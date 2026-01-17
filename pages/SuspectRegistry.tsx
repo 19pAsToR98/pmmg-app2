@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Screen, Suspect, Vehicle, Association } from '../types';
 import BottomNav from '../components/BottomNav';
 import SuspectAssociationSelector from '../components/SuspectAssociationSelector';
+import MapLocationPicker from '../components/MapLocationPicker';
 
 interface SuspectRegistryProps {
   navigateTo: (screen: Screen) => void;
@@ -22,6 +23,11 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, e
   const [photos, setPhotos] = useState<string[]>([]);
   const [showOnMap, setShowOnMap] = useState(true);
   
+  // Estados para Localização
+  const [lat, setLat] = useState<number | undefined>(undefined);
+  const [lng, setLng] = useState<number | undefined>(undefined);
+  const [lastSeenAddress, setLastSeenAddress] = useState('Localização não definida');
+
   // Estados para Veículos
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [currentVehiclePlate, setCurrentVehiclePlate] = useState('');
@@ -34,6 +40,12 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, e
   const [currentRelationship, setCurrentRelationship] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleLocationChange = (newLat: number, newLng: number, address: string) => {
+    setLat(newLat);
+    setLng(newLng);
+    setLastSeenAddress(address);
+  };
 
   const handleAddArticle = () => {
     if (currentArticle.trim()) {
@@ -118,12 +130,17 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, e
       alert("Nome e CPF são obrigatórios.");
       return;
     }
+    
+    if (showOnMap && (!lat || !lng)) {
+        alert("Se a exibição no mapa está ativa, defina a localização.");
+        return;
+    }
 
     const primaryPhoto = photos.length > 0 ? photos[0] : `https://picsum.photos/seed/${name}/200/250`;
 
-    // Mocking lat/lng for new suspects for map functionality
-    const newLat = -19.9 + (Math.random() * 0.05 - 0.025);
-    const newLng = -43.9 + (Math.random() * 0.05 - 0.025);
+    // Se a localização não foi definida manualmente, usamos um mock padrão
+    const finalLat = lat ?? -19.9167;
+    const finalLng = lng ?? -43.9345;
 
     const newSuspect: Suspect = {
       id: Date.now().toString(),
@@ -131,7 +148,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, e
       nickname,
       cpf,
       status,
-      lastSeen: 'Local do Registro',
+      lastSeen: lastSeenAddress,
       timeAgo: 'Agora',
       photoUrl: primaryPhoto,
       photoUrls: photos.length > 0 ? photos : [primaryPhoto],
@@ -139,8 +156,8 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, e
       motherName,
       articles,
       description,
-      lat: newLat,
-      lng: newLng,
+      lat: finalLat,
+      lng: finalLng,
       showOnMap: showOnMap,
       vehicles: vehicles,
       associations: associations,
@@ -262,6 +279,22 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, e
             <span className={`absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform shadow-md ${showOnMap ? 'translate-x-6' : 'translate-x-0'}`}></span>
           </button>
         </div>
+        
+        {/* Seção de Localização */}
+        {showOnMap && (
+            <div className="mt-8">
+                <div className="flex items-center gap-2 mb-4">
+                    <div className="h-4 w-1 bg-pmmg-gold rounded-full"></div>
+                    <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Localização (Último Visto)</h3>
+                </div>
+                <MapLocationPicker 
+                    initialLat={lat}
+                    initialLng={lng}
+                    onLocationChange={handleLocationChange}
+                />
+            </div>
+        )}
+
 
         <div className="flex items-center gap-2 mb-4 mt-8">
           <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
@@ -429,7 +462,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, e
           </button>
         </div>
         
-        {/* Seção de Ligações/Associações (Refatorada) */}
+        {/* Seção de Ligações/Associações */}
         <div className="flex items-center gap-2 mb-4 mt-8">
           <div className="h-4 w-1 bg-pmmg-blue rounded-full"></div>
           <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Ligações e Associações</h3>
