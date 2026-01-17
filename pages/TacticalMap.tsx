@@ -163,10 +163,10 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         const borderColorClass = suspect.status === 'Foragido' ? 'border-pmmg-red' : 
                                  suspect.status === 'Suspeito' ? 'border-pmmg-yellow' : 'border-pmmg-navy';
         
-        // 2. Create the custom icon HTML using the photo
+        // 2. Create the custom icon HTML using the photo (SQUARE FORMAT)
         const suspectIconHtml = `
-          <div class="w-10 h-10 rounded-full p-0.5 bg-white shadow-xl border-4 ${borderColorClass} overflow-hidden ring-2 ring-white/50">
-            <img src="${suspect.photoUrl}" class="w-full h-full object-cover rounded-full" alt="${suspect.name}">
+          <div class="w-10 h-10 p-0.5 bg-white shadow-xl border-4 ${borderColorClass} overflow-hidden ring-2 ring-white/50 rounded-lg">
+            <img src="${suspect.photoUrl}" class="w-full h-full object-cover rounded-md" alt="${suspect.name}">
           </div>
         `;
         
@@ -445,7 +445,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               onClick={() => setActiveFilter('Foragido')}
               className={`flex items-center gap-2 group transition-opacity ${activeFilter !== 'Todos' && activeFilter !== 'Foragido' ? 'opacity-40' : 'opacity-100'}`}
             >
-               <div className="w-4 h-4 rounded-full border-2 border-pmmg-red bg-slate-300 shadow-sm"></div>
+               <div className="w-4 h-4 rounded-md border-2 border-pmmg-red bg-slate-300 shadow-sm"></div>
                <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">Foragido</span>
             </button>
             
@@ -454,7 +454,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               onClick={() => setActiveFilter('Suspeito')}
               className={`flex items-center gap-2 group transition-opacity ${activeFilter !== 'Todos' && activeFilter !== 'Suspeito' ? 'opacity-40' : 'opacity-100'}`}
             >
-               <div className="w-4 h-4 rounded-full border-2 border-pmmg-yellow bg-slate-300 shadow-sm"></div>
+               <div className="w-4 h-4 rounded-md border-2 border-pmmg-yellow bg-slate-300 shadow-sm"></div>
                <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">Suspeito</span>
             </button>
             
