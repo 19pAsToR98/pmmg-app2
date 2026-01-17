@@ -99,7 +99,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
       const data: SearchResult[] = await response.json();
       
       setSearchResults(data);
-      // Abrir o dropdown somente se houver resultados
+      // Abrir o dropdown SOMENTE se houver resultados
       if (data.length > 0) {
         setIsDropdownOpen(true);
       } else {
@@ -189,18 +189,14 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
-            // Se o usuário começar a digitar, e o termo for diferente do endereço atual, 
-            // reabrimos o dropdown para que o debounce possa preenchê-lo.
-            if (e.target.value !== currentAddress) {
-                setIsDropdownOpen(true);
-            }
+            // Ao digitar, fechamos o dropdown imediatamente. Ele será reaberto pelo debounce (handleSearch) se houver resultados.
+            setIsDropdownOpen(false);
           }}
           onFocus={() => {
-            // Ao focar, se o termo de busca for o endereço já selecionado, não abra o dropdown.
-            // Caso contrário, se houver resultados anteriores, reabra.
-            if (searchTerm !== currentAddress && searchResults.length > 0) {
-              setIsDropdownOpen(true);
-            }
+            // Se o usuário focar e o termo de busca for diferente do endereço atual, 
+            // e houver resultados anteriores, podemos reabrir.
+            // Mas para simplificar e garantir que só abra após a busca, vamos remover a lógica de reabertura no focus.
+            // Deixamos vazio para que o debounce controle a abertura.
           }}
           className="block w-full pr-12 py-3 bg-white border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
           placeholder="Buscar endereço (Rua, Bairro, Cidade)..." 
