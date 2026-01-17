@@ -32,14 +32,13 @@ const AITools: React.FC<AIToolsProps> = ({ navigateTo, userRank }) => {
 
       <main className="flex-1 overflow-y-auto pb-32 no-scrollbar">
         <div className="flex flex-col items-center pt-8 px-6">
-          <div className="relative w-48 h-48 mb-6">
-            <div className="w-full h-full rounded-full bg-pmmg-navy/10 flex items-center justify-center border-4 border-pmmg-navy shadow-2xl relative">
+          <div className="relative w-64 h-64 mb-6">
+            <div className="w-full h-full rounded-full overflow-hidden relative shadow-2xl">
                <img 
                 alt="AI Mascot" 
                 className="w-full h-full object-cover rounded-full" 
                 src="avatar/ai_mascot.gif" 
               />
-              <div className="absolute inset-0 bg-pmmg-navy/20 rounded-full"></div>
             </div>
             <div className="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-4 border-pmmg-khaki"></div>
           </div>
