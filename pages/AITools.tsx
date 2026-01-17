@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Screen, UserRank } from '../types';
 import BottomNav from '../components/BottomNav';
@@ -37,8 +36,8 @@ const AITools: React.FC<AIToolsProps> = ({ navigateTo, userRank }) => {
             <div className="w-full h-full rounded-full bg-pmmg-navy/10 flex items-center justify-center border-4 border-pmmg-navy shadow-2xl relative">
                <img 
                 alt="AI Mascot" 
-                className="w-full h-full object-cover rounded-full grayscale brightness-75" 
-                src="https://picsum.photos/seed/aimascot/400/400" 
+                className="w-full h-full object-cover rounded-full" 
+                src="avatar/ai_mascot.gif" 
               />
               <div className="absolute inset-0 bg-pmmg-navy/20 rounded-full"></div>
             </div>
