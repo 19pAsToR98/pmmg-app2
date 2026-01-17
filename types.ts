@@ -13,6 +13,18 @@ export interface Association {
   relationship: string; // e.g., 'Cúmplice', 'Familiar', 'Contato'
 }
 
+export interface POI {
+  id: string;
+  lat: number;
+  lng: number;
+  title: string;
+  description: string;
+  type: 'Ponto de Risco' | 'Base Tática' | 'Comércio Suspeito' | 'Outro';
+  photoUrl?: string;
+  officerId: string;
+  timestamp: string;
+}
+
 export interface Suspect {
   id: string;
   name: string;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Screen, Suspect, UserRank } from './types';
+import { Screen, Suspect, UserRank, POI } from './types';
 import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import SuspectRegistry from './pages/SuspectRegistry';
@@ -70,9 +70,23 @@ const INITIAL_SUSPECTS: Suspect[] = [
   }
 ];
 
+const INITIAL_POIS: POI[] = [
+  {
+    id: 'poi1',
+    lat: -19.9180,
+    lng: -43.9350,
+    title: 'Ponto de Venda Ativo',
+    description: 'Tráfico de entorpecentes na esquina da rua. Pico às 18h.',
+    type: 'Ponto de Risco',
+    officerId: 'SGT_RODRIGO',
+    timestamp: new Date().toISOString(),
+  }
+];
+
 const App: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>('onboarding');
   const [suspects, setSuspects] = useState<Suspect[]>(INITIAL_SUSPECTS);
+  const [pois, setPois] = useState<POI[]>(INITIAL_POIS);
   const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
   const [userRank, setUserRank] = useState<UserRank>('Soldado');
@@ -86,6 +100,10 @@ const App: React.FC = () => {
   const addSuspect = (newSuspect: Suspect) => {
     setSuspects([newSuspect, ...suspects]);
     navigateTo('dashboard');
+  };
+  
+  const addPOI = (newPOI: POI) => {
+    setPois([...pois, newPOI]);
   };
 
   const openProfile = (id: string) => {
@@ -113,7 +131,7 @@ const App: React.FC = () => {
           onRankChange={setUserRank}
         />
       )}
-      {currentScreen === 'map' && <TacticalMap navigateTo={navigateTo} suspects={suspects} onOpenProfile={openProfile} initialCenter={mapCenter} />}
+      {currentScreen === 'map' && <TacticalMap navigateTo={navigateTo} suspects={suspects} onOpenProfile={openProfile} initialCenter={mapCenter} pois={pois} onAddPOI={addPOI} />}
     </div>
   );
 };
