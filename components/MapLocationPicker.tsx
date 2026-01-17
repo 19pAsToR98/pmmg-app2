@@ -17,7 +17,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null); // Referência para o componente inteiro
+  const wrapperRef = useRef<HTMLDivElement>(null);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [currentAddress, setCurrentAddress] = useState('Arraste o marcador para definir a localização.');
@@ -98,6 +98,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
       const data: SearchResult[] = await response.json();
       
       setSearchResults(data);
+      // Abrir o dropdown somente se houver resultados
       if (data.length > 0) {
         setIsDropdownOpen(true);
       } else {
@@ -106,6 +107,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
     } catch (error) {
       console.error("Erro na busca de endereço:", error);
       setSearchResults([]);
+      setIsDropdownOpen(false);
     } finally {
       setSearchLoading(false);
     }
@@ -149,15 +151,20 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
   // Efeito para lidar com a busca ao digitar (simulando debounce)
   useEffect(() => {
     const handler = setTimeout(() => {
+      // Só pesquisa se o termo for diferente do endereço atual (evita pesquisa após seleção)
       if (searchTerm && searchTerm !== currentAddress) {
         handleSearch(searchTerm);
+      } else if (!searchTerm) {
+        // Limpa resultados se o campo estiver vazio
+        setSearchResults([]);
+        setIsDropdownOpen(false);
       }
     }, 500);
 
     return () => {
       clearTimeout(handler);
     };
-  }, [searchTerm]);
+  }, [searchTerm, currentAddress]);
   
   // Efeito para fechar o dropdown ao clicar fora
   useEffect(() => {
@@ -181,16 +188,14 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
-            // Abrir o dropdown imediatamente ao digitar
-            if (e.target.value.length > 0) setIsDropdownOpen(true);
+            // Não forçamos a abertura aqui, a abertura será decidida pelo useEffect/handleSearch
           }}
           onFocus={() => {
-            // Abrir o dropdown ao focar, se houver resultados ou se estiver digitando
-            if (searchResults.length > 0 || searchTerm.length > 0) {
+            // Se houver resultados anteriores, reabre o dropdown ao focar
+            if (searchResults.length > 0) {
               setIsDropdownOpen(true);
             }
           }}
-          // Removido onBlur para evitar perda de foco
           className="block w-full pr-12 py-3 bg-white border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
           placeholder="Buscar endereço (Rua, Bairro, Cidade)..." 
           type="text" 
