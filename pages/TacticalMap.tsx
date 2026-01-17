@@ -16,6 +16,8 @@ interface TacticalMapProps {
 
 type MapFilter = 'Todos' | 'Foragido' | 'Suspeito' | 'Preso' | 'CPF Cancelado';
 
+const ZOOM_THRESHOLD = 15; // Nível de zoom para alternar para fotos
+
 const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenProfile, initialCenter, customMarkers, addCustomMarker, updateCustomMarker, deleteCustomMarker }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -27,6 +29,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   const [isAddingMarker, setIsAddingMarker] = useState(false);
   const [newMarkerData, setNewMarkerData] = useState<Omit<CustomMarker, 'id'> | null>(null);
   const [editingMarker, setEditingMarker] = useState<CustomMarker | null>(null);
+  const [currentZoom, setCurrentZoom] = useState(14); // Estado para rastrear o zoom
 
   // Filtragem dos suspeitos
   const filteredSuspects = suspects.filter(s => 
@@ -80,25 +83,33 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
     }
   };
 
-  // 1. Inicialização do Mapa (Roda apenas uma vez)
+  // 1. Inicialização do Mapa e Listeners de Zoom (Roda apenas uma vez)
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
 
     const fallbackPos: [number, number] = [-19.9167, -43.9345];
     const startPos = initialCenter || fallbackPos;
     
-    mapInstanceRef.current = L.map(mapContainerRef.current, {
+    const map = L.map(mapContainerRef.current, {
       center: startPos,
       zoom: initialCenter ? 17 : 14,
       zoomControl: false 
     });
+    mapInstanceRef.current = map;
+    setCurrentZoom(map.getZoom()); // Inicializa o estado de zoom
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap'
-    }).addTo(mapInstanceRef.current);
+    }).addTo(map);
 
-    markersLayerRef.current = L.layerGroup().addTo(mapInstanceRef.current);
-    customMarkersLayerRef.current = L.layerGroup().addTo(mapInstanceRef.current);
+    markersLayerRef.current = L.layerGroup().addTo(map);
+    customMarkersLayerRef.current = L.layerGroup().addTo(map);
+
+    // Listener para atualizar o zoom
+    const handleZoomChange = () => {
+      setCurrentZoom(map.getZoom());
+    };
+    map.on('zoomend', handleZoomChange);
 
     // Localização do usuário
     if (navigator.geolocation) {
@@ -117,13 +128,14 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             iconSize: [32, 32],
             iconAnchor: [16, 16]
           });
-          L.marker([latitude, longitude], { icon: officerIcon }).addTo(mapInstanceRef.current!).bindPopup("Você (Oficial)");
+          L.marker([latitude, longitude], { icon: officerIcon }).addTo(map).bindPopup("Você (Oficial)");
         }
       );
     }
 
     return () => {
       if (mapInstanceRef.current) {
+        mapInstanceRef.current.off('zoomend', handleZoomChange);
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
@@ -150,33 +162,55 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   }, [isAddingMarker]);
 
 
-  // 3. Atualização de Marcadores de Suspeitos (Depende de filteredSuspects)
+  // 3. Atualização de Marcadores de Suspeitos (Depende de filteredSuspects E currentZoom)
   useEffect(() => {
     if (!markersLayerRef.current) return;
     
     markersLayerRef.current.clearLayers();
     
+    const usePhotoMarker = currentZoom >= ZOOM_THRESHOLD;
+
     filteredSuspects.forEach(suspect => {
       if (suspect.lat && suspect.lng) {
         
-        // 1. Determine the border color class
-        const borderColorClass = suspect.status === 'Foragido' ? 'border-pmmg-red' : 
-                                 suspect.status === 'Suspeito' ? 'border-pmmg-yellow' : 'border-pmmg-navy';
+        let suspectIcon;
         
-        // 2. Create the custom icon HTML using the photo (SQUARE FORMAT)
-        // Removendo p-0.5 e rounded-md da imagem para preenchimento total
-        const suspectIconHtml = `
-          <div class="w-10 h-10 bg-white shadow-xl border-4 ${borderColorClass} overflow-hidden ring-2 ring-white/50 rounded-lg">
-            <img src="${suspect.photoUrl}" class="w-full h-full object-cover" alt="${suspect.name}">
-          </div>
-        `;
-        
-        const suspectIcon = L.divIcon({
-          className: 'custom-suspect-photo-icon',
-          html: suspectIconHtml,
-          iconSize: [48, 48],
-          iconAnchor: [24, 24]
-        });
+        if (usePhotoMarker) {
+            // Photo Marker (Zoomed In)
+            const borderColorClass = suspect.status === 'Foragido' ? 'border-pmmg-red' : 
+                                     suspect.status === 'Suspeito' ? 'border-pmmg-yellow' : 'border-pmmg-navy';
+            
+            const suspectIconHtml = `
+              <div class="w-10 h-10 bg-white shadow-xl border-4 ${borderColorClass} overflow-hidden ring-2 ring-white/50 rounded-lg">
+                <img src="${suspect.photoUrl}" class="w-full h-full object-cover" alt="${suspect.name}">
+              </div>
+            `;
+            
+            suspectIcon = L.divIcon({
+              className: 'custom-suspect-photo-icon',
+              html: suspectIconHtml,
+              iconSize: [48, 48],
+              iconAnchor: [24, 24]
+            });
+        } else {
+            // Simple Icon Marker (Zoomed Out)
+            const colorClass = suspect.status === 'Foragido' ? 'bg-pmmg-red' : 
+                               suspect.status === 'Suspeito' ? 'bg-pmmg-yellow' : 'bg-pmmg-navy';
+            const iconName = suspect.status === 'Foragido' ? 'priority_high' : 'warning';
+            
+            const simpleIconHtml = `
+              <div class="w-6 h-6 ${colorClass} rounded-full border-2 border-white flex items-center justify-center shadow-md">
+                <span class="material-symbols-outlined text-white text-[14px] fill-icon">${iconName}</span>
+              </div>
+            `;
+            
+            suspectIcon = L.divIcon({
+              className: 'custom-suspect-simple-icon',
+              html: simpleIconHtml,
+              iconSize: [24, 24],
+              iconAnchor: [12, 12]
+            });
+        }
 
         const marker = L.marker([suspect.lat, suspect.lng], { icon: suspectIcon }).addTo(markersLayerRef.current!);
         
@@ -206,7 +240,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         }
       }
     });
-  }, [filteredSuspects, initialCenter, activeFilter, onOpenProfile]);
+  }, [filteredSuspects, initialCenter, activeFilter, onOpenProfile, currentZoom]);
 
   // 4. Atualização de Marcadores Personalizados (Depende de customMarkers)
   useEffect(() => {
@@ -446,7 +480,9 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               onClick={() => setActiveFilter('Foragido')}
               className={`flex items-center gap-2 group transition-opacity ${activeFilter !== 'Todos' && activeFilter !== 'Foragido' ? 'opacity-40' : 'opacity-100'}`}
             >
-               <div className="w-4 h-4 rounded-md border-2 border-pmmg-red bg-slate-300 shadow-sm"></div>
+               <div className={`w-4 h-4 ${currentZoom >= ZOOM_THRESHOLD ? 'rounded-md border-2 bg-slate-300' : 'rounded-full bg-pmmg-red flex items-center justify-center'} border-pmmg-red shadow-sm`}>
+                 {!usePhotoMarker && <span className="material-symbols-outlined text-white text-[10px] fill-icon">priority_high</span>}
+               </div>
                <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">Foragido</span>
             </button>
             
@@ -455,7 +491,9 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               onClick={() => setActiveFilter('Suspeito')}
               className={`flex items-center gap-2 group transition-opacity ${activeFilter !== 'Todos' && activeFilter !== 'Suspeito' ? 'opacity-40' : 'opacity-100'}`}
             >
-               <div className="w-4 h-4 rounded-md border-2 border-pmmg-yellow bg-slate-300 shadow-sm"></div>
+               <div className={`w-4 h-4 ${currentZoom >= ZOOM_THRESHOLD ? 'rounded-md border-2 bg-slate-300' : 'rounded-full bg-pmmg-yellow flex items-center justify-center'} border-pmmg-yellow shadow-sm`}>
+                 {!usePhotoMarker && <span className="material-symbols-outlined text-pmmg-navy text-[10px] fill-icon">warning</span>}
+               </div>
                <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">Suspeito</span>
             </button>
             
