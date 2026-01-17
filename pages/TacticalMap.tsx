@@ -158,14 +158,23 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
     
     filteredSuspects.forEach(suspect => {
       if (suspect.lat && suspect.lng) {
-        const iconColorClass = suspect.status === 'Foragido' ? 'bg-pmmg-red' : 
-                             suspect.status === 'Suspeito' ? 'bg-pmmg-yellow' : 'bg-slate-600';
+        
+        // 1. Determine the border color class
+        const borderColorClass = suspect.status === 'Foragido' ? 'border-pmmg-red' : 
+                                 suspect.status === 'Suspeito' ? 'border-pmmg-yellow' : 'border-pmmg-navy';
+        
+        // 2. Create the custom icon HTML using the photo
+        const suspectIconHtml = `
+          <div class="w-10 h-10 rounded-full p-0.5 bg-white shadow-xl border-4 ${borderColorClass} overflow-hidden ring-2 ring-white/50">
+            <img src="${suspect.photoUrl}" class="w-full h-full object-cover rounded-full" alt="${suspect.name}">
+          </div>
+        `;
         
         const suspectIcon = L.divIcon({
-          className: 'custom-suspect-icon',
-          html: `<div class="w-10 h-10 ${iconColorClass} rounded-lg border-2 border-pmmg-navy flex items-center justify-center shadow-lg transform rotate-45"><span class="material-symbols-outlined text-pmmg-navy text-[20px] transform -rotate-45">priority_high</span></div>`,
-          iconSize: [40, 40],
-          iconAnchor: [20, 20]
+          className: 'custom-suspect-photo-icon',
+          html: suspectIconHtml,
+          iconSize: [48, 48],
+          iconAnchor: [24, 24]
         });
 
         const marker = L.marker([suspect.lat, suspect.lng], { icon: suspectIcon }).addTo(markersLayerRef.current!);
@@ -430,28 +439,37 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         <div className="absolute bottom-32 right-4 z-[1000]">
           <div className="bg-white/95 backdrop-blur-md p-3 rounded-2xl shadow-2xl border border-pmmg-navy/10 flex flex-col gap-2.5">
             <p className="text-[8px] font-black text-pmmg-navy/40 uppercase tracking-widest border-b border-pmmg-navy/5 pb-1 mb-1">Legenda Tática</p>
+            
+            {/* Foragido (Photo style) */}
             <button 
               onClick={() => setActiveFilter('Foragido')}
               className={`flex items-center gap-2 group transition-opacity ${activeFilter !== 'Todos' && activeFilter !== 'Foragido' ? 'opacity-40' : 'opacity-100'}`}
             >
-               <div className="w-3.5 h-3.5 bg-pmmg-red rounded shadow-sm border border-black/10"></div>
+               <div className="w-4 h-4 rounded-full border-2 border-pmmg-red bg-slate-300 shadow-sm"></div>
                <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">Foragido</span>
             </button>
+            
+            {/* Suspeito (Photo style) */}
             <button 
               onClick={() => setActiveFilter('Suspeito')}
               className={`flex items-center gap-2 group transition-opacity ${activeFilter !== 'Todos' && activeFilter !== 'Suspeito' ? 'opacity-40' : 'opacity-100'}`}
             >
-               <div className="w-3.5 h-3.5 bg-pmmg-yellow rounded shadow-sm border border-black/10"></div>
+               <div className="w-4 h-4 rounded-full border-2 border-pmmg-yellow bg-slate-300 shadow-sm"></div>
                <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">Suspeito</span>
             </button>
+            
+            {/* Oficial */}
             <div className="flex items-center gap-2">
                <div className="w-3.5 h-3.5 bg-pmmg-blue rounded-full border-2 border-white shadow-sm ring-1 ring-pmmg-blue/30"></div>
                <span className="text-[9px] font-bold text-pmmg-navy uppercase">Oficial</span>
             </div>
+            
+            {/* Ponto Tático */}
             <div className="flex items-center gap-2">
                <div className="w-3.5 h-3.5 bg-pmmg-gold rounded-full border-2 border-white shadow-sm ring-1 ring-pmmg-gold/30"></div>
                <span className="text-[9px] font-bold text-pmmg-navy uppercase">Ponto Tático</span>
             </div>
+            
             {activeFilter !== 'Todos' && (
               <button 
                 onClick={() => setActiveFilter('Todos')}
