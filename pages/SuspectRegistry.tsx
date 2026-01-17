@@ -5,9 +5,10 @@ import BottomNav from '../components/BottomNav';
 interface SuspectRegistryProps {
   navigateTo: (screen: Screen) => void;
   onSave: (suspect: Suspect) => void;
+  existingSuspects: Suspect[]; // Nova prop
 }
 
-const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave }) => {
+const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, existingSuspects }) => {
   const [status, setStatus] = useState<Suspect['status']>('Suspeito');
   const [name, setName] = useState('');
   const [cpf, setCpf] = useState('');
@@ -26,9 +27,10 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
   const [currentVehicleModel, setCurrentVehicleModel] = useState('');
   const [currentVehicleColor, setCurrentVehicleColor] = useState('');
 
-  // Estados para Associações (Simplificado, pois requer IDs de outros suspeitos)
-  // Vamos manter simples por enquanto, apenas um campo de texto para 'Ligações'
-  const [associationsText, setAssociationsText] = useState(''); 
+  // Estados para Associações
+  const [associations, setAssociations] = useState<Association[]>([]);
+  const [currentAssociationId, setCurrentAssociationId] = useState('');
+  const [currentRelationship, setCurrentRelationship] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -59,6 +61,32 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
 
   const handleRemoveVehicle = (index: number) => {
     setVehicles(vehicles.filter((_, i) => i !== index));
+  };
+
+  const handleAddAssociation = () => {
+    if (currentAssociationId && currentRelationship.trim()) {
+      const existingAssociation = associations.find(a => a.suspectId === currentAssociationId);
+      if (existingAssociation) {
+        alert('Este indivíduo já está associado.');
+        return;
+      }
+
+      const newAssociation: Association = {
+        suspectId: currentAssociationId,
+        relationship: currentRelationship.trim(),
+      };
+      setAssociations([...associations, newAssociation]);
+      setCurrentAssociationId('');
+      setCurrentRelationship('');
+    }
+  };
+
+  const handleRemoveAssociation = (index: number) => {
+    setAssociations(associations.filter((_, i) => i !== index));
+  };
+
+  const getSuspectNameById = (id: string) => {
+    return existingSuspects.find(s => s.id === id)?.name || `ID Desconhecido (${id})`;
   };
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,13 +122,6 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
     const newLat = -19.9 + (Math.random() * 0.05 - 0.025);
     const newLng = -43.9 + (Math.random() * 0.05 - 0.025);
 
-    // Simplificando associações para o registro inicial (apenas texto)
-    const associations: Association[] = associationsText.split(',').map(rel => ({
-      suspectId: 'N/A', // Placeholder, pois não temos a lista completa de IDs aqui
-      relationship: rel.trim(),
-    })).filter(a => a.relationship);
-
-
     const newSuspect: Suspect = {
       id: Date.now().toString(),
       name,
@@ -118,8 +139,8 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
       lat: newLat,
       lng: newLng,
       showOnMap: showOnMap,
-      vehicles: vehicles, // Incluindo veículos
-      associations: associations, // Incluindo associações
+      vehicles: vehicles,
+      associations: associations, // Usando a lista de associações baseada em ID
     };
 
     onSave(newSuspect);
@@ -405,24 +426,62 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
           </button>
         </div>
         
-        {/* Seção de Ligações/Associações */}
+        {/* Seção de Ligações/Associações (Refatorada) */}
         <div className="flex items-center gap-2 mb-4 mt-8">
           <div className="h-4 w-1 bg-pmmg-blue rounded-full"></div>
           <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Ligações e Associações</h3>
         </div>
         
-        <div className="space-y-4">
+        <div className="space-y-3 mb-4">
+          {associations.map((assoc, idx) => (
+            <div key={idx} className="flex items-center justify-between p-3 bg-white/70 border border-pmmg-navy/10 rounded-lg shadow-sm">
+              <div>
+                <p className="text-sm font-bold text-pmmg-navy">{getSuspectNameById(assoc.suspectId)}</p>
+                <p className="text-[10px] text-slate-600 font-semibold">Relacionamento: {assoc.relationship}</p>
+              </div>
+              <button 
+                onClick={() => handleRemoveAssociation(idx)}
+                className="text-pmmg-red p-1 rounded-full hover:bg-pmmg-red/10"
+              >
+                <span className="material-symbols-outlined text-lg">delete</span>
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div className="pmmg-card p-4 space-y-3">
           <div>
-            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Descrição de Ligações</label>
-            <textarea 
-              value={associationsText}
-              onChange={(e) => setAssociationsText(e.target.value)}
-              rows={2}
-              className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
-              placeholder="Ex: Cúmplice de 'Sombra', Contato frequente com 'Marquinhos'" 
-            />
-            <p className="text-[8px] text-slate-500 mt-1 ml-1">Separe as ligações por vírgula.</p>
+            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Indivíduo Associado</label>
+            <select 
+              value={currentAssociationId}
+              onChange={(e) => setCurrentAssociationId(e.target.value)}
+              className="block w-full px-4 py-3 bg-white border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm transition-all appearance-none bg-no-repeat bg-[right_1rem_center]"
+            >
+              <option value="">Selecione um suspeito existente</option>
+              {existingSuspects.map(s => (
+                <option key={s.id} value={s.id}>
+                  {s.name} ({s.nickname || s.cpf.slice(0, 3) + '...'})
+                </option>
+              ))}
+            </select>
           </div>
+          <div>
+            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Tipo de Ligação</label>
+            <input 
+              value={currentRelationship}
+              onChange={(e) => setCurrentRelationship(e.target.value)}
+              className="block w-full px-4 py-3 bg-white border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+              placeholder="Ex: Cúmplice, Familiar, Contato" 
+              type="text" 
+            />
+          </div>
+          <button 
+            onClick={handleAddAssociation}
+            className="w-full bg-pmmg-navy text-white text-[10px] font-bold py-2 rounded-lg uppercase flex items-center justify-center gap-2"
+            disabled={!currentAssociationId || !currentRelationship.trim()}
+          >
+            <span className="material-symbols-outlined text-lg">link</span> Adicionar Ligação
+          </button>
         </div>
 
 
