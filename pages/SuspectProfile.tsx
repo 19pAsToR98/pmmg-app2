@@ -17,7 +17,8 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
   const miniMapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
 
-  const photos = suspect.photoUrls || [suspect.photoUrl];
+  const photos = suspect.photoUrls && suspect.photoUrls.length > 0 ? suspect.photoUrls : [suspect.photoUrl];
+  const currentPhotoIndex = fullscreenImage ? photos.indexOf(fullscreenImage) : -1;
 
   const toggleSection = (section: string) => {
     setExpandedSection(expandedSection === section ? null : section);
@@ -25,6 +26,18 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
 
   const findAssociatedSuspect = (id: string) => {
     return allSuspects.find(s => s.id === id);
+  };
+
+  const handleNextImage = () => {
+    if (currentPhotoIndex !== -1 && currentPhotoIndex < photos.length - 1) {
+      setFullscreenImage(photos[currentPhotoIndex + 1]);
+    }
+  };
+
+  const handlePrevImage = () => {
+    if (currentPhotoIndex > 0) {
+      setFullscreenImage(photos[currentPhotoIndex - 1]);
+    }
   };
 
   useEffect(() => {
@@ -74,20 +87,49 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
       {/* Fullscreen Photo Modal */}
       {fullscreenImage && (
         <div 
-          className="fixed inset-0 z-[2000] bg-black/98 flex flex-col items-center justify-center p-4 animate-in fade-in duration-200"
-          onClick={() => setFullscreenImage(null)}
+          className="fixed inset-0 z-[2000] bg-black/95 flex flex-col items-center justify-center p-4 animate-in fade-in duration-200"
         >
-          <div className="absolute top-6 right-6 text-white bg-white/20 p-2 rounded-full backdrop-blur-md">
+          {/* Close Button */}
+          <button 
+            onClick={() => setFullscreenImage(null)}
+            className="absolute top-6 right-6 text-white bg-white/20 p-2 rounded-full backdrop-blur-md z-10 hover:bg-white/30 transition-colors"
+          >
             <span className="material-symbols-outlined text-2xl">close</span>
+          </button>
+
+          {/* Image Container */}
+          <div className="relative flex items-center justify-center w-full h-full">
+            
+            {/* Previous Button */}
+            <button
+              onClick={handlePrevImage}
+              disabled={currentPhotoIndex <= 0}
+              className={`absolute left-4 z-10 p-3 rounded-full bg-black/50 text-white transition-opacity ${currentPhotoIndex <= 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-black/70'}`}
+            >
+              <span className="material-symbols-outlined">arrow_back_ios</span>
+            </button>
+
+            {/* Image */}
+            <img 
+              src={fullscreenImage} 
+              alt="Evidência em Detalhe" 
+              className="max-w-full max-h-[85vh] object-contain rounded-sm shadow-2xl transition-transform duration-300" 
+            />
+
+            {/* Next Button */}
+            <button
+              onClick={handleNextImage}
+              disabled={currentPhotoIndex >= photos.length - 1}
+              className={`absolute right-4 z-10 p-3 rounded-full bg-black/50 text-white transition-opacity ${currentPhotoIndex >= photos.length - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-black/70'}`}
+            >
+              <span className="material-symbols-outlined">arrow_forward_ios</span>
+            </button>
           </div>
-          <img 
-            src={fullscreenImage} 
-            alt="Evidência em Detalhe" 
-            className="max-w-full max-h-[85vh] object-contain rounded-sm shadow-2xl border border-white/10" 
-          />
+
+          {/* Footer/Counter */}
           <div className="mt-6 px-8 text-center">
             <p className="text-pmmg-yellow text-[11px] font-black uppercase tracking-[0.2em] bg-pmmg-navy/80 px-6 py-3 rounded-full border border-pmmg-yellow/40 shadow-xl">
-              VISUALIZAÇÃO DE IDENTIFICAÇÃO ORIGINAL
+              {currentPhotoIndex + 1} / {photos.length} - VISUALIZAÇÃO DE IDENTIFICAÇÃO
             </p>
           </div>
         </div>
@@ -208,7 +250,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
             )}
           </div>
 
-          {/* NEW: Vehicles Section */}
+          {/* Vehicles Section */}
           <div className="pmmg-card">
             <div onClick={() => toggleSection('vehicles')} className="flex items-center justify-between p-4 cursor-pointer">
               <div className="flex items-center gap-3 text-pmmg-navy">
@@ -236,7 +278,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
             )}
           </div>
 
-          {/* NEW: Associations Section */}
+          {/* Associations Section */}
           <div className="pmmg-card">
             <div onClick={() => toggleSection('associations')} className="flex items-center justify-between p-4 cursor-pointer">
               <div className="flex items-center gap-3 text-pmmg-navy">
@@ -276,7 +318,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
             )}
           </div>
 
-          {/* Photo Gallery - NO FILTERS */}
+          {/* Photo Gallery */}
           <div className="pmmg-card p-4">
             <h3 className="text-[10px] font-bold text-pmmg-navy/60 uppercase tracking-widest mb-3 flex items-center gap-2">
               <span className="material-symbols-outlined text-sm">photo_library</span>
