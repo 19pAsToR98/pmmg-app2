@@ -228,14 +228,12 @@ const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo, userCha
       
       {/* Floating Action Button for New Group */}
       {activeTab === 'myGroups' && (
-        <div className="fixed bottom-20 right-0 left-0 mx-auto max-w-md z-50 pointer-events-none">
-          <button 
-            onClick={() => navigateTo('groupManagement')}
-            className="absolute right-6 w-14 h-14 bg-pmmg-navy text-pmmg-yellow rounded-full shadow-xl flex items-center justify-center border-4 border-white active:scale-95 transition-transform pointer-events-auto"
-          >
-            <span className="material-symbols-outlined text-3xl fill-icon">group_add</span>
-          </button>
-        </div>
+        <button 
+          onClick={() => navigateTo('groupManagement')}
+          className="fixed bottom-[100px] right-6 z-50 w-14 h-14 bg-pmmg-navy text-pmmg-yellow rounded-full shadow-xl flex items-center justify-center border-4 border-white active:scale-95 transition-transform"
+        >
+          <span className="material-symbols-outlined text-3xl fill-icon">group_add</span>
+        </button>
       )}
 
       <BottomNav activeScreen="chatList" navigateTo={navigateTo} />
