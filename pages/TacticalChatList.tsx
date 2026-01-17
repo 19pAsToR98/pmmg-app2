@@ -115,7 +115,7 @@ const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo, userCha
   };
 
   return (
-    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
+    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden relative">
       <header className="sticky top-0 z-50 bg-pmmg-navy text-white shadow-xl px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 shrink-0 bg-white rounded-full flex items-center justify-center p-1.5 border-2 border-pmmg-red shadow-inner">
@@ -225,6 +225,16 @@ const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo, userCha
 
         <div className="h-4"></div>
       </main>
+      
+      {/* Floating Action Button for New Group */}
+      {activeTab === 'myGroups' && (
+        <button 
+          onClick={() => navigateTo('groupManagement')}
+          className="fixed bottom-20 right-6 z-50 w-14 h-14 bg-pmmg-navy text-pmmg-yellow rounded-full shadow-xl flex items-center justify-center border-4 border-white active:scale-95 transition-transform"
+        >
+          <span className="material-symbols-outlined text-3xl fill-icon">group_add</span>
+        </button>
+      )}
 
       <BottomNav activeScreen="chatList" navigateTo={navigateTo} />
     </div>
