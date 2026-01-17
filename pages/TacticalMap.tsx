@@ -252,7 +252,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, pois, o
           <div className="bg-pmmg-navy/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-lg border border-pmmg-yellow/30 flex items-center gap-3">
             <div className="flex flex-col">
               <span className="text-[8px] font-bold text-pmmg-yellow uppercase tracking-[0.2em]">Monitoramento</span>
-              <span className="text-[10px] font-black text-white uppercase">{filteredSuspects.length + pois.length} Alvos/Pontos</span>
+              <span className="text-[10px] font-black text-white uppercase">{(filteredSuspects?.length || 0) + (pois?.length || 0)} Alvos/Pontos</span>
             </div>
             <div className="h-6 w-px bg-white/20"></div>
             <span className="text-pmmg-yellow material-symbols-outlined text-sm animate-pulse">radar</span>
