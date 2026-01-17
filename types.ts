@@ -1,4 +1,4 @@
-export type Screen = 'onboarding' | 'dashboard' | 'registry' | 'profile' | 'chatList' | 'chatRoom' | 'aiTools' | 'requestAccess' | 'profileSettings' | 'map' | 'contacts';
+export type Screen = 'onboarding' | 'dashboard' | 'registry' | 'profile' | 'chatList' | 'chatRoom' | 'aiTools' | 'requestAccess' | 'profileSettings' | 'map' | 'contacts' | 'groupManagement';
 
 export type UserRank = 'Soldado' | 'Cabo' | '3º Sargento' | '2º Sargento' | '1º Sargento' | 'Subtenente';
 
@@ -76,6 +76,10 @@ export interface Officer {
   isOnline: boolean;
 }
 
+export interface GroupParticipant extends Officer {
+  isAdmin: boolean;
+}
+
 export interface Chat {
   id: string;
   type: 'group' | 'individual';
@@ -87,4 +91,8 @@ export interface Chat {
   icon: string;
   active: boolean;
   messages: ChatMessage[];
+  // Propriedades adicionais para grupos
+  description?: string;
+  groupPhotoUrl?: string;
+  admins?: string[]; // IDs dos administradores
 }

@@ -102,6 +102,14 @@ const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo, userCha
             Adicionar Contatos
           </button>
         )}
+        {activeTab === 'myGroups' && (
+          <button 
+            onClick={() => navigateTo('groupManagement')}
+            className="mt-4 bg-pmmg-navy text-white text-[10px] font-bold px-4 py-2 rounded-lg uppercase"
+          >
+            Criar Novo Grupo
+          </button>
+        )}
       </div>
     );
   };

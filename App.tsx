@@ -10,7 +10,8 @@ import AITools from './pages/AITools';
 import RequestAccess from './pages/RequestAccess';
 import ProfileSettings from './pages/ProfileSettings';
 import TacticalMap from './pages/TacticalMap';
-import TacticalContacts from './pages/TacticalContacts'; // Importando a nova tela
+import TacticalContacts from './pages/TacticalContacts';
+import GroupManagement from './pages/GroupManagement'; // Importando a nova tela
 
 const INITIAL_SUSPECTS: Suspect[] = [
   {
@@ -112,10 +113,10 @@ const MOCK_CHATS: Chat[] = [
     unreadCount: 3, 
     icon: 'shield', 
     active: true,
-    messages: [
-      { id: 'm1', sender: 'Sgt. Douglas', initials: 'SD', text: 'Viatura 2314 em patrulhamento na Av. Amazonas. Nenhuma alteração até o momento.', time: '09:42', isMe: false, type: 'text' },
-      { id: 'm2', sender: 'Cap. Pereira', initials: 'CP', text: 'Copiado. Equipe do 1º BPM deslocando para apoio no cerco da região central.', time: '09:48', isMe: false, type: 'text' },
-    ]
+    messages: [],
+    description: 'Grupo de coordenação tática do 1º BPM.',
+    groupPhotoUrl: 'https://picsum.photos/seed/group1/100/100',
+    admins: ['o1', 'EU']
   },
   { 
     id: 'c_o1', // Chat individual com o1 (Aceito)
@@ -143,7 +144,10 @@ const MOCK_CHATS: Chat[] = [
     unreadCount: 0,
     icon: 'pets',
     active: false,
-    messages: []
+    messages: [],
+    description: 'Grupo de apoio com cães farejadores.',
+    groupPhotoUrl: 'https://picsum.photos/seed/group2/100/100',
+    admins: ['o2']
   }
 ];
 
@@ -247,7 +251,6 @@ const App: React.FC = () => {
     if (!chatToJoin || chatToJoin.type !== 'group') return;
 
     if (chatToJoin.participants.includes('EU')) {
-      alert("Você já é membro deste grupo.");
       openChat(chatId);
       return;
     }
@@ -258,6 +261,29 @@ const App: React.FC = () => {
     ));
     alert(`Você entrou no grupo ${chatToJoin.name}.`);
     openChat(chatId);
+  };
+
+  const onSaveGroup = (groupData: Omit<Chat, 'messages' | 'lastMessage' | 'lastTime' | 'unreadCount' | 'active'>) => {
+    const existingChatIndex = chats.findIndex(c => c.id === groupData.id);
+
+    const baseChat: Chat = {
+      ...groupData,
+      messages: [],
+      lastMessage: groupData.description || 'Novo grupo criado.',
+      lastTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      unreadCount: 0,
+      active: true,
+    };
+
+    if (existingChatIndex !== -1) {
+      // Edição
+      setChats(prev => prev.map((c, index) => index === existingChatIndex ? baseChat : c));
+      alert(`Grupo ${groupData.name} atualizado com sucesso.`);
+    } else {
+      // Criação
+      setChats(prev => [...prev, baseChat]);
+      alert(`Grupo ${groupData.name} criado com sucesso.`);
+    }
   };
 
   // --- Lógica de Dados ---
@@ -374,6 +400,15 @@ const App: React.FC = () => {
           onSendRequest={onSendRequest}
           onAcceptRequest={onAcceptRequest}
           onRejectRequest={onRejectRequest}
+        />
+      )}
+      {currentScreen === 'groupManagement' && (
+        <GroupManagement
+          navigateTo={navigateTo}
+          onBack={() => navigateTo('chatList')}
+          onSaveGroup={onSaveGroup}
+          allOfficers={officers}
+          // currentChat={...} // Adicionar lógica para edição se necessário
         />
       )}
     </div>
