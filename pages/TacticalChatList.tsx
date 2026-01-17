@@ -1,21 +1,35 @@
-
 import React from 'react';
-import { Screen } from '../types';
+import { Screen, Chat, Officer } from '../types';
 import BottomNav from '../components/BottomNav';
 
 interface TacticalChatListProps {
   navigateTo: (screen: Screen) => void;
+  chats: Chat[];
+  officers: Officer[];
+  openChat: (chatId: string) => void;
 }
 
-const MOCK_GROUPS = [
-  { id: '1', name: 'Tático Móvel - 1º BPM', msg: 'QAP. Viatura 24190 em deslocamento para o setor delta.', time: '12:45', badge: 3, icon: 'shield', active: true },
-  { id: '2', name: 'ROCCA - Inteligência', msg: 'Relatório de averiguação K9 concluído no Ponto Central.', time: '12:30', badge: 1, icon: 'pets', active: false },
-  { id: '3', name: 'GEPAR - Setor 7', msg: 'Patrulhamento preventivo iniciado na comunidade.', time: '11:15', icon: 'diversity_3', active: true },
-  { id: '4', name: 'GER - Comando 4ª CIA', msg: 'Atenção para o alerta de veículo roubado (Hilux Branca).', time: 'Ontem', icon: 'visibility', active: true },
-  { id: '5', name: 'Btl ROTAM - Operações', msg: 'Escala de plantão para o próximo feriado atualizada.', time: 'Ontem', badge: 8, icon: 'bolt', active: false },
-];
+const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo, chats, officers, openChat }) => {
+  
+  // Função auxiliar para obter o nome e ícone correto para chats individuais
+  const getChatDisplayInfo = (chat: Chat) => {
+    if (chat.type === 'group') {
+      return { name: chat.name, icon: chat.icon };
+    }
+    
+    // Para chat individual, assumimos que o outro participante é o primeiro na lista
+    const otherParticipantId = chat.participants.find(id => id !== 'EU'); // 'EU' é o ID mockado do usuário atual
+    const otherOfficer = officers.find(o => o.id === otherParticipantId);
 
-const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo }) => {
+    if (otherOfficer) {
+      return { 
+        name: `${otherOfficer.rank}. ${otherOfficer.name.split(' ')[1]} (${otherOfficer.unit})`, 
+        icon: 'person' 
+      };
+    }
+    return { name: chat.name, icon: 'person' };
+  };
+
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
       <header className="sticky top-0 z-50 bg-pmmg-navy text-white shadow-xl px-4 py-4 flex items-center justify-between">
@@ -48,35 +62,38 @@ const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo }) => {
         </div>
 
         <section className="px-4 mt-4 space-y-3">
-          {MOCK_GROUPS.map((group) => (
-            <div 
-              key={group.id} 
-              onClick={() => navigateTo('chatRoom')}
-              className="pmmg-card flex items-center p-3 gap-3 cursor-pointer active:scale-95 transition-transform"
-            >
-              <div className={`w-14 h-14 flex items-center justify-center rounded-xl shrink-0 ${
-                group.active ? 'bg-pmmg-navy text-pmmg-yellow' : 'bg-pmmg-navy/10 text-pmmg-navy/40 border border-pmmg-navy/20'
-              }`}>
-                <span className={`material-symbols-outlined text-3xl ${group.active ? 'fill-icon' : ''}`}>
-                  {group.icon}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-center mb-0.5">
-                  <h3 className="font-bold text-sm truncate uppercase tracking-tight">{group.name}</h3>
-                  <span className="text-[10px] font-medium opacity-60">{group.time}</span>
-                </div>
-                <p className="text-xs text-slate-600 truncate leading-tight">{group.msg}</p>
-              </div>
-              {group.badge && (
-                <div className="shrink-0">
-                  <span className="bg-pmmg-red text-white text-[10px] font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
-                    {group.badge}
+          {chats.map((chat) => {
+            const { name, icon } = getChatDisplayInfo(chat);
+            return (
+              <div 
+                key={chat.id} 
+                onClick={() => openChat(chat.id)}
+                className="pmmg-card flex items-center p-3 gap-3 cursor-pointer active:scale-95 transition-transform"
+              >
+                <div className={`w-14 h-14 flex items-center justify-center rounded-xl shrink-0 ${
+                  chat.active ? 'bg-pmmg-navy text-pmmg-yellow' : 'bg-pmmg-navy/10 text-pmmg-navy/40 border border-pmmg-navy/20'
+                }`}>
+                  <span className={`material-symbols-outlined text-3xl ${chat.active ? 'fill-icon' : ''}`}>
+                    {icon}
                   </span>
                 </div>
-              )}
-            </div>
-          ))}
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-center mb-0.5">
+                    <h3 className="font-bold text-sm truncate uppercase tracking-tight">{name}</h3>
+                    <span className="text-[10px] font-medium opacity-60">{chat.lastTime}</span>
+                  </div>
+                  <p className="text-xs text-slate-600 truncate leading-tight">{chat.lastMessage}</p>
+                </div>
+                {chat.unreadCount > 0 && (
+                  <div className="shrink-0">
+                    <span className="bg-pmmg-red text-white text-[10px] font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                      {chat.unreadCount}
+                    </span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </section>
 
         <div className="px-4 py-6 flex gap-2 overflow-x-auto no-scrollbar">

@@ -1,48 +1,23 @@
-
 import React, { useState, useRef, useEffect } from 'react';
-import { ChatMessage } from '../types';
+import { Chat, ChatMessage } from '../types';
 
 interface TacticalChatRoomProps {
+  chat: Chat;
   onBack: () => void;
+  onSendMessage: (chatId: string, message: ChatMessage) => void;
 }
 
-const MOCK_MESSAGES: ChatMessage[] = [
-  { id: '1', sender: 'Sgt. Douglas', initials: 'SD', text: 'Viatura 2314 em patrulhamento na Av. Amazonas. Nenhuma alteração até o momento.', time: '09:42', isMe: false, type: 'text' },
-  { 
-    id: '2', 
-    sender: 'Cap. Pereira', 
-    initials: 'CP', 
-    text: '', 
-    time: '09:45', 
-    isMe: false, 
-    type: 'alert',
-    alertData: {
-      title: 'M. S. Oliveira (24 anos)',
-      description: 'Mandado de prisão em aberto - Tráfico de Drogas',
-      image: 'https://picsum.photos/seed/oliv/150/150?grayscale'
-    }
-  },
-  { id: '3', sender: 'Eu', initials: 'EU', text: 'Copiado. Equipe do 1º BPM deslocando para apoio no cerco da região central.', time: '09:48', isMe: true, type: 'text' },
-  { 
-    id: '4', 
-    sender: 'Eu', 
-    initials: 'EU', 
-    text: 'Local da última visualização (BR-356).', 
-    time: '09:50', 
-    isMe: true, 
-    type: 'image',
-    alertData: {
-      title: '',
-      description: '',
-      image: 'https://picsum.photos/seed/loc/400/300'
-    }
-  },
-];
-
-const TacticalChatRoom: React.FC<TacticalChatRoomProps> = ({ onBack }) => {
-  const [messages, setMessages] = useState(MOCK_MESSAGES);
+const TacticalChatRoom: React.FC<TacticalChatRoomProps> = ({ chat, onBack, onSendMessage }) => {
   const [input, setInput] = useState('');
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Use o estado local para mensagens, mas inicialize com as mensagens do chat prop
+  const [messages, setMessages] = useState<ChatMessage[]>(chat.messages);
+
+  // Atualiza as mensagens se o chat mudar (ex: se o usuário mudar de sala)
+  useEffect(() => {
+    setMessages(chat.messages);
+  }, [chat.id, chat.messages]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -50,6 +25,7 @@ const TacticalChatRoom: React.FC<TacticalChatRoomProps> = ({ onBack }) => {
 
   const handleSend = () => {
     if (!input.trim()) return;
+    
     const newMessage: ChatMessage = {
       id: Date.now().toString(),
       sender: 'Eu',
@@ -59,9 +35,20 @@ const TacticalChatRoom: React.FC<TacticalChatRoomProps> = ({ onBack }) => {
       isMe: true,
       type: 'text'
     };
-    setMessages([...messages, newMessage]);
+    
+    // Atualiza o estado local imediatamente para feedback rápido
+    setMessages(prev => [...prev, newMessage]);
+    
+    // Envia a mensagem para o estado global (App.tsx)
+    onSendMessage(chat.id, newMessage);
+    
     setInput('');
   };
+
+  // Mock data for the header (assuming the user is always 'Soldado Rodrigo')
+  const headerInfo = chat.type === 'group' 
+    ? { name: chat.name, details: '14 Oficiais em campo', icon: 'groups' }
+    : { name: chat.name, details: 'Online', icon: 'person' };
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki-light/30 overflow-hidden relative">
@@ -71,11 +58,11 @@ const TacticalChatRoom: React.FC<TacticalChatRoomProps> = ({ onBack }) => {
         </button>
         <div className="flex-1 flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-pmmg-khaki-light border-2 border-pmmg-yellow flex items-center justify-center overflow-hidden">
-            <span className="material-symbols-outlined text-pmmg-navy">groups</span>
+            <span className="material-symbols-outlined text-pmmg-navy">{headerInfo.icon}</span>
           </div>
           <div>
-            <h1 className="font-bold text-sm text-white leading-tight uppercase tracking-tight">Tático Móvel - 1º BPM</h1>
-            <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase">14 Oficiais em campo</p>
+            <h1 className="font-bold text-sm text-white leading-tight uppercase tracking-tight">{headerInfo.name}</h1>
+            <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase">{headerInfo.details}</p>
           </div>
         </div>
         <button className="text-white">

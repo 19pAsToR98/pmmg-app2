@@ -58,3 +58,25 @@ export interface ChatMessage {
     image: string;
   };
 }
+
+export interface Officer {
+  id: string;
+  name: string;
+  rank: UserRank;
+  unit: string;
+  photoUrl: string;
+  isOnline: boolean;
+}
+
+export interface Chat {
+  id: string;
+  type: 'group' | 'individual';
+  name: string;
+  participants: string[]; // Officer IDs
+  lastMessage: string;
+  lastTime: string;
+  unreadCount: number;
+  icon: string;
+  active: boolean;
+  messages: ChatMessage[];
+}
