@@ -106,7 +106,7 @@ const MOCK_CHATS: Chat[] = [
     id: 'c1', 
     type: 'group', 
     name: 'Tático Móvel - 1º BPM', 
-    participants: ['o1', 'o2'], 
+    participants: ['o1', 'o2', 'EU'], // Usuário participa
     lastMessage: 'QAP. Viatura 24190 em deslocamento para o setor delta.', 
     lastTime: '12:45', 
     unreadCount: 3, 
@@ -132,6 +132,19 @@ const MOCK_CHATS: Chat[] = [
       { id: 'm4', sender: 'Sgt. Douglas', initials: 'SD', text: 'Relatório de averiguação K9 concluído no Ponto Central.', time: '12:30', isMe: false, type: 'text' },
     ]
   },
+  // Grupo Público que o usuário NÃO participa
+  {
+    id: 'c3',
+    type: 'group',
+    name: 'ROCCA - Patrulha Canina',
+    participants: ['o2', 'o3'], // Usuário NÃO participa
+    lastMessage: 'Cães em treinamento na área sul.',
+    lastTime: '14:00',
+    unreadCount: 0,
+    icon: 'pets',
+    active: false,
+    messages: []
+  }
 ];
 
 
@@ -228,6 +241,24 @@ const App: React.FC = () => {
     setChats(prev => [...prev, newChat]);
     openChat(newChat.id);
   };
+  
+  const onJoinGroup = (chatId: string) => {
+    const chatToJoin = chats.find(c => c.id === chatId);
+    if (!chatToJoin || chatToJoin.type !== 'group') return;
+
+    if (chatToJoin.participants.includes('EU')) {
+      alert("Você já é membro deste grupo.");
+      openChat(chatId);
+      return;
+    }
+
+    // Simula a entrada imediata no grupo (sem aprovação, para simplificar)
+    setChats(prev => prev.map(c => 
+      c.id === chatId ? { ...c, participants: [...c.participants, 'EU'], active: true } : c
+    ));
+    alert(`Você entrou no grupo ${chatToJoin.name}.`);
+    openChat(chatId);
+  };
 
   // --- Lógica de Dados ---
 
@@ -273,11 +304,14 @@ const App: React.FC = () => {
   const selectedSuspect = suspects.find(s => s.id === selectedSuspectId) || suspects[0];
   const activeChat = chats.find(c => c.id === activeChatId);
   
-  // Filtra apenas chats individuais de contatos aceitos e chats de grupo
-  const filteredChats = chats.filter(chat => 
-    chat.type === 'group' || 
+  // Chats que o usuário participa (Individual Aceito OU Grupo que inclui 'EU')
+  const userChats = chats.filter(chat => 
+    (chat.type === 'group' && chat.participants.includes('EU')) || 
     (chat.type === 'individual' && contacts.some(c => c.officerId === chat.participants.find(p => p !== 'EU') && c.status === 'Accepted'))
   );
+  
+  // Todos os grupos, incluindo aqueles que o usuário não participa
+  const allGroups = chats.filter(chat => chat.type === 'group');
 
   // Filtra oficiais que são contatos aceitos e estão online
   const acceptedOnlineOfficers = officers.filter(o => 
@@ -294,10 +328,12 @@ const App: React.FC = () => {
       {currentScreen === 'chatList' && (
         <TacticalChatList 
           navigateTo={navigateTo} 
-          chats={filteredChats} 
+          userChats={userChats} // Passa apenas os chats que o usuário participa
+          allGroups={allGroups} // Passa todos os grupos (públicos)
           officers={acceptedOnlineOfficers} 
           openChat={openChat} 
           startIndividualChat={startIndividualChat}
+          onJoinGroup={onJoinGroup}
           pendingRequestsCount={contacts.filter(c => c.status === 'Pending' && !c.isRequester).length}
         />
       )}
