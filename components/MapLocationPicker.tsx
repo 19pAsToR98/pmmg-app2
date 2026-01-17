@@ -45,6 +45,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
       // Centraliza o mapa
       mapInstanceRef.current.setView(newLatLng, 15);
       
+      // Limpa os resultados e fecha o dropdown após uma seleção/atualização bem-sucedida
       setSearchResults([]);
       setIsDropdownOpen(false);
     }
@@ -77,7 +78,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
 
       setCurrentAddress(address);
       onLocationChange(lat, lng, address);
-      setSearchTerm(address);
+      setSearchTerm(address); // Define o termo de busca para o endereço selecionado
     } catch (error) {
       console.error("Erro na geocodificação reversa:", error);
       setCurrentAddress('Erro ao buscar endereço.');
@@ -151,7 +152,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
   // Efeito para lidar com a busca ao digitar (simulando debounce)
   useEffect(() => {
     const handler = setTimeout(() => {
-      // Só pesquisa se o termo for diferente do endereço atual (evita pesquisa após seleção)
+      // Só pesquisa se o termo for diferente do endereço atual E se o termo não estiver vazio
       if (searchTerm && searchTerm !== currentAddress) {
         handleSearch(searchTerm);
       } else if (!searchTerm) {
@@ -188,11 +189,16 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
-            // Não forçamos a abertura aqui, a abertura será decidida pelo useEffect/handleSearch
+            // Se o usuário começar a digitar, e o termo for diferente do endereço atual, 
+            // reabrimos o dropdown para que o debounce possa preenchê-lo.
+            if (e.target.value !== currentAddress) {
+                setIsDropdownOpen(true);
+            }
           }}
           onFocus={() => {
-            // Se houver resultados anteriores, reabre o dropdown ao focar
-            if (searchResults.length > 0) {
+            // Ao focar, se o termo de busca for o endereço já selecionado, não abra o dropdown.
+            // Caso contrário, se houver resultados anteriores, reabra.
+            if (searchTerm !== currentAddress && searchResults.length > 0) {
               setIsDropdownOpen(true);
             }
           }}
