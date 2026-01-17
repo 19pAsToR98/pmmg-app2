@@ -152,6 +152,38 @@ const App: React.FC = () => {
     navigateTo('chatRoom');
   };
 
+  const startIndividualChat = (officerId: string) => {
+    // 1. Verificar se já existe um chat individual com este oficial
+    const existingChat = chats.find(chat => 
+      chat.type === 'individual' && chat.participants.includes(officerId)
+    );
+
+    if (existingChat) {
+      openChat(existingChat.id);
+      return;
+    }
+
+    // 2. Criar um novo chat
+    const officer = officers.find(o => o.id === officerId);
+    if (!officer) return;
+
+    const newChat: Chat = {
+      id: Date.now().toString(),
+      type: 'individual',
+      name: `${officer.rank}. ${officer.name.split(' ')[1]} (${officer.unit})`,
+      participants: ['EU', officerId], // 'EU' representa o usuário logado
+      lastMessage: 'Inicie a conversa tática.',
+      lastTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      unreadCount: 0,
+      icon: 'person',
+      active: true,
+      messages: [],
+    };
+
+    setChats(prev => [...prev, newChat]);
+    openChat(newChat.id);
+  };
+
   const addSuspect = (newSuspect: Suspect) => {
     setSuspects([newSuspect, ...suspects]);
     navigateTo('dashboard');
@@ -200,7 +232,7 @@ const App: React.FC = () => {
       {currentScreen === 'dashboard' && <Dashboard navigateTo={navigateTo} onOpenProfile={openProfile} suspects={suspects} />}
       {currentScreen === 'registry' && <SuspectRegistry navigateTo={navigateTo} onSave={addSuspect} allSuspects={suspects} />}
       {currentScreen === 'profile' && <SuspectProfile suspect={selectedSuspect} onBack={() => navigateTo('dashboard')} navigateTo={navigateTo} allSuspects={suspects} onOpenProfile={openProfile} />}
-      {currentScreen === 'chatList' && <TacticalChatList navigateTo={navigateTo} chats={chats} officers={officers} openChat={openChat} />}
+      {currentScreen === 'chatList' && <TacticalChatList navigateTo={navigateTo} chats={chats} officers={officers} openChat={openChat} startIndividualChat={startIndividualChat} />}
       {currentScreen === 'chatRoom' && activeChat && (
         <TacticalChatRoom 
           chat={activeChat} 

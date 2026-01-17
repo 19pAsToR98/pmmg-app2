@@ -7,10 +7,13 @@ interface TacticalChatListProps {
   chats: Chat[];
   officers: Officer[];
   openChat: (chatId: string) => void;
+  startIndividualChat: (officerId: string) => void;
 }
 
-const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo, chats, officers, openChat }) => {
+const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo, chats, officers, openChat, startIndividualChat }) => {
   
+  const onlineOfficers = officers.filter(o => o.isOnline);
+
   // Função auxiliar para obter o nome e ícone correto para chats individuais
   const getChatDisplayInfo = (chat: Chat) => {
     if (chat.type === 'group') {
@@ -38,8 +41,8 @@ const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo, chats, 
             <span className="material-symbols-outlined text-pmmg-navy text-xl">groups</span>
           </div>
           <div>
-            <h1 className="font-bold text-sm leading-none uppercase tracking-widest">Grupos Táticos</h1>
-            <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">Comunicação Operacional</p>
+            <h1 className="font-bold text-sm leading-none uppercase tracking-widest">Tropa Operacional</h1>
+            <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">Comunicação e Contatos</p>
           </div>
         </div>
         <button className="w-9 h-9 flex items-center justify-center rounded-full bg-white/10 text-pmmg-yellow border border-white/10">
@@ -48,7 +51,39 @@ const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo, chats, 
       </header>
 
       <main className="flex-1 overflow-y-auto pb-32 no-scrollbar">
-        <div className="px-4 pt-4 sticky top-0 z-40 bg-pmmg-khaki/90 backdrop-blur-md pb-2">
+        
+        {/* Oficiais Online (Amigos) */}
+        <section className="px-4 pt-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-[11px] font-bold text-pmmg-navy/60 uppercase tracking-wider">Oficiais Online ({onlineOfficers.length})</h3>
+            <span className="text-[10px] font-bold text-green-600 uppercase flex items-center gap-1">
+              <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> Ativos
+            </span>
+          </div>
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
+            {onlineOfficers.map(officer => (
+              <button 
+                key={officer.id}
+                onClick={() => startIndividualChat(officer.id)}
+                className="flex flex-col items-center shrink-0 w-16 active:scale-95 transition-transform"
+              >
+                <div className="relative w-14 h-14 mb-1">
+                  <div className="w-full h-full rounded-full overflow-hidden border-2 border-pmmg-navy/20 bg-slate-200">
+                    <img src={officer.photoUrl} alt={officer.name} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-pmmg-khaki"></div>
+                </div>
+                <span className="text-[10px] font-bold text-pmmg-navy uppercase truncate w-full text-center leading-tight">{officer.name.split(' ')[1]}</span>
+                <span className="text-[8px] text-slate-500 uppercase">{officer.rank.split(' ')[0]}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <div className="px-4 pt-2 sticky top-0 z-40 bg-pmmg-khaki/90 backdrop-blur-md pb-2">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-[11px] font-bold text-pmmg-navy/60 uppercase tracking-wider">Conversas e Grupos ({chats.length})</h3>
+          </div>
           <div className="relative">
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
               <span className="material-symbols-outlined text-pmmg-navy/50 text-xl">search</span>
@@ -97,16 +132,7 @@ const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo, chats, 
         </section>
 
         <div className="px-4 py-6 flex gap-2 overflow-x-auto no-scrollbar">
-          {['Todos', 'Favoritos', 'Batalhão', 'Urgentes'].map((filter, i) => (
-            <button 
-              key={filter} 
-              className={`text-[10px] font-bold px-4 py-2 rounded-full uppercase whitespace-nowrap shadow-sm border ${
-                i === 0 ? 'bg-pmmg-navy text-white' : 'bg-white/50 text-pmmg-navy border-pmmg-navy/10'
-              }`}
-            >
-              {filter}
-            </button>
-          ))}
+          {/* Filtros de chat */}
         </div>
       </main>
 
