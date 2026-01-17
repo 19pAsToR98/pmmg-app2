@@ -164,9 +164,10 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                                  suspect.status === 'Suspeito' ? 'border-pmmg-yellow' : 'border-pmmg-navy';
         
         // 2. Create the custom icon HTML using the photo (SQUARE FORMAT)
+        // Removendo p-0.5 e rounded-md da imagem para preenchimento total
         const suspectIconHtml = `
-          <div class="w-10 h-10 p-0.5 bg-white shadow-xl border-4 ${borderColorClass} overflow-hidden ring-2 ring-white/50 rounded-lg">
-            <img src="${suspect.photoUrl}" class="w-full h-full object-cover rounded-md" alt="${suspect.name}">
+          <div class="w-10 h-10 bg-white shadow-xl border-4 ${borderColorClass} overflow-hidden ring-2 ring-white/50 rounded-lg">
+            <img src="${suspect.photoUrl}" class="w-full h-full object-cover" alt="${suspect.name}">
           </div>
         `;
         
