@@ -1,7 +1,6 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
-import { Screen, Suspect } from '../types';
+import { Screen, Suspect, CustomMarker } from '../types';
 import BottomNav from '../components/BottomNav';
 
 interface TacticalMapProps {
@@ -9,22 +8,58 @@ interface TacticalMapProps {
   suspects: Suspect[];
   onOpenProfile: (id: string) => void;
   initialCenter?: [number, number] | null;
+  customMarkers: CustomMarker[];
+  addCustomMarker: (marker: CustomMarker) => void;
 }
 
 type MapFilter = 'Todos' | 'Foragido' | 'Suspeito' | 'Preso' | 'CPF Cancelado';
 
-const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenProfile, initialCenter }) => {
+const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenProfile, initialCenter, customMarkers, addCustomMarker }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
+  const customMarkersLayerRef = useRef<L.LayerGroup | null>(null);
   
   const [userPos, setUserPos] = useState<[number, number] | null>(null);
   const [activeFilter, setActiveFilter] = useState<MapFilter>('Todos');
+  const [isAddingMarker, setIsAddingMarker] = useState(false);
+  const [newMarkerData, setNewMarkerData] = useState<{ lat: number, lng: number, title: string, description: string, icon: string, color: string } | null>(null);
 
-  // Filtragem dos suspeitos com base no estado do filtro
+  // Filtragem dos suspeitos
   const filteredSuspects = suspects.filter(s => 
-    activeFilter === 'Todos' || s.status === activeFilter
+    (s.showOnMap === undefined || s.showOnMap === true) && 
+    (activeFilter === 'Todos' || s.status === activeFilter)
   );
+
+  const handleMapClick = (e: L.LeafletMouseEvent) => {
+    if (isAddingMarker) {
+      setNewMarkerData({
+        lat: e.latlng.lat,
+        lng: e.latlng.lng,
+        title: 'Novo Ponto Tático',
+        description: 'Detalhes do ponto de interesse.',
+        icon: 'flag',
+        color: 'bg-pmmg-gold'
+      });
+      setIsAddingMarker(false);
+    }
+  };
+
+  const handleSaveNewMarker = () => {
+    if (newMarkerData) {
+      const marker: CustomMarker = {
+        ...newMarkerData,
+        id: Date.now().toString(),
+      };
+      addCustomMarker(marker);
+      setNewMarkerData(null);
+    }
+  };
+
+  const handleCancelNewMarker = () => {
+    setNewMarkerData(null);
+    setIsAddingMarker(false);
+  };
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -44,17 +79,29 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       }).addTo(mapInstanceRef.current);
 
       markersLayerRef.current = L.layerGroup().addTo(mapInstanceRef.current);
+      customMarkersLayerRef.current = L.layerGroup().addTo(mapInstanceRef.current);
+      
+      mapInstanceRef.current.on('click', handleMapClick);
     }
 
-    // Localização do usuário
-    if (navigator.geolocation && !userPos) {
+    // Cleanup function for map click listener
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.off('click', handleMapClick);
+      }
+    };
+  }, [isAddingMarker]); // Dependência para garantir que o listener de clique seja reconfigurado se o modo mudar
+
+  useEffect(() => {
+    // Localização do usuário (executa apenas uma vez)
+    if (navigator.geolocation && !userPos && mapInstanceRef.current) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
           setUserPos([latitude, longitude]);
           
-          if (!initialCenter && mapInstanceRef.current) {
-            mapInstanceRef.current.setView([latitude, longitude], 15);
+          if (!initialCenter) {
+            mapInstanceRef.current!.setView([latitude, longitude], 15);
           }
           
           const officerIcon = L.divIcon({
@@ -67,8 +114,10 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         }
       );
     }
+  }, [userPos, initialCenter]);
 
-    // Atualizar marcadores toda vez que o filtro ou os suspeitos mudarem
+  useEffect(() => {
+    // Atualizar marcadores de Suspeitos
     if (markersLayerRef.current) {
       markersLayerRef.current.clearLayers();
       
@@ -113,8 +162,33 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         }
       });
     }
-
   }, [filteredSuspects, initialCenter, activeFilter]);
+
+  useEffect(() => {
+    // Atualizar Marcadores Personalizados
+    if (customMarkersLayerRef.current) {
+      customMarkersLayerRef.current.clearLayers();
+
+      customMarkers.forEach(markerData => {
+        const customIcon = L.divIcon({
+          className: 'custom-marker-icon',
+          html: `<div class="w-8 h-8 ${markerData.color} rounded-full border-2 border-white flex items-center justify-center shadow-lg"><span class="material-symbols-outlined text-white text-[16px] fill-icon">${markerData.icon}</span></div>`,
+          iconSize: [32, 32],
+          iconAnchor: [16, 16]
+        });
+
+        const marker = L.marker([markerData.lat, markerData.lng], { icon: customIcon }).addTo(customMarkersLayerRef.current!);
+        
+        const popupContent = `
+          <div class="p-2 min-w-[150px]">
+            <p class="font-bold text-[11px] text-pmmg-navy uppercase leading-tight">${markerData.title}</p>
+            <p class="text-[10px] text-slate-600 mt-1">${markerData.description}</p>
+          </div>
+        `;
+        marker.bindPopup(popupContent);
+      });
+    }
+  }, [customMarkers]);
 
   const recenter = () => {
     if (userPos && mapInstanceRef.current) {
@@ -135,9 +209,17 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               <p className="text-[9px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">Inteligência Territorial</p>
             </div>
           </div>
-          <button onClick={recenter} className="bg-white/10 p-2 rounded-full border border-white/20 text-white active:bg-white/20">
-            <span className="material-symbols-outlined text-lg">my_location</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setIsAddingMarker(true)}
+              className={`p-2 rounded-full border transition-all ${isAddingMarker ? 'bg-pmmg-red text-white border-pmmg-red shadow-lg' : 'bg-white/10 text-white border-white/20'}`}
+            >
+              <span className="material-symbols-outlined text-lg">add_location_alt</span>
+            </button>
+            <button onClick={recenter} className="bg-white/10 p-2 rounded-full border border-white/20 text-white active:bg-white/20">
+              <span className="material-symbols-outlined text-lg">my_location</span>
+            </button>
+          </div>
         </div>
 
         {/* Tactical Filters Chips */}
@@ -172,6 +254,93 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             <span className="text-pmmg-yellow material-symbols-outlined text-sm animate-pulse">radar</span>
           </div>
         </div>
+        
+        {/* Adding Marker Mode Indicator */}
+        {isAddingMarker && (
+          <div className="absolute inset-0 z-[1001] bg-black/30 flex items-center justify-center">
+            <div className="bg-white p-6 rounded-xl shadow-2xl text-center max-w-xs">
+              <span className="material-symbols-outlined text-pmmg-red text-4xl mb-2">pin_drop</span>
+              <p className="text-sm font-bold text-pmmg-navy uppercase">Modo de Adição Ativo</p>
+              <p className="text-xs text-slate-600 mt-2">Clique em qualquer ponto do mapa para posicionar o novo marcador tático.</p>
+              <button 
+                onClick={() => setIsAddingMarker(false)}
+                className="mt-4 w-full bg-pmmg-red text-white py-2 rounded-lg text-xs font-bold uppercase"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* New Marker Configuration Modal */}
+        {newMarkerData && (
+          <div className="absolute inset-0 z-[1002] bg-black/50 flex items-center justify-center p-4">
+            <div className="bg-white p-5 rounded-xl shadow-2xl w-full max-w-sm">
+              <h3 className="text-lg font-bold text-pmmg-navy uppercase mb-4 border-b pb-2">Configurar Marcador</h3>
+              
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1">Título</label>
+                  <input 
+                    value={newMarkerData.title}
+                    onChange={(e) => setNewMarkerData({...newMarkerData, title: e.target.value})}
+                    className="w-full px-3 py-2 border rounded-lg text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1">Descrição</label>
+                  <textarea 
+                    value={newMarkerData.description}
+                    onChange={(e) => setNewMarkerData({...newMarkerData, description: e.target.value})}
+                    rows={2}
+                    className="w-full px-3 py-2 border rounded-lg text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1">Ícone ({newMarkerData.icon})</label>
+                  <div className="flex gap-2 overflow-x-auto pb-2">
+                    {['flag', 'warning', 'shield', 'camera', 'bolt', 'visibility'].map(icon => (
+                      <button 
+                        key={icon}
+                        onClick={() => setNewMarkerData({...newMarkerData, icon})}
+                        className={`p-2 rounded-lg border transition-all ${newMarkerData.icon === icon ? 'bg-pmmg-navy text-pmmg-yellow border-pmmg-yellow' : 'bg-slate-100 text-pmmg-navy/50'}`}
+                      >
+                        <span className="material-symbols-outlined text-xl">{icon}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1">Cor</label>
+                  <div className="flex gap-2">
+                    {[{c: 'bg-pmmg-gold', v: 'pmmg-gold'}, {c: 'bg-pmmg-red', v: 'pmmg-red'}, {c: 'bg-pmmg-blue', v: 'pmmg-blue'}, {c: 'bg-green-500', v: 'green-500'}].map(color => (
+                      <button 
+                        key={color.v}
+                        onClick={() => setNewMarkerData({...newMarkerData, color: `bg-${color.v}`})}
+                        className={`w-8 h-8 rounded-full border-2 transition-all ${color.c} ${newMarkerData.color === `bg-${color.v}` ? 'ring-4 ring-offset-2 ring-pmmg-navy' : 'border-white'}`}
+                      ></button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button 
+                  onClick={handleCancelNewMarker}
+                  className="flex-1 bg-slate-200 text-pmmg-navy font-bold py-3 rounded-xl text-xs uppercase"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={handleSaveNewMarker}
+                  className="flex-1 bg-pmmg-navy text-white font-bold py-3 rounded-xl text-xs uppercase"
+                >
+                  Salvar Ponto
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Interactive Legend */}
         <div className="absolute bottom-32 right-4 z-[1000]">
@@ -194,6 +363,10 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             <div className="flex items-center gap-2">
                <div className="w-3.5 h-3.5 bg-pmmg-blue rounded-full border-2 border-white shadow-sm ring-1 ring-pmmg-blue/30"></div>
                <span className="text-[9px] font-bold text-pmmg-navy uppercase">Oficial</span>
+            </div>
+            <div className="flex items-center gap-2">
+               <div className="w-3.5 h-3.5 bg-pmmg-gold rounded-full border-2 border-white shadow-sm ring-1 ring-pmmg-gold/30"></div>
+               <span className="text-[9px] font-bold text-pmmg-navy uppercase">Ponto Tático</span>
             </div>
             {activeFilter !== 'Todos' && (
               <button 

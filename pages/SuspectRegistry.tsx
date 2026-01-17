@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Screen, Suspect } from '../types';
 import BottomNav from '../components/BottomNav';
@@ -19,6 +18,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
   const [currentArticle, setCurrentArticle] = useState('');
   const [articles, setArticles] = useState<string[]>([]);
   const [photos, setPhotos] = useState<string[]>([]);
+  const [showOnMap, setShowOnMap] = useState(true); // Novo estado para controle do mapa
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddArticle = () => {
@@ -61,6 +61,10 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
 
     const primaryPhoto = photos.length > 0 ? photos[0] : `https://picsum.photos/seed/${name}/200/250`;
 
+    // Mocking lat/lng for new suspects for map functionality
+    const newLat = -19.9 + (Math.random() * 0.05 - 0.025);
+    const newLng = -43.9 + (Math.random() * 0.05 - 0.025);
+
     const newSuspect: Suspect = {
       id: Date.now().toString(),
       name,
@@ -74,7 +78,10 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
       birthDate,
       motherName,
       articles,
-      description
+      description,
+      lat: newLat,
+      lng: newLng,
+      showOnMap: showOnMap, // Incluindo a nova propriedade
     };
 
     onSave(newSuspect);
@@ -175,6 +182,23 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
               </span>
             </button>
           ))}
+        </div>
+        
+        {/* NEW: Map Visibility Toggle */}
+        <div className="mt-6 pmmg-card p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="material-symbols-outlined text-pmmg-navy">map</span>
+            <div>
+              <p className="text-sm font-bold text-pmmg-navy uppercase leading-none">Exibir no Mapa Tático</p>
+              <p className="text-[10px] text-slate-500 mt-1">Marcar a última localização conhecida no mapa.</p>
+            </div>
+          </div>
+          <button 
+            onClick={() => setShowOnMap(!showOnMap)}
+            className={`relative w-12 h-6 rounded-full transition-colors shrink-0 ${showOnMap ? 'bg-pmmg-navy' : 'bg-slate-300'}`}
+          >
+            <span className={`absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform shadow-md ${showOnMap ? 'translate-x-6' : 'translate-x-0'}`}></span>
+          </button>
         </div>
 
         <div className="flex items-center gap-2 mb-4 mt-8">

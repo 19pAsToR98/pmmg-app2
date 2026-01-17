@@ -13,6 +13,16 @@ export interface Association {
   relationship: string; // e.g., 'Cúmplice', 'Familiar', 'Contato'
 }
 
+export interface CustomMarker {
+  id: string;
+  lat: number;
+  lng: number;
+  title: string;
+  description: string;
+  icon: string; // Material Symbols icon name
+  color: string; // Tailwind color class (e.g., 'bg-pmmg-gold')
+}
+
 export interface Suspect {
   id: string;
   name: string;
@@ -31,6 +41,7 @@ export interface Suspect {
   lng?: number;
   vehicles?: Vehicle[];
   associations?: Association[];
+  showOnMap?: boolean; // NEW: Controla se o marcador deve ser exibido no mapa tático
 }
 
 export interface ChatMessage {

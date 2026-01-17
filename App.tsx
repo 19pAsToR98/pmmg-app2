@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Screen, Suspect, UserRank } from './types';
+import { Screen, Suspect, UserRank, CustomMarker } from './types';
 import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import SuspectRegistry from './pages/SuspectRegistry';
@@ -32,7 +32,8 @@ const INITIAL_SUSPECTS: Suspect[] = [
     ],
     associations: [
       { suspectId: '2', relationship: 'Cúmplice em Roubo' }
-    ]
+    ],
+    showOnMap: true,
   },
   {
     id: '2',
@@ -51,7 +52,8 @@ const INITIAL_SUSPECTS: Suspect[] = [
     associations: [
       { suspectId: '1', relationship: 'Contato Frequente' },
       { suspectId: '3', relationship: 'Familiar (Primo)' }
-    ]
+    ],
+    showOnMap: true,
   },
   {
     id: '3',
@@ -66,13 +68,27 @@ const INITIAL_SUSPECTS: Suspect[] = [
     birthDate: '01/01/1998',
     articles: ['Art. 33'],
     lat: -19.9200,
-    lng: -43.9350
+    lng: -43.9350,
+    showOnMap: false, // Exemplo de suspeito que não aparece no mapa
+  }
+];
+
+const INITIAL_CUSTOM_MARKERS: CustomMarker[] = [
+  {
+    id: 'm1',
+    lat: -19.9180,
+    lng: -43.9355,
+    title: 'Ponto de Observação',
+    description: 'Vigilância 24h. Área de alto risco.',
+    icon: 'visibility',
+    color: 'bg-pmmg-gold'
   }
 ];
 
 const App: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>('onboarding');
   const [suspects, setSuspects] = useState<Suspect[]>(INITIAL_SUSPECTS);
+  const [customMarkers, setCustomMarkers] = useState<CustomMarker[]>(INITIAL_CUSTOM_MARKERS);
   const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
   const [userRank, setUserRank] = useState<UserRank>('Soldado');
@@ -86,6 +102,10 @@ const App: React.FC = () => {
   const addSuspect = (newSuspect: Suspect) => {
     setSuspects([newSuspect, ...suspects]);
     navigateTo('dashboard');
+  };
+
+  const addCustomMarker = (marker: CustomMarker) => {
+    setCustomMarkers(prev => [...prev, marker]);
   };
 
   const openProfile = (id: string) => {
@@ -113,7 +133,7 @@ const App: React.FC = () => {
           onRankChange={setUserRank}
         />
       )}
-      {currentScreen === 'map' && <TacticalMap navigateTo={navigateTo} suspects={suspects} onOpenProfile={openProfile} initialCenter={mapCenter} />}
+      {currentScreen === 'map' && <TacticalMap navigateTo={navigateTo} suspects={suspects} onOpenProfile={openProfile} initialCenter={mapCenter} customMarkers={customMarkers} addCustomMarker={addCustomMarker} />}
     </div>
   );
 };
