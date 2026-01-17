@@ -93,13 +93,16 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
   }, [selectedLocation]);
 
   // --- Address Search Logic ---
-  const handleAddressSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setAddress(value);
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAddress(e.target.value);
     setSelectedLocation(null); // Clear location if user starts typing again
-    if (value.length > 2) {
+    setAddressSuggestions([]); // Clear suggestions while typing
+  };
+
+  const handleAddressSearch = () => {
+    if (address.length > 2) {
       const filtered = MOCK_ADDRESS_SUGGESTIONS.filter(s => 
-        s.name.toLowerCase().includes(value.toLowerCase())
+        s.name.toLowerCase().includes(address.toLowerCase())
       );
       setAddressSuggestions(filtered);
     } else {
@@ -358,13 +361,23 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
         <div className="space-y-4">
           <div className="relative">
             <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Endereço de Última Ocorrência/Residência</label>
-            <input 
-              value={address}
-              onChange={handleAddressSearch}
-              className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
-              placeholder="Pesquisar endereço..." 
-              type="text" 
-            />
+            <div className="flex gap-2">
+              <input 
+                value={address}
+                onChange={handleAddressChange}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddressSearch()}
+                className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+                placeholder="Pesquisar endereço..." 
+                type="text" 
+              />
+              <button 
+                onClick={handleAddressSearch}
+                className="bg-pmmg-navy text-white p-3 rounded-lg active:scale-95 transition-transform"
+              >
+                <span className="material-symbols-outlined text-xl">search</span>
+              </button>
+            </div>
+            
             {addressSuggestions.length > 0 && (
               <div className="absolute z-10 w-full bg-white border border-pmmg-navy/20 rounded-lg mt-1 shadow-lg max-h-40 overflow-y-auto">
                 {addressSuggestions.map((loc, index) => (
