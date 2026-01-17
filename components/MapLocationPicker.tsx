@@ -17,6 +17,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null); // Referência para o componente inteiro
   
   const [searchTerm, setSearchTerm] = useState('');
   const [currentAddress, setCurrentAddress] = useState('Arraste o marcador para definir a localização.');
@@ -26,7 +27,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
 
   const defaultCenter: [number, number] = initialLat && initialLng ? [initialLat, initialLng] : [-19.9167, -43.9345];
 
-  // Função para atualizar apenas o marcador (Lat/Lng)
+  // Função para atualizar o estado e o marcador
   const updateMarker = (lat: number, lng: number) => {
     if (mapInstanceRef.current) {
       const newLatLng = L.latLng(lat, lng);
@@ -44,7 +45,6 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
       // Centraliza o mapa
       mapInstanceRef.current.setView(newLatLng, 15);
       
-      // Limpa resultados e fecha dropdown
       setSearchResults([]);
       setIsDropdownOpen(false);
     }
@@ -53,7 +53,6 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
   // Geocodificação Reversa (Lat/Lng -> Endereço Curto)
   const reverseGeocode = async (lat: number, lng: number) => {
     try {
-      // Requesting addressdetails=1 to get structured address components
       const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
       const data = await response.json();
       
@@ -69,18 +68,16 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
               data.address.state
           ].filter(Boolean);
           
-          // Use a versão mais curta se disponível, priorizando rua, número, cidade, estado
           if (parts.length > 0) {
               address = parts.join(', ');
           } else {
-              // Fallback para display_name se as partes estruturadas estiverem faltando
               address = data.display_name;
           }
       }
 
       setCurrentAddress(address);
       onLocationChange(lat, lng, address);
-      setSearchTerm(address); // Atualiza o campo de busca com o endereço simplificado
+      setSearchTerm(address);
     } catch (error) {
       console.error("Erro na geocodificação reversa:", error);
       setCurrentAddress('Erro ao buscar endereço.');
@@ -101,7 +98,11 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
       const data: SearchResult[] = await response.json();
       
       setSearchResults(data);
-      setIsDropdownOpen(true);
+      if (data.length > 0) {
+        setIsDropdownOpen(true);
+      } else {
+        setIsDropdownOpen(false);
+      }
     } catch (error) {
       console.error("Erro na busca de endereço:", error);
       setSearchResults([]);
@@ -116,7 +117,6 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
     const newLng = parseFloat(result.lon);
     
     updateMarker(newLat, newLng);
-    // Após definir o marcador, faz a geocodificação reversa para obter o endereço simplificado
     reverseGeocode(newLat, newLng);
   };
 
@@ -158,19 +158,39 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
       clearTimeout(handler);
     };
   }, [searchTerm]);
+  
+  // Efeito para fechar o dropdown ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [wrapperRef]);
 
 
   return (
     <div className="space-y-3">
-      <div className="relative">
+      <div className="relative" ref={wrapperRef}>
         <input 
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
-            setIsDropdownOpen(true);
+            // Abrir o dropdown imediatamente ao digitar
+            if (e.target.value.length > 0) setIsDropdownOpen(true);
           }}
-          onFocus={() => setIsDropdownOpen(true)}
-          // Removemos o onBlur com timeout, pois o onMouseDown no item da lista previne o blur
+          onFocus={() => {
+            // Abrir o dropdown ao focar, se houver resultados ou se estiver digitando
+            if (searchResults.length > 0 || searchTerm.length > 0) {
+              setIsDropdownOpen(true);
+            }
+          }}
+          // Removido onBlur para evitar perda de foco
           className="block w-full pr-12 py-3 bg-white border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
           placeholder="Buscar endereço (Rua, Bairro, Cidade)..." 
           type="text" 
