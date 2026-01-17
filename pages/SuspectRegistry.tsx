@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Screen, Suspect } from '../types';
+import { Screen, Suspect, Vehicle, Association } from '../types';
 import BottomNav from '../components/BottomNav';
 
 interface SuspectRegistryProps {
@@ -18,7 +18,18 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
   const [currentArticle, setCurrentArticle] = useState('');
   const [articles, setArticles] = useState<string[]>([]);
   const [photos, setPhotos] = useState<string[]>([]);
-  const [showOnMap, setShowOnMap] = useState(true); // Novo estado para controle do mapa
+  const [showOnMap, setShowOnMap] = useState(true);
+  
+  // Estados para Veículos
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [currentVehiclePlate, setCurrentVehiclePlate] = useState('');
+  const [currentVehicleModel, setCurrentVehicleModel] = useState('');
+  const [currentVehicleColor, setCurrentVehicleColor] = useState('');
+
+  // Estados para Associações (Simplificado, pois requer IDs de outros suspeitos)
+  // Vamos manter simples por enquanto, apenas um campo de texto para 'Ligações'
+  const [associationsText, setAssociationsText] = useState(''); 
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddArticle = () => {
@@ -30,6 +41,24 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
 
   const handleRemoveArticle = (index: number) => {
     setArticles(articles.filter((_, i) => i !== index));
+  };
+
+  const handleAddVehicle = () => {
+    if (currentVehiclePlate.trim() && currentVehicleModel.trim()) {
+      const newVehicle: Vehicle = {
+        plate: currentVehiclePlate.trim().toUpperCase(),
+        model: currentVehicleModel.trim(),
+        color: currentVehicleColor.trim() || 'Não Informado',
+      };
+      setVehicles([...vehicles, newVehicle]);
+      setCurrentVehiclePlate('');
+      setCurrentVehicleModel('');
+      setCurrentVehicleColor('');
+    }
+  };
+
+  const handleRemoveVehicle = (index: number) => {
+    setVehicles(vehicles.filter((_, i) => i !== index));
   };
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,6 +94,13 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
     const newLat = -19.9 + (Math.random() * 0.05 - 0.025);
     const newLng = -43.9 + (Math.random() * 0.05 - 0.025);
 
+    // Simplificando associações para o registro inicial (apenas texto)
+    const associations: Association[] = associationsText.split(',').map(rel => ({
+      suspectId: 'N/A', // Placeholder, pois não temos a lista completa de IDs aqui
+      relationship: rel.trim(),
+    })).filter(a => a.relationship);
+
+
     const newSuspect: Suspect = {
       id: Date.now().toString(),
       name,
@@ -81,7 +117,9 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
       description,
       lat: newLat,
       lng: newLng,
-      showOnMap: showOnMap, // Incluindo a nova propriedade
+      showOnMap: showOnMap,
+      vehicles: vehicles, // Incluindo veículos
+      associations: associations, // Incluindo associações
     };
 
     onSave(newSuspect);
@@ -184,7 +222,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
           ))}
         </div>
         
-        {/* NEW: Map Visibility Toggle */}
+        {/* Map Visibility Toggle */}
         <div className="mt-6 pmmg-card p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="material-symbols-outlined text-pmmg-navy">map</span>
@@ -273,6 +311,71 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
           </div>
         </div>
 
+        {/* Seção de Veículos */}
+        <div className="flex items-center gap-2 mb-4 mt-8">
+          <div className="h-4 w-1 bg-pmmg-yellow rounded-full"></div>
+          <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Veículos Cadastrados</h3>
+        </div>
+
+        <div className="space-y-3 mb-4">
+          {vehicles.map((vehicle, idx) => (
+            <div key={idx} className="flex items-center justify-between p-3 bg-white/70 border border-pmmg-navy/10 rounded-lg shadow-sm">
+              <div>
+                <p className="text-sm font-bold text-pmmg-navy">{vehicle.plate}</p>
+                <p className="text-[10px] text-slate-600">{vehicle.model} ({vehicle.color})</p>
+              </div>
+              <button 
+                onClick={() => handleRemoveVehicle(idx)}
+                className="text-pmmg-red p-1 rounded-full hover:bg-pmmg-red/10"
+              >
+                <span className="material-symbols-outlined text-lg">delete</span>
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div className="pmmg-card p-4 space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Placa</label>
+              <input 
+                value={currentVehiclePlate}
+                onChange={(e) => setCurrentVehiclePlate(e.target.value)}
+                className="block w-full px-3 py-2 bg-white border border-pmmg-navy/20 rounded-lg text-xs uppercase" 
+                placeholder="ABC-1234" 
+                type="text" 
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Modelo</label>
+              <input 
+                value={currentVehicleModel}
+                onChange={(e) => setCurrentVehicleModel(e.target.value)}
+                className="block w-full px-3 py-2 bg-white border border-pmmg-navy/20 rounded-lg text-xs" 
+                placeholder="Ex: Fiat Uno" 
+                type="text" 
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Cor</label>
+            <input 
+              value={currentVehicleColor}
+              onChange={(e) => setCurrentVehicleColor(e.target.value)}
+              className="block w-full px-3 py-2 bg-white border border-pmmg-navy/20 rounded-lg text-xs" 
+              placeholder="Ex: Cinza" 
+              type="text" 
+            />
+          </div>
+          <button 
+            onClick={handleAddVehicle}
+            className="w-full bg-pmmg-navy text-white text-[10px] font-bold py-2 rounded-lg uppercase flex items-center justify-center gap-2"
+          >
+            <span className="material-symbols-outlined text-lg">add_circle</span> Adicionar Veículo
+          </button>
+        </div>
+
+        {/* Seção de Artigos Criminais */}
         <div className="flex items-center gap-2 mb-4 mt-8">
           <div className="h-4 w-1 bg-pmmg-red rounded-full"></div>
           <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Artigos Criminais</h3>
@@ -301,6 +404,27 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
             Adicionar
           </button>
         </div>
+        
+        {/* Seção de Ligações/Associações */}
+        <div className="flex items-center gap-2 mb-4 mt-8">
+          <div className="h-4 w-1 bg-pmmg-blue rounded-full"></div>
+          <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Ligações e Associações</h3>
+        </div>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Descrição de Ligações</label>
+            <textarea 
+              value={associationsText}
+              onChange={(e) => setAssociationsText(e.target.value)}
+              rows={2}
+              className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+              placeholder="Ex: Cúmplice de 'Sombra', Contato frequente com 'Marquinhos'" 
+            />
+            <p className="text-[8px] text-slate-500 mt-1 ml-1">Separe as ligações por vírgula.</p>
+          </div>
+        </div>
+
 
         <div className="mt-10 mb-8">
           <button 
