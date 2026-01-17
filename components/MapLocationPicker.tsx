@@ -7,6 +7,12 @@ interface MapLocationPickerProps {
   onLocationChange: (lat: number, lng: number, address: string) => void;
 }
 
+interface SearchResult {
+  lat: string;
+  lon: string;
+  display_name: string;
+}
+
 const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initialLng, onLocationChange }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -15,11 +21,13 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
   const [searchTerm, setSearchTerm] = useState('');
   const [currentAddress, setCurrentAddress] = useState('Arraste o marcador para definir a localização.');
   const [searchLoading, setSearchLoading] = useState(false);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const defaultCenter: [number, number] = initialLat && initialLng ? [initialLat, initialLng] : [-19.9167, -43.9345];
 
   // Função para atualizar o estado e o marcador
-  const updateMarkerAndLocation = (lat: number, lng: number) => {
+  const updateMarkerAndLocation = (lat: number, lng: number, address: string) => {
     if (mapInstanceRef.current) {
       const newLatLng = L.latLng(lat, lng);
       
@@ -33,12 +41,14 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
         });
       }
       
-      // Centraliza o mapa se a mudança for significativa (ex: após busca)
-      if (mapInstanceRef.current.getCenter().distanceTo(newLatLng) > 500) {
-        mapInstanceRef.current.setView(newLatLng, 15);
-      }
+      // Centraliza o mapa
+      mapInstanceRef.current.setView(newLatLng, 15);
       
-      reverseGeocode(lat, lng);
+      setCurrentAddress(address);
+      onLocationChange(lat, lng, address);
+      setSearchTerm(address); // Atualiza o campo de busca com o endereço completo
+      setSearchResults([]);
+      setIsDropdownOpen(false);
     }
   };
 
@@ -48,6 +58,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
       const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
       const data = await response.json();
       const address = data.display_name || 'Endereço não encontrado';
+      
       setCurrentAddress(address);
       onLocationChange(lat, lng, address);
     } catch (error) {
@@ -57,28 +68,33 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
     }
   };
 
-  // Geocodificação (Endereço -> Lat/Lng)
-  const handleSearch = async () => {
-    if (!searchTerm.trim()) return;
+  // Geocodificação (Endereço -> Lista de Sugestões)
+  const handleSearch = async (query: string) => {
+    if (!query.trim() || query.length < 3) {
+      setSearchResults([]);
+      setIsDropdownOpen(false);
+      return;
+    }
     setSearchLoading(true);
     try {
-      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchTerm)}&limit=1&countrycodes=br`);
-      const data = await response.json();
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&countrycodes=br`);
+      const data: SearchResult[] = await response.json();
       
-      if (data && data.length > 0) {
-        const { lat, lon } = data[0];
-        const newLat = parseFloat(lat);
-        const newLng = parseFloat(lon);
-        updateMarkerAndLocation(newLat, newLng);
-      } else {
-        alert('Endereço não encontrado. Tente ser mais específico.');
-      }
+      setSearchResults(data);
+      setIsDropdownOpen(true);
     } catch (error) {
       console.error("Erro na busca de endereço:", error);
-      alert('Erro ao conectar com o serviço de busca de endereço.');
+      setSearchResults([]);
     } finally {
       setSearchLoading(false);
     }
+  };
+
+  // Seleção de um resultado da busca
+  const handleSelectResult = (result: SearchResult) => {
+    const newLat = parseFloat(result.lat);
+    const newLng = parseFloat(result.lon);
+    updateMarkerAndLocation(newLat, newLng, result.display_name);
   };
 
   // Inicialização do Mapa
@@ -95,8 +111,8 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(mapInstanceRef.current);
 
-    // Adiciona o marcador inicial
-    updateMarkerAndLocation(defaultCenter[0], defaultCenter[1]);
+    // Adiciona o marcador inicial e faz a geocodificação reversa
+    updateMarkerAndLocation(defaultCenter[0], defaultCenter[1], currentAddress);
 
     return () => {
       if (mapInstanceRef.current) {
@@ -106,27 +122,54 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
     };
   }, []);
 
+  // Efeito para lidar com a busca ao digitar (simulando debounce)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (searchTerm && searchTerm !== currentAddress) {
+        handleSearch(searchTerm);
+      }
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm]);
+
+
   return (
     <div className="space-y-3">
       <div className="relative">
         <input 
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setIsDropdownOpen(true);
+          }}
+          onFocus={() => setIsDropdownOpen(true)}
+          onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)}
           className="block w-full pr-12 py-3 bg-white border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
           placeholder="Buscar endereço (Rua, Bairro, Cidade)..." 
           type="text" 
           disabled={searchLoading}
         />
-        <button 
-          onClick={handleSearch}
-          disabled={searchLoading}
-          className="absolute right-0 top-0 h-full px-3 text-pmmg-navy active:bg-pmmg-navy/10 rounded-r-lg transition-colors"
-        >
-          <span className={`material-symbols-outlined text-xl ${searchLoading ? 'animate-spin' : ''}`}>
-            {searchLoading ? 'progress_activity' : 'search'}
-          </span>
-        </button>
+        <span className={`material-symbols-outlined absolute right-3 top-1/2 transform -translate-y-1/2 text-pmmg-navy/40 text-xl ${searchLoading ? 'animate-spin' : ''}`}>
+          {searchLoading ? 'progress_activity' : 'search'}
+        </span>
+
+        {isDropdownOpen && searchResults.length > 0 && (
+          <div className="absolute z-20 w-full mt-1 bg-white border border-pmmg-navy/20 rounded-lg shadow-xl max-h-60 overflow-y-auto">
+            {searchResults.map((result, index) => (
+              <div
+                key={index}
+                onMouseDown={() => handleSelectResult(result)}
+                className="p-3 cursor-pointer hover:bg-pmmg-khaki/50 transition-colors border-b border-pmmg-navy/5 last:border-b-0"
+              >
+                <p className="text-sm font-medium text-pmmg-navy leading-tight">{result.display_name}</p>
+                <p className="text-[10px] text-slate-500 mt-0.5">Lat: {parseFloat(result.lat).toFixed(4)}, Lng: {parseFloat(result.lon).toFixed(4)}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="pmmg-card p-3">
