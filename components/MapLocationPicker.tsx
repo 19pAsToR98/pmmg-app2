@@ -26,8 +26,8 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
 
   const defaultCenter: [number, number] = initialLat && initialLng ? [initialLat, initialLng] : [-19.9167, -43.9345];
 
-  // Função para atualizar o estado e o marcador
-  const updateMarkerAndLocation = (lat: number, lng: number, address: string) => {
+  // Função para atualizar apenas o marcador (Lat/Lng)
+  const updateMarker = (lat: number, lng: number) => {
     if (mapInstanceRef.current) {
       const newLatLng = L.latLng(lat, lng);
       
@@ -44,23 +44,43 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
       // Centraliza o mapa
       mapInstanceRef.current.setView(newLatLng, 15);
       
-      setCurrentAddress(address);
-      onLocationChange(lat, lng, address);
-      setSearchTerm(address); // Atualiza o campo de busca com o endereço completo
+      // Limpa resultados e fecha dropdown
       setSearchResults([]);
       setIsDropdownOpen(false);
     }
   };
 
-  // Geocodificação Reversa (Lat/Lng -> Endereço)
+  // Geocodificação Reversa (Lat/Lng -> Endereço Curto)
   const reverseGeocode = async (lat: number, lng: number) => {
     try {
+      // Requesting addressdetails=1 to get structured address components
       const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
       const data = await response.json();
-      const address = data.display_name || 'Endereço não encontrado';
       
+      let address = data.display_name || 'Endereço não encontrado';
+      
+      // Attempt to construct a shorter address from structured data
+      if (data.address) {
+          const parts = [
+              data.address.road,
+              data.address.house_number,
+              data.address.neighbourhood,
+              data.address.city,
+              data.address.state
+          ].filter(Boolean);
+          
+          // Use a versão mais curta se disponível, priorizando rua, número, cidade, estado
+          if (parts.length > 0) {
+              address = parts.join(', ');
+          } else {
+              // Fallback para display_name se as partes estruturadas estiverem faltando
+              address = data.display_name;
+          }
+      }
+
       setCurrentAddress(address);
       onLocationChange(lat, lng, address);
+      setSearchTerm(address); // Atualiza o campo de busca com o endereço simplificado
     } catch (error) {
       console.error("Erro na geocodificação reversa:", error);
       setCurrentAddress('Erro ao buscar endereço.');
@@ -94,7 +114,10 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
   const handleSelectResult = (result: SearchResult) => {
     const newLat = parseFloat(result.lat);
     const newLng = parseFloat(result.lon);
-    updateMarkerAndLocation(newLat, newLng, result.display_name);
+    
+    updateMarker(newLat, newLng);
+    // Após definir o marcador, faz a geocodificação reversa para obter o endereço simplificado
+    reverseGeocode(newLat, newLng);
   };
 
   // Inicialização do Mapa
@@ -112,7 +135,8 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
     }).addTo(mapInstanceRef.current);
 
     // Adiciona o marcador inicial e faz a geocodificação reversa
-    updateMarkerAndLocation(defaultCenter[0], defaultCenter[1], currentAddress);
+    updateMarker(defaultCenter[0], defaultCenter[1]);
+    reverseGeocode(defaultCenter[0], defaultCenter[1]);
 
     return () => {
       if (mapInstanceRef.current) {
@@ -146,7 +170,7 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
             setIsDropdownOpen(true);
           }}
           onFocus={() => setIsDropdownOpen(true)}
-          onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)}
+          // Removemos o onBlur com timeout, pois o onMouseDown no item da lista previne o blur
           className="block w-full pr-12 py-3 bg-white border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
           placeholder="Buscar endereço (Rua, Bairro, Cidade)..." 
           type="text" 
@@ -161,7 +185,10 @@ const MapLocationPicker: React.FC<MapLocationPickerProps> = ({ initialLat, initi
             {searchResults.map((result, index) => (
               <div
                 key={index}
-                onMouseDown={() => handleSelectResult(result)}
+                onMouseDown={(e) => {
+                  e.preventDefault(); // Previne que o input perca o foco
+                  handleSelectResult(result);
+                }}
                 className="p-3 cursor-pointer hover:bg-pmmg-khaki/50 transition-colors border-b border-pmmg-navy/5 last:border-b-0"
               >
                 <p className="text-sm font-medium text-pmmg-navy leading-tight">{result.display_name}</p>
