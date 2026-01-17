@@ -61,47 +61,35 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
     setIsAddingMarker(false);
   };
 
+  // 1. Inicialização do Mapa (Roda apenas uma vez)
   useEffect(() => {
-    if (!mapContainerRef.current) return;
+    if (!mapContainerRef.current || mapInstanceRef.current) return;
 
     const fallbackPos: [number, number] = [-19.9167, -43.9345];
     const startPos = initialCenter || fallbackPos;
     
-    if (!mapInstanceRef.current) {
-      mapInstanceRef.current = L.map(mapContainerRef.current, {
-        center: startPos,
-        zoom: initialCenter ? 17 : 14,
-        zoomControl: false 
-      });
+    mapInstanceRef.current = L.map(mapContainerRef.current, {
+      center: startPos,
+      zoom: initialCenter ? 17 : 14,
+      zoomControl: false 
+    });
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap'
-      }).addTo(mapInstanceRef.current);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(mapInstanceRef.current);
 
-      markersLayerRef.current = L.layerGroup().addTo(mapInstanceRef.current);
-      customMarkersLayerRef.current = L.layerGroup().addTo(mapInstanceRef.current);
-      
-      mapInstanceRef.current.on('click', handleMapClick);
-    }
+    markersLayerRef.current = L.layerGroup().addTo(mapInstanceRef.current);
+    customMarkersLayerRef.current = L.layerGroup().addTo(mapInstanceRef.current);
 
-    // Cleanup function for map click listener
-    return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.off('click', handleMapClick);
-      }
-    };
-  }, [isAddingMarker]); // Dependência para garantir que o listener de clique seja reconfigurado se o modo mudar
-
-  useEffect(() => {
-    // Localização do usuário (executa apenas uma vez)
-    if (navigator.geolocation && !userPos && mapInstanceRef.current) {
+    // Localização do usuário
+    if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
           setUserPos([latitude, longitude]);
           
-          if (!initialCenter) {
-            mapInstanceRef.current!.setView([latitude, longitude], 15);
+          if (!initialCenter && mapInstanceRef.current) {
+            mapInstanceRef.current.setView([latitude, longitude], 15);
           }
           
           const officerIcon = L.divIcon({
@@ -114,80 +102,104 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         }
       );
     }
-  }, [userPos, initialCenter]);
 
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, []);
+
+  // 2. Gerenciamento do Listener de Clique (Depende de isAddingMarker)
   useEffect(() => {
-    // Atualizar marcadores de Suspeitos
-    if (markersLayerRef.current) {
-      markersLayerRef.current.clearLayers();
-      
-      filteredSuspects.forEach(suspect => {
-        if (suspect.lat && suspect.lng) {
-          const iconColorClass = suspect.status === 'Foragido' ? 'bg-pmmg-red' : 
-                               suspect.status === 'Suspeito' ? 'bg-pmmg-yellow' : 'bg-slate-600';
-          
-          const suspectIcon = L.divIcon({
-            className: 'custom-suspect-icon',
-            html: `<div class="w-10 h-10 ${iconColorClass} rounded-lg border-2 border-pmmg-navy flex items-center justify-center shadow-lg transform rotate-45"><span class="material-symbols-outlined text-pmmg-navy text-[20px] transform -rotate-45">priority_high</span></div>`,
-            iconSize: [40, 40],
-            iconAnchor: [20, 20]
-          });
+    const map = mapInstanceRef.current;
+    if (!map) return;
 
-          const marker = L.marker([suspect.lat, suspect.lng], { icon: suspectIcon }).addTo(markersLayerRef.current!);
-          
-          const popupContent = document.createElement('div');
-          popupContent.className = "p-2 min-w-[150px]";
-          popupContent.innerHTML = `
-            <div class="flex items-center gap-2 mb-2">
-              <div class="w-10 h-10 rounded bg-slate-200 overflow-hidden"><img src="${suspect.photoUrl}" class="w-full h-full object-cover"></div>
-              <div>
-                <p class="font-bold text-[10px] text-pmmg-navy uppercase leading-tight">${suspect.name}</p>
-                <p class="text-[9px] text-slate-500 font-bold uppercase">${suspect.status}</p>
-              </div>
-            </div>
-            <button id="btn-${suspect.id}" class="w-full bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider">Ver Ficha</button>
-          `;
-
-          marker.bindPopup(popupContent);
-          
-          marker.on('popupopen', () => {
-            document.getElementById(`btn-${suspect.id}`)?.addEventListener('click', () => {
-              onOpenProfile(suspect.id);
-            });
-          });
-
-          if (initialCenter && initialCenter[0] === suspect.lat && initialCenter[1] === suspect.lng) {
-            marker.openPopup();
-          }
-        }
-      });
+    if (isAddingMarker) {
+      map.on('click', handleMapClick);
+    } else {
+      map.off('click', handleMapClick);
     }
-  }, [filteredSuspects, initialCenter, activeFilter]);
 
+    return () => {
+      map.off('click', handleMapClick);
+    };
+  }, [isAddingMarker]);
+
+
+  // 3. Atualização de Marcadores de Suspeitos (Depende de filteredSuspects)
   useEffect(() => {
-    // Atualizar Marcadores Personalizados
-    if (customMarkersLayerRef.current) {
-      customMarkersLayerRef.current.clearLayers();
-
-      customMarkers.forEach(markerData => {
-        const customIcon = L.divIcon({
-          className: 'custom-marker-icon',
-          html: `<div class="w-8 h-8 ${markerData.color} rounded-full border-2 border-white flex items-center justify-center shadow-lg"><span class="material-symbols-outlined text-white text-[16px] fill-icon">${markerData.icon}</span></div>`,
-          iconSize: [32, 32],
-          iconAnchor: [16, 16]
+    if (!markersLayerRef.current) return;
+    
+    markersLayerRef.current.clearLayers();
+    
+    filteredSuspects.forEach(suspect => {
+      if (suspect.lat && suspect.lng) {
+        const iconColorClass = suspect.status === 'Foragido' ? 'bg-pmmg-red' : 
+                             suspect.status === 'Suspeito' ? 'bg-pmmg-yellow' : 'bg-slate-600';
+        
+        const suspectIcon = L.divIcon({
+          className: 'custom-suspect-icon',
+          html: `<div class="w-10 h-10 ${iconColorClass} rounded-lg border-2 border-pmmg-navy flex items-center justify-center shadow-lg transform rotate-45"><span class="material-symbols-outlined text-pmmg-navy text-[20px] transform -rotate-45">priority_high</span></div>`,
+          iconSize: [40, 40],
+          iconAnchor: [20, 20]
         });
 
-        const marker = L.marker([markerData.lat, markerData.lng], { icon: customIcon }).addTo(customMarkersLayerRef.current!);
+        const marker = L.marker([suspect.lat, suspect.lng], { icon: suspectIcon }).addTo(markersLayerRef.current!);
         
-        const popupContent = `
-          <div class="p-2 min-w-[150px]">
-            <p class="font-bold text-[11px] text-pmmg-navy uppercase leading-tight">${markerData.title}</p>
-            <p class="text-[10px] text-slate-600 mt-1">${markerData.description}</p>
+        const popupContent = document.createElement('div');
+        popupContent.className = "p-2 min-w-[150px]";
+        popupContent.innerHTML = `
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-10 h-10 rounded bg-slate-200 overflow-hidden"><img src="${suspect.photoUrl}" class="w-full h-full object-cover"></div>
+            <div>
+              <p class="font-bold text-[10px] text-pmmg-navy uppercase leading-tight">${suspect.name}</p>
+              <p class="text-[9px] text-slate-500 font-bold uppercase">${suspect.status}</p>
+            </div>
           </div>
+          <button id="btn-${suspect.id}" class="w-full bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider">Ver Ficha</button>
         `;
+
         marker.bindPopup(popupContent);
+        
+        marker.on('popupopen', () => {
+          document.getElementById(`btn-${suspect.id}`)?.addEventListener('click', () => {
+            onOpenProfile(suspect.id);
+          });
+        });
+
+        if (initialCenter && suspect.lat === initialCenter[0] && suspect.lng === initialCenter[1]) {
+          marker.openPopup();
+        }
+      }
+    });
+  }, [filteredSuspects, initialCenter, activeFilter, onOpenProfile]);
+
+  // 4. Atualização de Marcadores Personalizados (Depende de customMarkers)
+  useEffect(() => {
+    if (!customMarkersLayerRef.current) return;
+    
+    customMarkersLayerRef.current.clearLayers();
+
+    customMarkers.forEach(markerData => {
+      const customIcon = L.divIcon({
+        className: 'custom-marker-icon',
+        html: `<div class="w-8 h-8 ${markerData.color} rounded-full border-2 border-white flex items-center justify-center shadow-lg"><span class="material-symbols-outlined text-white text-[16px] fill-icon">${markerData.icon}</span></div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
       });
-    }
+
+      const marker = L.marker([markerData.lat, markerData.lng], { icon: customIcon }).addTo(customMarkersLayerRef.current!);
+      
+      const popupContent = `
+        <div class="p-2 min-w-[150px]">
+          <p class="font-bold text-[11px] text-pmmg-navy uppercase leading-tight">${markerData.title}</p>
+          <p class="text-[10px] text-slate-600 mt-1">${markerData.description}</p>
+        </div>
+      `;
+      marker.bindPopup(popupContent);
+    });
   }, [customMarkers]);
 
   const recenter = () => {
@@ -248,7 +260,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           <div className="bg-pmmg-navy/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-lg border border-pmmg-yellow/30 flex items-center gap-3">
             <div className="flex flex-col">
               <span className="text-[8px] font-bold text-pmmg-yellow uppercase tracking-[0.2em]">Monitoramento</span>
-              <span className="text-[10px] font-black text-white uppercase">{filteredSuspects.length} Alvos na Região</span>
+              <span className="text-[10px] font-black text-white uppercase">{filteredSuspects.length + customMarkers.length} Alvos/Pontos Táticos</span>
             </div>
             <div className="h-6 w-px bg-white/20"></div>
             <span className="text-pmmg-yellow material-symbols-outlined text-sm animate-pulse">radar</span>
