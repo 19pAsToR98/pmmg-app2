@@ -108,6 +108,16 @@ const App: React.FC = () => {
     setCustomMarkers(prev => [...prev, marker]);
   };
 
+  const updateCustomMarker = (updatedMarker: CustomMarker) => {
+    setCustomMarkers(prev => 
+      prev.map(m => (m.id === updatedMarker.id ? updatedMarker : m))
+    );
+  };
+
+  const deleteCustomMarker = (id: string) => {
+    setCustomMarkers(prev => prev.filter(m => m.id !== id));
+  };
+
   const openProfile = (id: string) => {
     setSelectedSuspectId(id);
     setCurrentScreen('profile');
@@ -133,7 +143,18 @@ const App: React.FC = () => {
           onRankChange={setUserRank}
         />
       )}
-      {currentScreen === 'map' && <TacticalMap navigateTo={navigateTo} suspects={suspects} onOpenProfile={openProfile} initialCenter={mapCenter} customMarkers={customMarkers} addCustomMarker={addCustomMarker} />}
+      {currentScreen === 'map' && (
+        <TacticalMap 
+          navigateTo={navigateTo} 
+          suspects={suspects} 
+          onOpenProfile={openProfile} 
+          initialCenter={mapCenter} 
+          customMarkers={customMarkers} 
+          addCustomMarker={addCustomMarker} 
+          updateCustomMarker={updateCustomMarker}
+          deleteCustomMarker={deleteCustomMarker}
+        />
+      )}
     </div>
   );
 };

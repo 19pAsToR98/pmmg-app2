@@ -10,11 +10,13 @@ interface TacticalMapProps {
   initialCenter?: [number, number] | null;
   customMarkers: CustomMarker[];
   addCustomMarker: (marker: CustomMarker) => void;
+  updateCustomMarker: (marker: CustomMarker) => void;
+  deleteCustomMarker: (id: string) => void;
 }
 
 type MapFilter = 'Todos' | 'Foragido' | 'Suspeito' | 'Preso' | 'CPF Cancelado';
 
-const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenProfile, initialCenter, customMarkers, addCustomMarker }) => {
+const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenProfile, initialCenter, customMarkers, addCustomMarker, updateCustomMarker, deleteCustomMarker }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
@@ -23,7 +25,8 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   const [userPos, setUserPos] = useState<[number, number] | null>(null);
   const [activeFilter, setActiveFilter] = useState<MapFilter>('Todos');
   const [isAddingMarker, setIsAddingMarker] = useState(false);
-  const [newMarkerData, setNewMarkerData] = useState<{ lat: number, lng: number, title: string, description: string, icon: string, color: string } | null>(null);
+  const [newMarkerData, setNewMarkerData] = useState<Omit<CustomMarker, 'id'> | null>(null);
+  const [editingMarker, setEditingMarker] = useState<CustomMarker | null>(null);
 
   // Filtragem dos suspeitos
   const filteredSuspects = suspects.filter(s => 
@@ -50,15 +53,31 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       const marker: CustomMarker = {
         ...newMarkerData,
         id: Date.now().toString(),
-      };
+      } as CustomMarker; // Casting para garantir que o tipo está correto
       addCustomMarker(marker);
       setNewMarkerData(null);
+    }
+  };
+
+  const handleSaveEditMarker = () => {
+    if (editingMarker) {
+      updateCustomMarker(editingMarker);
+      setEditingMarker(null);
     }
   };
 
   const handleCancelNewMarker = () => {
     setNewMarkerData(null);
     setIsAddingMarker(false);
+    setEditingMarker(null);
+  };
+
+  const handleDeleteMarker = (id: string) => {
+    if (window.confirm("Tem certeza que deseja excluir este ponto tático?")) {
+      deleteCustomMarker(id);
+      // Fechar o popup se estiver aberto
+      mapInstanceRef.current?.closePopup();
+    }
   };
 
   // 1. Inicialização do Mapa (Roda apenas uma vez)
@@ -118,11 +137,9 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
 
     if (isAddingMarker) {
       map.on('click', handleMapClick);
-      // Altera o cursor do mapa
       map.getContainer().style.cursor = 'crosshair';
     } else {
       map.off('click', handleMapClick);
-      // Restaura o cursor padrão
       map.getContainer().style.cursor = '';
     }
 
@@ -197,13 +214,34 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
 
       const marker = L.marker([markerData.lat, markerData.lng], { icon: customIcon }).addTo(customMarkersLayerRef.current!);
       
-      const popupContent = `
+      const popupContent = document.createElement('div');
+      popupContent.className = "p-2 min-w-[150px]";
+      popupContent.innerHTML = `
         <div class="p-2 min-w-[150px]">
           <p class="font-bold text-[11px] text-pmmg-navy uppercase leading-tight">${markerData.title}</p>
           <p class="text-[10px] text-slate-600 mt-1">${markerData.description}</p>
+          <div class="flex gap-2 mt-3">
+            <button id="edit-btn-${markerData.id}" class="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center gap-1">
+              <span class="material-symbols-outlined text-sm">edit</span> Editar
+            </button>
+            <button id="delete-btn-${markerData.id}" class="px-3 bg-pmmg-red text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center">
+              <span class="material-symbols-outlined text-sm">delete</span>
+            </button>
+          </div>
         </div>
       `;
+      
       marker.bindPopup(popupContent);
+
+      marker.on('popupopen', () => {
+        document.getElementById(`edit-btn-${markerData.id}`)?.addEventListener('click', () => {
+          setEditingMarker(markerData);
+          mapInstanceRef.current?.closePopup();
+        });
+        document.getElementById(`delete-btn-${markerData.id}`)?.addEventListener('click', () => {
+          handleDeleteMarker(markerData.id);
+        });
+      });
     });
   }, [customMarkers]);
 
@@ -212,6 +250,10 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       mapInstanceRef.current.setView(userPos, 16);
     }
   };
+
+  // Determina qual modal de configuração exibir (Novo ou Edição)
+  const activeMarkerData = newMarkerData || editingMarker;
+  const isEditing = !!editingMarker;
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
@@ -230,7 +272,8 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             <button 
               onClick={() => {
                 setIsAddingMarker(prev => !prev);
-                setNewMarkerData(null); // Limpa dados se estiver voltando
+                setNewMarkerData(null); 
+                setEditingMarker(null);
               }}
               className={`p-2 rounded-full border transition-all ${isAddingMarker ? 'bg-pmmg-red text-white border-pmmg-red shadow-lg' : 'bg-white/10 text-white border-white/20'}`}
             >
@@ -284,38 +327,60 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           </div>
         )}
 
-        {/* New Marker Configuration Modal */}
-        {newMarkerData && (
+        {/* Marker Configuration Modal (New or Edit) */}
+        {activeMarkerData && (
           <div className="absolute inset-0 z-[1002] bg-black/50 flex items-center justify-center p-4">
             <div className="bg-white p-5 rounded-xl shadow-2xl w-full max-w-sm">
-              <h3 className="text-lg font-bold text-pmmg-navy uppercase mb-4 border-b pb-2">Configurar Marcador</h3>
+              <h3 className="text-lg font-bold text-pmmg-navy uppercase mb-4 border-b pb-2">
+                {isEditing ? 'Editar Marcador Tático' : 'Configurar Novo Marcador'}
+              </h3>
               
               <div className="space-y-3">
                 <div>
                   <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1">Título</label>
                   <input 
-                    value={newMarkerData.title}
-                    onChange={(e) => setNewMarkerData({...newMarkerData, title: e.target.value})}
+                    value={activeMarkerData.title}
+                    onChange={(e) => {
+                      const newTitle = e.target.value;
+                      if (isEditing) {
+                        setEditingMarker(prev => prev ? {...prev, title: newTitle} : null);
+                      } else {
+                        setNewMarkerData(prev => prev ? {...prev, title: newTitle} : null);
+                      }
+                    }}
                     className="w-full px-3 py-2 border rounded-lg text-sm"
                   />
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1">Descrição</label>
                   <textarea 
-                    value={newMarkerData.description}
-                    onChange={(e) => setNewMarkerData({...newMarkerData, description: e.target.value})}
+                    value={activeMarkerData.description}
+                    onChange={(e) => {
+                      const newDescription = e.target.value;
+                      if (isEditing) {
+                        setEditingMarker(prev => prev ? {...prev, description: newDescription} : null);
+                      } else {
+                        setNewMarkerData(prev => prev ? {...prev, description: newDescription} : null);
+                      }
+                    }}
                     rows={2}
                     className="w-full px-3 py-2 border rounded-lg text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1">Ícone ({newMarkerData.icon})</label>
+                  <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1">Ícone ({activeMarkerData.icon})</label>
                   <div className="flex gap-2 overflow-x-auto pb-2">
                     {['flag', 'warning', 'shield', 'camera', 'bolt', 'visibility'].map(icon => (
                       <button 
                         key={icon}
-                        onClick={() => setNewMarkerData({...newMarkerData, icon})}
-                        className={`p-2 rounded-lg border transition-all ${newMarkerData.icon === icon ? 'bg-pmmg-navy text-pmmg-yellow border-pmmg-yellow' : 'bg-slate-100 text-pmmg-navy/50'}`}
+                        onClick={() => {
+                          if (isEditing) {
+                            setEditingMarker(prev => prev ? {...prev, icon} : null);
+                          } else {
+                            setNewMarkerData(prev => prev ? {...prev, icon} : null);
+                          }
+                        }}
+                        className={`p-2 rounded-lg border transition-all ${activeMarkerData.icon === icon ? 'bg-pmmg-navy text-pmmg-yellow border-pmmg-yellow' : 'bg-slate-100 text-pmmg-navy/50'}`}
                       >
                         <span className="material-symbols-outlined text-xl">{icon}</span>
                       </button>
@@ -328,8 +393,15 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                     {[{c: 'bg-pmmg-gold', v: 'pmmg-gold'}, {c: 'bg-pmmg-red', v: 'pmmg-red'}, {c: 'bg-pmmg-blue', v: 'pmmg-blue'}, {c: 'bg-green-500', v: 'green-500'}].map(color => (
                       <button 
                         key={color.v}
-                        onClick={() => setNewMarkerData({...newMarkerData, color: `bg-${color.v}`})}
-                        className={`w-8 h-8 rounded-full border-2 transition-all ${color.c} ${newMarkerData.color === `bg-${color.v}` ? 'ring-4 ring-offset-2 ring-pmmg-navy' : 'border-white'}`}
+                        onClick={() => {
+                          const newColor = `bg-${color.v}`;
+                          if (isEditing) {
+                            setEditingMarker(prev => prev ? {...prev, color: newColor} : null);
+                          } else {
+                            setNewMarkerData(prev => prev ? {...prev, color: newColor} : null);
+                          }
+                        }}
+                        className={`w-8 h-8 rounded-full border-2 transition-all ${color.c} ${activeMarkerData.color === `bg-${color.v}` ? 'ring-4 ring-offset-2 ring-pmmg-navy' : 'border-white'}`}
                       ></button>
                     ))}
                   </div>
@@ -344,10 +416,10 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                   Cancelar
                 </button>
                 <button 
-                  onClick={handleSaveNewMarker}
+                  onClick={isEditing ? handleSaveEditMarker : handleSaveNewMarker}
                   className="flex-1 bg-pmmg-navy text-white font-bold py-3 rounded-xl text-xs uppercase"
                 >
-                  Salvar Ponto
+                  {isEditing ? 'Salvar Edição' : 'Salvar Ponto'}
                 </button>
               </div>
             </div>
