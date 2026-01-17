@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Screen, Suspect } from '../types';
 import BottomNav from '../components/BottomNav';
+import MapLocationPicker from '../components/MapLocationPicker';
 
 interface SuspectRegistryProps {
   navigateTo: (screen: Screen) => void;
@@ -18,7 +19,10 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
   const [currentArticle, setCurrentArticle] = useState('');
   const [articles, setArticles] = useState<string[]>([]);
   const [photos, setPhotos] = useState<string[]>([]);
-  const [showOnMap, setShowOnMap] = useState(true); // Novo estado para controle do mapa
+  const [showOnMap, setShowOnMap] = useState(true);
+  const [lat, setLat] = useState<number | undefined>(undefined);
+  const [lng, setLng] = useState<number | undefined>(undefined);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddArticle = () => {
@@ -53,6 +57,11 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
     fileInputRef.current?.click();
   };
 
+  const handleLocationChange = (newLat: number, newLng: number) => {
+    setLat(newLat);
+    setLng(newLng);
+  };
+
   const handleSave = () => {
     if (!name || !cpf) {
       alert("Nome e CPF são obrigatórios.");
@@ -60,10 +69,6 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
     }
 
     const primaryPhoto = photos.length > 0 ? photos[0] : `https://picsum.photos/seed/${name}/200/250`;
-
-    // Mocking lat/lng for new suspects for map functionality
-    const newLat = -19.9 + (Math.random() * 0.05 - 0.025);
-    const newLng = -43.9 + (Math.random() * 0.05 - 0.025);
 
     const newSuspect: Suspect = {
       id: Date.now().toString(),
@@ -79,9 +84,9 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
       motherName,
       articles,
       description,
-      lat: newLat,
-      lng: newLng,
-      showOnMap: showOnMap, // Incluindo a nova propriedade
+      lat: lat,
+      lng: lng,
+      showOnMap: showOnMap,
     };
 
     onSave(newSuspect);
@@ -184,8 +189,20 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
           ))}
         </div>
         
-        {/* NEW: Map Visibility Toggle */}
-        <div className="mt-6 pmmg-card p-4 flex items-center justify-between">
+        {/* Localização no Mapa */}
+        <div className="flex items-center gap-2 mb-4 mt-8">
+          <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
+          <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Localização Conhecida</h3>
+        </div>
+        
+        <MapLocationPicker 
+          initialLat={lat}
+          initialLng={lng}
+          onLocationChange={handleLocationChange}
+        />
+
+        {/* Map Visibility Toggle */}
+        <div className="mt-4 pmmg-card p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="material-symbols-outlined text-pmmg-navy">map</span>
             <div>
