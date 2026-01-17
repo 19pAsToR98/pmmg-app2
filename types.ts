@@ -1,4 +1,4 @@
-export type Screen = 'onboarding' | 'dashboard' | 'registry' | 'profile' | 'chatList' | 'chatRoom' | 'aiTools' | 'requestAccess' | 'profileSettings' | 'map';
+export type Screen = 'onboarding' | 'dashboard' | 'registry' | 'profile' | 'chatList' | 'chatRoom' | 'aiTools' | 'requestAccess' | 'profileSettings' | 'map' | 'contacts';
 
 export type UserRank = 'Soldado' | 'Cabo' | '3º Sargento' | '2º Sargento' | '1º Sargento' | 'Subtenente';
 
@@ -57,6 +57,14 @@ export interface ChatMessage {
     description: string;
     image: string;
   };
+}
+
+export type ContactStatus = 'Pending' | 'Accepted' | 'Blocked';
+
+export interface Contact {
+  officerId: string;
+  status: ContactStatus;
+  isRequester: boolean; // True if the current user sent the request
 }
 
 export interface Officer {
