@@ -1,16 +1,13 @@
 import React, { useState, useRef } from 'react';
-import { Screen, Suspect, Vehicle, Association } from '../types';
+import { Screen, Suspect } from '../types';
 import BottomNav from '../components/BottomNav';
-import SuspectAssociationSelector from '../components/SuspectAssociationSelector';
-import MapLocationPicker from '../components/MapLocationPicker';
 
 interface SuspectRegistryProps {
   navigateTo: (screen: Screen) => void;
   onSave: (suspect: Suspect) => void;
-  existingSuspects: Suspect[];
 }
 
-const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, existingSuspects }) => {
+const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave }) => {
   const [status, setStatus] = useState<Suspect['status']>('Suspeito');
   const [name, setName] = useState('');
   const [cpf, setCpf] = useState('');
@@ -21,31 +18,8 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, e
   const [currentArticle, setCurrentArticle] = useState('');
   const [articles, setArticles] = useState<string[]>([]);
   const [photos, setPhotos] = useState<string[]>([]);
-  const [showOnMap, setShowOnMap] = useState(true);
-  
-  // Estados para Localização
-  const [lat, setLat] = useState<number | undefined>(undefined);
-  const [lng, setLng] = useState<number | undefined>(undefined);
-  const [lastSeenAddress, setLastSeenAddress] = useState('Localização não definida');
-
-  // Estados para Veículos
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [currentVehiclePlate, setCurrentVehiclePlate] = useState('');
-  const [currentVehicleModel, setCurrentVehicleModel] = useState('');
-  const [currentVehicleColor, setCurrentVehicleColor] = useState('');
-
-  // Estados para Associações
-  const [associations, setAssociations] = useState<Association[]>([]);
-  const [currentAssociationId, setCurrentAssociationId] = useState('');
-  const [currentRelationship, setCurrentRelationship] = useState('');
-
+  const [showOnMap, setShowOnMap] = useState(true); // Novo estado para controle do mapa
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleLocationChange = (newLat: number, newLng: number, address: string) => {
-    setLat(newLat);
-    setLng(newLng);
-    setLastSeenAddress(address);
-  };
 
   const handleAddArticle = () => {
     if (currentArticle.trim()) {
@@ -56,52 +30,6 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, e
 
   const handleRemoveArticle = (index: number) => {
     setArticles(articles.filter((_, i) => i !== index));
-  };
-
-  const handleAddVehicle = () => {
-    if (currentVehiclePlate.trim() && currentVehicleModel.trim()) {
-      const newVehicle: Vehicle = {
-        plate: currentVehiclePlate.trim().toUpperCase(),
-        model: currentVehicleModel.trim(),
-        color: currentVehicleColor.trim() || 'Não Informado',
-      };
-      setVehicles([...vehicles, newVehicle]);
-      setCurrentVehiclePlate('');
-      setCurrentVehicleModel('');
-      setCurrentVehicleColor('');
-    }
-  };
-
-  const handleRemoveVehicle = (index: number) => {
-    setVehicles(vehicles.filter((_, i) => i !== index));
-  };
-
-  const handleAddAssociation = () => {
-    if (currentAssociationId && currentRelationship.trim()) {
-      // Evita associar a si mesmo (se o ID do novo suspeito fosse conhecido)
-      // E evita duplicatas
-      const existingAssociation = associations.find(a => a.suspectId === currentAssociationId);
-      if (existingAssociation) {
-        alert('Este indivíduo já está associado.');
-        return;
-      }
-
-      const newAssociation: Association = {
-        suspectId: currentAssociationId,
-        relationship: currentRelationship.trim(),
-      };
-      setAssociations([...associations, newAssociation]);
-      setCurrentAssociationId('');
-      setCurrentRelationship('');
-    }
-  };
-
-  const handleRemoveAssociation = (index: number) => {
-    setAssociations(associations.filter((_, i) => i !== index));
-  };
-
-  const getSuspectNameById = (id: string) => {
-    return existingSuspects.find(s => s.id === id)?.name || `ID Desconhecido (${id})`;
   };
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -130,17 +58,12 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, e
       alert("Nome e CPF são obrigatórios.");
       return;
     }
-    
-    if (showOnMap && (!lat || !lng)) {
-        alert("Se a exibição no mapa está ativa, defina a localização.");
-        return;
-    }
 
     const primaryPhoto = photos.length > 0 ? photos[0] : `https://picsum.photos/seed/${name}/200/250`;
 
-    // Se a localização não foi definida manualmente, usamos um mock padrão
-    const finalLat = lat ?? -19.9167;
-    const finalLng = lng ?? -43.9345;
+    // Mocking lat/lng for new suspects for map functionality
+    const newLat = -19.9 + (Math.random() * 0.05 - 0.025);
+    const newLng = -43.9 + (Math.random() * 0.05 - 0.025);
 
     const newSuspect: Suspect = {
       id: Date.now().toString(),
@@ -148,7 +71,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, e
       nickname,
       cpf,
       status,
-      lastSeen: lastSeenAddress,
+      lastSeen: 'Local do Registro',
       timeAgo: 'Agora',
       photoUrl: primaryPhoto,
       photoUrls: photos.length > 0 ? photos : [primaryPhoto],
@@ -156,11 +79,9 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, e
       motherName,
       articles,
       description,
-      lat: finalLat,
-      lng: finalLng,
-      showOnMap: showOnMap,
-      vehicles: vehicles,
-      associations: associations,
+      lat: newLat,
+      lng: newLng,
+      showOnMap: showOnMap, // Incluindo a nova propriedade
     };
 
     onSave(newSuspect);
@@ -263,7 +184,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, e
           ))}
         </div>
         
-        {/* Map Visibility Toggle */}
+        {/* NEW: Map Visibility Toggle */}
         <div className="mt-6 pmmg-card p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="material-symbols-outlined text-pmmg-navy">map</span>
@@ -279,22 +200,6 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, e
             <span className={`absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform shadow-md ${showOnMap ? 'translate-x-6' : 'translate-x-0'}`}></span>
           </button>
         </div>
-        
-        {/* Seção de Localização */}
-        {showOnMap && (
-            <div className="mt-8">
-                <div className="flex items-center gap-2 mb-4">
-                    <div className="h-4 w-1 bg-pmmg-gold rounded-full"></div>
-                    <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Localização (Último Visto)</h3>
-                </div>
-                <MapLocationPicker 
-                    initialLat={lat}
-                    initialLng={lng}
-                    onLocationChange={handleLocationChange}
-                />
-            </div>
-        )}
-
 
         <div className="flex items-center gap-2 mb-4 mt-8">
           <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
@@ -368,71 +273,6 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, e
           </div>
         </div>
 
-        {/* Seção de Veículos */}
-        <div className="flex items-center gap-2 mb-4 mt-8">
-          <div className="h-4 w-1 bg-pmmg-yellow rounded-full"></div>
-          <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Veículos Cadastrados</h3>
-        </div>
-
-        <div className="space-y-3 mb-4">
-          {vehicles.map((vehicle, idx) => (
-            <div key={idx} className="flex items-center justify-between p-3 bg-white/70 border border-pmmg-navy/10 rounded-lg shadow-sm">
-              <div>
-                <p className="text-sm font-bold text-pmmg-navy">{vehicle.plate}</p>
-                <p className="text-[10px] text-slate-600">{vehicle.model} ({vehicle.color})</p>
-              </div>
-              <button 
-                onClick={() => handleRemoveVehicle(idx)}
-                className="text-pmmg-red p-1 rounded-full hover:bg-pmmg-red/10"
-              >
-                <span className="material-symbols-outlined text-lg">delete</span>
-              </button>
-            </div>
-          ))}
-        </div>
-
-        <div className="pmmg-card p-4 space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Placa</label>
-              <input 
-                value={currentVehiclePlate}
-                onChange={(e) => setCurrentVehiclePlate(e.target.value)}
-                className="block w-full px-3 py-2 bg-white border border-pmmg-navy/20 rounded-lg text-xs uppercase" 
-                placeholder="ABC-1234" 
-                type="text" 
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Modelo</label>
-              <input 
-                value={currentVehicleModel}
-                onChange={(e) => setCurrentVehicleModel(e.target.value)}
-                className="block w-full px-3 py-2 bg-white border border-pmmg-navy/20 rounded-lg text-xs" 
-                placeholder="Ex: Fiat Uno" 
-                type="text" 
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Cor</label>
-            <input 
-              value={currentVehicleColor}
-              onChange={(e) => setCurrentVehicleColor(e.target.value)}
-              className="block w-full px-3 py-2 bg-white border border-pmmg-navy/20 rounded-lg text-xs" 
-              placeholder="Ex: Cinza" 
-              type="text" 
-            />
-          </div>
-          <button 
-            onClick={handleAddVehicle}
-            className="w-full bg-pmmg-navy text-white text-[10px] font-bold py-2 rounded-lg uppercase flex items-center justify-center gap-2"
-          >
-            <span className="material-symbols-outlined text-lg">add_circle</span> Adicionar Veículo
-          </button>
-        </div>
-
-        {/* Seção de Artigos Criminais */}
         <div className="flex items-center gap-2 mb-4 mt-8">
           <div className="h-4 w-1 bg-pmmg-red rounded-full"></div>
           <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Artigos Criminais</h3>
@@ -461,56 +301,6 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, e
             Adicionar
           </button>
         </div>
-        
-        {/* Seção de Ligações/Associações */}
-        <div className="flex items-center gap-2 mb-4 mt-8">
-          <div className="h-4 w-1 bg-pmmg-blue rounded-full"></div>
-          <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Ligações e Associações</h3>
-        </div>
-        
-        <div className="space-y-3 mb-4">
-          {associations.map((assoc, idx) => (
-            <div key={idx} className="flex items-center justify-between p-3 bg-white/70 border border-pmmg-navy/10 rounded-lg shadow-sm">
-              <div>
-                <p className="text-sm font-bold text-pmmg-navy">{getSuspectNameById(assoc.suspectId)}</p>
-                <p className="text-[10px] text-slate-600 font-semibold">Relacionamento: {assoc.relationship}</p>
-              </div>
-              <button 
-                onClick={() => handleRemoveAssociation(idx)}
-                className="text-pmmg-red p-1 rounded-full hover:bg-pmmg-red/10"
-              >
-                <span className="material-symbols-outlined text-lg">delete</span>
-              </button>
-            </div>
-          ))}
-        </div>
-
-        <div className="pmmg-card p-4 space-y-3">
-          <SuspectAssociationSelector
-            existingSuspects={existingSuspects}
-            onSelect={setCurrentAssociationId}
-            currentAssociationId={currentAssociationId}
-          />
-          
-          <div>
-            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Tipo de Ligação</label>
-            <input 
-              value={currentRelationship}
-              onChange={(e) => setCurrentRelationship(e.target.value)}
-              className="block w-full px-4 py-3 bg-white border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
-              placeholder="Ex: Cúmplice, Familiar, Contato" 
-              type="text" 
-            />
-          </div>
-          <button 
-            onClick={handleAddAssociation}
-            className="w-full bg-pmmg-navy text-white text-[10px] font-bold py-2 rounded-lg uppercase flex items-center justify-center gap-2"
-            disabled={!currentAssociationId || !currentRelationship.trim()}
-          >
-            <span className="material-symbols-outlined text-lg">link</span> Adicionar Ligação
-          </button>
-        </div>
-
 
         <div className="mt-10 mb-8">
           <button 

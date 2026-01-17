@@ -129,7 +129,7 @@ const App: React.FC = () => {
     <div className="flex flex-col h-screen max-w-md mx-auto relative overflow-hidden bg-pmmg-khaki">
       {currentScreen === 'onboarding' && <Onboarding onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />}
       {currentScreen === 'dashboard' && <Dashboard navigateTo={navigateTo} onOpenProfile={openProfile} suspects={suspects} />}
-      {currentScreen === 'registry' && <SuspectRegistry navigateTo={navigateTo} onSave={addSuspect} existingSuspects={suspects} />}
+      {currentScreen === 'registry' && <SuspectRegistry navigateTo={navigateTo} onSave={addSuspect} />}
       {currentScreen === 'profile' && <SuspectProfile suspect={selectedSuspect} onBack={() => navigateTo('dashboard')} navigateTo={navigateTo} allSuspects={suspects} onOpenProfile={openProfile} />}
       {currentScreen === 'chatList' && <TacticalChatList navigateTo={navigateTo} />}
       {currentScreen === 'chatRoom' && <TacticalChatRoom onBack={() => navigateTo('chatList')} />}
