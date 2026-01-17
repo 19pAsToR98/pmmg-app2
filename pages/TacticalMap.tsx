@@ -26,6 +26,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, pois, o
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newPOICoords, setNewPOICoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [isAddingPOI, setIsAddingPOI] = useState(false); // Novo estado para o modo de adição
 
   // Filtragem dos suspeitos com base no estado do filtro
   const filteredSuspects = suspects.filter(s => 
@@ -87,8 +88,11 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, pois, o
 
       // Adicionar listener para clique no mapa para adicionar POI
       mapInstanceRef.current.on('click', (e: L.LeafletMouseEvent) => {
-        setNewPOICoords({ lat: e.latlng.lat, lng: e.latlng.lng });
-        setIsModalOpen(true);
+        if (isAddingPOI) {
+          setNewPOICoords({ lat: e.latlng.lat, lng: e.latlng.lng });
+          setIsModalOpen(true);
+          setIsAddingPOI(false); // Sai do modo de adição após o clique
+        }
       });
     }
 
@@ -200,12 +204,17 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, pois, o
       });
     }
 
-  }, [filteredSuspects, initialCenter, activeFilter, pois]);
+  }, [filteredSuspects, initialCenter, activeFilter, pois, isAddingPOI]);
 
   const recenter = () => {
     if (userPos && mapInstanceRef.current) {
       mapInstanceRef.current.setView(userPos, 16);
     }
+  };
+  
+  const handleAddPOIMode = () => {
+    setIsAddingPOI(true);
+    alert('Modo de Adição de Ponto Tático Ativado. Clique no mapa para marcar a localização.');
   };
 
   return (
@@ -258,9 +267,21 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, pois, o
             <span className="text-pmmg-yellow material-symbols-outlined text-sm animate-pulse">radar</span>
           </div>
         </div>
+        
+        {/* FAB for adding POI */}
+        <button 
+          onClick={handleAddPOIMode}
+          className={`absolute bottom-32 right-4 z-[1000] w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 ${
+            isAddingPOI ? 'bg-pmmg-red rotate-45' : 'bg-pmmg-navy'
+          }`}
+        >
+          <span className={`material-symbols-outlined text-white text-3xl ${isAddingPOI ? 'fill-icon' : ''}`}>
+            {isAddingPOI ? 'close' : 'add_location_alt'}
+          </span>
+        </button>
 
         {/* Interactive Legend */}
-        <div className="absolute bottom-32 right-4 z-[1000]">
+        <div className="absolute bottom-52 right-4 z-[1000]">
           <div className="bg-white/95 backdrop-blur-md p-3 rounded-2xl shadow-2xl border border-pmmg-navy/10 flex flex-col gap-2.5">
             <p className="text-[8px] font-black text-pmmg-navy/40 uppercase tracking-widest border-b border-pmmg-navy/5 pb-1 mb-1">Legenda Tática</p>
             <button 

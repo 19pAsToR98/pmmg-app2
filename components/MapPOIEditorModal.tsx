@@ -30,6 +30,13 @@ const MapPOIEditorModal: React.FC<MapPOIEditorModalProps> = ({ isOpen, onClose, 
     }
   };
 
+  const resetState = () => {
+    setTitle('');
+    setDescription('');
+    setType('Ponto de Risco');
+    setPhoto(undefined);
+  };
+
   const handleSave = () => {
     if (!title || !description) {
       alert('Título e descrição são obrigatórios.');
@@ -49,11 +56,12 @@ const MapPOIEditorModal: React.FC<MapPOIEditorModalProps> = ({ isOpen, onClose, 
     };
 
     onSave(newPOI);
-    // Reset state
-    setTitle('');
-    setDescription('');
-    setType('Ponto de Risco');
-    setPhoto(undefined);
+    resetState();
+    onClose();
+  };
+  
+  const handleClose = () => {
+    resetState();
     onClose();
   };
 
@@ -63,7 +71,7 @@ const MapPOIEditorModal: React.FC<MapPOIEditorModalProps> = ({ isOpen, onClose, 
         
         <header className="flex justify-between items-center border-b border-pmmg-navy/10 pb-3 mb-4">
           <h2 className="text-lg font-bold text-pmmg-navy uppercase tracking-tight">Cadastrar Ponto Tático</h2>
-          <button onClick={onClose} className="text-pmmg-navy/60 hover:text-pmmg-red">
+          <button onClick={handleClose} className="text-pmmg-navy/60 hover:text-pmmg-red">
             <span className="material-symbols-outlined">close</span>
           </button>
         </header>
@@ -154,13 +162,20 @@ const MapPOIEditorModal: React.FC<MapPOIEditorModalProps> = ({ isOpen, onClose, 
           </div>
         </div>
 
-        <footer className="pt-4">
+        <footer className="pt-4 flex gap-3">
+          <button 
+            onClick={handleClose}
+            className="flex-1 bg-white border border-pmmg-navy/20 text-pmmg-navy font-bold py-4 rounded-xl shadow-md flex items-center justify-center gap-3 uppercase tracking-widest active:scale-[0.98] transition-transform"
+          >
+            <span className="material-symbols-outlined">cancel</span>
+            Cancelar
+          </button>
           <button 
             onClick={handleSave}
-            className="w-full bg-pmmg-navy text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-3 uppercase tracking-widest active:scale-[0.98] transition-transform"
+            className="flex-1 bg-pmmg-navy text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-3 uppercase tracking-widest active:scale-[0.98] transition-transform"
           >
             <span className="material-symbols-outlined">add_location_alt</span>
-            Salvar Ponto Tático
+            Salvar Ponto
           </button>
         </footer>
       </div>
