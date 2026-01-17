@@ -111,19 +111,24 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
     };
   }, []);
 
-  // 2. Gerenciamento do Listener de Clique (Depende de isAddingMarker)
+  // 2. Gerenciamento do Listener de Clique e Cursor (Depende de isAddingMarker)
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map) return;
 
     if (isAddingMarker) {
       map.on('click', handleMapClick);
+      // Altera o cursor do mapa
+      map.getContainer().style.cursor = 'crosshair';
     } else {
       map.off('click', handleMapClick);
+      // Restaura o cursor padrão
+      map.getContainer().style.cursor = '';
     }
 
     return () => {
       map.off('click', handleMapClick);
+      map.getContainer().style.cursor = '';
     };
   }, [isAddingMarker]);
 
@@ -223,7 +228,10 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           </div>
           <div className="flex items-center gap-2">
             <button 
-              onClick={() => setIsAddingMarker(true)}
+              onClick={() => {
+                setIsAddingMarker(prev => !prev);
+                setNewMarkerData(null); // Limpa dados se estiver voltando
+              }}
               className={`p-2 rounded-full border transition-all ${isAddingMarker ? 'bg-pmmg-red text-white border-pmmg-red shadow-lg' : 'bg-white/10 text-white border-white/20'}`}
             >
               <span className="material-symbols-outlined text-lg">add_location_alt</span>
@@ -267,19 +275,11 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           </div>
         </div>
         
-        {/* Adding Marker Mode Indicator */}
+        {/* Adding Marker Mode Indicator (Non-blocking) */}
         {isAddingMarker && (
-          <div className="absolute inset-0 z-[1001] bg-black/30 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-xl shadow-2xl text-center max-w-xs">
-              <span className="material-symbols-outlined text-pmmg-red text-4xl mb-2">pin_drop</span>
-              <p className="text-sm font-bold text-pmmg-navy uppercase">Modo de Adição Ativo</p>
-              <p className="text-xs text-slate-600 mt-2">Clique em qualquer ponto do mapa para posicionar o novo marcador tático.</p>
-              <button 
-                onClick={() => setIsAddingMarker(false)}
-                className="mt-4 w-full bg-pmmg-red text-white py-2 rounded-lg text-xs font-bold uppercase"
-              >
-                Cancelar
-              </button>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[1001] pointer-events-none">
+            <div className="bg-pmmg-red text-white p-2 rounded-full shadow-xl border-4 border-white animate-pulse">
+              <span className="material-symbols-outlined text-3xl">pin_drop</span>
             </div>
           </div>
         )}
