@@ -37,6 +37,9 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
     (activeFilter === 'Todos' || s.status === activeFilter)
   );
 
+  // Variável de controle de zoom acessível no JSX
+  const usePhotoMarker = currentZoom >= ZOOM_THRESHOLD;
+
   const handleMapClick = (e: L.LeafletMouseEvent) => {
     if (isAddingMarker) {
       setNewMarkerData({
@@ -168,14 +171,15 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
     
     markersLayerRef.current.clearLayers();
     
-    const usePhotoMarker = currentZoom >= ZOOM_THRESHOLD;
+    // Reutiliza a variável usePhotoMarker definida no corpo do componente
+    const localUsePhotoMarker = currentZoom >= ZOOM_THRESHOLD;
 
     filteredSuspects.forEach(suspect => {
       if (suspect.lat && suspect.lng) {
         
         let suspectIcon;
         
-        if (usePhotoMarker) {
+        if (localUsePhotoMarker) {
             // Photo Marker (Zoomed In)
             const borderColorClass = suspect.status === 'Foragido' ? 'border-pmmg-red' : 
                                      suspect.status === 'Suspeito' ? 'border-pmmg-yellow' : 'border-pmmg-navy';
@@ -480,7 +484,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               onClick={() => setActiveFilter('Foragido')}
               className={`flex items-center gap-2 group transition-opacity ${activeFilter !== 'Todos' && activeFilter !== 'Foragido' ? 'opacity-40' : 'opacity-100'}`}
             >
-               <div className={`w-4 h-4 ${currentZoom >= ZOOM_THRESHOLD ? 'rounded-md border-2 bg-slate-300' : 'rounded-full bg-pmmg-red flex items-center justify-center'} border-pmmg-red shadow-sm`}>
+               <div className={`w-4 h-4 ${usePhotoMarker ? 'rounded-md border-2 bg-slate-300' : 'rounded-full bg-pmmg-red flex items-center justify-center'} border-pmmg-red shadow-sm`}>
                  {!usePhotoMarker && <span className="material-symbols-outlined text-white text-[10px] fill-icon">priority_high</span>}
                </div>
                <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">Foragido</span>
@@ -491,7 +495,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               onClick={() => setActiveFilter('Suspeito')}
               className={`flex items-center gap-2 group transition-opacity ${activeFilter !== 'Todos' && activeFilter !== 'Suspeito' ? 'opacity-40' : 'opacity-100'}`}
             >
-               <div className={`w-4 h-4 ${currentZoom >= ZOOM_THRESHOLD ? 'rounded-md border-2 bg-slate-300' : 'rounded-full bg-pmmg-yellow flex items-center justify-center'} border-pmmg-yellow shadow-sm`}>
+               <div className={`w-4 h-4 ${usePhotoMarker ? 'rounded-md border-2 bg-slate-300' : 'rounded-full bg-pmmg-yellow flex items-center justify-center'} border-pmmg-yellow shadow-sm`}>
                  {!usePhotoMarker && <span className="material-symbols-outlined text-pmmg-navy text-[10px] fill-icon">warning</span>}
                </div>
                <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">Suspeito</span>
