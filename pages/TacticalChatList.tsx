@@ -1,20 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Screen, Chat, Officer } from '../types';
 import BottomNav from '../components/BottomNav';
 
 interface TacticalChatListProps {
   navigateTo: (screen: Screen) => void;
   chats: Chat[];
-  officers: Officer[]; // Agora contém apenas contatos aceitos e online
+  officers: Officer[]; // Contatos aceitos e online
   openChat: (chatId: string) => void;
   startIndividualChat: (officerId: string) => void;
   pendingRequestsCount: number;
 }
 
-const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo, chats, officers, openChat, startIndividualChat, pendingRequestsCount }) => {
-  
-  const onlineOfficers = officers; // Já filtrado no App.tsx para ser Contatos Aceitos e Online
+type ChatTab = 'individual' | 'group';
 
+const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo, chats, officers, openChat, startIndividualChat, pendingRequestsCount }) => {
+  const [activeTab, setActiveTab] = useState<ChatTab>('individual');
+  
   // Função auxiliar para obter o nome e ícone correto para chats individuais
   const getChatDisplayInfo = (chat: Chat) => {
     if (chat.type === 'group') {
@@ -35,9 +36,13 @@ const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo, chats, 
     return { name: chat.name, icon: 'person', isGroup: false };
   };
 
-  // Separa chats individuais de grupos para exibição diferenciada
+  // Separa chats individuais de grupos
   const individualChats = chats.filter(c => c.type === 'individual');
   const groupChats = chats.filter(c => c.type === 'group');
+
+  const displayedChats = activeTab === 'individual' ? individualChats : groupChats;
+  const activeTabLabel = activeTab === 'individual' ? 'Chats Individuais' : 'Grupos Táticos';
+  const activeTabCount = displayedChats.length;
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
@@ -66,60 +71,64 @@ const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo, chats, 
 
       <main className="flex-1 overflow-y-auto pb-32 no-scrollbar">
         
-        {/* Contatos Ativos (Online) */}
-        <section className="px-4 pt-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-[11px] font-bold text-pmmg-navy/60 uppercase tracking-wider">Contatos Ativos ({onlineOfficers.length})</h3>
-            <span className="text-[10px] font-bold text-green-600 uppercase flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> Online
-            </span>
-          </div>
-          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4">
-            {onlineOfficers.map(officer => (
-              <button 
-                key={officer.id}
-                onClick={() => startIndividualChat(officer.id)}
-                className="flex flex-col items-center shrink-0 w-16 active:scale-95 transition-transform"
-              >
-                <div className="relative w-14 h-14 mb-1">
-                  <div className="w-full h-full rounded-full overflow-hidden border-2 border-pmmg-navy/20 bg-slate-200">
-                    <img src={officer.photoUrl} alt={officer.name} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-pmmg-khaki"></div>
-                </div>
-                <span className="text-[10px] font-bold text-pmmg-navy uppercase truncate w-full text-center leading-tight">{officer.name.split(' ')[1]}</span>
-                <span className="text-[8px] text-slate-500 uppercase">{officer.rank.split(' ')[0]}</span>
-              </button>
-            ))}
+        {/* Tabs Navigation */}
+        <section className="sticky top-0 z-40 bg-pmmg-navy/95 backdrop-blur-sm px-4 pt-3 pb-3 shadow-md">
+          <div className="flex bg-pmmg-navy/80 rounded-xl p-1 border border-pmmg-yellow/20">
+            <button
+              onClick={() => setActiveTab('individual')}
+              className={`flex-1 py-2 text-center text-sm font-bold uppercase tracking-wider rounded-lg transition-colors ${
+                activeTab === 'individual' ? 'bg-pmmg-yellow text-pmmg-navy shadow-lg' : 'text-white/60 hover:bg-pmmg-navy/50'
+              }`}
+            >
+              Individuais ({individualChats.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('group')}
+              className={`flex-1 py-2 text-center text-sm font-bold uppercase tracking-wider rounded-lg transition-colors ${
+                activeTab === 'group' ? 'bg-pmmg-yellow text-pmmg-navy shadow-lg' : 'text-white/60 hover:bg-pmmg-navy/50'
+              }`}
+            >
+              Grupos ({groupChats.length})
+            </button>
           </div>
         </section>
 
-        <div className="px-4 pt-2 sticky top-0 z-40 bg-pmmg-khaki/90 backdrop-blur-md pb-2">
+        {/* Search Bar (Moved below tabs) */}
+        <div className="px-4 pt-4 pb-4">
           <div className="relative">
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
               <span className="material-symbols-outlined text-pmmg-navy/50 text-xl">search</span>
             </div>
             <input 
               className="block w-full pl-10 pr-3 py-3 bg-white/60 border border-pmmg-navy/10 focus:border-pmmg-navy focus:ring-0 rounded-2xl text-sm placeholder-pmmg-navy/40" 
-              placeholder="Filtrar conversas..." 
+              placeholder={`Filtrar ${activeTab === 'individual' ? 'contatos...' : 'grupos...'}`} 
               type="text" 
             />
           </div>
         </div>
 
-        {/* Chats Individuais (Amigos) */}
-        <section className="px-4 mt-4 space-y-3">
-          <h3 className="text-[11px] font-bold text-pmmg-navy/60 uppercase tracking-wider mb-3">Chats Individuais ({individualChats.length})</h3>
-          {individualChats.map((chat) => {
-            const { name, icon } = getChatDisplayInfo(chat);
+        {/* Chat List Content */}
+        <section className="px-4 space-y-3">
+          <h3 className="text-[11px] font-bold text-pmmg-navy/60 uppercase tracking-wider mb-3">
+            {activeTabLabel} ({activeTabCount})
+          </h3>
+          
+          {displayedChats.length > 0 ? displayedChats.map((chat) => {
+            const { name, icon, isGroup } = getChatDisplayInfo(chat);
+            
+            // Determina a cor da borda lateral
+            const borderColor = isGroup ? 'border-pmmg-navy' : 'border-pmmg-yellow';
+            
             return (
               <div 
                 key={chat.id} 
                 onClick={() => openChat(chat.id)}
-                className="pmmg-card flex items-center p-3 gap-3 cursor-pointer active:scale-95 transition-transform border-l-4 border-pmmg-yellow"
+                className={`pmmg-card flex items-center p-3 gap-3 cursor-pointer active:scale-95 transition-transform border-l-4 ${borderColor}`}
               >
-                <div className={`w-14 h-14 flex items-center justify-center rounded-xl shrink-0 bg-pmmg-navy/10 text-pmmg-navy/40 border border-pmmg-navy/20`}>
-                  <span className={`material-symbols-outlined text-3xl`}>
+                <div className={`w-14 h-14 flex items-center justify-center rounded-xl shrink-0 ${
+                  isGroup ? 'bg-pmmg-navy text-pmmg-yellow' : 'bg-pmmg-navy/10 text-pmmg-navy/40 border border-pmmg-navy/20'
+                }`}>
+                  <span className={`material-symbols-outlined text-3xl ${isGroup ? 'fill-icon' : ''}`}>
                     {icon}
                   </span>
                 </div>
@@ -139,42 +148,20 @@ const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo, chats, 
                 )}
               </div>
             );
-          })}
-        </section>
-        
-        {/* Chats de Grupo */}
-        <section className="px-4 mt-6 space-y-3">
-          <h3 className="text-[11px] font-bold text-pmmg-navy/60 uppercase tracking-wider mb-3">Grupos Táticos ({groupChats.length})</h3>
-          {groupChats.map((chat) => {
-            const { name, icon } = getChatDisplayInfo(chat);
-            return (
-              <div 
-                key={chat.id} 
-                onClick={() => openChat(chat.id)}
-                className="pmmg-card flex items-center p-3 gap-3 cursor-pointer active:scale-95 transition-transform border-l-4 border-pmmg-navy"
-              >
-                <div className={`w-14 h-14 flex items-center justify-center rounded-xl shrink-0 bg-pmmg-navy text-pmmg-yellow`}>
-                  <span className={`material-symbols-outlined text-3xl fill-icon`}>
-                    {icon}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-center mb-0.5">
-                    <h3 className="font-bold text-sm truncate uppercase tracking-tight">{name}</h3>
-                    <span className="text-[10px] font-medium opacity-60">{chat.lastTime}</span>
-                  </div>
-                  <p className="text-xs text-slate-600 truncate leading-tight">{chat.lastMessage}</p>
-                </div>
-                {chat.unreadCount > 0 && (
-                  <div className="shrink-0">
-                    <span className="bg-pmmg-red text-white text-[10px] font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
-                      {chat.unreadCount}
-                    </span>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+          }) : (
+            <div className="text-center py-10 opacity-40">
+              <span className="material-symbols-outlined text-5xl">chat_bubble_off</span>
+              <p className="text-xs font-bold uppercase mt-2">Nenhuma conversa encontrada nesta categoria.</p>
+              {activeTab === 'individual' && (
+                <button 
+                  onClick={() => navigateTo('contacts')}
+                  className="mt-4 bg-pmmg-navy text-white text-[10px] font-bold px-4 py-2 rounded-lg uppercase"
+                >
+                  Adicionar Contatos
+                </button>
+              )}
+            </div>
+          )}
         </section>
 
         <div className="h-4"></div>
