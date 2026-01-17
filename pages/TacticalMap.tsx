@@ -1,70 +1,30 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
-import { Screen, Suspect, POI } from '../types';
+import { Screen, Suspect } from '../types';
 import BottomNav from '../components/BottomNav';
-import MapPOIEditorModal from '../components/MapPOIEditorModal';
 
 interface TacticalMapProps {
   navigateTo: (screen: Screen) => void;
   suspects: Suspect[];
-  pois: POI[];
   onOpenProfile: (id: string) => void;
-  onAddPOI: (poi: POI) => void;
   initialCenter?: [number, number] | null;
 }
 
 type MapFilter = 'Todos' | 'Foragido' | 'Suspeito' | 'Preso' | 'CPF Cancelado';
 
-const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, pois, onOpenProfile, onAddPOI, initialCenter }) => {
+const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenProfile, initialCenter }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
-  const poiLayerRef = useRef<L.LayerGroup | null>(null);
   
   const [userPos, setUserPos] = useState<[number, number] | null>(null);
   const [activeFilter, setActiveFilter] = useState<MapFilter>('Todos');
-  
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newPOICoords, setNewPOICoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [isAddingPOI, setIsAddingPOI] = useState(false); // Novo estado para o modo de adição
 
   // Filtragem dos suspeitos com base no estado do filtro
   const filteredSuspects = suspects.filter(s => 
     activeFilter === 'Todos' || s.status === activeFilter
   );
-
-  const getPOIIcon = (poi: POI) => {
-    let iconHtml = '';
-    let iconColor = 'bg-pmmg-navy';
-    let iconSymbol = 'location_on';
-
-    switch (poi.type) {
-      case 'Ponto de Risco':
-        iconColor = 'bg-pmmg-red';
-        iconSymbol = 'dangerous';
-        break;
-      case 'Base Tática':
-        iconColor = 'bg-pmmg-blue';
-        iconSymbol = 'shield';
-        break;
-      case 'Comércio Suspeito':
-        iconColor = 'bg-pmmg-yellow';
-        iconSymbol = 'store';
-        break;
-      default:
-        iconColor = 'bg-slate-600';
-        iconSymbol = 'pin_drop';
-    }
-
-    iconHtml = `<div class="w-8 h-8 ${iconColor} rounded-full border-2 border-white flex items-center justify-center shadow-lg ring-2 ring-black/20"><span class="material-symbols-outlined text-white text-[16px] fill-icon">${iconSymbol}</span></div>`;
-    
-    return L.divIcon({
-      className: 'custom-poi-icon',
-      html: iconHtml,
-      iconSize: [32, 32],
-      iconAnchor: [16, 32]
-    });
-  };
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -84,16 +44,6 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, pois, o
       }).addTo(mapInstanceRef.current);
 
       markersLayerRef.current = L.layerGroup().addTo(mapInstanceRef.current);
-      poiLayerRef.current = L.layerGroup().addTo(mapInstanceRef.current);
-
-      // Adicionar listener para clique no mapa para adicionar POI
-      mapInstanceRef.current.on('click', (e: L.LeafletMouseEvent) => {
-        if (isAddingPOI) {
-          setNewPOICoords({ lat: e.latlng.lat, lng: e.latlng.lng });
-          setIsModalOpen(true);
-          setIsAddingPOI(false); // Sai do modo de adição após o clique
-        }
-      });
     }
 
     // Localização do usuário
@@ -118,27 +68,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, pois, o
       );
     }
 
-    // Função para criar o popup de POI
-    const createPOIPopup = (poi: POI) => {
-      const popupContent = document.createElement('div');
-      popupContent.className = "p-2 min-w-[150px]";
-      popupContent.innerHTML = `
-        <div class="flex items-center gap-2 mb-2">
-          <div class="w-10 h-10 rounded bg-slate-200 overflow-hidden border border-pmmg-navy/10">
-            ${poi.photoUrl ? `<img src="${poi.photoUrl}" class="w-full h-full object-cover">` : `<div class="w-full h-full flex items-center justify-center"><span class="material-symbols-outlined text-pmmg-navy/40 text-xl">image</span></div>`}
-          </div>
-          <div>
-            <p class="font-bold text-[10px] text-pmmg-navy uppercase leading-tight">${poi.title}</p>
-            <p class="text-[9px] text-slate-500 font-bold uppercase">${poi.type}</p>
-          </div>
-        </div>
-        <p class="text-[10px] text-slate-700 mb-2">${poi.description.substring(0, 50)}...</p>
-        <button id="btn-poi-${poi.id}" class="w-full bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider">Detalhes</button>
-      `;
-      return popupContent;
-    };
-
-    // Atualizar marcadores de Suspeitos
+    // Atualizar marcadores toda vez que o filtro ou os suspeitos mudarem
     if (markersLayerRef.current) {
       markersLayerRef.current.clearLayers();
       
@@ -184,37 +114,12 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, pois, o
       });
     }
 
-    // Atualizar marcadores de POIs
-    if (poiLayerRef.current) {
-      poiLayerRef.current.clearLayers();
-      
-      pois.forEach(poi => {
-        const poiIcon = getPOIIcon(poi);
-        const marker = L.marker([poi.lat, poi.lng], { icon: poiIcon }).addTo(poiLayerRef.current!);
-        
-        const popupContent = createPOIPopup(poi);
-        marker.bindPopup(popupContent);
-        
-        // Adicionar listener para o botão de detalhes do POI (apenas um alerta simples por enquanto)
-        marker.on('popupopen', () => {
-          document.getElementById(`btn-poi-${poi.id}`)?.addEventListener('click', () => {
-            alert(`Detalhes do POI: ${poi.title}\nDescrição: ${poi.description}\nTipo: ${poi.type}`);
-          });
-        });
-      });
-    }
-
-  }, [filteredSuspects, initialCenter, activeFilter, pois, isAddingPOI]);
+  }, [filteredSuspects, initialCenter, activeFilter]);
 
   const recenter = () => {
     if (userPos && mapInstanceRef.current) {
       mapInstanceRef.current.setView(userPos, 16);
     }
-  };
-  
-  const handleAddPOIMode = () => {
-    setIsAddingPOI(true);
-    alert('Modo de Adição de Ponto Tático Ativado. Clique no mapa para marcar a localização.');
   };
 
   return (
@@ -261,27 +166,15 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, pois, o
           <div className="bg-pmmg-navy/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-lg border border-pmmg-yellow/30 flex items-center gap-3">
             <div className="flex flex-col">
               <span className="text-[8px] font-bold text-pmmg-yellow uppercase tracking-[0.2em]">Monitoramento</span>
-              <span className="text-[10px] font-black text-white uppercase">{(filteredSuspects?.length || 0) + (pois?.length || 0)} Alvos/Pontos</span>
+              <span className="text-[10px] font-black text-white uppercase">{filteredSuspects.length} Alvos na Região</span>
             </div>
             <div className="h-6 w-px bg-white/20"></div>
             <span className="text-pmmg-yellow material-symbols-outlined text-sm animate-pulse">radar</span>
           </div>
         </div>
-        
-        {/* FAB for adding POI */}
-        <button 
-          onClick={handleAddPOIMode}
-          className={`absolute bottom-32 right-4 z-[1000] w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 ${
-            isAddingPOI ? 'bg-pmmg-red rotate-45' : 'bg-pmmg-navy'
-          }`}
-        >
-          <span className={`material-symbols-outlined text-white text-3xl ${isAddingPOI ? 'fill-icon' : ''}`}>
-            {isAddingPOI ? 'close' : 'add_location_alt'}
-          </span>
-        </button>
 
         {/* Interactive Legend */}
-        <div className="absolute bottom-52 right-4 z-[1000]">
+        <div className="absolute bottom-32 right-4 z-[1000]">
           <div className="bg-white/95 backdrop-blur-md p-3 rounded-2xl shadow-2xl border border-pmmg-navy/10 flex flex-col gap-2.5">
             <p className="text-[8px] font-black text-pmmg-navy/40 uppercase tracking-widest border-b border-pmmg-navy/5 pb-1 mb-1">Legenda Tática</p>
             <button 
@@ -302,10 +195,6 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, pois, o
                <div className="w-3.5 h-3.5 bg-pmmg-blue rounded-full border-2 border-white shadow-sm ring-1 ring-pmmg-blue/30"></div>
                <span className="text-[9px] font-bold text-pmmg-navy uppercase">Oficial</span>
             </div>
-            <div className="flex items-center gap-2">
-               <div className="w-3.5 h-3.5 bg-pmmg-navy rounded-full border-2 border-white shadow-sm ring-1 ring-pmmg-navy/30"></div>
-               <span className="text-[9px] font-bold text-pmmg-navy uppercase">POI Tático</span>
-            </div>
             {activeFilter !== 'Todos' && (
               <button 
                 onClick={() => setActiveFilter('Todos')}
@@ -319,13 +208,6 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, pois, o
       </div>
 
       <BottomNav activeScreen="map" navigateTo={navigateTo} />
-      
-      <MapPOIEditorModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSave={onAddPOI}
-        initialCoords={newPOICoords}
-      />
     </div>
   );
 };
