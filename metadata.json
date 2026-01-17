@@ -1,0 +1,9 @@
+{
+  "name": "PMMG Operacional Dashboard",
+  "description": "Uma plataforma de inteligência e integração tática para operações da Polícia Militar de Minas Gerais.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
