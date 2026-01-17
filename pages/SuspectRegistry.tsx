@@ -1,11 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { Screen, Suspect, Vehicle, Association } from '../types';
 import BottomNav from '../components/BottomNav';
+import SuspectAssociationSelector from '../components/SuspectAssociationSelector';
 
 interface SuspectRegistryProps {
   navigateTo: (screen: Screen) => void;
   onSave: (suspect: Suspect) => void;
-  existingSuspects: Suspect[]; // Nova prop
+  existingSuspects: Suspect[];
 }
 
 const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, existingSuspects }) => {
@@ -65,6 +66,8 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, e
 
   const handleAddAssociation = () => {
     if (currentAssociationId && currentRelationship.trim()) {
+      // Evita associar a si mesmo (se o ID do novo suspeito fosse conhecido)
+      // E evita duplicatas
       const existingAssociation = associations.find(a => a.suspectId === currentAssociationId);
       if (existingAssociation) {
         alert('Este indivíduo já está associado.');
@@ -140,7 +143,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, e
       lng: newLng,
       showOnMap: showOnMap,
       vehicles: vehicles,
-      associations: associations, // Usando a lista de associações baseada em ID
+      associations: associations,
     };
 
     onSave(newSuspect);
@@ -450,21 +453,12 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, e
         </div>
 
         <div className="pmmg-card p-4 space-y-3">
-          <div>
-            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Indivíduo Associado</label>
-            <select 
-              value={currentAssociationId}
-              onChange={(e) => setCurrentAssociationId(e.target.value)}
-              className="block w-full px-4 py-3 bg-white border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm transition-all appearance-none bg-no-repeat bg-[right_1rem_center]"
-            >
-              <option value="">Selecione um suspeito existente</option>
-              {existingSuspects.map(s => (
-                <option key={s.id} value={s.id}>
-                  {s.name} ({s.nickname || s.cpf.slice(0, 3) + '...'})
-                </option>
-              ))}
-            </select>
-          </div>
+          <SuspectAssociationSelector
+            existingSuspects={existingSuspects}
+            onSelect={setCurrentAssociationId}
+            currentAssociationId={currentAssociationId}
+          />
+          
           <div>
             <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Tipo de Ligação</label>
             <input 
