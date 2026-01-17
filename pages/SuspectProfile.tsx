@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import L from 'leaflet';
 import { Screen, Suspect } from '../types';
@@ -8,9 +7,11 @@ interface SuspectProfileProps {
   suspect: Suspect;
   onBack: () => void;
   navigateTo: (screen: Screen, center?: [number, number]) => void;
+  allSuspects: Suspect[];
+  onOpenProfile: (id: string) => void;
 }
 
-const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, navigateTo }) => {
+const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, navigateTo, allSuspects, onOpenProfile }) => {
   const [expandedSection, setExpandedSection] = useState<string | null>('data');
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const miniMapRef = useRef<HTMLDivElement>(null);
@@ -20,6 +21,10 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
 
   const toggleSection = (section: string) => {
     setExpandedSection(expandedSection === section ? null : section);
+  };
+
+  const findAssociatedSuspect = (id: string) => {
+    return allSuspects.find(s => s.id === id);
   };
 
   useEffect(() => {
@@ -198,6 +203,74 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                   </div>
                 )) : (
                   <p className="text-xs text-slate-400 italic">Nenhum artigo registrado.</p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* NEW: Vehicles Section */}
+          <div className="pmmg-card">
+            <div onClick={() => toggleSection('vehicles')} className="flex items-center justify-between p-4 cursor-pointer">
+              <div className="flex items-center gap-3 text-pmmg-navy">
+                <span className="material-symbols-outlined">directions_car</span>
+                <span className="text-sm font-bold uppercase">Veículos Cadastrados</span>
+              </div>
+              <span className="material-symbols-outlined text-pmmg-navy/40">
+                {expandedSection === 'vehicles' ? 'expand_less' : 'expand_more'}
+              </span>
+            </div>
+            {expandedSection === 'vehicles' && (
+              <div className="p-4 space-y-3 border-t border-pmmg-navy/5">
+                {suspect.vehicles && suspect.vehicles.length > 0 ? suspect.vehicles.map((vehicle, i) => (
+                  <div key={i} className="p-3 bg-pmmg-navy/5 rounded border border-pmmg-navy/10">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-bold text-pmmg-navy">{vehicle.plate}</p>
+                      <span className="text-[10px] font-semibold text-slate-500">{vehicle.color}</span>
+                    </div>
+                    <p className="text-[11px] text-slate-700 mt-1">{vehicle.model}</p>
+                  </div>
+                )) : (
+                  <p className="text-xs text-slate-400 italic">Nenhum veículo registrado.</p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* NEW: Associations Section */}
+          <div className="pmmg-card">
+            <div onClick={() => toggleSection('associations')} className="flex items-center justify-between p-4 cursor-pointer">
+              <div className="flex items-center gap-3 text-pmmg-navy">
+                <span className="material-symbols-outlined">link</span>
+                <span className="text-sm font-bold uppercase">Ligações e Contatos</span>
+              </div>
+              <span className="material-symbols-outlined text-pmmg-navy/40">
+                {expandedSection === 'associations' ? 'expand_less' : 'expand_more'}
+              </span>
+            </div>
+            {expandedSection === 'associations' && (
+              <div className="p-4 space-y-3 border-t border-pmmg-navy/5">
+                {suspect.associations && suspect.associations.length > 0 ? suspect.associations.map((association, i) => {
+                  const associatedSuspect = findAssociatedSuspect(association.suspectId);
+                  if (!associatedSuspect) return null;
+
+                  return (
+                    <div 
+                      key={i} 
+                      className="flex items-center gap-3 p-3 bg-pmmg-navy/5 rounded border border-pmmg-navy/10 cursor-pointer active:bg-pmmg-navy/10 transition-colors"
+                      onClick={() => onOpenProfile(associatedSuspect.id)}
+                    >
+                      <div className="w-10 h-10 shrink-0 rounded-full overflow-hidden bg-slate-300 border border-pmmg-navy/20">
+                        <img src={associatedSuspect.photoUrl} alt={associatedSuspect.name} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase tracking-wider truncate">{association.relationship}</p>
+                        <h4 className="text-sm font-bold text-pmmg-navy truncate">{associatedSuspect.name}</h4>
+                      </div>
+                      <span className="material-symbols-outlined text-pmmg-navy/40 text-lg shrink-0">arrow_forward_ios</span>
+                    </div>
+                  );
+                }) : (
+                  <p className="text-xs text-slate-400 italic">Nenhuma ligação registrada.</p>
                 )}
               </div>
             )}

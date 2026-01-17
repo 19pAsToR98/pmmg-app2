@@ -1,7 +1,17 @@
-
 export type Screen = 'onboarding' | 'dashboard' | 'registry' | 'profile' | 'chatList' | 'chatRoom' | 'aiTools' | 'requestAccess' | 'profileSettings' | 'map';
 
 export type UserRank = 'Soldado' | 'Cabo' | '3º Sargento' | '2º Sargento' | '1º Sargento' | 'Subtenente';
+
+export interface Vehicle {
+  plate: string;
+  model: string;
+  color: string;
+}
+
+export interface Association {
+  suspectId: string;
+  relationship: string; // e.g., 'Cúmplice', 'Familiar', 'Contato'
+}
 
 export interface Suspect {
   id: string;
@@ -19,6 +29,8 @@ export interface Suspect {
   description?: string;
   lat?: number;
   lng?: number;
+  vehicles?: Vehicle[];
+  associations?: Association[];
 }
 
 export interface ChatMessage {

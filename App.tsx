@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Screen, Suspect, UserRank } from './types';
 import Onboarding from './pages/Onboarding';
@@ -26,7 +25,14 @@ const INITIAL_SUSPECTS: Suspect[] = [
     birthDate: '12/05/1990',
     articles: ['Art. 157', 'Art. 33'],
     lat: -19.9320,
-    lng: -43.9381
+    lng: -43.9381,
+    vehicles: [
+      { plate: 'ABC-1234', model: 'Fiat Uno', color: 'Cinza' },
+      { plate: 'XYZ-9876', model: 'Honda Civic', color: 'Preto' }
+    ],
+    associations: [
+      { suspectId: '2', relationship: 'Cúmplice em Roubo' }
+    ]
   },
   {
     id: '2',
@@ -41,7 +47,26 @@ const INITIAL_SUSPECTS: Suspect[] = [
     birthDate: '22/10/1995',
     articles: ['Art. 180'],
     lat: -19.9230,
-    lng: -43.9442
+    lng: -43.9442,
+    associations: [
+      { suspectId: '1', relationship: 'Contato Frequente' },
+      { suspectId: '3', relationship: 'Familiar (Primo)' }
+    ]
+  },
+  {
+    id: '3',
+    name: 'Fernanda Rocha',
+    nickname: 'Nanda',
+    cpf: '222.333.444-55',
+    status: 'Suspeito',
+    lastSeen: 'Rua da Bahia, BH',
+    timeAgo: '3 dias',
+    photoUrl: 'https://picsum.photos/seed/fernanda/200/250?grayscale',
+    motherName: 'Helena Rocha',
+    birthDate: '01/01/1998',
+    articles: ['Art. 33'],
+    lat: -19.9200,
+    lng: -43.9350
   }
 ];
 
@@ -75,7 +100,7 @@ const App: React.FC = () => {
       {currentScreen === 'onboarding' && <Onboarding onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />}
       {currentScreen === 'dashboard' && <Dashboard navigateTo={navigateTo} onOpenProfile={openProfile} suspects={suspects} />}
       {currentScreen === 'registry' && <SuspectRegistry navigateTo={navigateTo} onSave={addSuspect} />}
-      {currentScreen === 'profile' && <SuspectProfile suspect={selectedSuspect} onBack={() => navigateTo('dashboard')} navigateTo={navigateTo} />}
+      {currentScreen === 'profile' && <SuspectProfile suspect={selectedSuspect} onBack={() => navigateTo('dashboard')} navigateTo={navigateTo} allSuspects={suspects} onOpenProfile={openProfile} />}
       {currentScreen === 'chatList' && <TacticalChatList navigateTo={navigateTo} />}
       {currentScreen === 'chatRoom' && <TacticalChatRoom onBack={() => navigateTo('chatList')} />}
       {currentScreen === 'aiTools' && <AITools navigateTo={navigateTo} userRank={userRank} />}
