@@ -1,13 +1,30 @@
-import React, { useState, useRef } from 'react';
-import { Screen, Suspect } from '../types';
+import React, { useState, useRef, useEffect } from 'react';
+import L from 'leaflet';
+import { Screen, Suspect, Vehicle, Association } from '../types';
 import BottomNav from '../components/BottomNav';
 
 interface SuspectRegistryProps {
   navigateTo: (screen: Screen) => void;
   onSave: (suspect: Suspect) => void;
+  allSuspects: Suspect[];
 }
 
-const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave }) => {
+// Mock data for address search (since we cannot use external APIs)
+const MOCK_ADDRESS_SUGGESTIONS = [
+  { name: 'Rua da Bahia, 1000, Centro, BH', lat: -19.9200, lng: -43.9350 },
+  { name: 'Av. Amazonas, 500, Centro, BH', lat: -19.9230, lng: -43.9442 },
+  { name: 'Praça da Liberdade, BH', lat: -19.9320, lng: -43.9381 },
+];
+
+const TacticalMapIcon = L.divIcon({
+  className: 'custom-location-icon',
+  html: `<div class="w-6 h-6 bg-pmmg-navy rounded-full border-2 border-white flex items-center justify-center shadow-lg"><span class="material-symbols-outlined text-pmmg-yellow text-[14px] fill-icon">location_on</span></div>`,
+  iconSize: [24, 24],
+  iconAnchor: [12, 12]
+});
+
+
+const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, allSuspects }) => {
   const [status, setStatus] = useState<Suspect['status']>('Suspeito');
   const [name, setName] = useState('');
   const [cpf, setCpf] = useState('');
@@ -18,9 +35,137 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
   const [currentArticle, setCurrentArticle] = useState('');
   const [articles, setArticles] = useState<string[]>([]);
   const [photos, setPhotos] = useState<string[]>([]);
-  const [showOnMap, setShowOnMap] = useState(true); // Novo estado para controle do mapa
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showOnMap, setShowOnMap] = useState(true);
+  
+  // New States for Address, Vehicles, Associations
+  const [address, setAddress] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState<{ lat: number, lng: number, name: string } | null>(null);
+  const [addressSuggestions, setAddressSuggestions] = useState<typeof MOCK_ADDRESS_SUGGESTIONS>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [associations, setAssociations] = useState<Association[]>([]);
 
+  // Vehicle Input States
+  const [newVehiclePlate, setNewVehiclePlate] = useState('');
+  const [newVehicleModel, setNewVehicleModel] = useState('');
+  const [newVehicleColor, setNewVehicleColor] = useState('');
+
+  // Association Input States
+  const [associationSearchTerm, setAssociationSearchTerm] = useState('');
+  const [associationRelationship, setAssociationRelationship] = useState('');
+  const [filteredSuspects, setFilteredSuspects] = useState<Suspect[]>([]);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const miniMapRef = useRef<HTMLDivElement>(null);
+  const mapInstance = useRef<L.Map | null>(null);
+
+  // --- Leaflet Minimap Effect ---
+  useEffect(() => {
+    if (miniMapRef.current && selectedLocation) {
+      const { lat, lng } = selectedLocation;
+      
+      if (mapInstance.current) {
+        mapInstance.current.setView([lat, lng], 15);
+        mapInstance.current.eachLayer((layer) => {
+          if (layer instanceof L.Marker) {
+            layer.remove();
+          }
+        });
+      } else {
+        mapInstance.current = L.map(miniMapRef.current, {
+          center: [lat, lng],
+          zoom: 15,
+          zoomControl: false,
+          dragging: false,
+          touchZoom: false,
+          scrollWheelZoom: false,
+          doubleClickZoom: false,
+          boxZoom: false
+        });
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance.current);
+      }
+
+      L.marker([lat, lng], { icon: TacticalMapIcon }).addTo(mapInstance.current);
+    }
+
+    return () => {
+      // Cleanup is handled by the component unmounting, but we ensure the map is removed if location changes significantly or component unmounts.
+    };
+  }, [selectedLocation]);
+
+  // --- Address Search Logic ---
+  const handleAddressSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setAddress(value);
+    setSelectedLocation(null); // Clear location if user starts typing again
+    if (value.length > 2) {
+      const filtered = MOCK_ADDRESS_SUGGESTIONS.filter(s => 
+        s.name.toLowerCase().includes(value.toLowerCase())
+      );
+      setAddressSuggestions(filtered);
+    } else {
+      setAddressSuggestions([]);
+    }
+  };
+
+  const handleSelectLocation = (location: { lat: number, lng: number, name: string }) => {
+    setSelectedLocation(location);
+    setAddress(location.name);
+    setAddressSuggestions([]);
+  };
+
+  // --- Vehicle Management Logic ---
+  const handleAddVehicle = () => {
+    if (newVehiclePlate.trim() && newVehicleModel.trim()) {
+      const newVehicle: Vehicle = {
+        plate: newVehiclePlate.trim().toUpperCase(),
+        model: newVehicleModel.trim(),
+        color: newVehicleColor.trim() || 'Não Informado',
+      };
+      setVehicles([...vehicles, newVehicle]);
+      setNewVehiclePlate('');
+      setNewVehicleModel('');
+      setNewVehicleColor('');
+    }
+  };
+
+  const handleRemoveVehicle = (index: number) => {
+    setVehicles(vehicles.filter((_, i) => i !== index));
+  };
+
+  // --- Association Management Logic ---
+  useEffect(() => {
+    if (associationSearchTerm.length > 1) {
+      const term = associationSearchTerm.toLowerCase();
+      const results = allSuspects.filter(s => 
+        s.name.toLowerCase().includes(term) && 
+        !associations.some(a => a.suspectId === s.id) // Avoid adding already associated suspects
+      );
+      setFilteredSuspects(results);
+    } else {
+      setFilteredSuspects([]);
+    }
+  }, [associationSearchTerm, allSuspects, associations]);
+
+  const handleAddAssociation = (suspectId: string) => {
+    if (associationRelationship.trim()) {
+      const newAssociation: Association = {
+        suspectId,
+        relationship: associationRelationship.trim(),
+      };
+      setAssociations([...associations, newAssociation]);
+      setAssociationSearchTerm('');
+      setAssociationRelationship('');
+      setFilteredSuspects([]);
+    } else {
+      alert("Defina o tipo de ligação (Ex: Cúmplice, Familiar).");
+    }
+  };
+
+  const handleRemoveAssociation = (index: number) => {
+    setAssociations(associations.filter((_, i) => i !== index));
+  };
+
+  // --- General Registry Logic ---
   const handleAddArticle = () => {
     if (currentArticle.trim()) {
       setArticles([...articles, currentArticle.trim()]);
@@ -61,9 +206,10 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
 
     const primaryPhoto = photos.length > 0 ? photos[0] : `https://picsum.photos/seed/${name}/200/250`;
 
-    // Mocking lat/lng for new suspects for map functionality
-    const newLat = -19.9 + (Math.random() * 0.05 - 0.025);
-    const newLng = -43.9 + (Math.random() * 0.05 - 0.025);
+    // Use selected location if available, otherwise mock coordinates
+    const lat = selectedLocation?.lat || (-19.9 + (Math.random() * 0.05 - 0.025));
+    const lng = selectedLocation?.lng || (-43.9 + (Math.random() * 0.05 - 0.025));
+    const lastSeen = selectedLocation?.name || 'Local do Registro';
 
     const newSuspect: Suspect = {
       id: Date.now().toString(),
@@ -71,7 +217,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
       nickname,
       cpf,
       status,
-      lastSeen: 'Local do Registro',
+      lastSeen,
       timeAgo: 'Agora',
       photoUrl: primaryPhoto,
       photoUrls: photos.length > 0 ? photos : [primaryPhoto],
@@ -79,9 +225,11 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
       motherName,
       articles,
       description,
-      lat: newLat,
-      lng: newLng,
-      showOnMap: showOnMap, // Incluindo a nova propriedade
+      lat,
+      lng,
+      showOnMap,
+      vehicles, // Include vehicles
+      associations, // Include associations
     };
 
     onSave(newSuspect);
@@ -118,6 +266,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
           capture="environment"
         />
 
+        {/* Photo Gallery Section (Existing) */}
         <div className="flex items-center gap-3 overflow-x-auto pb-4 no-scrollbar">
           {photos.length > 0 ? (
             <>
@@ -184,7 +333,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
           ))}
         </div>
         
-        {/* NEW: Map Visibility Toggle */}
+        {/* Map Visibility Toggle (Existing) */}
         <div className="mt-6 pmmg-card p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="material-symbols-outlined text-pmmg-navy">map</span>
@@ -201,11 +350,52 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
           </button>
         </div>
 
+        {/* --- Endereço Section (NEW) --- */}
+        <div className="flex items-center gap-2 mb-4 mt-8">
+          <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
+          <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Endereço e Localização</h3>
+        </div>
+        <div className="space-y-4">
+          <div className="relative">
+            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Endereço de Última Ocorrência/Residência</label>
+            <input 
+              value={address}
+              onChange={handleAddressSearch}
+              className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+              placeholder="Pesquisar endereço..." 
+              type="text" 
+            />
+            {addressSuggestions.length > 0 && (
+              <div className="absolute z-10 w-full bg-white border border-pmmg-navy/20 rounded-lg mt-1 shadow-lg max-h-40 overflow-y-auto">
+                {addressSuggestions.map((loc, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleSelectLocation(loc)}
+                    className="w-full text-left px-4 py-2 text-sm text-pmmg-navy hover:bg-pmmg-khaki/50 transition-colors border-b border-pmmg-navy/5 last:border-b-0"
+                  >
+                    {loc.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          {selectedLocation && (
+            <div className="pmmg-card overflow-hidden">
+              <div className="p-3 bg-pmmg-navy/5 flex items-center justify-between">
+                <p className="text-[10px] font-bold text-pmmg-navy uppercase tracking-wider">Localização Confirmada</p>
+                <span className="text-[9px] text-green-600 font-bold uppercase">GPS OK</span>
+              </div>
+              <div ref={miniMapRef} className="h-40 w-full bg-slate-200 z-0"></div>
+            </div>
+          )}
+        </div>
+
+        {/* --- Dados Pessoais (Existing) --- */}
         <div className="flex items-center gap-2 mb-4 mt-8">
           <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
           <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Dados Pessoais</h3>
         </div>
-
         <div className="space-y-4">
           <div>
             <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Nome Completo</label>
@@ -273,6 +463,133 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave })
           </div>
         </div>
 
+        {/* --- Veículos Section (NEW) --- */}
+        <div className="flex items-center gap-2 mb-4 mt-8">
+          <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
+          <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Veículos Cadastrados ({vehicles.length})</h3>
+        </div>
+        <div className="pmmg-card p-4 space-y-3">
+          {vehicles.map((v, idx) => (
+            <div key={idx} className="flex items-center justify-between p-2 bg-pmmg-navy/5 rounded-lg border border-pmmg-navy/10">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-pmmg-navy truncate">{v.plate} - {v.model}</p>
+                <p className="text-[10px] text-slate-500">{v.color}</p>
+              </div>
+              <button onClick={() => handleRemoveVehicle(idx)} className="text-pmmg-red p-1 shrink-0">
+                <span className="material-symbols-outlined text-lg">delete</span>
+              </button>
+            </div>
+          ))}
+          <div className="pt-2 space-y-2 border-t border-pmmg-navy/10">
+            <div className="grid grid-cols-2 gap-3">
+              <input 
+                value={newVehiclePlate}
+                onChange={(e) => setNewVehiclePlate(e.target.value)}
+                className="w-full px-3 py-2 bg-white border border-pmmg-navy/20 rounded-lg text-xs" 
+                placeholder="Placa (Ex: ABC1234)" 
+                type="text" 
+              />
+              <input 
+                value={newVehicleModel}
+                onChange={(e) => setNewVehicleModel(e.target.value)}
+                className="w-full px-3 py-2 bg-white border border-pmmg-navy/20 rounded-lg text-xs" 
+                placeholder="Modelo (Ex: Fiat Uno)" 
+                type="text" 
+              />
+            </div>
+            <div className="flex gap-3">
+              <input 
+                value={newVehicleColor}
+                onChange={(e) => setNewVehicleColor(e.target.value)}
+                className="flex-1 px-3 py-2 bg-white border border-pmmg-navy/20 rounded-lg text-xs" 
+                placeholder="Cor (Opcional)" 
+                type="text" 
+              />
+              <button 
+                onClick={handleAddVehicle}
+                disabled={!newVehiclePlate.trim() || !newVehicleModel.trim()}
+                className="px-4 py-2 bg-pmmg-navy text-white text-[10px] font-bold rounded-lg uppercase disabled:opacity-50"
+              >
+                Adicionar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* --- Ligações Section (NEW) --- */}
+        <div className="flex items-center gap-2 mb-4 mt-8">
+          <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
+          <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Ligações e Associações ({associations.length})</h3>
+        </div>
+        <div className="pmmg-card p-4 space-y-3">
+          {associations.map((a, idx) => {
+            const associatedSuspect = allSuspects.find(s => s.id === a.suspectId);
+            if (!associatedSuspect) return null;
+            return (
+              <div key={idx} className="flex items-center justify-between p-2 bg-pmmg-navy/5 rounded-lg border border-pmmg-navy/10">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-300 shrink-0">
+                    <img src={associatedSuspect.photoUrl} alt={associatedSuspect.name} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase truncate">{a.relationship}</p>
+                    <p className="text-sm font-bold text-pmmg-navy truncate">{associatedSuspect.name}</p>
+                  </div>
+                </div>
+                <button onClick={() => handleRemoveAssociation(idx)} className="text-pmmg-red p-1 shrink-0">
+                  <span className="material-symbols-outlined text-lg">delete</span>
+                </button>
+              </div>
+            );
+          })}
+          <div className="pt-2 space-y-2 border-t border-pmmg-navy/10">
+            <input 
+              value={associationRelationship}
+              onChange={(e) => setAssociationRelationship(e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-pmmg-navy/20 rounded-lg text-xs" 
+              placeholder="Tipo de Ligação (Ex: Cúmplice, Familiar)" 
+              type="text" 
+            />
+            <input 
+              value={associationSearchTerm}
+              onChange={(e) => setAssociationSearchTerm(e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-pmmg-navy/20 rounded-lg text-xs" 
+              placeholder="Buscar indivíduo existente (Nome/CPF)" 
+              type="text" 
+            />
+            {filteredSuspects.length > 0 && associationRelationship.trim() && (
+              <div className="bg-white border border-pmmg-navy/20 rounded-lg shadow-md max-h-40 overflow-y-auto">
+                {filteredSuspects.slice(0, 5).map((s) => (
+                  <div 
+                    key={s.id} 
+                    className="flex items-center justify-between p-2 hover:bg-pmmg-khaki/50 transition-colors border-b border-pmmg-navy/5"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-300 shrink-0">
+                        <img src={s.photoUrl} alt={s.name} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-pmmg-navy truncate">{s.name}</p>
+                        <p className="text-[10px] text-slate-500">{s.cpf}</p>
+                      </div>
+                    </div>
+                    <button 
+                      onClick={() => handleAddAssociation(s.id)}
+                      className="bg-pmmg-navy text-white text-[9px] font-bold px-3 py-1 rounded uppercase shrink-0"
+                    >
+                      Vincular
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {filteredSuspects.length > 0 && !associationRelationship.trim() && (
+                <p className="text-[10px] text-pmmg-red italic text-center">Defina o tipo de ligação antes de vincular.</p>
+            )}
+          </div>
+        </div>
+
+        {/* --- Artigos Criminais (Existing) --- */}
         <div className="flex items-center gap-2 mb-4 mt-8">
           <div className="h-4 w-1 bg-pmmg-red rounded-full"></div>
           <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Artigos Criminais</h3>

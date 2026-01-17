@@ -49,6 +49,7 @@ const INITIAL_SUSPECTS: Suspect[] = [
     articles: ['Art. 180'],
     lat: -19.9230,
     lng: -43.9442,
+    vehicles: [],
     associations: [
       { suspectId: '1', relationship: 'Contato Frequente' },
       { suspectId: '3', relationship: 'Familiar (Primo)' }
@@ -69,6 +70,8 @@ const INITIAL_SUSPECTS: Suspect[] = [
     articles: ['Art. 33'],
     lat: -19.9200,
     lng: -43.9350,
+    vehicles: [],
+    associations: [],
     showOnMap: false, // Exemplo de suspeito que não aparece no mapa
   }
 ];
@@ -129,7 +132,7 @@ const App: React.FC = () => {
     <div className="flex flex-col h-screen max-w-md mx-auto relative overflow-hidden bg-pmmg-khaki">
       {currentScreen === 'onboarding' && <Onboarding onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />}
       {currentScreen === 'dashboard' && <Dashboard navigateTo={navigateTo} onOpenProfile={openProfile} suspects={suspects} />}
-      {currentScreen === 'registry' && <SuspectRegistry navigateTo={navigateTo} onSave={addSuspect} />}
+      {currentScreen === 'registry' && <SuspectRegistry navigateTo={navigateTo} onSave={addSuspect} allSuspects={suspects} />}
       {currentScreen === 'profile' && <SuspectProfile suspect={selectedSuspect} onBack={() => navigateTo('dashboard')} navigateTo={navigateTo} allSuspects={suspects} onOpenProfile={openProfile} />}
       {currentScreen === 'chatList' && <TacticalChatList navigateTo={navigateTo} />}
       {currentScreen === 'chatRoom' && <TacticalChatRoom onBack={() => navigateTo('chatList')} />}
