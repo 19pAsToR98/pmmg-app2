@@ -330,7 +330,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
       <header className="sticky top-0 z-[1000] bg-pmmg-navy px-4 py-4 shadow-xl">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 shrink-0 bg-white rounded-full flex items-center justify-center p-1 border-2 border-pmmg-red">
               <span className="material-symbols-outlined text-pmmg-navy text-xl">map</span>
@@ -357,22 +357,8 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           </div>
         </div>
 
-        {/* Tactical Filters Chips */}
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-          {['Todos', 'Foragido', 'Suspeito', 'Preso'].map((filter) => (
-            <button
-              key={filter}
-              onClick={() => setActiveFilter(filter as MapFilter)}
-              className={`px-3 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-wider transition-all whitespace-nowrap border ${
-                activeFilter === filter 
-                ? 'bg-pmmg-yellow text-pmmg-navy border-pmmg-yellow' 
-                : 'bg-white/10 text-white/60 border-white/10'
-              }`}
-            >
-              {filter}
-            </button>
-          ))}
-        </div>
+        {/* Tactical Filters Chips - REMOVIDO */}
+        
       </header>
 
       <div className="flex-1 relative">
