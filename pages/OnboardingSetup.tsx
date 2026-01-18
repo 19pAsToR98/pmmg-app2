@@ -33,59 +33,61 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
 
   // --- Map/City Logic ---
   
+  // Efeito para inicializar o mapa quando o Passo 3 é atingido
   useEffect(() => {
-    if (step === 3 && mapContainerRef.current) {
-      const initialLocation = selectedLocation || MOCK_CITIES[0];
-      
-      const icon = L.divIcon({
-        className: 'custom-location-icon',
-        html: `<div class="w-8 h-8 bg-pmmg-navy rounded-full border-2 border-pmmg-yellow flex items-center justify-center shadow-lg"><span class="material-symbols-outlined text-pmmg-yellow text-[16px] fill-icon">location_on</span></div>`,
-        iconSize: [32, 32],
-        iconAnchor: [16, 16]
+    if (step !== 3 || !mapContainerRef.current) return;
+
+    // Define a localização inicial (BH como fallback)
+    const initialLocation = selectedLocation || MOCK_CITIES[0];
+    
+    const icon = L.divIcon({
+      className: 'custom-location-icon',
+      html: `<div class="w-8 h-8 bg-pmmg-navy rounded-full border-2 border-pmmg-yellow flex items-center justify-center shadow-lg"><span class="material-symbols-outlined text-pmmg-yellow text-[16px] fill-icon">location_on</span></div>`,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16]
+    });
+
+    if (!mapInstance.current) {
+      // 1. Inicializa o mapa
+      mapInstance.current = L.map(mapContainerRef.current, {
+        center: [initialLocation.lat, initialLocation.lng],
+        zoom: 12,
+        zoomControl: false,
+        dragging: false,
+        touchZoom: false,
+        scrollWheelZoom: false,
+        doubleClickZoom: false,
+        boxZoom: false
       });
-
-      if (!mapInstance.current) {
-        // Inicializa o mapa
-        mapInstance.current = L.map(mapContainerRef.current, {
-          center: [initialLocation.lat, initialLocation.lng],
-          zoom: 12,
-          zoomControl: false,
-          dragging: false, // Desabilita arrastar para manter o foco na cidade
-          touchZoom: false,
-          scrollWheelZoom: false,
-          doubleClickZoom: false,
-          boxZoom: false
-        });
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance.current);
-        
-        markerInstance.current = L.marker([initialLocation.lat, initialLocation.lng], { icon }).addTo(mapInstance.current);
-        
-        // Define a cidade inicial se ainda não estiver definida
-        if (!city) {
-            setCity(initialLocation.name);
-            setSelectedLocation(initialLocation);
-        }
-
-      } else {
-        // Se o mapa já existe, apenas ajusta a visualização e o marcador
-        mapInstance.current.setView([initialLocation.lat, initialLocation.lng], 12);
-        markerInstance.current?.setLatLng([initialLocation.lat, initialLocation.lng]);
-      }
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance.current);
       
-      // Força o Leaflet a recalcular o tamanho do container (essencial após transições de estado)
-      mapInstance.current.invalidateSize();
+      markerInstance.current = L.marker([initialLocation.lat, initialLocation.lng], { icon }).addTo(mapInstance.current);
+      
+      // Define a cidade inicial se ainda não estiver definida
+      if (!city) {
+          setCity(initialLocation.name);
+          setSelectedLocation(initialLocation);
+      }
+
+    } else {
+      // Se o mapa já existe, apenas garante que a visualização esteja correta
+      mapInstance.current.setView([initialLocation.lat, initialLocation.lng], 12);
+      markerInstance.current?.setLatLng([initialLocation.lat, initialLocation.lng]);
     }
     
+    // Força o Leaflet a recalcular o tamanho do container
+    mapInstance.current.invalidateSize();
+
     return () => {
-      // Limpeza do mapa ao sair do componente (ou se o passo mudar, embora o componente não desmonte)
+      // Cleanup: Se o passo mudar, remove o mapa para evitar vazamento de memória
       if (step !== 3 && mapInstance.current) {
         mapInstance.current.remove();
         mapInstance.current = null;
       }
     };
-  }, [step]); // Depende apenas do passo para inicializar/limpar
+  }, [step]); 
 
-  // Atualiza o mapa quando a localização selecionada muda
+  // Efeito para atualizar o marcador quando selectedLocation muda
   useEffect(() => {
     if (step === 3 && selectedLocation && mapInstance.current && markerInstance.current) {
       mapInstance.current.setView([selectedLocation.lat, selectedLocation.lng], 12);
@@ -94,7 +96,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
   }, [selectedLocation, step]);
 
 
-  const handleCitySearch = (term: string) => {
+  const handleCitySearchChange = (term: string) => {
     setCitySearchTerm(term);
     if (term.length > 1) {
       const filtered = MOCK_CITIES.filter(c => 
@@ -198,13 +200,13 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
               <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Buscar Cidade em MG</label>
               <input 
                 value={citySearchTerm}
-                onChange={(e) => handleCitySearch(e.target.value)}
+                onChange={(e) => handleCitySearchChange(e.target.value)}
                 className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
                 placeholder="Ex: Belo Horizonte" 
                 type="text" 
               />
               
-              {citySuggestions.length > 0 && (
+              {citySearchTerm.length > 0 && citySuggestions.length > 0 && (
                 <div className="absolute z-10 w-full bg-white border border-pmmg-navy/20 rounded-lg mt-1 shadow-lg max-h-40 overflow-y-auto">
                   {citySuggestions.map((loc, index) => (
                     <button
@@ -217,9 +219,12 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
                   ))}
                 </div>
               )}
+              {citySearchTerm.length > 0 && citySuggestions.length === 0 && (
+                <p className="text-[10px] text-pmmg-navy/50 mt-2 text-center">Nenhuma cidade encontrada.</p>
+              )}
             </div>
             
-            {/* Exibe o mapa apenas se uma cidade foi selecionada ou se estamos no passo 3 */}
+            {/* Exibe o mapa se uma cidade foi selecionada ou se estamos no passo 3 (usando fallback) */}
             {(city || step === 3) && (
               <div className="pmmg-card overflow-hidden">
                 <div className="p-3 bg-pmmg-navy/5 flex items-center justify-between">
