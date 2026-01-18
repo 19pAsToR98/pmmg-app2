@@ -88,6 +88,11 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onSetupComplete }) =>
     
     return () => {
       if (mapInstance.current) {
+        // Explicitly remove marker and clear references before removing the map
+        if (markerInstance.current) {
+          markerInstance.current.remove();
+          markerInstance.current = null;
+        }
         mapInstance.current.remove();
         mapInstance.current = null;
       }

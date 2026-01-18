@@ -88,7 +88,10 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
     }
 
     return () => {
-      // Cleanup is handled by the component unmounting, but we ensure the map is removed if location changes significantly or component unmounts.
+      if (mapInstance.current) {
+        mapInstance.current.remove();
+        mapInstance.current = null;
+      }
     };
   }, [selectedLocation]);
 
