@@ -1,0 +1,21 @@
+{
+  "name": "PMMG Operacional",
+  "short_name": "PMMG Tático",
+  "description": "Plataforma de inteligência e integração tática para operações da PMMG.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#c5b39a",
+  "theme_color": "#002147",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
