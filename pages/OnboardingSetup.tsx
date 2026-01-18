@@ -21,7 +21,7 @@ const MOCK_CITIES = [
 const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
-  const [rank, setRank] = useState<UserRank>('Soldado');
+  const [rank, setRank] = useState<UserRank>('Soldado'); // Padrão: Soldado
   const [city, setCity] = useState('');
   const [citySearchTerm, setCitySearchTerm] = useState('');
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number, lng: number, name: string } | null>(null);
@@ -37,42 +37,62 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
     if (step === 3 && mapContainerRef.current) {
       const initialLocation = selectedLocation || MOCK_CITIES[0];
       
+      const icon = L.divIcon({
+        className: 'custom-location-icon',
+        html: `<div class="w-8 h-8 bg-pmmg-navy rounded-full border-2 border-pmmg-yellow flex items-center justify-center shadow-lg"><span class="material-symbols-outlined text-pmmg-yellow text-[16px] fill-icon">location_on</span></div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
+      });
+
       if (!mapInstance.current) {
+        // Inicializa o mapa
         mapInstance.current = L.map(mapContainerRef.current, {
           center: [initialLocation.lat, initialLocation.lng],
           zoom: 12,
           zoomControl: false,
-          dragging: true,
-          touchZoom: true,
+          dragging: false, // Desabilita arrastar para manter o foco na cidade
+          touchZoom: false,
           scrollWheelZoom: false,
           doubleClickZoom: false,
           boxZoom: false
         });
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance.current);
         
-        // Adiciona o marcador inicial
-        const icon = L.divIcon({
-          className: 'custom-location-icon',
-          html: `<div class="w-8 h-8 bg-pmmg-navy rounded-full border-2 border-pmmg-yellow flex items-center justify-center shadow-lg"><span class="material-symbols-outlined text-pmmg-yellow text-[16px] fill-icon">location_on</span></div>`,
-          iconSize: [32, 32],
-          iconAnchor: [16, 16]
-        });
         markerInstance.current = L.marker([initialLocation.lat, initialLocation.lng], { icon }).addTo(mapInstance.current);
+        
+        // Define a cidade inicial se ainda não estiver definida
+        if (!city) {
+            setCity(initialLocation.name);
+            setSelectedLocation(initialLocation);
+        }
+
       } else {
-        // Se o mapa já existe, apenas ajusta a visualização se uma localização foi selecionada
+        // Se o mapa já existe, apenas ajusta a visualização e o marcador
         mapInstance.current.setView([initialLocation.lat, initialLocation.lng], 12);
         markerInstance.current?.setLatLng([initialLocation.lat, initialLocation.lng]);
       }
       
-      // Garante que o mapa se ajuste ao tamanho do container após a transição
+      // Força o Leaflet a recalcular o tamanho do container (essencial após transições de estado)
       mapInstance.current.invalidateSize();
     }
     
     return () => {
-      // Não remove o mapa aqui para evitar recriação constante, mas garante que ele seja removido se o componente for desmontado.
-      // No contexto deste app, o App.tsx gerencia a montagem/desmontagem.
+      // Limpeza do mapa ao sair do componente (ou se o passo mudar, embora o componente não desmonte)
+      if (step !== 3 && mapInstance.current) {
+        mapInstance.current.remove();
+        mapInstance.current = null;
+      }
     };
-  }, [step, selectedLocation]);
+  }, [step]); // Depende apenas do passo para inicializar/limpar
+
+  // Atualiza o mapa quando a localização selecionada muda
+  useEffect(() => {
+    if (step === 3 && selectedLocation && mapInstance.current && markerInstance.current) {
+      mapInstance.current.setView([selectedLocation.lat, selectedLocation.lng], 12);
+      markerInstance.current.setLatLng([selectedLocation.lat, selectedLocation.lng]);
+    }
+  }, [selectedLocation, step]);
+
 
   const handleCitySearch = (term: string) => {
     setCitySearchTerm(term);
@@ -91,11 +111,6 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
     setCity(location.name);
     setCitySearchTerm('');
     setCitySuggestions([]);
-    
-    if (mapInstance.current && markerInstance.current) {
-      mapInstance.current.setView([location.lat, location.lng], 12);
-      markerInstance.current.setLatLng([location.lat, location.lng]);
-    }
   };
 
   // --- Navigation Logic ---
@@ -204,12 +219,14 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
               )}
             </div>
             
-            {city && (
+            {/* Exibe o mapa apenas se uma cidade foi selecionada ou se estamos no passo 3 */}
+            {(city || step === 3) && (
               <div className="pmmg-card overflow-hidden">
                 <div className="p-3 bg-pmmg-navy/5 flex items-center justify-between">
-                  <p className="text-[10px] font-bold text-pmmg-navy uppercase tracking-wider">Cidade Selecionada: {city}</p>
+                  <p className="text-[10px] font-bold text-pmmg-navy uppercase tracking-wider">Cidade Selecionada: {city || 'Carregando...'}</p>
                   <span className="text-[9px] text-green-600 font-bold uppercase">OK</span>
                 </div>
+                {/* O mapa precisa de uma altura definida */}
                 <div ref={mapContainerRef} className="h-48 w-full bg-slate-200 z-0"></div>
               </div>
             )}
