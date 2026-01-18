@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import L from 'leaflet';
 import { Screen, Suspect, CustomMarker } from '../types';
 import BottomNav from '../components/BottomNav';
@@ -85,6 +85,13 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       mapInstanceRef.current?.closePopup();
     }
   };
+  
+  // Função para simular o compartilhamento de localização
+  const handleShareLocation = useCallback((lat: number, lng: number, title: string) => {
+    const locationLink = `https://maps.google.com/maps?q=${lat},${lng}`;
+    alert(`Localização de ${title} pronta para compartilhamento:\n\nCoordenadas: ${lat.toFixed(5)}, ${lng.toFixed(5)}\nLink (Simulado): ${locationLink}`);
+  }, []);
+
 
   // 1. Inicialização do Mapa e Listeners de Zoom (Roda apenas uma vez)
   useEffect(() => {
@@ -143,7 +150,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         mapInstanceRef.current = null;
       }
     };
-  }, []);
+  }, [initialCenter]);
 
   // 2. Gerenciamento do Listener de Clique e Cursor (Depende de isAddingMarker)
   useEffect(() => {
@@ -171,7 +178,6 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
     
     markersLayerRef.current.clearLayers();
     
-    // Reutiliza a variável usePhotoMarker definida no corpo do componente
     const localUsePhotoMarker = currentZoom >= ZOOM_THRESHOLD;
 
     filteredSuspects.forEach(suspect => {
@@ -228,14 +234,25 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               <p class="text-[9px] text-slate-500 font-bold uppercase">${suspect.status}</p>
             </div>
           </div>
-          <button id="btn-${suspect.id}" class="w-full bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider">Ver Ficha</button>
+          <div class="flex gap-2 mt-3">
+            <button id="btn-profile-${suspect.id}" class="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider">Ver Ficha</button>
+            <button id="btn-share-suspect-${suspect.id}" class="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center">
+              <span class="material-symbols-outlined text-pmmg-navy text-lg">share</span>
+            </button>
+          </div>
         `;
 
         marker.bindPopup(popupContent);
         
         marker.on('popupopen', () => {
-          document.getElementById(`btn-${suspect.id}`)?.addEventListener('click', () => {
+          document.getElementById(`btn-profile-${suspect.id}`)?.addEventListener('click', () => {
             onOpenProfile(suspect.id);
+          });
+          // New listener for sharing suspect location
+          document.getElementById(`btn-share-suspect-${suspect.id}`)?.addEventListener('click', () => {
+            if (suspect.lat && suspect.lng) {
+              handleShareLocation(suspect.lat, suspect.lng, suspect.name);
+            }
           });
         });
 
@@ -244,7 +261,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         }
       }
     });
-  }, [filteredSuspects, initialCenter, activeFilter, onOpenProfile, currentZoom]);
+  }, [filteredSuspects, initialCenter, activeFilter, onOpenProfile, currentZoom, handleShareLocation]);
 
   // 4. Atualização de Marcadores Personalizados (Depende de customMarkers)
   useEffect(() => {
@@ -272,6 +289,9 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             <button id="edit-btn-${markerData.id}" class="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center gap-1">
               <span class="material-symbols-outlined text-sm">edit</span> Editar
             </button>
+            <button id="share-btn-${markerData.id}" class="flex-1 bg-pmmg-blue text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center gap-1">
+              <span class="material-symbols-outlined text-sm">share</span> Compartilhar
+            </button>
             <button id="delete-btn-${markerData.id}" class="px-3 bg-pmmg-red text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center">
               <span class="material-symbols-outlined text-sm">delete</span>
             </button>
@@ -289,9 +309,13 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         document.getElementById(`delete-btn-${markerData.id}`)?.addEventListener('click', () => {
           handleDeleteMarker(markerData.id);
         });
+        // New listener for sharing custom marker location
+        document.getElementById(`share-btn-${markerData.id}`)?.addEventListener('click', () => {
+          handleShareLocation(markerData.lat, markerData.lng, markerData.title);
+        });
       });
     });
-  }, [customMarkers]);
+  }, [customMarkers, handleDeleteMarker, handleShareLocation]);
 
   const recenter = () => {
     if (userPos && mapInstanceRef.current) {
