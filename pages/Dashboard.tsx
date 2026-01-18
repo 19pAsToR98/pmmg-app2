@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Screen, Suspect } from '../types';
 import BottomNav from '../components/BottomNav';
@@ -44,6 +43,14 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, onOpenProfile, suspec
               <span className="w-1.5 h-1.5 bg-green-400 rounded-full"></span> Online
             </div>
           </div>
+          {/* Botão para Cadastro de Indivíduo (Registry) */}
+          <button 
+            onClick={() => navigateTo('registry')}
+            className="bg-pmmg-yellow/20 p-1.5 rounded-full border border-pmmg-yellow/50 text-pmmg-yellow"
+          >
+            <span className="material-symbols-outlined text-xl">person_add</span>
+          </button>
+          {/* Botão para AI Tools */}
           <button 
             onClick={() => navigateTo('aiTools')}
             className="bg-white/10 p-1.5 rounded-full border border-white/20 text-white"
@@ -95,15 +102,11 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, onOpenProfile, suspec
             <input 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-full pl-10 pr-12 py-4 bg-white border-2 border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-0 rounded-2xl text-sm font-bold placeholder-pmmg-navy/40 shadow-sm" 
+              className="block w-full pl-10 pr-4 py-4 bg-white border-2 border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-0 rounded-2xl text-sm font-bold placeholder-pmmg-navy/40 shadow-sm" 
               placeholder="BUSCAR INDIVÍDUO (NOME, CPF, ALCUNHA)" 
               type="text" 
             />
-            <div className="absolute inset-y-0 right-3 flex items-center">
-              <button className="bg-pmmg-navy text-white p-2 rounded-xl shadow-md">
-                <span className="material-symbols-outlined text-xl">barcode_scanner</span>
-              </button>
-            </div>
+            {/* Removed barcode scanner button */}
           </div>
         </section>
 
