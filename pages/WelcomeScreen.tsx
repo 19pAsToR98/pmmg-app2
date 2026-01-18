@@ -1,12 +1,12 @@
-
 import React from 'react';
+import { Screen } from '../types';
 
-interface OnboardingProps {
+interface WelcomeScreenProps {
   onEnter: () => void;
   onRequest: () => void;
 }
 
-const Onboarding: React.FC<OnboardingProps> = ({ onEnter, onRequest }) => {
+const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, onRequest }) => {
   return (
     <div className="relative h-full flex flex-col items-center justify-between px-8 py-16 overflow-hidden">
       <div className="absolute inset-0 z-0">
@@ -63,4 +63,4 @@ const Onboarding: React.FC<OnboardingProps> = ({ onEnter, onRequest }) => {
   );
 };
 
-export default Onboarding;
+export default WelcomeScreen;

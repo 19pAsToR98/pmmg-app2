@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Screen, Suspect, UserRank, CustomMarker, Officer, Chat, ChatMessage, Contact, ContactStatus } from './types';
-import Onboarding from './pages/Onboarding';
+import WelcomeScreen from './pages/WelcomeScreen'; // Renomeado
 import Dashboard from './pages/Dashboard';
 import SuspectRegistry from './pages/SuspectRegistry';
 import SuspectProfile from './pages/SuspectProfile';
@@ -11,7 +11,8 @@ import RequestAccess from './pages/RequestAccess';
 import ProfileSettings from './pages/ProfileSettings';
 import TacticalMap from './pages/TacticalMap';
 import TacticalContacts from './pages/TacticalContacts';
-import GroupManagement from './pages/GroupManagement'; // Importando a nova tela
+import GroupManagement from './pages/GroupManagement';
+import OnboardingSetup from './pages/OnboardingSetup'; // Novo componente
 
 const INITIAL_SUSPECTS: Suspect[] = [
   {
@@ -153,18 +154,23 @@ const MOCK_CHATS: Chat[] = [
 
 
 const App: React.FC = () => {
-  const [currentScreen, setCurrentScreen] = useState<Screen>('onboarding');
+  const [currentScreen, setCurrentScreen] = useState<Screen>('welcomeScreen');
   const [suspects, setSuspects] = useState<Suspect[]>(INITIAL_SUSPECTS);
   const [customMarkers, setCustomMarkers] = useState<CustomMarker[]>(INITIAL_CUSTOM_MARKERS);
   const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
+  
+  // User Profile States (Updated to reflect new onboarding)
   const [userRank, setUserRank] = useState<UserRank>('Soldado');
+  const [userName, setUserName] = useState('Rodrigo Alves');
+  const [userCity, setUserCity] = useState('Belo Horizonte');
+  const [isRegistered, setIsRegistered] = useState(false); // New state for registration status
   
   // Chat/Social States
   const [officers, setOfficers] = useState<Officer[]>(MOCK_OFFICERS);
   const [chats, setChats] = useState<Chat[]>(MOCK_CHATS);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
-  const [contacts, setContacts] = useState<Contact[]>(INITIAL_CONTACTS); // Novo estado de contatos
+  const [contacts, setContacts] = useState<Contact[]>(INITIAL_CONTACTS);
 
   const navigateTo = (screen: Screen, center?: [number, number]) => {
     if (center) setMapCenter(center);
@@ -311,6 +317,13 @@ const App: React.FC = () => {
     setSelectedSuspectId(id);
     setCurrentScreen('profile');
   };
+  
+  const handleOnboardingComplete = (name: string, rank: UserRank, city: string) => {
+    setUserName(name);
+    setUserRank(rank);
+    setUserCity(city);
+    navigateTo('dashboard');
+  };
 
   const handleSendMessage = (chatId: string, message: ChatMessage) => {
     setChats(prevChats => prevChats.map(chat => {
@@ -347,15 +360,20 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen max-w-md mx-auto relative overflow-hidden bg-pmmg-khaki">
-      {currentScreen === 'onboarding' && <Onboarding onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />}
+      {currentScreen === 'welcomeScreen' && <WelcomeScreen onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />}
+      
+      {currentScreen === 'requestAccess' && <RequestAccess onBack={() => navigateTo('welcomeScreen')} onSuccess={() => { setIsRegistered(true); navigateTo('onboardingSetup'); }} />}
+      
+      {currentScreen === 'onboardingSetup' && isRegistered && <OnboardingSetup onComplete={handleOnboardingComplete} />}
+      
       {currentScreen === 'dashboard' && <Dashboard navigateTo={navigateTo} onOpenProfile={openProfile} suspects={suspects} />}
       {currentScreen === 'registry' && <SuspectRegistry navigateTo={navigateTo} onSave={addSuspect} allSuspects={suspects} />}
       {currentScreen === 'profile' && <SuspectProfile suspect={selectedSuspect} onBack={() => navigateTo('dashboard')} navigateTo={navigateTo} allSuspects={suspects} onOpenProfile={openProfile} />}
       {currentScreen === 'chatList' && (
         <TacticalChatList 
           navigateTo={navigateTo} 
-          userChats={userChats} // Passa apenas os chats que o usuário participa
-          allGroups={allGroups} // Passa todos os grupos (públicos)
+          userChats={userChats} 
+          allGroups={allGroups} 
           officers={acceptedOnlineOfficers} 
           openChat={openChat} 
           startIndividualChat={startIndividualChat}
@@ -371,7 +389,6 @@ const App: React.FC = () => {
         />
       )}
       {currentScreen === 'aiTools' && <AITools navigateTo={navigateTo} userRank={userRank} />}
-      {currentScreen === 'requestAccess' && <RequestAccess onBack={() => navigateTo('onboarding')} />}
       {currentScreen === 'profileSettings' && (
         <ProfileSettings 
           navigateTo={navigateTo} 
@@ -408,7 +425,6 @@ const App: React.FC = () => {
           onBack={() => navigateTo('chatList')}
           onSaveGroup={onSaveGroup}
           allOfficers={officers}
-          // currentChat={...} // Adicionar lógica para edição se necessário
         />
       )}
     </div>
