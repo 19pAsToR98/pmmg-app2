@@ -7,12 +7,11 @@ import SuspectProfile from './pages/SuspectProfile';
 import TacticalChatList from './pages/TacticalChatList';
 import TacticalChatRoom from './pages/TacticalChatRoom';
 import AITools from './pages/AITools';
-import Register from './pages/Register'; // Importação renomeada
-import OnboardingSetup from './pages/OnboardingSetup'; // Nova importação
+import RequestAccess from './pages/RequestAccess';
 import ProfileSettings from './pages/ProfileSettings';
 import TacticalMap from './pages/TacticalMap';
 import TacticalContacts from './pages/TacticalContacts';
-import GroupManagement from './pages/GroupManagement';
+import GroupManagement from './pages/GroupManagement'; // Importando a nova tela
 
 const INITIAL_SUSPECTS: Suspect[] = [
   {
@@ -159,18 +158,13 @@ const App: React.FC = () => {
   const [customMarkers, setCustomMarkers] = useState<CustomMarker[]>(INITIAL_CUSTOM_MARKERS);
   const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
-  
-  // User Profile States (Updated for Onboarding Setup)
-  const [userName, setUserName] = useState('Oficial PMMG');
   const [userRank, setUserRank] = useState<UserRank>('Soldado');
-  const [userCity, setUserCity] = useState('Belo Horizonte');
-  const [userCityCoords, setUserCityCoords] = useState<[number, number]>([-19.9167, -43.9345]);
   
   // Chat/Social States
   const [officers, setOfficers] = useState<Officer[]>(MOCK_OFFICERS);
   const [chats, setChats] = useState<Chat[]>(MOCK_CHATS);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
-  const [contacts, setContacts] = useState<Contact[]>(INITIAL_CONTACTS);
+  const [contacts, setContacts] = useState<Contact[]>(INITIAL_CONTACTS); // Novo estado de contatos
 
   const navigateTo = (screen: Screen, center?: [number, number]) => {
     if (center) setMapCenter(center);
@@ -181,21 +175,6 @@ const App: React.FC = () => {
   const openChat = (chatId: string) => {
     setActiveChatId(chatId);
     navigateTo('chatRoom');
-  };
-
-  // --- Lógica de Registro e Onboarding ---
-  
-  const handleRegisterSuccess = () => {
-    // Após o registro (e-mail/senha), move para a configuração do perfil
-    navigateTo('onboardingSetup');
-  };
-
-  const handleSetupComplete = (name: string, rank: UserRank, city: string, cityCoords: [number, number]) => {
-    setUserName(name);
-    setUserRank(rank);
-    setUserCity(city);
-    setUserCityCoords(cityCoords);
-    navigateTo('dashboard');
   };
 
   // --- Lógica de Contatos ---
@@ -368,9 +347,7 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen max-w-md mx-auto relative overflow-hidden bg-pmmg-khaki">
-      {currentScreen === 'onboarding' && <Onboarding onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('register')} />}
-      {currentScreen === 'register' && <Register onBack={() => navigateTo('onboarding')} onRegisterSuccess={handleRegisterSuccess} />}
-      {currentScreen === 'onboardingSetup' && <OnboardingSetup onSetupComplete={handleSetupComplete} />}
+      {currentScreen === 'onboarding' && <Onboarding onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />}
       {currentScreen === 'dashboard' && <Dashboard navigateTo={navigateTo} onOpenProfile={openProfile} suspects={suspects} />}
       {currentScreen === 'registry' && <SuspectRegistry navigateTo={navigateTo} onSave={addSuspect} allSuspects={suspects} />}
       {currentScreen === 'profile' && <SuspectProfile suspect={selectedSuspect} onBack={() => navigateTo('dashboard')} navigateTo={navigateTo} allSuspects={suspects} onOpenProfile={openProfile} />}
@@ -394,6 +371,7 @@ const App: React.FC = () => {
         />
       )}
       {currentScreen === 'aiTools' && <AITools navigateTo={navigateTo} userRank={userRank} />}
+      {currentScreen === 'requestAccess' && <RequestAccess onBack={() => navigateTo('onboarding')} />}
       {currentScreen === 'profileSettings' && (
         <ProfileSettings 
           navigateTo={navigateTo} 
