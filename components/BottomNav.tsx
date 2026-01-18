@@ -10,7 +10,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeScreen, navigateTo }) => {
   const tabs = [
     { id: 'dashboard', label: 'Painel', icon: 'dashboard' },
     { id: 'map', label: 'Mapa', icon: 'map' },
-    { id: 'aiTools', label: 'Assistente', icon: 'psychology', badge: 0 }, // Substituído 'registry' por 'aiTools'
+    { id: 'aiTools', label: 'Assistente', icon: 'psychology' }, // Removido 'badge: 0'
     { id: 'chatList', label: 'Tropa', icon: 'groups' },
     { id: 'profileSettings', label: 'Perfil', icon: 'person' },
   ];
@@ -33,7 +33,8 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeScreen, navigateTo }) => {
               <span className={`material-symbols-outlined text-[26px] ${activeScreen === tab.id ? 'fill-icon' : ''}`}>
                 {tab.icon}
               </span>
-              {tab.badge && tab.badge > 0 && (
+              {/* A lógica de exibição do badge só é executada se tab.badge existir e for > 0 */}
+              {('badge' in tab) && tab.badge && tab.badge > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-pmmg-red text-white text-[8px] flex items-center justify-center rounded-full border border-white">
                   {tab.badge}
                 </span>
