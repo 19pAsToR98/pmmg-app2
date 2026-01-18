@@ -1,4 +1,4 @@
-export type Screen = 'onboarding' | 'dashboard' | 'registry' | 'profile' | 'chatList' | 'chatRoom' | 'aiTools' | 'requestAccess' | 'profileSettings' | 'map' | 'contacts' | 'groupManagement';
+export type Screen = 'onboarding' | 'dashboard' | 'registry' | 'profile' | 'chatList' | 'chatRoom' | 'aiTools' | 'register' | 'onboardingSetup' | 'profileSettings' | 'map' | 'contacts' | 'groupManagement';
 
 export type UserRank = 'Soldado' | 'Cabo' | '3º Sargento' | '2º Sargento' | '1º Sargento' | 'Subtenente';
 
