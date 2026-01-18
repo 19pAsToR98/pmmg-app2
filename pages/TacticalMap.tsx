@@ -286,11 +286,11 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           <p class="font-bold text-[11px] text-pmmg-navy uppercase leading-tight">${markerData.title}</p>
           <p class="text-[10px] text-slate-600 mt-1">${markerData.description}</p>
           <div class="flex gap-2 mt-3">
-            <button id="edit-btn-${markerData.id}" class="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center gap-1">
-              <span class="material-symbols-outlined text-sm">edit</span> Editar
+            <button id="edit-btn-${markerData.id}" class="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center">
+              <span class="material-symbols-outlined text-sm">edit</span>
             </button>
-            <button id="share-btn-${markerData.id}" class="flex-1 bg-pmmg-blue text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center gap-1">
-              <span class="material-symbols-outlined text-sm">share</span> Compartilhar
+            <button id="share-btn-${markerData.id}" class="flex-1 bg-pmmg-blue text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center">
+              <span class="material-symbols-outlined text-sm">share</span>
             </button>
             <button id="delete-btn-${markerData.id}" class="px-3 bg-pmmg-red text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center">
               <span class="material-symbols-outlined text-sm">delete</span>
