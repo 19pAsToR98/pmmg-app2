@@ -1,4 +1,4 @@
-export type Screen = 'onboarding' | 'dashboard' | 'registry' | 'profile' | 'chatList' | 'chatRoom' | 'aiTools' | 'requestAccess' | 'profileSettings' | 'map' | 'contacts' | 'groupManagement' | 'signUp' | 'onboardingSteps';
+export type Screen = 'onboarding' | 'dashboard' | 'registry' | 'profile' | 'chatList' | 'chatRoom' | 'aiTools' | 'requestAccess' | 'profileSettings' | 'map' | 'contacts' | 'groupManagement';
 
 export type UserRank = 'Soldado' | 'Cabo' | '3º Sargento' | '2º Sargento' | '1º Sargento' | 'Subtenente';
 
@@ -53,7 +53,7 @@ export interface ChatMessage {
   isMe: boolean;
   type: 'text' | 'alert' | 'image';
   alertData?: {
-    title: string:
+    title: string;
     description: string;
     image: string;
   };

@@ -11,9 +11,7 @@ import RequestAccess from './pages/RequestAccess';
 import ProfileSettings from './pages/ProfileSettings';
 import TacticalMap from './pages/TacticalMap';
 import TacticalContacts from './pages/TacticalContacts';
-import GroupManagement from './pages/GroupManagement';
-import SignUp from './pages/SignUp'; // Novo Import
-import OnboardingSteps from './pages/OnboardingSteps'; // Novo Import
+import GroupManagement from './pages/GroupManagement'; // Importando a nova tela
 
 const INITIAL_SUSPECTS: Suspect[] = [
   {
@@ -160,17 +158,13 @@ const App: React.FC = () => {
   const [customMarkers, setCustomMarkers] = useState<CustomMarker[]>(INITIAL_CUSTOM_MARKERS);
   const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
-  
-  // User Profile States (Updated for Onboarding)
-  const [userName, setUserName] = useState('Rodrigo Alves');
   const [userRank, setUserRank] = useState<UserRank>('Soldado');
-  const [userCity, setUserCity] = useState('Belo Horizonte');
-
+  
   // Chat/Social States
   const [officers, setOfficers] = useState<Officer[]>(MOCK_OFFICERS);
   const [chats, setChats] = useState<Chat[]>(MOCK_CHATS);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
-  const [contacts, setContacts] = useState<Contact[]>(INITIAL_CONTACTS);
+  const [contacts, setContacts] = useState<Contact[]>(INITIAL_CONTACTS); // Novo estado de contatos
 
   const navigateTo = (screen: Screen, center?: [number, number]) => {
     if (center) setMapCenter(center);
@@ -181,22 +175,6 @@ const App: React.FC = () => {
   const openChat = (chatId: string) => {
     setActiveChatId(chatId);
     navigateTo('chatRoom');
-  };
-
-  // --- Lógica de Autenticação/Onboarding ---
-  
-  const handleSignUpSuccess = () => {
-    // Após o cadastro, inicia o Onboarding em etapas
-    navigateTo('onboardingSteps');
-  };
-
-  const handleOnboardingComplete = (name: string, rank: UserRank, city: string, lat: number, lng: number) => {
-    setUserName(name);
-    setUserRank(rank);
-    setUserCity(city);
-    // Poderíamos usar lat/lng para definir a posição inicial do mapa, mas por enquanto, apenas armazenamos a cidade.
-    alert(`Onboarding concluído! Bem-vindo, ${rank} ${name} de ${city}.`);
-    navigateTo('dashboard');
   };
 
   // --- Lógica de Contatos ---
@@ -369,9 +347,7 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen max-w-md mx-auto relative overflow-hidden bg-pmmg-khaki">
-      {currentScreen === 'onboarding' && <Onboarding onEnter={() => navigateTo('signUp')} onRequest={() => navigateTo('requestAccess')} />}
-      {currentScreen === 'signUp' && <SignUp onSignUpSuccess={handleSignUpSuccess} onBack={() => navigateTo('onboarding')} />}
-      {currentScreen === 'onboardingSteps' && <OnboardingSteps onComplete={handleOnboardingComplete} initialRank={userRank} />}
+      {currentScreen === 'onboarding' && <Onboarding onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />}
       {currentScreen === 'dashboard' && <Dashboard navigateTo={navigateTo} onOpenProfile={openProfile} suspects={suspects} />}
       {currentScreen === 'registry' && <SuspectRegistry navigateTo={navigateTo} onSave={addSuspect} allSuspects={suspects} />}
       {currentScreen === 'profile' && <SuspectProfile suspect={selectedSuspect} onBack={() => navigateTo('dashboard')} navigateTo={navigateTo} allSuspects={suspects} onOpenProfile={openProfile} />}
