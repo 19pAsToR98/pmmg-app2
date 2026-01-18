@@ -1,0 +1,9 @@
+{
+  "appId": "com.pmmg.operacional",
+  "appName": "PMMG Operacional",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}
