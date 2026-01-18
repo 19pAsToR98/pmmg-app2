@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Screen } from '../types';
 
@@ -11,10 +10,13 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeScreen, navigateTo }) => {
   const tabs = [
     { id: 'dashboard', label: 'Painel', icon: 'dashboard' },
     { id: 'map', label: 'Mapa', icon: 'map' },
-    { id: 'registry', label: 'Alertas', icon: 'notifications', badge: 3 },
+    { id: 'aiTools', label: 'Assistente', icon: 'psychology', badge: 0 }, // Substituído 'registry' por 'aiTools'
     { id: 'chatList', label: 'Tropa', icon: 'groups' },
     { id: 'profileSettings', label: 'Perfil', icon: 'person' },
   ];
+
+  // Nota: O badge de alertas (registry) foi removido, mas mantive a estrutura para o caso de futuros badges.
+  // Se o badge for necessário para 'Assistente', ele deve ser passado via props. Por enquanto, setei para 0.
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white/95 border-t border-pmmg-navy/10 px-6 pt-3 pb-8 z-50 backdrop-blur-lg max-w-md mx-auto">
@@ -31,7 +33,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeScreen, navigateTo }) => {
               <span className={`material-symbols-outlined text-[26px] ${activeScreen === tab.id ? 'fill-icon' : ''}`}>
                 {tab.icon}
               </span>
-              {tab.badge && (
+              {tab.badge && tab.badge > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-pmmg-red text-white text-[8px] flex items-center justify-center rounded-full border border-white">
                   {tab.badge}
                 </span>
