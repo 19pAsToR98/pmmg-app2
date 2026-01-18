@@ -9,9 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "esbuild-wasm": "^0.27.2",
+    "leaflet": "1.9.4",
     "react": "^19.2.3",
-    "react-dom": "^19.2.3",
-    "leaflet": "1.9.4"
+    "react-dom": "^19.2.3"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
