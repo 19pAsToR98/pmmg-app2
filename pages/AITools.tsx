@@ -37,7 +37,7 @@ const AITools: React.FC<AIToolsProps> = ({ navigateTo, userRank }) => {
                <img 
                 alt="AI Mascot" 
                 className="w-full h-full object-cover rounded-full" 
-                src="avatar/ai_mascot.gif" 
+                src="https://regularmei.com.br/wp-content/uploads/2026/01/ai_mascot.gif" 
               />
             </div>
             <div className="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-4 border-pmmg-khaki"></div>

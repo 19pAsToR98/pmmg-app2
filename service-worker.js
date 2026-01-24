@@ -8,8 +8,6 @@ const urlsToCache = [
   // Adicione aqui os caminhos para seus ícones PWA
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png',
-  // Adicione aqui os caminhos para os assets críticos (como o GIF)
-  '/avatar/ai_mascot.gif',
   // Adicione aqui os caminhos para os arquivos JS/CSS externos que não são importados via importmap (Tailwind, Material Symbols, Leaflet)
   'https://cdn.tailwindcss.com?plugins=forms,container-queries',
   'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap',
