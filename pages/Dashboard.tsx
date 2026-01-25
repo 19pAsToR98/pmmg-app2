@@ -1,37 +1,3 @@
-/**
- * Dashboard.tsx
- * 
- * DESCRIÇÃO GERAL:
- * Esta é a tela inicial (Painel) do sistema PMMG Operacional. Ela serve como um hub central
- * para visualização rápida de estatísticas táticas e acesso a funcionalidades chave.
- * 
- * DISPOSIÇÃO E NAVEGAÇÃO:
- * 
- * 1. HEADER (Topo Fixo):
- *    - Identificação do Sistema ("PMMG OPERACIONAL").
- *    - Status da Patrulha (Mock: Online).
- *    - Botões de Ação Rápida:
- *      - Cadastro de Indivíduo (Registry): Navega para 'registry'.
- *      - Central de Inteligência (AI Tools): Navega para 'aiTools'.
- * 
- * 2. STATS GRID (Grade de Estatísticas):
- *    - Exibe contagens rápidas de Foragidos, Suspeitos, Presos e CPF Cancelados.
- *    - Cada card é clicável e navega para a tela de Gerenciamento de Suspeitos ('suspectsManagement'),
- *      aplicando o filtro de status correspondente.
- * 
- * 3. SEARCH & MANAGEMENT (Busca e Gerenciamento):
- *    - Campo de Busca Unificado: Permite pesquisa rápida de suspeitos por nome, CPF ou alcunha.
- *    - Botão "Consulta e Gerenciamento Completo": Navega para a tela 'suspectsManagement' sem filtros.
- * 
- * 4. RECENT ALERTS (Alertas e Registros Recentes):
- *    - Exibe os 5 suspeitos mais recentes ou os resultados filtrados pela busca.
- *    - Cada item é um card detalhado que permite:
- *      - Visualizar a Ficha Completa (onOpenProfile).
- *      - Compartilhar a ficha (Simulação).
- * 
- * 5. BOTTOM NAV (Navegação Inferior):
- *    - Componente fixo para navegação entre as principais telas: Painel, Mapa, Assistente, Tropa, Perfil.
- */
 import React, { useState } from 'react';
 import { Screen, Suspect } from '../types';
 import BottomNav from '../components/BottomNav';
@@ -79,30 +45,23 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
         <div className="flex items-center gap-2">
           <div className="text-right mr-2">
             <div className="text-[9px] text-white/50 uppercase font-bold">Patrulha 402</div>
-            {/* Status: Online destacado */}
-            <div className="text-[10px] text-green-400 font-black uppercase flex items-center justify-end gap-1 bg-green-900/20 px-2 rounded">
-              <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span> STATUS: ONLINE
+            <div className="text-[10px] text-green-400 font-bold uppercase flex items-center justify-end gap-1">
+              <span className="w-1.5 h-1.5 bg-green-400 rounded-full"></span> Online
             </div>
           </div>
-          {/* Botão para Novo Cadastro */}
+          {/* Botão para Cadastro de Indivíduo (Registry) */}
           <button 
             onClick={() => navigateTo('registry')}
-            title="Novo Cadastro de Suspeito"
-            className="bg-pmmg-yellow/20 p-1.5 rounded-full border border-pmmg-yellow/50 text-pmmg-yellow relative group"
+            className="bg-pmmg-yellow/20 p-1.5 rounded-full border border-pmmg-yellow/50 text-pmmg-yellow"
           >
             <span className="material-symbols-outlined text-xl">person_add</span>
-            {/* Tooltip/Label for clarity */}
-            <span className="absolute top-full right-0 mt-2 bg-pmmg-navy text-white text-[8px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Novo Cadastro</span>
           </button>
-          {/* Botão para Análise de Inteligência */}
+          {/* Botão para AI Tools */}
           <button 
             onClick={() => navigateTo('aiTools')}
-            title="Ferramentas de Inteligência"
-            className="bg-white/10 p-1.5 rounded-full border border-white/20 text-white relative group"
+            className="bg-white/10 p-1.5 rounded-full border border-white/20 text-white"
           >
             <span className="material-symbols-outlined text-xl">psychology</span>
-            {/* Tooltip/Label for clarity */}
-            <span className="absolute top-full right-0 mt-2 bg-pmmg-navy text-white text-[8px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Análise de Inteligência</span>
           </button>
         </div>
       </header>
@@ -116,7 +75,6 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
               <span className="text-2xl font-black text-pmmg-red">{stats.foragidos}</span>
               <span className="material-symbols-outlined text-pmmg-red/30">release_alert</span>
             </div>
-            <p className="text-[8px] font-black text-pmmg-red uppercase mt-2">Ver Detalhes dos Suspeitos</p>
           </button>
           <button onClick={() => handleCardClick('Suspeito')} className="pmmg-card p-3 border-l-4 border-l-pmmg-yellow active:scale-[0.98] transition-transform text-left">
             <span className="text-[10px] font-bold uppercase text-pmmg-navy/60 block mb-1">Suspeitos</span>
@@ -124,7 +82,6 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
               <span className="text-2xl font-black text-pmmg-navy">{stats.suspeitos}</span>
               <span className="material-symbols-outlined text-pmmg-yellow">visibility</span>
             </div>
-            <p className="text-[8px] font-black text-pmmg-navy uppercase mt-2">Ver Detalhes dos Suspeitos</p>
           </button>
           <button onClick={() => handleCardClick('Preso')} className="pmmg-card p-3 border-l-4 border-l-pmmg-blue active:scale-[0.98] transition-transform text-left">
             <span className="text-[10px] font-bold uppercase text-pmmg-navy/60 block mb-1">Presos</span>
@@ -132,7 +89,6 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
               <span className="text-2xl font-black text-pmmg-blue">{stats.presos}</span>
               <span className="material-symbols-outlined text-pmmg-blue/30">lock</span>
             </div>
-            <p className="text-[8px] font-black text-pmmg-blue uppercase mt-2">Ver Detalhes dos Suspeitos</p>
           </button>
           <button onClick={() => handleCardClick('CPF Cancelado')} className="pmmg-card p-3 border-l-4 border-l-slate-600 active:scale-[0.98] transition-transform text-left">
             <span className="text-[10px] font-bold uppercase text-pmmg-navy/60 block mb-1">CPF Cancelado</span>
@@ -140,7 +96,6 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
               <span className="text-2xl font-black text-slate-600">{stats.cancelados}</span>
               <span className="material-symbols-outlined text-slate-400">cancel</span>
             </div>
-            <p className="text-[8px] font-black text-slate-600 uppercase mt-2">Ver Detalhes dos Suspeitos</p>
           </button>
         </section>
 
@@ -165,7 +120,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
             className="w-full mt-3 bg-pmmg-navy text-pmmg-yellow text-[10px] font-bold py-2 rounded-xl uppercase tracking-widest flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
           >
             <span className="material-symbols-outlined text-lg">manage_search</span>
-            Gerenciar Todos os Suspeitos
+            Consulta e Gerenciamento Completo
           </button>
         </section>
 
