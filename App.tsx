@@ -362,6 +362,12 @@ const App: React.FC = () => {
     navigateTo('dashboard');
   };
 
+  const deleteSuspects = (ids: string[]) => {
+    setSuspects(prev => prev.filter(s => !ids.includes(s.id)));
+    // Também remover marcadores customizados se houver IDs correspondentes (embora improvável)
+    setCustomMarkers(prev => prev.filter(m => !ids.includes(m.id)));
+  };
+
   const addCustomMarker = (marker: CustomMarker) => {
     setCustomMarkers(prev => [...prev, marker]);
   };
@@ -438,6 +444,7 @@ const App: React.FC = () => {
           onOpenProfile={openProfile}
           suspects={suspects}
           initialStatusFilter={initialSuspectFilter}
+          deleteSuspects={deleteSuspects} // Passando a função de exclusão
         />
       )}
       {currentScreen === 'chatList' && (

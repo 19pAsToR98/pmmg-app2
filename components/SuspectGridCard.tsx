@@ -3,18 +3,18 @@ import { Suspect } from '../types';
 
 interface SuspectGridCardProps {
   suspect: Suspect;
-  onOpenProfile: (id: string) => void;
+  // onOpenProfile: (id: string) => void; // Removido, a navegação é gerenciada pelo pai
 }
 
-const SuspectGridCard: React.FC<SuspectGridCardProps> = ({ suspect, onOpenProfile }) => {
+const SuspectGridCard: React.FC<SuspectGridCardProps> = ({ suspect }) => {
   const statusColor = suspect.status === 'Foragido' ? 'bg-pmmg-red' : 
                         suspect.status === 'Suspeito' ? 'bg-pmmg-yellow text-pmmg-navy' :
                         suspect.status === 'Preso' ? 'bg-pmmg-blue' : 'bg-slate-700';
   
   return (
     <div 
-      onClick={() => onOpenProfile(suspect.id)}
-      className="pmmg-card overflow-hidden transition-all active:scale-[0.98] cursor-pointer flex flex-col h-full"
+      // onClick={() => onOpenProfile(suspect.id)} // Removido
+      className="pmmg-card overflow-hidden transition-all cursor-pointer flex flex-col h-full"
     >
       <div className="w-full aspect-[3/4] relative bg-slate-200 shrink-0">
         <img alt={suspect.name} className="w-full h-full object-cover" src={suspect.photoUrl} />
@@ -29,6 +29,7 @@ const SuspectGridCard: React.FC<SuspectGridCardProps> = ({ suspect, onOpenProfil
         </div>
         <div className="mt-2">
           <button 
+            // O botão interno não deve ter ação se o clique for gerenciado pelo pai
             className="w-full bg-pmmg-navy text-white text-[8px] font-bold py-1.5 rounded-lg uppercase tracking-wide"
           >
             Ver Ficha

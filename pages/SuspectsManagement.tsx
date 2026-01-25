@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { Suspect, Screen } from '../types';
 import BottomNav from '../components/BottomNav';
 import SuspectGridCard from '../components/SuspectGridCard';
@@ -11,13 +11,45 @@ interface SuspectsManagementProps {
   onOpenProfile: (id: string) => void;
   suspects: Suspect[];
   initialStatusFilter: SuspectStatusFilter;
+  deleteSuspects: (ids: string[]) => void; // Nova prop
 }
 
 const STATUS_OPTIONS: SuspectStatusFilter[] = ['Todos', 'Foragido', 'Suspeito', 'Preso', 'CPF Cancelado'];
 
-const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onOpenProfile, suspects, initialStatusFilter }) => {
+// Hook customizado para simular Long Press
+const useLongPress = (callback: () => void, ms = 500) => {
+  const timerRef = useRef<number | null>(null);
+  const isLongPress = useRef(false);
+
+  const start = useCallback(() => {
+    isLongPress.current = false;
+    timerRef.current = setTimeout(() => {
+      isLongPress.current = true;
+      callback();
+    }, ms);
+  }, [callback, ms]);
+
+  const clear = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+  }, []);
+
+  return {
+    onMouseDown: start,
+    onMouseUp: clear,
+    onMouseLeave: clear,
+    onTouchStart: start,
+    onTouchEnd: clear,
+    isLongPress,
+  };
+};
+
+const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onOpenProfile, suspects, initialStatusFilter, deleteSuspects }) => {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedSuspectIds, setSelectedSuspectIds] = useState<string[]>([]);
   
   // States para filtros
   const [globalSearch, setGlobalSearch] = useState('');
@@ -65,10 +97,6 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
         
         if (!matchesGlobal) return false;
       }
-
-      // Filtro de Data (Apenas para simular o campo, sem lógica de filtragem complexa)
-      // Se dateFilter for usado, a lógica de filtragem real precisaria de um campo 'registryDate' no tipo Suspect.
-      // Por enquanto, ignoramos a data na filtragem real, mas mantemos o campo na UI.
       
       return true;
     });
@@ -80,23 +108,95 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
     setStatusFilter('Todos');
   };
 
+  // --- Lógica de Seleção ---
+
+  const toggleSelection = (id: string) => {
+    setSelectedSuspectIds(prev => 
+      prev.includes(id) ? prev.filter(sId => sId !== id) : [...prev, id]
+    );
+  };
+
+  const handleLongPress = (id: string) => {
+    if (!isSelectionMode) {
+      setIsSelectionMode(true);
+      setSelectedSuspectIds([id]);
+    }
+  };
+
+  const handleCardClick = (id: string) => {
+    if (isSelectionMode) {
+      toggleSelection(id);
+    } else {
+      onOpenProfile(id);
+    }
+  };
+
+  const handleExitSelectionMode = () => {
+    setIsSelectionMode(false);
+    setSelectedSuspectIds([]);
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedSuspectIds.length > 0 && window.confirm(`Tem certeza que deseja excluir ${selectedSuspectIds.length} registro(s)?`)) {
+      deleteSuspects(selectedSuspectIds);
+      handleExitSelectionMode();
+    }
+  };
+
+  // --- Componentes de Renderização ---
+
+  const renderSuspectGridCard = (suspect: Suspect) => {
+    const isSelected = selectedSuspectIds.includes(suspect.id);
+    
+    const longPressProps = useLongPress(() => handleLongPress(suspect.id));
+
+    return (
+      <div 
+        key={suspect.id} 
+        onClick={() => handleCardClick(suspect.id)}
+        {...longPressProps}
+        className={`relative transition-all cursor-pointer ${isSelectionMode ? 'active:scale-[0.98]' : 'active:scale-[0.98]'}`}
+      >
+        <SuspectGridCard suspect={suspect} onOpenProfile={onOpenProfile} />
+        
+        {isSelectionMode && (
+          <div className={`absolute top-2 right-2 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+            isSelected ? 'bg-pmmg-red border-white shadow-lg' : 'bg-white/70 border-pmmg-navy/30'
+          }`}>
+            {isSelected && <span className="material-symbols-outlined text-white text-sm fill-icon">check</span>}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderSuspectListCard = (s: Suspect) => {
+    const isSelected = selectedSuspectIds.includes(s.id);
+    const longPressProps = useLongPress(() => handleLongPress(s.id));
+
     const statusColor = s.status === 'Foragido' ? 'bg-pmmg-red' : 
                         s.status === 'Suspeito' ? 'bg-pmmg-yellow text-pmmg-navy' :
                         s.status === 'Preso' ? 'bg-pmmg-blue' : 'bg-slate-700';
-    const borderColor = s.status === 'Foragido' ? 'border-l-pmmg-red' : 
-                        s.status === 'Suspeito' ? 'border-l-pmmg-yellow' :
-                        s.status === 'Preso' ? 'border-l-pmmg-blue' : 'border-l-slate-600';
     
-    // Pega o primeiro veículo para exibição na lista
     const primaryVehicle = s.vehicles && s.vehicles.length > 0 ? `${s.vehicles[0].plate} (${s.vehicles[0].model})` : null;
 
     return (
       <div 
         key={s.id} 
-        onClick={() => onOpenProfile(s.id)}
-        className="pmmg-card flex p-3 gap-4 items-center active:scale-[0.98] transition-all shadow-sm border-l-4 border-l-pmmg-navy"
+        onClick={() => handleCardClick(s.id)}
+        {...longPressProps}
+        className={`pmmg-card flex p-3 gap-4 items-center transition-all shadow-sm border-l-4 border-l-pmmg-navy relative ${
+          isSelectionMode ? (isSelected ? 'bg-pmmg-red/10 border-l-pmmg-red ring-1 ring-pmmg-red' : 'opacity-70') : 'active:scale-[0.98]'
+        }`}
       >
+        {isSelectionMode && (
+          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all shrink-0 ${
+            isSelected ? 'bg-pmmg-red border-white shadow-lg' : 'bg-white/70 border-pmmg-navy/30'
+          }`}>
+            {isSelected && <span className="material-symbols-outlined text-white text-sm fill-icon">check</span>}
+          </div>
+        )}
+        
         <div className="w-16 h-16 rounded-xl bg-slate-200 overflow-hidden border-2 border-white shadow-md shrink-0">
           <img src={s.photoUrl} className="w-full h-full object-cover" alt={s.name} />
         </div>
@@ -131,128 +231,137 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
-      <header className="sticky top-0 z-[100] bg-pmmg-navy px-4 pt-6 pb-4 shadow-xl shrink-0">
+      <header className={`sticky top-0 z-[100] px-4 pt-6 pb-4 shadow-xl shrink-0 transition-colors ${isSelectionMode ? 'bg-pmmg-red' : 'bg-pmmg-navy'}`}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <button onClick={() => navigateTo('dashboard')} className="text-white active:scale-90 transition-transform">
-              <span className="material-symbols-outlined">arrow_back_ios</span>
+            <button onClick={isSelectionMode ? handleExitSelectionMode : () => navigateTo('dashboard')} className="text-white active:scale-90 transition-transform">
+              <span className="material-symbols-outlined">{isSelectionMode ? 'close' : 'arrow_back_ios'}</span>
             </button>
             <div>
-              <h1 className="font-bold text-sm leading-none text-white uppercase tracking-tight">Banco de Dados</h1>
-              <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">Consulta Unificada SISP</p>
+              <h1 className="font-bold text-sm leading-none text-white uppercase tracking-tight">
+                {isSelectionMode ? `${selectedSuspectIds.length} Selecionado(s)` : 'Banco de Dados'}
+              </h1>
+              <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">
+                {isSelectionMode ? 'Modo de Seleção Ativo' : 'Consulta Unificada SISP'}
+              </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            {/* Novo Registro Button */}
-            <button 
-              onClick={() => navigateTo('registry')}
-              className="bg-pmmg-red/20 p-2 rounded-lg text-pmmg-red border border-pmmg-red/50 active:bg-pmmg-red/30 transition-all"
-              title="Novo Registro de Indivíduo"
-            >
-              <span className="material-symbols-outlined text-lg fill-icon">person_add</span>
-            </button>
-            {/* Toggle View Mode */}
-            <button 
-              onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-              className="bg-white/10 p-2 rounded-lg text-white border border-white/20 active:bg-white/20 transition-all"
-              title="Alternar Visualização"
-            >
-              <span className="material-symbols-outlined text-lg">
-                {viewMode === 'grid' ? 'view_list' : 'grid_view'}
-              </span>
-            </button>
-            {/* Toggle Filter Menu */}
-            <button 
-              onClick={() => setShowFilterMenu(!showFilterMenu)}
-              className={`p-2 rounded-lg flex items-center justify-center transition-all ${showFilterMenu || statusFilter !== 'Todos' || dateFilter ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white hover:bg-white/10'}`}
-            >
-              <span className={`material-symbols-outlined text-xl ${showFilterMenu ? 'fill-icon' : ''}`}>tune</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Barra de Pesquisa Única com Ícone de Filtro */}
-        <div className="relative group mb-2">
-          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-            <span className="material-symbols-outlined text-pmmg-navy text-xl group-focus-within:text-pmmg-yellow transition-colors">manage_search</span>
-          </div>
-          <input 
-            value={globalSearch}
-            onChange={(e) => setGlobalSearch(e.target.value)}
-            placeholder="NOME, VULGO, PLACA, ENDEREÇO..."
-            className="w-full pl-12 pr-24 py-4 bg-white rounded-2xl border-none focus:ring-4 focus:ring-pmmg-yellow/20 text-xs font-black uppercase shadow-inner placeholder:text-slate-400"
-          />
-          <div className="absolute inset-y-0 right-2 flex items-center gap-1">
-            {globalSearch && (
+          
+          {!isSelectionMode && (
+            <div className="flex items-center gap-2">
+              {/* Novo Registro Button */}
               <button 
-                onClick={() => setGlobalSearch('')}
-                className="p-1 text-slate-400 hover:text-pmmg-navy transition-colors"
+                onClick={() => navigateTo('registry')}
+                className="bg-pmmg-red/20 p-2 rounded-lg text-pmmg-red border border-pmmg-red/50 active:bg-pmmg-red/30 transition-all"
+                title="Novo Registro de Indivíduo"
               >
-                <span className="material-symbols-outlined text-lg">close</span>
+                <span className="material-symbols-outlined text-lg fill-icon">person_add</span>
               </button>
-            )}
-          </div>
-
-          {/* Menu de Filtro Flutuante */}
-          {showFilterMenu && (
-            <div 
-              ref={filterMenuRef}
-              className="absolute top-full right-0 mt-3 w-72 bg-white rounded-3xl shadow-2xl border border-pmmg-navy/10 z-[200] p-5 animate-in fade-in slide-in-from-top-2 duration-200"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-pmmg-navy/60">Filtros Avançados</h4>
-                <button 
-                  onClick={handleClearFilters}
-                  className="text-[9px] font-black text-pmmg-red uppercase"
-                >
-                  Limpar Tudo
-                </button>
-              </div>
-
-              {/* Status Section */}
-              <div className="mb-5">
-                <label className="block text-[9px] font-black uppercase text-pmmg-navy/40 mb-2 tracking-wider">Status Operacional</label>
-                <div className="flex flex-wrap gap-2">
-                  {STATUS_OPTIONS.map(opt => (
-                    <button
-                      key={opt}
-                      onClick={() => setStatusFilter(opt)}
-                      className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all border ${
-                        statusFilter === opt 
-                        ? 'bg-pmmg-navy text-white border-pmmg-navy shadow-md' 
-                        : 'bg-slate-50 text-pmmg-navy/60 border-slate-200'
-                      }`}
-                    >
-                      {opt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Date Section (Mocked) */}
-              <div>
-                <label className="block text-[9px] font-black uppercase text-pmmg-navy/40 mb-2 tracking-wider">Data de Registro (Mock)</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-sm text-pmmg-navy/30">calendar_today</span>
-                  <input 
-                    type="text" // Changed to text since we don't have registryDate field
-                    value={dateFilter}
-                    onChange={(e) => setDateFilter(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-xs font-bold text-pmmg-navy focus:ring-2 focus:ring-pmmg-navy/10 transition-all"
-                    placeholder="DD/MM/AAAA"
-                  />
-                </div>
-              </div>
-
+              {/* Toggle View Mode */}
               <button 
-                onClick={() => setShowFilterMenu(false)}
-                className="w-full mt-6 bg-pmmg-navy text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg active:scale-95 transition-all"
+                onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+                className="bg-white/10 p-2 rounded-lg text-white border border-white/20 active:bg-white/20 transition-all"
+                title="Alternar Visualização"
               >
-                Aplicar Filtros
+                <span className="material-symbols-outlined text-lg">
+                  {viewMode === 'grid' ? 'view_list' : 'grid_view'}
+                </span>
+              </button>
+              {/* Toggle Filter Menu */}
+              <button 
+                onClick={() => setShowFilterMenu(!showFilterMenu)}
+                className={`p-2 rounded-lg flex items-center justify-center transition-all ${showFilterMenu || statusFilter !== 'Todos' || dateFilter ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white hover:bg-white/10'}`}
+              >
+                <span className={`material-symbols-outlined text-xl ${showFilterMenu ? 'fill-icon' : ''}`}>tune</span>
               </button>
             </div>
           )}
         </div>
+
+        {/* Barra de Pesquisa Única com Ícone de Filtro */}
+        {!isSelectionMode && (
+          <div className="relative group mb-2">
+            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+              <span className="material-symbols-outlined text-pmmg-navy text-xl group-focus-within:text-pmmg-yellow transition-colors">manage_search</span>
+            </div>
+            <input 
+              value={globalSearch}
+              onChange={(e) => setGlobalSearch(e.target.value)}
+              placeholder="NOME, VULGO, PLACA, ENDEREÇO..."
+              className="w-full pl-12 pr-24 py-4 bg-white rounded-2xl border-none focus:ring-4 focus:ring-pmmg-yellow/20 text-xs font-black uppercase shadow-inner placeholder:text-slate-400"
+            />
+            <div className="absolute inset-y-0 right-2 flex items-center gap-1">
+              {globalSearch && (
+                <button 
+                  onClick={() => setGlobalSearch('')}
+                  className="p-1 text-slate-400 hover:text-pmmg-navy transition-colors"
+                >
+                  <span className="material-symbols-outlined text-lg">close</span>
+                </button>
+              )}
+            </div>
+
+            {/* Menu de Filtro Flutuante */}
+            {showFilterMenu && (
+              <div 
+                ref={filterMenuRef}
+                className="absolute top-full right-0 mt-3 w-72 bg-white rounded-3xl shadow-2xl border border-pmmg-navy/10 z-[200] p-5 animate-in fade-in slide-in-from-top-2 duration-200"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-pmmg-navy/60">Filtros Avançados</h4>
+                  <button 
+                    onClick={handleClearFilters}
+                    className="text-[9px] font-black text-pmmg-red uppercase"
+                  >
+                    Limpar Tudo
+                  </button>
+                </div>
+
+                {/* Status Section */}
+                <div className="mb-5">
+                  <label className="block text-[9px] font-black uppercase text-pmmg-navy/40 mb-2 tracking-wider">Status Operacional</label>
+                  <div className="flex flex-wrap gap-2">
+                    {STATUS_OPTIONS.map(opt => (
+                      <button
+                        key={opt}
+                        onClick={() => setStatusFilter(opt)}
+                        className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all border ${
+                          statusFilter === opt 
+                          ? 'bg-pmmg-navy text-white border-pmmg-navy shadow-md' 
+                          : 'bg-slate-50 text-pmmg-navy/60 border-slate-200'
+                        }`}
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Date Section (Mocked) */}
+                <div>
+                  <label className="block text-[9px] font-black uppercase text-pmmg-navy/40 mb-2 tracking-wider">Data de Registro (Mock)</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-sm text-pmmg-navy/30">calendar_today</span>
+                    <input 
+                      type="text" // Changed to text since we don't have registryDate field
+                      value={dateFilter}
+                      onChange={(e) => setDateFilter(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-xs font-bold text-pmmg-navy focus:ring-2 focus:ring-pmmg-navy/10 transition-all"
+                      placeholder="DD/MM/AAAA"
+                    />
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => setShowFilterMenu(false)}
+                  className="w-full mt-6 bg-pmmg-navy text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg active:scale-95 transition-all"
+                >
+                  Aplicar Filtros
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </header>
 
       <main className="flex-1 overflow-y-auto pb-40 px-4 pt-4 no-scrollbar">
@@ -270,9 +379,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
           {filteredSuspects.length > 0 ? (
             viewMode === 'grid' ? (
               <div className="grid grid-cols-2 gap-4">
-                {filteredSuspects.map(suspect => (
-                  <SuspectGridCard key={suspect.id} suspect={suspect} onOpenProfile={onOpenProfile} />
-                ))}
+                {filteredSuspects.map(renderSuspectGridCard)}
               </div>
             ) : (
               <div className="space-y-3">
@@ -289,7 +396,22 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
         </section>
       </main>
       
-      {/* Removido o Floating Action Button */}
+      {/* Floating Action Bar for Deletion */}
+      {isSelectionMode && (
+        <div className="fixed bottom-[80px] left-0 right-0 z-50 max-w-md mx-auto px-4 animate-in slide-in-from-bottom-4 duration-300">
+          <div className="bg-pmmg-red text-white p-3 rounded-xl shadow-2xl flex items-center justify-between border-2 border-white">
+            <span className="text-sm font-bold uppercase">{selectedSuspectIds.length} Selecionado(s)</span>
+            <button 
+              onClick={handleDeleteSelected}
+              disabled={selectedSuspectIds.length === 0}
+              className="bg-white text-pmmg-red font-bold px-4 py-2 rounded-lg text-xs uppercase flex items-center gap-2 active:scale-95 transition-transform disabled:opacity-50"
+            >
+              <span className="material-symbols-outlined text-lg">delete</span>
+              Excluir
+            </button>
+          </div>
+        </div>
+      )}
 
       <BottomNav activeScreen="dashboard" navigateTo={navigateTo} />
     </div>
