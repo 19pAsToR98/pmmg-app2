@@ -1,3 +1,37 @@
+/**
+ * Dashboard.tsx
+ * 
+ * DESCRIÇÃO GERAL:
+ * Esta é a tela inicial (Painel) do sistema PMMG Operacional. Ela serve como um hub central
+ * para visualização rápida de estatísticas táticas e acesso a funcionalidades chave.
+ * 
+ * DISPOSIÇÃO E NAVEGAÇÃO:
+ * 
+ * 1. HEADER (Topo Fixo):
+ *    - Identificação do Sistema ("PMMG OPERACIONAL").
+ *    - Status da Patrulha (Mock: Online).
+ *    - Botões de Ação Rápida:
+ *      - Cadastro de Indivíduo (Registry): Navega para 'registry'.
+ *      - Central de Inteligência (AI Tools): Navega para 'aiTools'.
+ * 
+ * 2. STATS GRID (Grade de Estatísticas):
+ *    - Exibe contagens rápidas de Foragidos, Suspeitos, Presos e CPF Cancelados.
+ *    - Cada card é clicável e navega para a tela de Gerenciamento de Suspeitos ('suspectsManagement'),
+ *      aplicando o filtro de status correspondente.
+ * 
+ * 3. SEARCH & MANAGEMENT (Busca e Gerenciamento):
+ *    - Campo de Busca Unificado: Permite pesquisa rápida de suspeitos por nome, CPF ou alcunha.
+ *    - Botão "Consulta e Gerenciamento Completo": Navega para a tela 'suspectsManagement' sem filtros.
+ * 
+ * 4. RECENT ALERTS (Alertas e Registros Recentes):
+ *    - Exibe os 5 suspeitos mais recentes ou os resultados filtrados pela busca.
+ *    - Cada item é um card detalhado que permite:
+ *      - Visualizar a Ficha Completa (onOpenProfile).
+ *      - Compartilhar a ficha (Simulação).
+ * 
+ * 5. BOTTOM NAV (Navegação Inferior):
+ *    - Componente fixo para navegação entre as principais telas: Painel, Mapa, Assistente, Tropa, Perfil.
+ */
 import React, { useState } from 'react';
 import { Screen, Suspect } from '../types';
 import BottomNav from '../components/BottomNav';
