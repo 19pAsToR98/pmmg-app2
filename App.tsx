@@ -24,7 +24,7 @@ const INITIAL_SUSPECTS: Suspect[] = [
     status: 'Foragido',
     lastSeen: 'Praça da Liberdade, BH',
     timeAgo: '23 min',
-    photoUrl: 'https://i.pravatar.cc/150?img=68', // Foto de pessoa
+    photoUrl: 'https://picsum.photos/seed/mugshot1/200/250?grayscale&blur=1', // Foto de prontuário
     motherName: 'Maria Helena Silveira',
     birthDate: '12/05/1990',
     articles: ['Art. 157', 'Art. 33'],
@@ -47,7 +47,7 @@ const INITIAL_SUSPECTS: Suspect[] = [
     status: 'Suspeito',
     lastSeen: 'Mercado Central, BH',
     timeAgo: '1 hora',
-    photoUrl: 'https://i.pravatar.cc/150?img=12', // Foto de pessoa
+    photoUrl: 'https://picsum.photos/seed/mugshot2/200/250?grayscale', // Foto de prontuário
     motherName: 'Ana Paula Lima',
     birthDate: '22/10/1995',
     articles: ['Art. 180'],
@@ -68,7 +68,7 @@ const INITIAL_SUSPECTS: Suspect[] = [
     status: 'Suspeito',
     lastSeen: 'Rua da Bahia, BH',
     timeAgo: '3 dias',
-    photoUrl: 'https://i.pravatar.cc/150?img=45', // Foto de pessoa
+    photoUrl: 'https://picsum.photos/seed/mugshot3/200/250?grayscale', // Foto de prontuário
     motherName: 'Helena Rocha',
     birthDate: '01/01/1998',
     articles: ['Art. 33'],
@@ -86,7 +86,7 @@ const INITIAL_SUSPECTS: Suspect[] = [
     status: 'Preso',
     lastSeen: 'Penitenciária Nelson Hungria',
     timeAgo: '1 ano',
-    photoUrl: 'https://i.pravatar.cc/150?img=30',
+    photoUrl: 'https://picsum.photos/seed/mugshot4/200/250?grayscale&blur=1',
     motherName: 'Joana Oliveira',
     birthDate: '10/03/1985',
     articles: ['Art. 121', 'Art. 33'],
@@ -104,7 +104,7 @@ const INITIAL_SUSPECTS: Suspect[] = [
     status: 'Foragido',
     lastSeen: 'Avenida Afonso Pena, 1500',
     timeAgo: '5 horas',
-    photoUrl: 'https://i.pravatar.cc/150?img=21',
+    photoUrl: 'https://picsum.photos/seed/mugshot5/200/250?grayscale',
     motherName: 'Lúcia Mendes',
     birthDate: '05/11/1992',
     articles: ['Art. 155'],
@@ -122,7 +122,7 @@ const INITIAL_SUSPECTS: Suspect[] = [
     status: 'CPF Cancelado',
     lastSeen: 'Registro Antigo',
     timeAgo: '2 anos',
-    photoUrl: 'https://i.pravatar.cc/150?img=55',
+    photoUrl: 'https://picsum.photos/seed/mugshot6/200/250?grayscale',
     motherName: 'Clara Souza',
     birthDate: '20/07/1978',
     articles: [],
