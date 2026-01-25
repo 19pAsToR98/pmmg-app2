@@ -4,24 +4,30 @@ import BottomNav from '../components/BottomNav';
 
 interface DashboardProps {
   navigateTo: (screen: Screen) => void;
+  navigateToSuspectsManagement: (status: Suspect['status'] | 'Todos') => void;
   onOpenProfile: (id: string) => void;
   suspects: Suspect[];
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ navigateTo, onOpenProfile, suspects }) => {
+const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsManagement, onOpenProfile, suspects }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Quick filter for recent alerts on the dashboard (limited to top 5 if no search term)
   const filteredSuspects = suspects.filter(s => 
     s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     s.cpf.includes(searchTerm) ||
     (s.nickname && s.nickname.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  ).slice(0, searchTerm ? suspects.length : 5); 
 
   const stats = {
     foragidos: suspects.filter(s => s.status === 'Foragido').length,
     suspeitos: suspects.filter(s => s.status === 'Suspeito').length,
     presos: suspects.filter(s => s.status === 'Preso').length,
     cancelados: suspects.filter(s => s.status === 'CPF Cancelado').length,
+  };
+
+  const handleCardClick = (status: Suspect['status']) => {
+    navigateToSuspectsManagement(status);
   };
 
   return (
@@ -63,34 +69,34 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, onOpenProfile, suspec
       <main className="flex-1 overflow-y-auto pb-32 no-scrollbar">
         {/* Stats Grid */}
         <section className="px-4 pt-4 grid grid-cols-2 gap-3">
-          <div className="pmmg-card p-3 border-l-4 border-l-pmmg-red">
+          <button onClick={() => handleCardClick('Foragido')} className="pmmg-card p-3 border-l-4 border-l-pmmg-red active:scale-[0.98] transition-transform text-left">
             <span className="text-[10px] font-bold uppercase text-pmmg-navy/60 block mb-1">Foragidos</span>
             <div className="flex items-end justify-between">
               <span className="text-2xl font-black text-pmmg-red">{stats.foragidos}</span>
               <span className="material-symbols-outlined text-pmmg-red/30">release_alert</span>
             </div>
-          </div>
-          <div className="pmmg-card p-3 border-l-4 border-l-pmmg-yellow">
+          </button>
+          <button onClick={() => handleCardClick('Suspeito')} className="pmmg-card p-3 border-l-4 border-l-pmmg-yellow active:scale-[0.98] transition-transform text-left">
             <span className="text-[10px] font-bold uppercase text-pmmg-navy/60 block mb-1">Suspeitos</span>
             <div className="flex items-end justify-between">
               <span className="text-2xl font-black text-pmmg-navy">{stats.suspeitos}</span>
               <span className="material-symbols-outlined text-pmmg-yellow">visibility</span>
             </div>
-          </div>
-          <div className="pmmg-card p-3 border-l-4 border-l-pmmg-blue">
+          </button>
+          <button onClick={() => handleCardClick('Preso')} className="pmmg-card p-3 border-l-4 border-l-pmmg-blue active:scale-[0.98] transition-transform text-left">
             <span className="text-[10px] font-bold uppercase text-pmmg-navy/60 block mb-1">Presos</span>
             <div className="flex items-end justify-between">
               <span className="text-2xl font-black text-pmmg-blue">{stats.presos}</span>
               <span className="material-symbols-outlined text-pmmg-blue/30">lock</span>
             </div>
-          </div>
-          <div className="pmmg-card p-3 border-l-4 border-l-slate-600">
+          </button>
+          <button onClick={() => handleCardClick('CPF Cancelado')} className="pmmg-card p-3 border-l-4 border-l-slate-600 active:scale-[0.98] transition-transform text-left">
             <span className="text-[10px] font-bold uppercase text-pmmg-navy/60 block mb-1">CPF Cancelado</span>
             <div className="flex items-end justify-between">
               <span className="text-2xl font-black text-slate-600">{stats.cancelados}</span>
               <span className="material-symbols-outlined text-slate-400">cancel</span>
             </div>
-          </div>
+          </button>
         </section>
 
         {/* Search */}
@@ -106,15 +112,23 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, onOpenProfile, suspec
               placeholder="BUSCAR INDIVÍDUO (NOME, CPF, ALCUNHA)" 
               type="text" 
             />
-            {/* Removed barcode scanner button */}
           </div>
+          
+          {/* Button to navigate to full management page */}
+          <button 
+            onClick={() => navigateToSuspectsManagement('Todos')}
+            className="w-full mt-3 bg-pmmg-navy text-pmmg-yellow text-[10px] font-bold py-2 rounded-xl uppercase tracking-widest flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+          >
+            <span className="material-symbols-outlined text-lg">manage_search</span>
+            Consulta e Gerenciamento Completo
+          </button>
         </section>
 
         {/* Recent Alerts */}
         <div className="px-4 pt-8 pb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="h-4 w-1.5 bg-pmmg-red rounded-full"></div>
-            <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-widest italic">Alertas e Registros</h3>
+            <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-widest italic">Alertas e Registros Recentes ({searchTerm ? 'Filtrados' : 'Top 5'})</h3>
           </div>
           <span className="text-[10px] font-bold text-pmmg-navy/40 uppercase">{filteredSuspects.length} Encontrados</span>
         </div>

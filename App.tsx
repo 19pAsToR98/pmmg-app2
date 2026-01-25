@@ -13,6 +13,7 @@ import TacticalMap from './pages/TacticalMap';
 import TacticalContacts from './pages/TacticalContacts';
 import GroupManagement from './pages/GroupManagement';
 import OnboardingSetup from './pages/OnboardingSetup'; // Novo componente
+import SuspectsManagement from './pages/SuspectsManagement'; // Novo componente
 
 const INITIAL_SUSPECTS: Suspect[] = [
   {
@@ -166,6 +167,9 @@ const App: React.FC = () => {
   const [userCity, setUserCity] = useState('Belo Horizonte');
   const [isRegistered, setIsRegistered] = useState(false); // New state for registration status
   
+  // Suspect Management Filter State
+  const [initialSuspectFilter, setInitialSuspectFilter] = useState<Suspect['status'] | 'Todos'>('Todos');
+  
   // Chat/Social States
   const [officers, setOfficers] = useState<Officer[]>(MOCK_OFFICERS);
   const [chats, setChats] = useState<Chat[]>(MOCK_CHATS);
@@ -176,6 +180,11 @@ const App: React.FC = () => {
     if (center) setMapCenter(center);
     else if (screen !== 'map') setMapCenter(null);
     setCurrentScreen(screen);
+  };
+  
+  const navigateToSuspectsManagement = (statusFilter: Suspect['status'] | 'Todos' = 'Todos') => {
+    setInitialSuspectFilter(statusFilter);
+    navigateTo('suspectsManagement');
   };
 
   const openChat = (chatId: string) => {
@@ -366,9 +375,17 @@ const App: React.FC = () => {
       
       {currentScreen === 'onboardingSetup' && isRegistered && <OnboardingSetup onComplete={handleOnboardingComplete} />}
       
-      {currentScreen === 'dashboard' && <Dashboard navigateTo={navigateTo} onOpenProfile={openProfile} suspects={suspects} />}
+      {currentScreen === 'dashboard' && <Dashboard navigateTo={navigateTo} navigateToSuspectsManagement={navigateToSuspectsManagement} onOpenProfile={openProfile} suspects={suspects} />}
       {currentScreen === 'registry' && <SuspectRegistry navigateTo={navigateTo} onSave={addSuspect} allSuspects={suspects} />}
       {currentScreen === 'profile' && <SuspectProfile suspect={selectedSuspect} onBack={() => navigateTo('dashboard')} navigateTo={navigateTo} allSuspects={suspects} onOpenProfile={openProfile} />}
+      {currentScreen === 'suspectsManagement' && (
+        <SuspectsManagement
+          navigateTo={navigateTo}
+          onOpenProfile={openProfile}
+          suspects={suspects}
+          initialStatusFilter={initialSuspectFilter}
+        />
+      )}
       {currentScreen === 'chatList' && (
         <TacticalChatList 
           navigateTo={navigateTo} 
