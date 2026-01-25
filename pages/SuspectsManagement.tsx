@@ -143,6 +143,14 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {/* Novo Registro Button */}
+            <button 
+              onClick={() => navigateTo('registry')}
+              className="bg-pmmg-red/20 p-2 rounded-lg text-pmmg-red border border-pmmg-red/50 active:bg-pmmg-red/30 transition-all"
+              title="Novo Registro de Indivíduo"
+            >
+              <span className="material-symbols-outlined text-lg fill-icon">person_add</span>
+            </button>
             {/* Toggle View Mode */}
             <button 
               onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
@@ -281,14 +289,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
         </section>
       </main>
       
-      {/* Floating Action Button for New Registry */}
-      <button 
-        onClick={() => navigateTo('registry')}
-        className="fixed bottom-[100px] right-6 z-50 w-14 h-14 bg-pmmg-red text-white rounded-full shadow-xl flex items-center justify-center border-4 border-white active:scale-95 transition-transform"
-        title="Novo Registro de Indivíduo"
-      >
-        <span className="material-symbols-outlined text-3xl fill-icon">person_add</span>
-      </button>
+      {/* Removido o Floating Action Button */}
 
       <BottomNav activeScreen="dashboard" navigateTo={navigateTo} />
     </div>
