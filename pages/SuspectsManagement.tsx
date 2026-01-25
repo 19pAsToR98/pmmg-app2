@@ -280,6 +280,15 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
           )}
         </section>
       </main>
+      
+      {/* Floating Action Button for New Registry */}
+      <button 
+        onClick={() => navigateTo('registry')}
+        className="fixed bottom-[100px] right-6 z-50 w-14 h-14 bg-pmmg-red text-white rounded-full shadow-xl flex items-center justify-center border-4 border-white active:scale-95 transition-transform"
+        title="Novo Registro de Indivíduo"
+      >
+        <span className="material-symbols-outlined text-3xl fill-icon">person_add</span>
+      </button>
 
       <BottomNav activeScreen="dashboard" navigateTo={navigateTo} />
     </div>
