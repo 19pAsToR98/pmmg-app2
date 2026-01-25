@@ -79,23 +79,30 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
         <div className="flex items-center gap-2">
           <div className="text-right mr-2">
             <div className="text-[9px] text-white/50 uppercase font-bold">Patrulha 402</div>
-            <div className="text-[10px] text-green-400 font-bold uppercase flex items-center justify-end gap-1">
-              <span className="w-1.5 h-1.5 bg-green-400 rounded-full"></span> Online
+            {/* Status: Online destacado */}
+            <div className="text-[10px] text-green-400 font-black uppercase flex items-center justify-end gap-1 bg-green-900/20 px-2 rounded">
+              <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span> STATUS: ONLINE
             </div>
           </div>
-          {/* Botão para Cadastro de Indivíduo (Registry) */}
+          {/* Botão para Novo Cadastro */}
           <button 
             onClick={() => navigateTo('registry')}
-            className="bg-pmmg-yellow/20 p-1.5 rounded-full border border-pmmg-yellow/50 text-pmmg-yellow"
+            title="Novo Cadastro de Suspeito"
+            className="bg-pmmg-yellow/20 p-1.5 rounded-full border border-pmmg-yellow/50 text-pmmg-yellow relative group"
           >
             <span className="material-symbols-outlined text-xl">person_add</span>
+            {/* Tooltip/Label for clarity */}
+            <span className="absolute top-full right-0 mt-2 bg-pmmg-navy text-white text-[8px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Novo Cadastro</span>
           </button>
-          {/* Botão para AI Tools */}
+          {/* Botão para Análise de Inteligência */}
           <button 
             onClick={() => navigateTo('aiTools')}
-            className="bg-white/10 p-1.5 rounded-full border border-white/20 text-white"
+            title="Ferramentas de Inteligência"
+            className="bg-white/10 p-1.5 rounded-full border border-white/20 text-white relative group"
           >
             <span className="material-symbols-outlined text-xl">psychology</span>
+            {/* Tooltip/Label for clarity */}
+            <span className="absolute top-full right-0 mt-2 bg-pmmg-navy text-white text-[8px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Análise de Inteligência</span>
           </button>
         </div>
       </header>
@@ -109,6 +116,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
               <span className="text-2xl font-black text-pmmg-red">{stats.foragidos}</span>
               <span className="material-symbols-outlined text-pmmg-red/30">release_alert</span>
             </div>
+            <p className="text-[8px] font-black text-pmmg-red uppercase mt-2">Ver Detalhes dos Suspeitos</p>
           </button>
           <button onClick={() => handleCardClick('Suspeito')} className="pmmg-card p-3 border-l-4 border-l-pmmg-yellow active:scale-[0.98] transition-transform text-left">
             <span className="text-[10px] font-bold uppercase text-pmmg-navy/60 block mb-1">Suspeitos</span>
@@ -116,6 +124,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
               <span className="text-2xl font-black text-pmmg-navy">{stats.suspeitos}</span>
               <span className="material-symbols-outlined text-pmmg-yellow">visibility</span>
             </div>
+            <p className="text-[8px] font-black text-pmmg-navy uppercase mt-2">Ver Detalhes dos Suspeitos</p>
           </button>
           <button onClick={() => handleCardClick('Preso')} className="pmmg-card p-3 border-l-4 border-l-pmmg-blue active:scale-[0.98] transition-transform text-left">
             <span className="text-[10px] font-bold uppercase text-pmmg-navy/60 block mb-1">Presos</span>
@@ -123,6 +132,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
               <span className="text-2xl font-black text-pmmg-blue">{stats.presos}</span>
               <span className="material-symbols-outlined text-pmmg-blue/30">lock</span>
             </div>
+            <p className="text-[8px] font-black text-pmmg-blue uppercase mt-2">Ver Detalhes dos Suspeitos</p>
           </button>
           <button onClick={() => handleCardClick('CPF Cancelado')} className="pmmg-card p-3 border-l-4 border-l-slate-600 active:scale-[0.98] transition-transform text-left">
             <span className="text-[10px] font-bold uppercase text-pmmg-navy/60 block mb-1">CPF Cancelado</span>
@@ -130,6 +140,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
               <span className="text-2xl font-black text-slate-600">{stats.cancelados}</span>
               <span className="material-symbols-outlined text-slate-400">cancel</span>
             </div>
+            <p className="text-[8px] font-black text-slate-600 uppercase mt-2">Ver Detalhes dos Suspeitos</p>
           </button>
         </section>
 
@@ -154,7 +165,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
             className="w-full mt-3 bg-pmmg-navy text-pmmg-yellow text-[10px] font-bold py-2 rounded-xl uppercase tracking-widest flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
           >
             <span className="material-symbols-outlined text-lg">manage_search</span>
-            Consulta e Gerenciamento Completo
+            Gerenciar Todos os Suspeitos
           </button>
         </section>
 
