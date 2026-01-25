@@ -1,8 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Screen, Suspect } from '../types';
 import BottomNav from '../components/BottomNav';
+import SuspectGridCard from '../components/SuspectGridCard';
 
 type SuspectStatusFilter = Suspect['status'] | 'Todos';
+type ViewMode = 'list' | 'grid';
 
 interface SuspectsManagementProps {
   navigateTo: (screen: Screen) => void;
@@ -16,20 +18,15 @@ const STATUS_OPTIONS: SuspectStatusFilter[] = ['Todos', 'Foragido', 'Suspeito', 
 const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onOpenProfile, suspects, initialStatusFilter }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<SuspectStatusFilter>(initialStatusFilter);
-  const [addressFilter, setAddressFilter] = useState('');
-  const [vehicleFilter, setVehicleFilter] = useState('');
-  const [dateFilter, setDateFilter] = useState(''); // Mock for registration date
-
-  // Atualiza o filtro de status se um filtro inicial for passado (ex: ao clicar no card do Dashboard)
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  
+  // Atualiza o filtro de status se um filtro inicial for passado
   useEffect(() => {
     setStatusFilter(initialStatusFilter);
   }, [initialStatusFilter]);
 
   const filteredSuspects = useMemo(() => {
     const term = searchTerm.toLowerCase().trim();
-    const address = addressFilter.toLowerCase().trim();
-    const vehicle = vehicleFilter.toLowerCase().trim();
-    // const date = dateFilter.toLowerCase().trim(); // Data de cadastro não implementada no mock
 
     return suspects.filter(s => {
       // 1. Status Filter
@@ -37,49 +34,33 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
         return false;
       }
 
-      // 2. Name, Nickname, CPF Search Term
+      // 2. Unified Search Term (Name, Nickname, CPF, Last Seen Address, Vehicle details)
       if (term) {
         const matchesName = s.name.toLowerCase().includes(term);
         const matchesNickname = s.nickname?.toLowerCase().includes(term);
         const matchesCpf = s.cpf.includes(term);
-        if (!matchesName && !matchesNickname && !matchesCpf) {
-          return false;
-        }
-      }
-
-      // 3. Address Filter (using lastSeen as proxy)
-      if (address && !s.lastSeen.toLowerCase().includes(address)) {
-        return false;
-      }
-
-      // 4. Vehicle Filter (checking plate, model, or color)
-      if (vehicle) {
+        const matchesAddress = s.lastSeen.toLowerCase().includes(term);
         const matchesVehicle = s.vehicles?.some(v => 
-          v.plate.toLowerCase().includes(vehicle) || 
-          v.model.toLowerCase().includes(vehicle) || 
-          v.color.toLowerCase().includes(vehicle)
+          v.plate.toLowerCase().includes(term) || 
+          v.model.toLowerCase().includes(term) || 
+          v.color.toLowerCase().includes(term)
         );
-        if (!matchesVehicle) {
+        
+        if (!matchesName && !matchesNickname && !matchesCpf && !matchesAddress && !matchesVehicle) {
           return false;
         }
       }
-      
-      // 5. Date Filter (Apenas para simular o campo, sem lógica de filtragem complexa)
-      // if (date && !s.id.includes(date)) { return false; }
 
       return true;
     });
-  }, [suspects, searchTerm, statusFilter, addressFilter, vehicleFilter, dateFilter]);
+  }, [suspects, searchTerm, statusFilter]);
 
   const handleClearFilters = () => {
     setSearchTerm('');
     setStatusFilter('Todos');
-    setAddressFilter('');
-    setVehicleFilter('');
-    setDateFilter('');
   };
 
-  const renderSuspectCard = (alert: Suspect) => {
+  const renderSuspectListCard = (alert: Suspect) => {
     const statusColor = alert.status === 'Foragido' ? 'bg-pmmg-red' : 
                         alert.status === 'Suspeito' ? 'bg-pmmg-yellow text-pmmg-navy' :
                         alert.status === 'Preso' ? 'bg-pmmg-blue' : 'bg-slate-700';
@@ -88,7 +69,11 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
                         alert.status === 'Preso' ? 'border-l-pmmg-blue' : 'border-l-slate-600';
     
     return (
-      <div key={alert.id} className={`pmmg-card overflow-hidden transition-all active:scale-[0.98] border-l-4 ${borderColor}`}>
+      <div 
+        key={alert.id} 
+        className={`pmmg-card overflow-hidden transition-all active:scale-[0.98] border-l-4 ${borderColor} cursor-pointer`}
+        onClick={() => onOpenProfile(alert.id)}
+      >
         <div className="flex">
           <div className="w-24 h-32 relative bg-slate-200 shrink-0">
             <img alt={alert.name} className="w-full h-full object-cover" src={alert.photoUrl} />
@@ -116,7 +101,6 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
             </div>
             <div className="flex gap-2 mt-2">
               <button 
-                onClick={() => onOpenProfile(alert.id)}
                 className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-2 rounded-lg uppercase tracking-wide"
               >
                 Ficha Completa
@@ -140,12 +124,24 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
             <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">Consulta Completa</p>
           </div>
         </div>
-        <button 
-          onClick={handleClearFilters}
-          className="bg-white/10 p-1.5 rounded-full border border-white/20 text-white text-[10px] font-bold uppercase"
-        >
-          <span className="material-symbols-outlined text-xl">filter_alt_off</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Toggle View Mode */}
+          <button 
+            onClick={() => setViewMode(viewMode === 'list' ? 'grid' : 'list')}
+            className="bg-white/10 p-1.5 rounded-full border border-white/20 text-white"
+          >
+            <span className="material-symbols-outlined text-xl">
+              {viewMode === 'list' ? 'grid_view' : 'view_list'}
+            </span>
+          </button>
+          {/* Clear Filters */}
+          <button 
+            onClick={handleClearFilters}
+            className="bg-white/10 p-1.5 rounded-full border border-white/20 text-white text-[10px] font-bold uppercase"
+          >
+            <span className="material-symbols-outlined text-xl">filter_alt_off</span>
+          </button>
+        </div>
       </header>
 
       <main className="flex-1 overflow-y-auto pb-32 no-scrollbar">
@@ -153,7 +149,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
         {/* Search and Filters Section */}
         <section className="sticky top-[68px] z-40 bg-pmmg-khaki/95 backdrop-blur-sm px-4 pt-4 pb-3 shadow-md border-b border-pmmg-navy/10">
           
-          {/* Main Search (Name, Nickname, CPF) */}
+          {/* Main Search (Unified) */}
           <div className="relative mb-4">
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
               <span className="material-symbols-outlined text-pmmg-navy/50 text-xl">search</span>
@@ -162,7 +158,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="block w-full pl-10 pr-4 py-3 bg-white border-2 border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-0 rounded-xl text-sm font-medium placeholder-pmmg-navy/40 shadow-sm" 
-              placeholder="Nome, Apelido ou CPF" 
+              placeholder="Buscar: Nome, CPF, Endereço, Placa, etc." 
               type="text" 
             />
           </div>
@@ -183,31 +179,6 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
               </button>
             ))}
           </div>
-
-          {/* Advanced Filters (Address, Vehicle, Date) */}
-          <div className="mt-4 space-y-3">
-            <input 
-              value={addressFilter}
-              onChange={(e) => setAddressFilter(e.target.value)}
-              className="block w-full px-4 py-2 bg-white/80 border border-pmmg-navy/10 focus:border-pmmg-navy focus:ring-0 rounded-lg text-xs placeholder-pmmg-navy/40" 
-              placeholder="Filtrar por Endereço (Última Ocorrência)" 
-              type="text" 
-            />
-            <input 
-              value={vehicleFilter}
-              onChange={(e) => setVehicleFilter(e.target.value)}
-              className="block w-full px-4 py-2 bg-white/80 border border-pmmg-navy/10 focus:border-pmmg-navy focus:ring-0 rounded-lg text-xs placeholder-pmmg-navy/40" 
-              placeholder="Filtrar por Placa ou Modelo de Veículo" 
-              type="text" 
-            />
-            <input 
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className="block w-full px-4 py-2 bg-white/80 border border-pmmg-navy/10 focus:border-pmmg-navy focus:ring-0 rounded-lg text-xs placeholder-pmmg-navy/40" 
-              placeholder="Filtrar por Data de Cadastro (Ex: DD/MM/AAAA)" 
-              type="text" 
-            />
-          </div>
         </section>
 
         {/* Results List */}
@@ -220,7 +191,19 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
         </div>
 
         <section className="px-4 space-y-4">
-          {filteredSuspects.length > 0 ? filteredSuspects.map(renderSuspectCard) : (
+          {filteredSuspects.length > 0 ? (
+            viewMode === 'list' ? (
+              <div className="space-y-4">
+                {filteredSuspects.map(renderSuspectListCard)}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                {filteredSuspects.map(suspect => (
+                  <SuspectGridCard key={suspect.id} suspect={suspect} onOpenProfile={onOpenProfile} />
+                ))}
+              </div>
+            )
+          ) : (
             <div className="text-center py-10 opacity-40">
               <span className="material-symbols-outlined text-5xl">person_search</span>
               <p className="text-xs font-bold uppercase mt-2">Nenhum registro encontrado com os filtros aplicados.</p>
