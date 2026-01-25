@@ -38,7 +38,8 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
   // Close filter menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (filterMenuRef.current && !filterMenuMenuRef.current.contains(event.target as Node)) {
+      // CORREÇÃO: Usando filterMenuRef em vez de filterMenuMenuRef
+      if (filterMenuRef.current && !filterMenuRef.current.contains(event.target as Node)) {
         setShowFilterMenu(false);
       }
     };
