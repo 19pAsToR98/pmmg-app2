@@ -471,7 +471,8 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         )}
 
         {/* Legend Bar (Fixed above BottomNav) */}
-        <div className={`fixed bottom-[80px] left-0 right-0 z-40 max-w-md mx-auto transition-transform duration-300 ${isLegendOpen ? 'translate-y-0' : 'translate-y-[100%]'}`}>
+        {/* Z-index 40 para ficar abaixo do BottomNav (z-50) */}
+        <div className={`absolute bottom-0 left-0 right-0 z-40 max-w-md mx-auto transition-transform duration-300 ${isLegendOpen ? 'translate-y-[-80px]' : 'translate-y-[100%]'}`}>
           <div className="bg-white/95 backdrop-blur-md p-3 rounded-t-2xl shadow-2xl border-t border-pmmg-navy/10">
             <div className="flex flex-wrap gap-x-4 gap-y-2 justify-center">
               <p className="text-[8px] font-black text-pmmg-navy/40 uppercase tracking-widest w-full text-center mb-1">Legenda Tática</p>
@@ -525,7 +526,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         {/* Toggle Button for Legend Bar */}
         <button 
           onClick={() => setIsLegendOpen(prev => !prev)}
-          className="fixed bottom-[80px] right-6 z-[1001] w-16 h-6 bg-pmmg-navy text-pmmg-yellow rounded-t-xl shadow-xl flex items-center justify-center border-t-4 border-x-4 border-white active:scale-95 transition-transform"
+          className="absolute bottom-4 right-6 z-[1001] w-16 h-6 bg-pmmg-navy text-pmmg-yellow rounded-t-xl shadow-xl flex items-center justify-center border-t-4 border-x-4 border-white active:scale-95 transition-transform"
         >
           <span className={`material-symbols-outlined text-lg transition-transform ${isLegendOpen ? 'rotate-180' : 'rotate-0'}`}>
             keyboard_arrow_up
