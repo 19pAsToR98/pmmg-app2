@@ -30,16 +30,24 @@ export interface Suspect {
   cpf: string;
   rg?: string; // NOVO: Registro Geral
   status: 'Foragido' | 'Suspeito' | 'Preso' | 'CPF Cancelado';
-  lastSeen: string;
+  
+  // Localização de Abordagem (Antigo lastSeen/lat/lng)
+  approachAddress: string; // Endereço da última abordagem/ocorrência
+  approachLat?: number;
+  approachLng?: number;
   timeAgo: string;
+  
+  // Localização Residencial (NOVO)
+  residenceAddress?: string;
+  residenceLat?: number;
+  residenceLng?: number;
+
   photoUrl: string; // Primary photo
   photoUrls?: string[]; // Multiple photos
   birthDate?: string;
   motherName?: string;
   articles?: string[];
   description?: string;
-  lat?: number;
-  lng?: number;
   vehicles?: Vehicle[];
   associations?: Association[];
   showOnMap?: boolean; // NEW: Controla se o marcador deve ser exibido no mapa tático

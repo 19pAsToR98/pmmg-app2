@@ -42,19 +42,30 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
   const [photos, setPhotos] = useState<string[]>(currentSuspect?.photoUrls || (currentSuspect?.photoUrl ? [currentSuspect.photoUrl] : []));
   const [showOnMap, setShowOnMap] = useState(currentSuspect?.showOnMap ?? true);
   
-  // States for Address, Vehicles, Associations
-  const initialAddress = currentSuspect?.lastSeen || '';
-  const initialLat = currentSuspect?.lat;
-  const initialLng = currentSuspect?.lng;
-  
-  const [address, setAddress] = useState(initialAddress);
-  const [selectedLocation, setSelectedLocation] = useState<GeocodedLocation | null>(
-    (initialLat && initialLng) ? { name: initialAddress, lat: initialLat, lng: initialLng } : null
+  // --- Localização Residencial ---
+  const [residenceAddress, setResidenceAddress] = useState(currentSuspect?.residenceAddress || '');
+  const [selectedResidence, setSelectedResidence] = useState<GeocodedLocation | null>(
+    (currentSuspect?.residenceLat && currentSuspect?.residenceLng && currentSuspect?.residenceAddress) 
+      ? { name: currentSuspect.residenceAddress, lat: currentSuspect.residenceLat, lng: currentSuspect.residenceLng } 
+      : null
   );
-  const [addressSuggestions, setAddressSuggestions] = useState<GeocodedLocation[]>([]);
-  const [vehicles, setVehicles] = useState<Vehicle[]>(currentSuspect?.vehicles || []);
-  const [associations, setAssociations] = useState<Association[]>(currentSuspect?.associations || []);
-  const [isSearching, setIsSearching] = useState(false);
+  const [residenceSuggestions, setResidenceSuggestions] = useState<GeocodedLocation[]>([]);
+  const residenceMapRef = useRef<HTMLDivElement>(null);
+  const residenceMapInstance = useRef<L.Map | null>(null);
+  const [isSearchingResidence, setIsSearchingResidence] = useState(false);
+
+  // --- Localização de Abordagem (Última Ocorrência) ---
+  const [approachAddress, setApproachAddress] = useState(currentSuspect?.approachAddress || '');
+  const [selectedApproach, setSelectedApproach] = useState<GeocodedLocation | null>(
+    (currentSuspect?.approachLat && currentSuspect?.approachLng && currentSuspect?.approachAddress) 
+      ? { name: currentSuspect.approachAddress, lat: currentSuspect.approachLat, lng: currentSuspect.approachLng } 
+      : null
+  );
+  const [approachSuggestions, setApproachSuggestions] = useState<GeocodedLocation[]>([]);
+  const approachMapRef = useRef<HTMLDivElement>(null);
+  const approachMapInstance = useRef<L.Map | null>(null);
+  const [isSearchingApproach, setIsSearchingApproach] = useState(false);
+
 
   // Vehicle Input States
   const [newVehiclePlate, setNewVehiclePlate] = useState('');
@@ -67,67 +78,69 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
   const [filteredSuspects, setFilteredSuspects] = useState<Suspect[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const miniMapRef = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<L.Map | null>(null);
 
-  // --- Leaflet Minimap Effect ---
-  useEffect(() => {
-    if (miniMapRef.current && selectedLocation) {
-      const { lat, lng } = selectedLocation;
-      
-      if (mapInstance.current) {
-        mapInstance.current.setView([lat, lng], 15);
-        mapInstance.current.eachLayer((layer) => {
-          if (layer instanceof L.Marker) {
-            layer.remove();
-          }
-        });
-      } else {
-        // Inicializa o mapa
-        mapInstance.current = L.map(miniMapRef.current, {
-          center: [lat, lng],
-          zoom: 15,
-          zoomControl: false,
-          dragging: false,
-          touchZoom: false,
-          scrollWheelZoom: false,
-          doubleClickZoom: false,
-          boxZoom: false
-        });
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance.current);
-      }
+  // --- Leaflet Minimap Effect (General function for both maps) ---
+  const initializeMap = (ref: React.RefObject<HTMLDivElement>, instanceRef: React.MutableRefObject<L.Map | null>, location: GeocodedLocation | null) => {
+    if (!ref.current || !location) return;
 
-      L.marker([lat, lng], { icon: TacticalMapIcon }).addTo(mapInstance.current);
-      mapInstance.current.invalidateSize(); // Garante que o mapa seja renderizado corretamente
+    const { lat, lng } = location;
+    
+    if (instanceRef.current) {
+      instanceRef.current.setView([lat, lng], 15);
+      instanceRef.current.eachLayer((layer) => {
+        if (layer instanceof L.Marker) {
+          layer.remove();
+        }
+      });
+    } else {
+      instanceRef.current = L.map(ref.current, {
+        center: [lat, lng],
+        zoom: 15,
+        zoomControl: false,
+        dragging: false,
+        touchZoom: false,
+        scrollWheelZoom: false,
+        doubleClickZoom: false,
+        boxZoom: false
+      });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(instanceRef.current);
     }
 
-    return () => {
-      // Limpeza do mapa ao desmontar ou mudar de localização
-      if (mapInstance.current && !selectedLocation) {
-        mapInstance.current.remove();
-        mapInstance.current = null;
-      }
-    };
-  }, [selectedLocation]);
-
-  // --- Address Search Logic (Real Geocoding via Nominatim) ---
-  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAddress(e.target.value);
-    setSelectedLocation(null); // Clear location if user starts typing again
-    setAddressSuggestions([]); // Clear suggestions while typing
+    L.marker([lat, lng], { icon: TacticalMapIcon }).addTo(instanceRef.current);
+    instanceRef.current.invalidateSize();
   };
 
-  const handleAddressSearch = async () => {
+  useEffect(() => {
+    initializeMap(residenceMapRef, residenceMapInstance, selectedResidence);
+    return () => {
+      if (residenceMapInstance.current && !selectedResidence) {
+        residenceMapInstance.current.remove();
+        residenceMapInstance.current = null;
+      }
+    };
+  }, [selectedResidence]);
+
+  useEffect(() => {
+    initializeMap(approachMapRef, approachMapInstance, selectedApproach);
+    return () => {
+      if (approachMapInstance.current && !selectedApproach) {
+        approachMapInstance.current.remove();
+        approachMapInstance.current = null;
+      }
+    };
+  }, [selectedApproach]);
+
+  // --- Address Search Logic (General function) ---
+  const handleAddressSearch = async (address: string, setSuggestions: (s: GeocodedLocation[]) => void, setIsSearching: (b: boolean) => void) => {
     if (address.length < 3) {
       alert("Digite pelo menos 3 caracteres para buscar um endereço.");
       return;
     }
     
     setIsSearching(true);
-    setAddressSuggestions([]);
+    setSuggestions([]);
 
     try {
-      // Usando Nominatim (OpenStreetMap) para geocodificação
       const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=5&countrycodes=br`;
       const response = await fetch(url);
       const data = await response.json();
@@ -138,7 +151,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
           lat: parseFloat(item.lat),
           lng: parseFloat(item.lon),
         }));
-        setAddressSuggestions(results);
+        setSuggestions(results);
       } else {
         alert("Nenhum endereço encontrado para a busca.");
       }
@@ -150,13 +163,34 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
     }
   };
 
-  const handleSelectLocation = (location: GeocodedLocation) => {
-    setSelectedLocation(location);
-    setAddress(location.name);
-    setAddressSuggestions([]);
+  // Handlers específicos para Residencial
+  const handleResidenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setResidenceAddress(e.target.value);
+    setSelectedResidence(null);
+    setResidenceSuggestions([]);
+  };
+  const handleResidenceSearch = () => handleAddressSearch(residenceAddress, setResidenceSuggestions, setIsSearchingResidence);
+  const handleSelectResidence = (location: GeocodedLocation) => {
+    setSelectedResidence(location);
+    setResidenceAddress(location.name);
+    setResidenceSuggestions([]);
   };
 
-  // --- Vehicle Management Logic ---
+  // Handlers específicos para Abordagem
+  const handleApproachChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setApproachAddress(e.target.value);
+    setSelectedApproach(null);
+    setApproachSuggestions([]);
+  };
+  const handleApproachSearch = () => handleAddressSearch(approachAddress, setApproachSuggestions, setIsSearchingApproach);
+  const handleSelectApproach = (location: GeocodedLocation) => {
+    setSelectedApproach(location);
+    setApproachAddress(location.name);
+    setApproachSuggestions([]);
+  };
+
+
+  // --- Vehicle Management Logic (Sem alterações) ---
   const handleAddVehicle = () => {
     if (newVehiclePlate.trim() && newVehicleModel.trim()) {
       const newVehicle: Vehicle = {
@@ -175,7 +209,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
     setVehicles(vehicles.filter((_, i) => i !== index));
   };
 
-  // --- Association Management Logic ---
+  // --- Association Management Logic (Sem alterações) ---
   useEffect(() => {
     if (associationSearchTerm.length > 1) {
       const term = associationSearchTerm.toLowerCase();
@@ -208,7 +242,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
     setAssociations(associations.filter((_, i) => i !== index));
   };
 
-  // --- General Registry Logic ---
+  // --- General Registry Logic (Sem alterações) ---
   const handleAddArticle = () => {
     if (currentArticle.trim()) {
       setArticles([...articles, currentArticle.trim()]);
@@ -249,10 +283,16 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
 
     const primaryPhoto = photos.length > 0 ? photos[0] : `https://picsum.photos/seed/${name}/200/250`;
 
-    // Use selected location if available, otherwise mock coordinates
-    const lat = selectedLocation?.lat || (-19.9 + (Math.random() * 0.05 - 0.025));
-    const lng = selectedLocation?.lng || (-43.9 + (Math.random() * 0.05 - 0.025));
-    const lastSeen = selectedLocation?.name || 'Local do Registro';
+    // Define a localização de abordagem (approach)
+    const approachLat = selectedApproach?.lat || currentSuspect?.approachLat || (-19.9 + (Math.random() * 0.05 - 0.025));
+    const approachLng = selectedApproach?.lng || currentSuspect?.approachLng || (-43.9 + (Math.random() * 0.05 - 0.025));
+    const finalApproachAddress = selectedApproach?.name || approachAddress || 'Local do Registro';
+
+    // Define a localização residencial (residence)
+    const residenceLat = selectedResidence?.lat;
+    const residenceLng = selectedResidence?.lng;
+    const finalResidenceAddress = selectedResidence?.name || residenceAddress || undefined;
+
 
     const suspectData: Suspect = {
       id: currentSuspect?.id || Date.now().toString(), // Usa ID existente se estiver editando
@@ -261,16 +301,24 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
       cpf,
       rg,
       status,
-      lastSeen,
+      
+      // Localização de Abordagem
+      approachAddress: finalApproachAddress,
+      approachLat,
+      approachLng,
       timeAgo: isEditing ? currentSuspect!.timeAgo : 'Agora', // Mantém o tempo se estiver editando
+      
+      // Localização Residencial
+      residenceAddress: finalResidenceAddress,
+      residenceLat,
+      residenceLng,
+
       photoUrl: primaryPhoto,
       photoUrls: photos.length > 0 ? photos : [primaryPhoto],
       birthDate,
       motherName,
       articles,
       description,
-      lat,
-      lng,
       showOnMap,
       vehicles,
       associations,
@@ -401,44 +449,44 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
           </button>
         </div>
 
-        {/* --- Endereço Section (Existing) --- */}
+        {/* --- Endereço Section: Residencial --- */}
         <div className="flex items-center gap-2 mb-4 mt-8">
           <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
-          <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Endereço e Localização</h3>
+          <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Endereço Residencial (Base)</h3>
         </div>
         <div className="space-y-4">
           <div className="relative">
-            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Endereço de Última Ocorrência/Residência</label>
+            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Endereço de Moradia</label>
             <div className="flex gap-2">
               <input 
-                value={address}
-                onChange={handleAddressChange}
+                value={residenceAddress}
+                onChange={handleResidenceChange}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
-                    handleAddressSearch();
+                    handleResidenceSearch();
                   }
                 }}
                 className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
-                placeholder="Pesquisar endereço..." 
+                placeholder="Pesquisar endereço residencial..." 
                 type="text" 
               />
               <button 
-                onClick={handleAddressSearch}
-                disabled={isSearching}
+                onClick={handleResidenceSearch}
+                disabled={isSearchingResidence}
                 className="bg-pmmg-navy text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50"
               >
-                <span className="material-symbols-outlined text-xl animate-spin" style={{ display: isSearching ? 'block' : 'none' }}>progress_activity</span>
-                <span className="material-symbols-outlined text-xl" style={{ display: isSearching ? 'none' : 'block' }}>search</span>
+                <span className="material-symbols-outlined text-xl animate-spin" style={{ display: isSearchingResidence ? 'block' : 'none' }}>progress_activity</span>
+                <span className="material-symbols-outlined text-xl" style={{ display: isSearchingResidence ? 'none' : 'block' }}>search</span>
               </button>
             </div>
             
-            {addressSuggestions.length > 0 && (
+            {residenceSuggestions.length > 0 && (
               <div className="absolute z-10 w-full bg-white border border-pmmg-navy/20 rounded-lg mt-1 shadow-lg max-h-40 overflow-y-auto">
-                {addressSuggestions.map((loc, index) => (
+                {residenceSuggestions.map((loc, index) => (
                   <button
                     key={index}
-                    onClick={() => handleSelectLocation(loc)}
+                    onClick={() => handleSelectResidence(loc)}
                     className="w-full text-left px-4 py-2 text-sm text-pmmg-navy hover:bg-pmmg-khaki/50 transition-colors border-b border-pmmg-navy/5 last:border-b-0"
                   >
                     {loc.name}
@@ -446,21 +494,77 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
                 ))}
               </div>
             )}
-            {addressSuggestions.length === 0 && !isSearching && address.length > 2 && (
-              <p className="text-[10px] text-pmmg-red italic text-center mt-2">Nenhum resultado encontrado.</p>
-            )}
           </div>
           
-          {selectedLocation && (
+          {selectedResidence && (
             <div className="pmmg-card overflow-hidden">
               <div className="p-3 bg-pmmg-navy/5 flex items-center justify-between">
-                <p className="text-[10px] font-bold text-pmmg-navy uppercase tracking-wider">Localização Confirmada</p>
+                <p className="text-[10px] font-bold text-pmmg-navy uppercase tracking-wider">Localização Residencial Confirmada</p>
                 <span className="text-[9px] text-green-600 font-bold uppercase">GPS OK</span>
               </div>
-              <div ref={miniMapRef} className="h-40 w-full bg-slate-200 z-0"></div>
+              <div ref={residenceMapRef} className="h-40 w-full bg-slate-200 z-0"></div>
             </div>
           )}
         </div>
+
+        {/* --- Endereço Section: Abordagem --- */}
+        <div className="flex items-center gap-2 mb-4 mt-8">
+          <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
+          <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Endereço de Abordagem (Última Ocorrência)</h3>
+        </div>
+        <div className="space-y-4">
+          <div className="relative">
+            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Endereço de Última Ocorrência/Abordagem</label>
+            <div className="flex gap-2">
+              <input 
+                value={approachAddress}
+                onChange={handleApproachChange}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleApproachSearch();
+                  }
+                }}
+                className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+                placeholder="Pesquisar endereço de abordagem..." 
+                type="text" 
+              />
+              <button 
+                onClick={handleApproachSearch}
+                disabled={isSearchingApproach}
+                className="bg-pmmg-navy text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50"
+              >
+                <span className="material-symbols-outlined text-xl animate-spin" style={{ display: isSearchingApproach ? 'block' : 'none' }}>progress_activity</span>
+                <span className="material-symbols-outlined text-xl" style={{ display: isSearchingApproach ? 'none' : 'block' }}>search</span>
+              </button>
+            </div>
+            
+            {approachSuggestions.length > 0 && (
+              <div className="absolute z-10 w-full bg-white border border-pmmg-navy/20 rounded-lg mt-1 shadow-lg max-h-40 overflow-y-auto">
+                {approachSuggestions.map((loc, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleSelectApproach(loc)}
+                    className="w-full text-left px-4 py-2 text-sm text-pmmg-navy hover:bg-pmmg-khaki/50 transition-colors border-b border-pmmg-navy/5 last:border-b-0"
+                  >
+                    {loc.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          {selectedApproach && (
+            <div className="pmmg-card overflow-hidden">
+              <div className="p-3 bg-pmmg-navy/5 flex items-center justify-between">
+                <p className="text-[10px] font-bold text-pmmg-navy uppercase tracking-wider">Localização de Abordagem Confirmada</p>
+                <span className="text-[9px] text-green-600 font-bold uppercase">GPS OK</span>
+              </div>
+              <div ref={approachMapRef} className="h-40 w-full bg-slate-200 z-0"></div>
+            </div>
+          )}
+        </div>
+
 
         {/* --- Dados Pessoais (Updated) --- */}
         <div className="flex items-center gap-2 mb-4 mt-8">
