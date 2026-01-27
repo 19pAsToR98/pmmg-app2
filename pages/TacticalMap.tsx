@@ -471,7 +471,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         )}
 
         {/* Legend Bar (Fixed above BottomNav) */}
-        <div className={`absolute bottom-0 left-0 right-0 z-40 max-w-md mx-auto transition-transform duration-300 ${isLegendOpen ? 'translate-y-[-80px]' : 'translate-y-[100%]'}`}>
+        <div className={`absolute bottom-0 left-0 right-0 z-40 max-w-md mx-auto transition-transform duration-300 ${isLegendOpen ? 'translate-y-[-100px]' : 'translate-y-[100%]'}`}>
           <div className="bg-white/95 backdrop-blur-md p-3 rounded-t-2xl shadow-2xl border-t border-pmmg-navy/10">
             <div className="flex flex-wrap gap-x-4 gap-y-2 justify-center">
               <p className="text-[8px] font-black text-pmmg-navy/40 uppercase tracking-widest w-full text-center mb-1">Legenda Tática</p>
