@@ -49,13 +49,6 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
               <span className="w-1.5 h-1.5 bg-green-400 rounded-full"></span> Online
             </div>
           </div>
-          {/* Botão para Cadastro de Indivíduo (Registry) */}
-          <button 
-            onClick={() => navigateTo('registry')}
-            className="bg-pmmg-yellow/20 p-1.5 rounded-full border border-pmmg-yellow/50 text-pmmg-yellow"
-          >
-            <span className="material-symbols-outlined text-xl">person_add</span>
-          </button>
           {/* Botão para AI Tools */}
           <button 
             onClick={() => navigateTo('aiTools')}
@@ -114,13 +107,13 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
             />
           </div>
           
-          {/* Button to navigate to full management page */}
+          {/* Button to navigate to registry (Replaced old management button) */}
           <button 
-            onClick={() => navigateToSuspectsManagement('Todos')}
-            className="w-full mt-3 bg-pmmg-navy text-pmmg-yellow text-[10px] font-bold py-2 rounded-xl uppercase tracking-widest flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+            onClick={() => navigateTo('registry')}
+            className="w-full mt-3 bg-pmmg-red text-white text-[10px] font-bold py-2 rounded-xl uppercase tracking-widest flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
           >
-            <span className="material-symbols-outlined text-lg">manage_search</span>
-            Consulta e Gerenciamento Completo
+            <span className="material-symbols-outlined text-lg">person_add</span>
+            Novo Registro
           </button>
         </section>
 
