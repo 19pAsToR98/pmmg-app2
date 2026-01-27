@@ -364,18 +364,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       <div className="flex-1 relative">
         <div ref={mapContainerRef} className="w-full h-full" style={{ zIndex: 1 }} />
         
-        {/* Floating Counter */}
-        <div className="absolute top-4 left-4 z-[1000] pointer-events-none">
-          <div className="bg-pmmg-navy/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-lg border border-pmmg-yellow/30 flex items-center gap-3">
-            <div className="flex flex-col">
-              <span className="text-[8px] font-bold text-pmmg-yellow uppercase tracking-[0.2em]">Monitoramento</span>
-              <span className="text-[10px] font-black text-white uppercase">{filteredSuspects.length + customMarkers.length} Alvos/Pontos Táticos</span>
-            </div>
-            <div className="h-6 w-px bg-white/20"></div>
-            <span className="text-pmmg-yellow material-symbols-outlined text-sm animate-pulse">radar</span>
-          </div>
-        </div>
-        
+        {/* Floating Counter (REMOVIDO) */}
         {/* Adding Marker Mode Indicator (Non-blocking) */}
         {isAddingMarker && (
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[1001] pointer-events-none">
@@ -513,7 +502,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             
             {/* Oficial */}
             <div className="flex items-center gap-2">
-               <div className="w-3.5 h-3.5 bg-pmmg-blue rounded-full border-2 border-white shadow-sm ring-1 ring-pmmg-blue/30"></div>
+               <div className="w-3.5 h-3.5 bg-pmmg-blue rounded-full border-2 border-white shadow-sm ring-1 ring-pmmg-blue/50"></div>
                <span className="text-[9px] font-bold text-pmmg-navy uppercase">Oficial</span>
             </div>
             
