@@ -102,7 +102,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAddress(e.target.value);
     setSelectedLocation(null); // Clear location if user starts typing again
-    setAddressSuggestions([]); // Clear suggestions while typing
+    setAddressSuggestions([]); // Clear suggestions when typing starts
   };
 
   const handleAddressSearch = () => {
@@ -372,7 +372,12 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
               <input 
                 value={address}
                 onChange={handleAddressChange}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddressSearch()}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault(); // Previne o submit do form
+                    handleAddressSearch();
+                  }
+                }}
                 className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
                 placeholder="Pesquisar endereço..." 
                 type="text" 
