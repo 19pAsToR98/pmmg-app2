@@ -3,7 +3,7 @@ import { Screen, Suspect } from '../types';
 import BottomNav from '../components/BottomNav';
 
 interface DashboardProps {
-  navigateTo: (screen: Screen) => void;
+  navigateTo: (screen: Screen, center?: [number, number]) => void;
   navigateToSuspectsManagement: (status: Suspect['status'] | 'Todos') => void;
   onOpenProfile: (id: string) => void;
   suspects: Suspect[];
@@ -29,6 +29,15 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
   const handleCardClick = (status: Suspect['status']) => {
     navigateToSuspectsManagement(status);
   };
+  
+  const handleViewOnMap = (suspect: Suspect) => {
+    if (suspect.lat && suspect.lng) {
+      navigateTo('map', [suspect.lat, suspect.lng]);
+    } else {
+      alert("Localização não registrada para este indivíduo.");
+      navigateTo('map');
+    }
+  };
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
@@ -51,7 +60,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                 <span className="w-1.5 h-1.5 bg-green-400 rounded-full"></span> Online
               </div>
             </div>
-            {/* Botão para Perfil (Substituindo AI Tools) */}
+            {/* Botão para Perfil */}
             <button 
               onClick={() => navigateTo('profileSettings')}
               className="bg-white/10 p-1.5 rounded-full border border-white/20 text-white"
@@ -165,7 +174,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                       </div>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 mt-2">
                     <button 
                       onClick={() => onOpenProfile(alert.id)}
                       className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-2 rounded-lg uppercase tracking-wide"
@@ -173,10 +182,11 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                       Ficha Completa
                     </button>
                     <button 
-                      onClick={() => alert(`Compartilhando ficha de: ${alert.name}`)}
-                      className="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center"
+                      onClick={() => handleViewOnMap(alert)}
+                      className="flex-1 bg-pmmg-yellow text-pmmg-navy text-[9px] font-bold py-2 rounded-lg uppercase tracking-wide flex items-center justify-center gap-1"
                     >
-                      <span className="material-symbols-outlined text-pmmg-navy text-lg">share</span>
+                      <span className="material-symbols-outlined text-sm">map</span>
+                      Ver no Mapa
                     </button>
                   </div>
                 </div>
