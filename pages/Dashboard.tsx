@@ -171,14 +171,14 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                         <span className="material-symbols-outlined text-[14px] text-pmmg-navy">history</span>
                         <span className="text-[10px] text-slate-700">Há {alert.timeAgo}</span>
                       </div>
-                      {/* Link VER NO MAPA (Substituindo o botão) */}
+                      {/* Link VER NO MAPA (Corrigido para text-slate-700) */}
                       {alert.lat && alert.lng && (
                         <div 
                           onClick={() => handleViewOnMap(alert)}
                           className="flex items-center gap-1.5 cursor-pointer active:opacity-70 transition-opacity"
                         >
-                          <span className="material-symbols-outlined text-[14px] text-pmmg-blue fill-icon">map</span>
-                          <span className="text-[10px] text-pmmg-blue font-bold uppercase tracking-wider">Ver no Mapa</span>
+                          <span className="material-symbols-outlined text-[14px] text-slate-700 fill-icon">map</span>
+                          <span className="text-[10px] text-slate-700 font-bold uppercase tracking-wider">Ver no Mapa</span>
                         </div>
                       )}
                     </div>
