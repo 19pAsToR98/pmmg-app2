@@ -66,6 +66,10 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
   const approachMapInstance = useRef<L.Map | null>(null);
   const [isSearchingApproach, setIsSearchingApproach] = useState(false);
 
+  // --- Veículos e Associações (REINTRODUZIDOS) ---
+  const [vehicles, setVehicles] = useState<Vehicle[]>(currentSuspect?.vehicles || []);
+  const [associations, setAssociations] = useState<Association[]>(currentSuspect?.associations || []);
+
 
   // Vehicle Input States
   const [newVehiclePlate, setNewVehiclePlate] = useState('');
