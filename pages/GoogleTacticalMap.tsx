@@ -136,7 +136,7 @@ const GoogleTacticalMap: React.FC<GoogleTacticalMapProps> = ({ navigateTo, suspe
     const svg = `
       <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
         <circle cx="16" cy="16" r="14" fill="${color}" stroke="#FFFFFF" stroke-width="3"/>
-        <text x="16" y="20" font-family="Material Symbols Outlined" font-size="16" fill="#FFFFFF" text-anchor="middle" dominant-baseline="middle">${iconName}</text>
+        <text x="16" y="20" font-family="'Material Symbols Outlined'" font-size="16" fill="#FFFFFF" text-anchor="middle" dominant-baseline="middle">${iconName}</text>
       </svg>
     `;
 
@@ -161,7 +161,7 @@ const GoogleTacticalMap: React.FC<GoogleTacticalMapProps> = ({ navigateTo, suspe
     const svg = `
       <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
         <circle cx="16" cy="16" r="14" fill="${color}" stroke="#FFFFFF" stroke-width="3"/>
-        <text x="16" y="20" font-family="Material Symbols Outlined" font-size="16" fill="#FFFFFF" text-anchor="middle" dominant-baseline="middle">${m.icon}</text>
+        <text x="16" y="20" font-family="'Material Symbols Outlined'" font-size="16" fill="#FFFFFF" text-anchor="middle" dominant-baseline="middle">${m.icon}</text>
       </svg>
     `;
 
@@ -318,37 +318,57 @@ const GoogleTacticalMap: React.FC<GoogleTacticalMapProps> = ({ navigateTo, suspe
               onCloseClick={() => setSelectedMarker(null)}
             >
               <div className="p-2 min-w-[180px] font-sans">
-                <p className="font-bold text-[11px] text-pmmg-navy uppercase leading-tight mb-1">
-                  {'name' in selectedMarker ? selectedMarker.name : selectedMarker.title}
-                </p>
-                <p className="text-[10px] text-slate-600 mb-3">
-                  {'description' in selectedMarker ? selectedMarker.description : selectedMarker.lastSeen}
-                </p>
-                <div className="flex gap-2">
-                  {'name' in selectedMarker ? (
-                    <button 
-                      onClick={() => onOpenProfile(selectedMarker.id)}
-                      className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider"
-                    >
-                      Ver Ficha
-                    </button>
-                  ) : (
-                    <>
+                
+                {'name' in selectedMarker ? (
+                  // Suspect Marker Content
+                  <div className="flex gap-3 items-start">
+                    <img 
+                      src={selectedMarker.photoUrl} 
+                      alt={selectedMarker.name} 
+                      className="w-12 h-12 object-cover rounded-lg border border-pmmg-navy/20 shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-[11px] text-pmmg-navy uppercase leading-tight mb-1 truncate">
+                        {selectedMarker.name}
+                      </p>
+                      <p className="text-[10px] text-slate-600 mb-3">
+                        Status: <span className="font-semibold">{selectedMarker.status}</span>
+                      </p>
                       <button 
-                        onClick={() => setEditingMarker(selectedMarker as CustomMarker)}
-                        className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider"
+                        onClick={() => onOpenProfile(selectedMarker.id)}
+                        className="w-full bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider active:scale-95 transition-transform"
                       >
-                        Editar
+                        Ver Ficha Completa
                       </button>
-                      <button 
-                        onClick={() => handleDeleteMarker(selectedMarker.id)}
-                        className="px-3 bg-pmmg-red text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider"
-                      >
-                        Excluir
-                      </button>
-                    </>
-                  )}
-                </div>
+                    </div>
+                  </div>
+                ) : (
+                  // Custom Marker / User Marker Content
+                  <>
+                    <p className="font-bold text-[11px] text-pmmg-navy uppercase leading-tight mb-1">
+                      {selectedMarker.title}
+                    </p>
+                    <p className="text-[10px] text-slate-600 mb-3">
+                      {selectedMarker.description}
+                    </p>
+                    {selectedMarker.id !== 'user' && (
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => setEditingMarker(selectedMarker as CustomMarker)}
+                          className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider active:scale-95 transition-transform"
+                        >
+                          Editar
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteMarker(selectedMarker.id)}
+                          className="px-3 bg-pmmg-red text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider active:scale-95 transition-transform"
+                        >
+                          Excluir
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             </InfoWindow>
           )}
