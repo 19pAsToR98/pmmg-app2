@@ -66,7 +66,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
   const approachMapInstance = useRef<L.Map | null>(null);
   const [isSearchingApproach, setIsSearchingApproach] = useState(false);
 
-  // --- Veículos e Associações (REINTRODUZIDOS) ---
+  // --- Veículos e Associações ---
   const [vehicles, setVehicles] = useState<Vehicle[]>(currentSuspect?.vehicles || []);
   const [associations, setAssociations] = useState<Association[]>(currentSuspect?.associations || []);
 
@@ -89,49 +89,47 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
 
     const { lat, lng } = location;
     
+    // Remove o mapa existente se houver
     if (instanceRef.current) {
-      instanceRef.current.setView([lat, lng], 15);
-      instanceRef.current.eachLayer((layer) => {
-        if (layer instanceof L.Marker) {
-          layer.remove();
-        }
-      });
-    } else {
-      instanceRef.current = L.map(ref.current, {
-        center: [lat, lng],
-        zoom: 15,
-        zoomControl: false,
-        dragging: false,
-        touchZoom: false,
-        scrollWheelZoom: false,
-        doubleClickZoom: false,
-        boxZoom: false
-      });
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(instanceRef.current);
+      instanceRef.current.remove();
+      instanceRef.current = null;
     }
+    
+    // Inicializa o novo mapa
+    instanceRef.current = L.map(ref.current, {
+      center: [lat, lng],
+      zoom: 15,
+      zoomControl: false,
+      dragging: false,
+      touchZoom: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      boxZoom: false
+    });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(instanceRef.current);
 
     L.marker([lat, lng], { icon: TacticalMapIcon }).addTo(instanceRef.current);
     instanceRef.current.invalidateSize();
   };
 
+  // Efeito para o Mapa Residencial
   useEffect(() => {
-    initializeMap(residenceMapRef, residenceMapInstance, selectedResidence);
-    return () => {
-      if (residenceMapInstance.current && !selectedResidence) {
-        residenceMapInstance.current.remove();
-        residenceMapInstance.current = null;
-      }
-    };
+    if (selectedResidence) {
+      initializeMap(residenceMapRef, residenceMapInstance, selectedResidence);
+    } else if (residenceMapInstance.current) {
+      residenceMapInstance.current.remove();
+      residenceMapInstance.current = null;
+    }
   }, [selectedResidence]);
 
+  // Efeito para o Mapa de Abordagem
   useEffect(() => {
-    initializeMap(approachMapRef, approachMapInstance, selectedApproach);
-    return () => {
-      if (approachMapInstance.current && !selectedApproach) {
-        approachMapInstance.current.remove();
-        approachMapInstance.current = null;
-      }
-    };
+    if (selectedApproach) {
+      initializeMap(approachMapRef, approachMapInstance, selectedApproach);
+    } else if (approachMapInstance.current) {
+      approachMapInstance.current.remove();
+      approachMapInstance.current = null;
+    }
   }, [selectedApproach]);
 
   // --- Address Search Logic (General function) ---
