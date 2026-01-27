@@ -214,6 +214,12 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                     <p className="text-sm font-bold text-slate-800">{suspect.cpf}</p>
                   </div>
                   <div>
+                    <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase tracking-wider mb-0.5">RG</p>
+                    <p className="text-sm font-bold text-slate-800">{suspect.rg || 'N/D'}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
                     <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase tracking-wider mb-0.5">Nascimento</p>
                     <p className="text-sm font-bold text-slate-800">{suspect.birthDate || 'N/D'}</p>
                   </div>
