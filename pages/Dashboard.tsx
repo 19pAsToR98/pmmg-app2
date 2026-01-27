@@ -139,77 +139,67 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
 
         <section className="px-4 space-y-4">
           {filteredSuspects.length > 0 ? filteredSuspects.map((alert) => (
-            <div key={alert.id} className="pmmg-card overflow-hidden transition-all">
+            <div key={alert.id} className="pmmg-card overflow-hidden transition-all active:scale-[0.98]">
               <div className="flex">
-                {/* Area clicável para Ficha Completa (Foto e Texto) */}
-                <div 
-                  onClick={() => onOpenProfile(alert.id)}
-                  className="flex flex-1 cursor-pointer active:scale-[0.99] transition-transform"
-                >
-                  <div className="w-32 h-44 relative bg-slate-200 shrink-0">
-                    <img alt={alert.name} className="w-full h-full object-cover" src={alert.photoUrl} />
-                    <div className={`absolute top-0 left-0 text-white text-[8px] font-bold px-2 py-1 uppercase rounded-br-lg shadow-md ${
-                      alert.status === 'Foragido' ? 'bg-pmmg-red' : 
-                      alert.status === 'Suspeito' ? 'bg-pmmg-yellow text-pmmg-navy' :
-                      alert.status === 'Preso' ? 'bg-pmmg-blue' : 'bg-slate-700'
-                    }`}>
-                      {alert.status}
+                <div className="w-32 h-44 relative bg-slate-200 shrink-0">
+                  <img alt={alert.name} className="w-full h-full object-cover" src={alert.photoUrl} />
+                  <div className={`absolute top-0 left-0 text-white text-[8px] font-bold px-2 py-1 uppercase rounded-br-lg shadow-md ${
+                    alert.status === 'Foragido' ? 'bg-pmmg-red' : 
+                    alert.status === 'Suspeito' ? 'bg-pmmg-yellow text-pmmg-navy' :
+                    alert.status === 'Preso' ? 'bg-pmmg-blue' : 'bg-slate-700'
+                  }`}>
+                    {alert.status}
+                  </div>
+                </div>
+                <div className="flex-1 p-3 flex flex-col justify-between overflow-hidden">
+                  <div>
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-bold text-sm text-pmmg-navy uppercase leading-tight truncate pr-1">{alert.name}</h4>
+                      <span className={`material-symbols-outlined fill-icon text-lg ${
+                        alert.status === 'Foragido' ? 'text-pmmg-red' : 'text-pmmg-yellow'
+                      }`}>
+                        {alert.status === 'Foragido' ? 'priority_high' : 'warning'}
+                      </span>
+                    </div>
+                    <p className="text-[10px] font-semibold text-slate-500 mt-1">CPF: {alert.cpf}</p>
+                    <div className="mt-2 space-y-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[14px] text-pmmg-navy">location_on</span>
+                        <span className="text-[10px] text-slate-700 truncate">Visto em: {alert.lastSeen}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[14px] text-pmmg-navy">history</span>
+                        <span className="text-[10px] text-slate-700">Há {alert.timeAgo}</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex-1 p-3 flex flex-col justify-between overflow-hidden">
-                    <div>
-                      <div className="flex justify-between items-start">
-                        <h4 className="font-bold text-sm text-pmmg-navy uppercase leading-tight truncate pr-1">{alert.name}</h4>
-                        <span className={`material-symbols-outlined fill-icon text-lg ${
-                          alert.status === 'Foragido' ? 'text-pmmg-red' : 'text-pmmg-yellow'
-                        }`}>
-                          {alert.status === 'Foragido' ? 'priority_high' : 'warning'}
-                        </span>
-                      </div>
-                      <p className="text-[10px] font-semibold text-slate-500 mt-1">CPF: {alert.cpf}</p>
-                      <div className="mt-2 space-y-1">
-                        <div className="flex items-center gap-1.5">
-                          <span className="material-symbols-outlined text-[14px] text-pmmg-navy">location_on</span>
-                          <span className="text-[10px] text-slate-700 truncate">Visto em: {alert.lastSeen}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="material-symbols-outlined text-[14px] text-pmmg-navy">history</span>
-                          <span className="text-[10px] text-slate-700">Há {alert.timeAgo}</span>
-                        </div>
-                        
-                        {/* LINK DISCRETO 'VER NO MAPA' */}
-                        {alert.lat && alert.lng && (
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation(); // Previne que o clique abra a ficha
-                              handleViewOnMap(alert);
-                            }}
-                            className="flex items-center gap-1.5 text-[10px] font-bold text-pmmg-blue uppercase hover:underline pt-1"
-                          >
-                            <span className="material-symbols-outlined text-[14px] text-pmmg-blue">map</span>
-                            Ver no Mapa
-                          </button>
-                        )}
-                      </div>
+                  <div className="flex flex-col gap-2">
+                    {/* Novo Botão VER NO MAPA */}
+                    {alert.lat && alert.lng && (
+                      <button 
+                        onClick={() => handleViewOnMap(alert)}
+                        className="w-full bg-pmmg-navy/5 text-pmmg-navy text-[9px] font-bold py-1.5 rounded-lg uppercase tracking-wide flex items-center justify-center gap-1 active:bg-pmmg-navy/10 transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-sm">map</span>
+                        Ver no Mapa
+                      </button>
+                    )}
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => onOpenProfile(alert.id)}
+                        className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-2 rounded-lg uppercase tracking-wide"
+                      >
+                        Ficha Completa
+                      </button>
+                      <button 
+                        onClick={() => alert(`Compartilhando ficha de: ${alert.name}`)}
+                        className="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center"
+                      >
+                        <span className="material-symbols-outlined text-pmmg-navy text-lg">share</span>
+                      </button>
                     </div>
                   </div>
                 </div>
-              </div>
-              
-              {/* Ações na parte inferior do card (Ficha Completa e Compartilhar) */}
-              <div className="p-3 pt-0 flex gap-2">
-                <button 
-                  onClick={() => onOpenProfile(alert.id)}
-                  className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-2 rounded-lg uppercase tracking-wide"
-                >
-                  Ficha Completa
-                </button>
-                <button 
-                  onClick={() => alert(`Compartilhando ficha de: ${alert.name}`)}
-                  className="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center"
-                >
-                  <span className="material-symbols-outlined text-pmmg-navy text-lg">share</span>
-                </button>
               </div>
             </div>
           )) : (
