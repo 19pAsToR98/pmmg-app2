@@ -9,7 +9,7 @@ interface SuspectProfileProps {
   navigateTo: (screen: Screen, center?: [number, number]) => void;
   allSuspects: Suspect[];
   onOpenProfile: (id: string) => void;
-  onEdit: (id: string) => void; // Função para iniciar a edição
+  onEdit: (id: string) => void; // NOVO: Função para iniciar a edição
 }
 
 const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, navigateTo, allSuspects, onOpenProfile, onEdit }) => {
@@ -41,11 +41,10 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
     }
   };
 
-  // O mapa agora usa approachLat/Lng
   useEffect(() => {
-    if (miniMapRef.current && suspect.approachLat && suspect.approachLng && !mapInstance.current) {
+    if (miniMapRef.current && suspect.lat && suspect.lng && !mapInstance.current) {
       mapInstance.current = L.map(miniMapRef.current, {
-        center: [suspect.approachLat, suspect.approachLng],
+        center: [suspect.lat, suspect.lng],
         zoom: 15,
         zoomControl: false,
         dragging: false,
@@ -65,7 +64,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
         iconAnchor: [16, 16]
       });
 
-      L.marker([suspect.approachLat, suspect.approachLng], { icon: suspectIcon }).addTo(mapInstance.current);
+      L.marker([suspect.lat, suspect.lng], { icon: suspectIcon }).addTo(mapInstance.current);
     }
 
     return () => {
@@ -77,8 +76,8 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
   }, [suspect]);
 
   const handleOpenMap = () => {
-    if (suspect.approachLat && suspect.approachLng) {
-      navigateTo('map', [suspect.approachLat, suspect.approachLng]);
+    if (suspect.lat && suspect.lng) {
+      navigateTo('map', [suspect.lat, suspect.lng]);
     } else {
       navigateTo('map');
     }
@@ -241,34 +240,6 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
             )}
           </div>
 
-          {/* Localização Section */}
-          <div className="pmmg-card">
-            <div onClick={() => toggleSection('location')} className="flex items-center justify-between p-4 cursor-pointer">
-              <div className="flex items-center gap-3 text-pmmg-navy">
-                <span className="material-symbols-outlined">location_on</span>
-                <span className="text-sm font-bold uppercase">Localização Tática</span>
-              </div>
-              <span className="material-symbols-outlined text-pmmg-navy/40">
-                {expandedSection === 'location' ? 'expand_less' : 'expand_more'}
-              </span>
-            </div>
-            {expandedSection === 'location' && (
-              <div className="p-4 space-y-4 border-t border-pmmg-navy/5">
-                {/* Endereço de Abordagem */}
-                <div>
-                  <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase tracking-wider mb-0.5">Última Abordagem/Ocorrência</p>
-                  <p className="text-sm font-bold text-slate-800">{suspect.approachAddress}</p>
-                  <p className="text-[9px] text-slate-400 mt-0.5">Registrado há {suspect.timeAgo}</p>
-                </div>
-                {/* Endereço Residencial */}
-                <div>
-                  <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase tracking-wider mb-0.5">Endereço Residencial (Base)</p>
-                  <p className="text-sm font-bold text-slate-800">{suspect.residenceAddress || 'Não Registrado'}</p>
-                </div>
-              </div>
-            )}
-          </div>
-
           <div className="pmmg-card">
              <div onClick={() => toggleSection('articles')} className="flex items-center justify-between p-4 cursor-pointer">
               <div className="flex items-center gap-3 text-pmmg-navy">
@@ -384,10 +355,10 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
           <div className="pmmg-card overflow-hidden">
             <div className="p-4 flex items-center justify-between text-pmmg-navy bg-white/40">
               <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined">map</span>
-                <span className="text-sm font-bold uppercase">Mapa de Abordagem</span>
+                <span className="material-symbols-outlined">location_on</span>
+                <span className="text-sm font-bold uppercase">Última Localização</span>
               </div>
-              <span className="text-[9px] font-bold uppercase opacity-50">{suspect.approachAddress}</span>
+              <span className="text-[9px] font-bold uppercase opacity-50">{suspect.lastSeen}</span>
             </div>
             <div className="relative group cursor-pointer" onClick={handleOpenMap}>
               <div ref={miniMapRef} className="h-48 w-full bg-slate-200 z-0 pointer-events-none"></div>
