@@ -1,31 +1,20 @@
 import React, { useState } from 'react';
 import { Screen, Chat, Officer } from '../types';
 import BottomNav from '../components/BottomNav';
-import GroupCard from '../components/GroupCard';
 
 interface TacticalChatListProps {
   navigateTo: (screen: Screen) => void;
-  userChats: Chat[]; // Chats que o usuário participa (Individual Aceito OU Grupo)
-  allGroups: Chat[]; // Todos os grupos (públicos)
+  userChats: Chat[]; // Chats que o usuário participa (apenas individuais agora)
   officers: Officer[]; // Contatos aceitos e online
   openChat: (chatId: string) => void;
-  startIndividualChat: (officerId: string) => void;
-  onJoinGroup: (chatId: string) => void;
   pendingRequestsCount: number;
 }
 
-type ChatTab = 'individual' | 'myGroups' | 'publicGroups';
-
-const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo, userChats, allGroups, officers, openChat, startIndividualChat, onJoinGroup, pendingRequestsCount }) => {
-  const [activeTab, setActiveTab] = useState<ChatTab>('individual');
+const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo, userChats, officers, openChat, pendingRequestsCount }) => {
   const [searchTerm, setSearchTerm] = useState('');
   
   // Função auxiliar para obter o nome e ícone correto para chats individuais
   const getChatDisplayInfo = (chat: Chat) => {
-    if (chat.type === 'group') {
-      return { name: chat.name, icon: chat.icon, isGroup: true };
-    }
-    
     // Para chat individual, assumimos que o outro participante é o primeiro na lista
     const otherParticipantId = chat.participants.find(id => id !== 'EU'); // 'EU' é o ID mockado do usuário atual
     const otherOfficer = officers.find(o => o.id === otherParticipantId);
@@ -34,32 +23,23 @@ const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo, userCha
       return { 
         name: `${otherOfficer.rank}. ${otherOfficer.name.split(' ')[1]} (${otherOfficer.unit})`, 
         icon: 'person',
-        isGroup: false
       };
     }
-    return { name: chat.name, icon: 'person', isGroup: false };
+    return { name: chat.name, icon: 'person' };
   };
 
-  // Separa chats individuais de grupos que o usuário participa
-  const individualChats = userChats.filter(c => c.type === 'individual');
-  const myGroupChats = userChats.filter(c => c.type === 'group');
-  
-  // Grupos públicos (todos os grupos)
-  const publicGroups = allGroups.filter(g => 
-    g.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Chats exibidos na aba 'myGroups' ou 'individual'
-  const displayedChats = activeTab === 'individual' ? individualChats : myGroupChats;
-  const activeTabLabel = activeTab === 'individual' ? 'Chats Individuais' : 'Meus Grupos Táticos';
-  const activeTabCount = activeTab === 'publicGroups' ? publicGroups.length : displayedChats.length;
+  // Filtra chats individuais com base no termo de busca
+  const filteredChats = userChats.filter(chat => {
+    const { name } = getChatDisplayInfo(chat);
+    return name.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   const renderChatList = (chats: Chat[]) => {
     return chats.length > 0 ? chats.map((chat) => {
-      const { name, icon, isGroup } = getChatDisplayInfo(chat);
+      const { name, icon } = getChatDisplayInfo(chat);
       
-      // Determina a cor da borda lateral
-      const borderColor = isGroup ? 'border-pmmg-navy' : 'border-pmmg-yellow';
+      // Determina a cor da borda lateral (sempre individual agora)
+      const borderColor = 'border-pmmg-yellow';
       
       return (
         <div 
@@ -67,10 +47,8 @@ const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo, userCha
           onClick={() => openChat(chat.id)}
           className={`pmmg-card flex items-center p-3 gap-3 cursor-pointer active:scale-95 transition-transform border-l-4 ${borderColor}`}
         >
-          <div className={`w-14 h-14 flex items-center justify-center rounded-xl shrink-0 ${
-            isGroup ? 'bg-pmmg-navy text-pmmg-yellow' : 'bg-pmmg-navy/10 text-pmmg-navy/40 border border-pmmg-navy/20'
-          }`}>
-            <span className={`material-symbols-outlined text-3xl ${isGroup ? 'fill-icon' : ''}`}>
+          <div className={`w-14 h-14 flex items-center justify-center rounded-xl shrink-0 bg-pmmg-navy/10 text-pmmg-navy/40 border border-pmmg-navy/20`}>
+            <span className={`material-symbols-outlined text-3xl`}>
               {icon}
             </span>
           </div>
@@ -93,23 +71,13 @@ const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo, userCha
     }) : (
       <div className="text-center py-10 opacity-40">
         <span className="material-symbols-outlined text-5xl">chat_bubble_off</span>
-        <p className="text-xs font-bold uppercase mt-2">Nenhuma conversa encontrada nesta categoria.</p>
-        {activeTab === 'individual' && (
-          <button 
-            onClick={() => navigateTo('contacts')}
-            className="mt-4 bg-pmmg-navy text-white text-[10px] font-bold px-4 py-2 rounded-lg uppercase"
-          >
-            Adicionar Contatos
-          </button>
-        )}
-        {activeTab === 'myGroups' && (
-          <button 
-            onClick={() => navigateTo('groupManagement')}
-            className="mt-4 bg-pmmg-navy text-white text-[10px] font-bold px-4 py-2 rounded-lg uppercase"
-          >
-            Criar Novo Grupo
-          </button>
-        )}
+        <p className="text-xs font-bold uppercase mt-2">Nenhuma conversa individual encontrada.</p>
+        <button 
+          onClick={() => navigateTo('contacts')}
+          className="mt-4 bg-pmmg-navy text-white text-[10px] font-bold px-4 py-2 rounded-lg uppercase"
+        >
+          Adicionar Contatos
+        </button>
       </div>
     );
   };
@@ -119,11 +87,11 @@ const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo, userCha
       <header className="sticky top-0 z-50 bg-pmmg-navy text-white shadow-xl px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 shrink-0 bg-white rounded-full flex items-center justify-center p-1.5 border-2 border-pmmg-red shadow-inner">
-            <span className="material-symbols-outlined text-pmmg-navy text-xl">groups</span>
+            <span className="material-symbols-outlined text-pmmg-navy text-xl">person_pin</span>
           </div>
           <div>
-            <h1 className="font-bold text-sm leading-none uppercase tracking-widest">Tropa Operacional</h1>
-            <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">Comunicação e Contatos</p>
+            <h1 className="font-bold text-sm leading-none uppercase tracking-widest">Contatos Táticos</h1>
+            <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">Comunicação Individual</p>
           </div>
         </div>
         <button 
@@ -141,36 +109,6 @@ const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo, userCha
 
       <main className="flex-1 overflow-y-auto pb-32 no-scrollbar">
         
-        {/* Tabs Navigation */}
-        <section className="sticky top-0 z-40 bg-pmmg-navy/95 backdrop-blur-sm px-4 pt-3 pb-3 shadow-md">
-          <div className="flex bg-pmmg-navy/80 rounded-xl p-1 border border-pmmg-yellow/20">
-            <button
-              onClick={() => setActiveTab('individual')}
-              className={`flex-1 py-2 text-center text-[11px] font-bold uppercase tracking-wider rounded-lg transition-colors ${
-                activeTab === 'individual' ? 'bg-pmmg-yellow text-pmmg-navy shadow-lg' : 'text-white/60 hover:bg-pmmg-navy/50'
-              }`}
-            >
-              Individuais ({individualChats.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('myGroups')}
-              className={`flex-1 py-2 text-center text-[11px] font-bold uppercase tracking-wider rounded-lg transition-colors ${
-                activeTab === 'myGroups' ? 'bg-pmmg-yellow text-pmmg-navy shadow-lg' : 'text-white/60 hover:bg-pmmg-navy/50'
-              }`}
-            >
-              Meus Grupos ({myGroupChats.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('publicGroups')}
-              className={`flex-1 py-2 text-center text-[11px] font-bold uppercase tracking-wider rounded-lg transition-colors ${
-                activeTab === 'publicGroups' ? 'bg-pmmg-yellow text-pmmg-navy shadow-lg' : 'text-white/60 hover:bg-pmmg-navy/50'
-              }`}
-            >
-              Buscar Grupos
-            </button>
-          </div>
-        </section>
-
         {/* Search Bar */}
         <div className="px-4 pt-4 pb-4">
           <div className="relative">
@@ -181,7 +119,7 @@ const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo, userCha
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="block w-full pl-10 pr-3 py-3 bg-white/60 border border-pmmg-navy/10 focus:border-pmmg-navy focus:ring-0 rounded-2xl text-sm placeholder-pmmg-navy/40" 
-              placeholder={`Filtrar ${activeTab === 'publicGroups' ? 'grupos públicos...' : 'conversas...'}`} 
+              placeholder={`Filtrar conversas...`} 
               type="text" 
             />
           </div>
@@ -189,53 +127,15 @@ const TacticalChatList: React.FC<TacticalChatListProps> = ({ navigateTo, userCha
 
         {/* Chat List Content */}
         <section className="px-4 space-y-3">
-          {activeTab !== 'publicGroups' && (
-            <>
-              <h3 className="text-[11px] font-bold text-pmmg-navy/60 uppercase tracking-wider mb-3">
-                {activeTabLabel} ({activeTabCount})
-              </h3>
-              {renderChatList(displayedChats)}
-            </>
-          )}
-
-          {activeTab === 'publicGroups' && (
-            <>
-              <h3 className="text-[11px] font-bold text-pmmg-navy/60 uppercase tracking-wider mb-3">
-                Grupos Públicos ({publicGroups.length})
-              </h3>
-              {publicGroups.length > 0 ? publicGroups.map((group) => {
-                const isMember = group.participants.includes('EU');
-                return (
-                  <GroupCard 
-                    key={group.id} 
-                    group={group} 
-                    isMember={isMember} 
-                    onAction={isMember ? openChat : onJoinGroup}
-                  />
-                );
-              }) : (
-                <div className="text-center py-10 opacity-40">
-                  <span className="material-symbols-outlined text-5xl">search_off</span>
-                  <p className="text-xs font-bold uppercase mt-2">Nenhum grupo encontrado.</p>
-                </div>
-              )}
-            </>
-          )}
+          <h3 className="text-[11px] font-bold text-pmmg-navy/60 uppercase tracking-wider mb-3">
+            Conversas Ativas ({filteredChats.length})
+          </h3>
+          {renderChatList(filteredChats)}
         </section>
 
         <div className="h-4"></div>
       </main>
       
-      {/* Floating Action Button for New Group */}
-      {activeTab === 'myGroups' && (
-        <button 
-          onClick={() => navigateTo('groupManagement')}
-          className="fixed bottom-[100px] right-6 z-50 w-14 h-14 bg-pmmg-navy text-pmmg-yellow rounded-full shadow-xl flex items-center justify-center border-4 border-white active:scale-95 transition-transform"
-        >
-          <span className="material-symbols-outlined text-3xl fill-icon">group_add</span>
-        </button>
-      )}
-
       <BottomNav activeScreen="chatList" navigateTo={navigateTo} />
     </div>
   );

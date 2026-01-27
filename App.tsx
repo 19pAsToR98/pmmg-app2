@@ -11,7 +11,6 @@ import RequestAccess from './pages/RequestAccess';
 import ProfileSettings from './pages/ProfileSettings';
 import TacticalMap from './pages/TacticalMap';
 import TacticalContacts from './pages/TacticalContacts';
-import GroupManagement from './pages/GroupManagement';
 import OnboardingSetup from './pages/OnboardingSetup'; // Novo componente
 import SuspectsManagement from './pages/SuspectsManagement'; // Novo componente
 
@@ -166,21 +165,6 @@ const INITIAL_CONTACTS: Contact[] = [
 
 const MOCK_CHATS: Chat[] = [
   { 
-    id: 'c1', 
-    type: 'group', 
-    name: 'Tático Móvel - 1º BPM', 
-    participants: ['o1', 'o2', 'EU'], // Usuário participa
-    lastMessage: 'QAP. Viatura 24190 em deslocamento para o setor delta.', 
-    lastTime: '12:45', 
-    unreadCount: 3, 
-    icon: 'shield', 
-    active: true,
-    messages: [],
-    description: 'Grupo de coordenação tática do 1º BPM.',
-    groupPhotoUrl: 'https://picsum.photos/seed/group1/100/100',
-    admins: ['o1', 'EU']
-  },
-  { 
     id: 'c_o1', // Chat individual com o1 (Aceito)
     type: 'individual', 
     name: 'Sgt. Douglas (1º BPM)', 
@@ -195,22 +179,6 @@ const MOCK_CHATS: Chat[] = [
       { id: 'm4', sender: 'Sgt. Douglas', initials: 'SD', text: 'Relatório de averiguação K9 concluído no Ponto Central.', time: '12:30', isMe: false, type: 'text' },
     ]
   },
-  // Grupo Público que o usuário NÃO participa
-  {
-    id: 'c3',
-    type: 'group',
-    name: 'ROCCA - Patrulha Canina',
-    participants: ['o2', 'o3'], // Usuário NÃO participa
-    lastMessage: 'Cães em treinamento na área sul.',
-    lastTime: '14:00',
-    unreadCount: 0,
-    icon: 'pets',
-    active: false,
-    messages: [],
-    description: 'Grupo de apoio com cães farejadores.',
-    groupPhotoUrl: 'https://picsum.photos/seed/group2/100/100',
-    admins: ['o2']
-  }
 ];
 
 
@@ -258,7 +226,7 @@ const App: React.FC = () => {
     navigateTo('chatRoom');
   };
 
-  // --- Lógica de Contatos (Omitida para brevidade, sem alterações) ---
+  // --- Lógica de Contatos ---
 
   const getContactStatus = (officerId: string): ContactStatus | null => {
     return contacts.find(c => c.officerId === officerId)?.status || null;
@@ -327,45 +295,7 @@ const App: React.FC = () => {
     openChat(newChat.id);
   };
   
-  const onJoinGroup = (chatId: string) => {
-    const chatToJoin = chats.find(c => c.id === chatId);
-    if (!chatToJoin || chatToJoin.type !== 'group') return;
-
-    if (chatToJoin.participants.includes('EU')) {
-      openChat(chatId);
-      return;
-    }
-
-    // Simula a entrada imediata no grupo (sem aprovação, para simplificar)
-    setChats(prev => prev.map(c => 
-      c.id === chatId ? { ...c, participants: [...c.participants, 'EU'], active: true } : c
-    ));
-    alert(`Você entrou no grupo ${chatToJoin.name}.`);
-    openChat(chatId);
-  };
-
-  const onSaveGroup = (groupData: Omit<Chat, 'messages' | 'lastMessage' | 'lastTime' | 'unreadCount' | 'active'>) => {
-    const existingChatIndex = chats.findIndex(c => c.id === groupData.id);
-
-    const baseChat: Chat = {
-      ...groupData,
-      messages: [],
-      lastMessage: groupData.description || 'Novo grupo criado.',
-      lastTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      unreadCount: 0,
-      active: true,
-    };
-
-    if (existingChatIndex !== -1) {
-      // Edição
-      setChats(prev => prev.map((c, index) => index === existingChatIndex ? baseChat : c));
-      alert(`Grupo ${groupData.name} atualizado com sucesso.`);
-    } else {
-      // Criação
-      setChats(prev => [...prev, baseChat]);
-      alert(`Grupo ${groupData.name} criado com sucesso.`);
-    }
-  };
+  // Removendo onJoinGroup e onSaveGroup
 
   // --- Lógica de Dados ---
 
@@ -438,15 +368,11 @@ const App: React.FC = () => {
   const suspectToEdit = suspects.find(s => s.id === editingSuspectId);
   const activeChat = chats.find(c => c.id === activeChatId);
   
-  // Chats que o usuário participa (Individual Aceito OU Grupo que inclui 'EU')
+  // Chats que o usuário participa (AGORA APENAS INDIVIDUAIS ACEITOS)
   const userChats = chats.filter(chat => 
-    (chat.type === 'group' && chat.participants.includes('EU')) || 
-    (chat.type === 'individual' && contacts.some(c => c.officerId === chat.participants.find(p => p !== 'EU') && c.status === 'Accepted'))
+    chat.type === 'individual' && contacts.some(c => c.officerId === chat.participants.find(p => p !== 'EU') && c.status === 'Accepted')
   );
   
-  // Todos os grupos, incluindo aqueles que o usuário não participa
-  const allGroups = chats.filter(chat => chat.type === 'group');
-
   // Filtra oficiais que são contatos aceitos e estão online
   const acceptedOnlineOfficers = officers.filter(o => 
     o.isOnline && contacts.some(c => c.officerId === o.id && c.status === 'Accepted')
@@ -494,11 +420,8 @@ const App: React.FC = () => {
         <TacticalChatList 
           navigateTo={navigateTo} 
           userChats={userChats} 
-          allGroups={allGroups} 
           officers={acceptedOnlineOfficers} 
           openChat={openChat} 
-          startIndividualChat={startIndividualChat}
-          onJoinGroup={onJoinGroup}
           pendingRequestsCount={contacts.filter(c => c.status === 'Pending' && !c.isRequester).length}
         />
       )}
@@ -538,14 +461,6 @@ const App: React.FC = () => {
           onSendRequest={onSendRequest}
           onAcceptRequest={onAcceptRequest}
           onRejectRequest={onRejectRequest}
-        />
-      )}
-      {currentScreen === 'groupManagement' && (
-        <GroupManagement
-          navigateTo={navigateTo}
-          onBack={() => navigateTo('chatList')}
-          onSaveGroup={onSaveGroup}
-          allOfficers={officers}
         />
       )}
     </div>
