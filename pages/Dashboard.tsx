@@ -134,7 +134,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
             <div className="h-4 w-1.5 bg-pmmg-red rounded-full"></div>
             <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-widest italic">Alertas e Registros Recentes ({searchTerm ? 'Filtrados' : 'Top 5'})</h3>
           </div>
-          <span className="text-[10px] font-bold text-pmmg-navy/40 uppercase">{filteredSuspects.length} Encontrados</span>
+          {/* Removido: <span className="text-[10px] font-bold text-pmmg-navy/40 uppercase">{filteredSuspects.length} Encontrados</span> */}
         </div>
 
         <section className="px-4 space-y-4">
@@ -171,7 +171,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                         <span className="material-symbols-outlined text-[14px] text-pmmg-navy">history</span>
                         <span className="text-[10px] text-slate-700">Há {alert.timeAgo}</span>
                       </div>
-                      {/* Link VER NO MAPA (Corrigido para text-slate-700) */}
+                      {/* Link VER NO MAPA */}
                       {alert.lat && alert.lng && (
                         <div 
                           onClick={() => handleViewOnMap(alert)}
