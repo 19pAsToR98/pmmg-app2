@@ -51,12 +51,12 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                 <span className="w-1.5 h-1.5 bg-green-400 rounded-full"></span> Online
               </div>
             </div>
-            {/* Botão para AI Tools */}
+            {/* Botão para Perfil (Substituindo AI Tools) */}
             <button 
-              onClick={() => navigateTo('aiTools')}
+              onClick={() => navigateTo('profileSettings')}
               className="bg-white/10 p-1.5 rounded-full border border-white/20 text-white"
             >
-              <span className="material-symbols-outlined text-xl">psychology</span>
+              <span className="material-symbols-outlined text-xl">person</span>
             </button>
           </div>
         </div>
@@ -109,7 +109,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
           </button>
         </section>
         
-        {/* New Registry Button (Moved here, below stats) */}
+        {/* New Registry Button */}
         <section className="px-4 pt-4">
           <button 
             onClick={() => navigateTo('registry')}
