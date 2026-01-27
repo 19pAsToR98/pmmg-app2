@@ -23,6 +23,18 @@ const containerStyle = {
 
 const defaultCenter: google.maps.LatLngLiteral = { lat: -19.9167, lng: -43.9345 }; // Belo Horizonte
 
+// Mapeamento de ícones Material Symbols para seus códigos Unicode (necessário para SVG em Google Maps)
+const ICON_UNICODE_MAP: { [key: string]: string } = {
+  'priority_high': '\ue645', // Foragido
+  'warning': '\ue002', // Suspeito
+  'flag': '\ue153',
+  'shield': '\ue6e1',
+  'camera': '\ue3b0',
+  'bolt': '\ue0b8',
+  'visibility': '\ue417',
+  'person': '\ue7fd',
+};
+
 const GoogleTacticalMap: React.FC<GoogleTacticalMapProps> = ({ navigateTo, suspects, onOpenProfile, initialCenter, customMarkers, addCustomMarker, updateCustomMarker, deleteCustomMarker }) => {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY || '',
@@ -131,12 +143,21 @@ const GoogleTacticalMap: React.FC<GoogleTacticalMapProps> = ({ navigateTo, suspe
   const getSuspectIcon = (s: Suspect): google.maps.Icon => {
     const color = s.status === 'Foragido' ? '#e31c1c' : s.status === 'Suspeito' ? '#ffcc00' : '#002147';
     const iconName = s.status === 'Foragido' ? 'priority_high' : 'warning';
-    
+    const unicode = ICON_UNICODE_MAP[iconName] || '\ue800'; // Fallback icon
+
     // Usando Material Symbols como SVG para o Google Maps Marker
     const svg = `
       <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <style>
+          @font-face {
+            font-family: 'Material Symbols Outlined';
+            font-style: normal;
+            font-weight: 400;
+            src: url(https://fonts.gstatic.com/s/materialsymbolsoutlined/v190/kJEhBvYX7BgnkSrUwT8OhrdQw4oELdPIeeII9v6oDMzByuE.woff2) format('woff2');
+          }
+        </style>
         <circle cx="16" cy="16" r="14" fill="${color}" stroke="#FFFFFF" stroke-width="3"/>
-        <text x="16" y="20" font-family="'Material Symbols Outlined'" font-size="16" fill="#FFFFFF" text-anchor="middle" dominant-baseline="middle">${iconName}</text>
+        <text x="16" y="20" font-family="'Material Symbols Outlined'" font-size="16" fill="#FFFFFF" text-anchor="middle" dominant-baseline="middle">${unicode}</text>
       </svg>
     `;
 
@@ -155,13 +176,21 @@ const GoogleTacticalMap: React.FC<GoogleTacticalMapProps> = ({ navigateTo, suspe
       'bg-pmmg-blue': '#0047ab',
       'bg-green-500': '#22c55e',
     };
-    const colorKey = m.color.replace('bg-', '');
     const color = colorMap[m.color] || '#002147';
+    const unicode = ICON_UNICODE_MAP[m.icon] || '\ue800'; // Fallback icon
 
     const svg = `
       <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <style>
+          @font-face {
+            font-family: 'Material Symbols Outlined';
+            font-style: normal;
+            font-weight: 400;
+            src: url(https://fonts.gstatic.com/s/materialsymbolsoutlined/v190/kJEhBvYX7BgnkSrUwT8OhrdQw4oELdPIeeII9v6oDMzByuE.woff2) format('woff2');
+          }
+        </style>
         <circle cx="16" cy="16" r="14" fill="${color}" stroke="#FFFFFF" stroke-width="3"/>
-        <text x="16" y="20" font-family="'Material Symbols Outlined'" font-size="16" fill="#FFFFFF" text-anchor="middle" dominant-baseline="middle">${m.icon}</text>
+        <text x="16" y="20" font-family="'Material Symbols Outlined'" font-size="16" fill="#FFFFFF" text-anchor="middle" dominant-baseline="middle">${unicode}</text>
       </svg>
     `;
 
