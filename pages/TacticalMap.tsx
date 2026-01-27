@@ -30,6 +30,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   const [newMarkerData, setNewMarkerData] = useState<Omit<CustomMarker, 'id'> | null>(null);
   const [editingMarker, setEditingMarker] = useState<CustomMarker | null>(null);
   const [currentZoom, setCurrentZoom] = useState(14); // Estado para rastrear o zoom
+  const [showLegend, setShowLegend] = useState(false); // Novo estado para a legenda
 
   // Filtragem dos suspeitos
   const filteredSuspects = suspects.filter(s => 
@@ -364,7 +365,6 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       <div className="flex-1 relative">
         <div ref={mapContainerRef} className="w-full h-full" style={{ zIndex: 1 }} />
         
-        {/* Floating Counter (REMOVIDO) */}
         {/* Adding Marker Mode Indicator (Non-blocking) */}
         {isAddingMarker && (
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[1001] pointer-events-none">
@@ -474,7 +474,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         )}
 
         {/* Interactive Legend */}
-        <div className="absolute bottom-32 right-4 z-[1000]">
+        <div className={`absolute bottom-32 right-4 z-[1000] transition-all duration-300 ${showLegend ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10 pointer-events-none'}`}>
           <div className="bg-white/95 backdrop-blur-md p-3 rounded-2xl shadow-2xl border border-pmmg-navy/10 flex flex-col gap-2.5">
             <p className="text-[8px] font-black text-pmmg-navy/40 uppercase tracking-widest border-b border-pmmg-navy/5 pb-1 mb-1">Legenda Tática</p>
             
@@ -522,6 +522,16 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             )}
           </div>
         </div>
+        
+        {/* FAB para Legenda */}
+        <button 
+          onClick={() => setShowLegend(prev => !prev)}
+          className="fixed bottom-[100px] right-6 z-[1000] w-12 h-12 bg-pmmg-navy text-pmmg-yellow rounded-full shadow-xl flex items-center justify-center border-4 border-white active:scale-95 transition-transform"
+        >
+          <span className="material-symbols-outlined text-2xl fill-icon">
+            {showLegend ? 'close' : 'menu_book'}
+          </span>
+        </button>
       </div>
 
       <BottomNav activeScreen="map" navigateTo={navigateTo} />
