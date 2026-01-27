@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import L from 'leaflet';
+import 'leaflet-rotate'; // Importa o plugin de rotação
 import { Screen, Suspect, CustomMarker } from '../types';
 import BottomNav from '../components/BottomNav';
 
@@ -30,6 +31,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   const [newMarkerData, setNewMarkerData] = useState<Omit<CustomMarker, 'id'> | null>(null);
   const [editingMarker, setEditingMarker] = useState<CustomMarker | null>(null);
   const [currentZoom, setCurrentZoom] = useState(14); // Estado para rastrear o zoom
+  const [currentBearing, setCurrentBearing] = useState(0); // Estado para rastrear a rotação
 
   // Filtragem dos suspeitos
   const filteredSuspects = suspects.filter(s => 
@@ -92,6 +94,14 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
     alert(`Localização de ${title} pronta para compartilhamento:\n\nCoordenadas: ${lat.toFixed(5)}, ${lng.toFixed(5)}\nLink (Simulado): ${locationLink}`);
   }, []);
 
+  // Função para alterar a rotação
+  const changeBearing = (delta: number) => {
+    if (mapInstanceRef.current && 'setBearing' in mapInstanceRef.current) {
+      const newBearing = (currentBearing + delta) % 360;
+      (mapInstanceRef.current as any).setBearing(newBearing);
+      setCurrentBearing(newBearing);
+    }
+  };
 
   // 1. Inicialização do Mapa e Listeners de Zoom (Roda apenas uma vez)
   useEffect(() => {
@@ -100,10 +110,13 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
     const fallbackPos: [number, number] = [-19.9167, -43.9345];
     const startPos = initialCenter || fallbackPos;
     
+    // Adicionando a opção 'rotate: true' e 'bearing: 0'
     const map = L.map(mapContainerRef.current, {
       center: startPos,
       zoom: initialCenter ? 17 : 14,
-      zoomControl: false 
+      zoomControl: false,
+      rotate: true, // Habilita a rotação
+      bearing: 0,   // Rotação inicial
     });
     mapInstanceRef.current = map;
     setCurrentZoom(map.getZoom()); // Inicializa o estado de zoom
@@ -320,6 +333,10 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   const recenter = () => {
     if (userPos && mapInstanceRef.current) {
       mapInstanceRef.current.setView(userPos, 16);
+      if ('setBearing' in mapInstanceRef.current) {
+        (mapInstanceRef.current as any).setBearing(0);
+        setCurrentBearing(0);
+      }
     }
   };
 
@@ -341,6 +358,22 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {/* Botões de Rotação */}
+            <button 
+              onClick={() => changeBearing(-45)}
+              className="bg-white/10 p-2 rounded-full border border-white/20 text-white active:bg-white/20"
+              title="Girar 45° Esquerda"
+            >
+              <span className="material-symbols-outlined text-lg">rotate_left</span>
+            </button>
+            <button 
+              onClick={() => changeBearing(45)}
+              className="bg-white/10 p-2 rounded-full border border-white/20 text-white active:bg-white/20"
+              title="Girar 45° Direita"
+            >
+              <span className="material-symbols-outlined text-lg">rotate_right</span>
+            </button>
+            
             <button 
               onClick={() => {
                 setIsAddingMarker(prev => !prev);
@@ -357,14 +390,28 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           </div>
         </div>
 
-        {/* Tactical Filters Chips - REMOVIDO */}
+        {/* Tactical Filters Chips */}
+        <div className="flex gap-2 overflow-x-auto pt-3 pb-1 no-scrollbar">
+          {['Todos', 'Foragido', 'Suspeito', 'Preso', 'CPF Cancelado'].map((filter) => (
+            <button
+              key={filter}
+              onClick={() => setActiveFilter(filter as MapFilter)}
+              className={`shrink-0 text-[9px] font-bold px-3 py-1.5 rounded-full uppercase transition-colors ${
+                activeFilter === filter 
+                  ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' 
+                  : 'bg-white/10 text-white/70 hover:bg-white/20'
+              }`}
+            >
+              {filter}
+            </button>
+          ))}
+        </div>
         
       </header>
 
       <div className="flex-1 relative">
         <div ref={mapContainerRef} className="w-full h-full" style={{ zIndex: 1 }} />
         
-        {/* Floating Counter (REMOVIDO) */}
         {/* Adding Marker Mode Indicator (Non-blocking) */}
         {isAddingMarker && (
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[1001] pointer-events-none">
