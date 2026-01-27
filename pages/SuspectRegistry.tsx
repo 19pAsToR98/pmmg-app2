@@ -9,12 +9,11 @@ interface SuspectRegistryProps {
   allSuspects: Suspect[];
 }
 
-// Mock data for address search (since we cannot use external APIs)
-const MOCK_ADDRESS_SUGGESTIONS = [
-  { name: 'Rua da Bahia, 1000, Centro, BH', lat: -19.9200, lng: -43.9350 },
-  { name: 'Av. Amazonas, 500, Centro, BH', lat: -19.9230, lng: -43.9442 },
-  { name: 'Praça da Liberdade, BH', lat: -19.9320, lng: -43.9381 },
-];
+interface GeocodedLocation {
+  name: string;
+  lat: number;
+  lng: number;
+}
 
 const TacticalMapIcon = L.divIcon({
   className: 'custom-location-icon',
@@ -39,10 +38,11 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
   
   // New States for Address, Vehicles, Associations
   const [address, setAddress] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState<{ lat: number, lng: number, name: string } | null>(null);
-  const [addressSuggestions, setAddressSuggestions] = useState<typeof MOCK_ADDRESS_SUGGESTIONS>([]);
+  const [selectedLocation, setSelectedLocation] = useState<GeocodedLocation | null>(null);
+  const [addressSuggestions, setAddressSuggestions] = useState<GeocodedLocation[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [associations, setAssociations] = useState<Association[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   // Vehicle Input States
   const [newVehiclePlate, setNewVehiclePlate] = useState('');
@@ -98,26 +98,47 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
     };
   }, [selectedLocation]);
 
-  // --- Address Search Logic ---
+  // --- Address Search Logic (Real Geocoding via Nominatim) ---
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAddress(e.target.value);
     setSelectedLocation(null); // Clear location if user starts typing again
-    setAddressSuggestions([]); // Clear suggestions when typing starts
+    setAddressSuggestions([]); // Clear suggestions while typing
   };
 
-  const handleAddressSearch = () => {
-    if (address.length > 2) {
-      const filtered = MOCK_ADDRESS_SUGGESTIONS.filter(s => 
-        s.name.toLowerCase().includes(address.toLowerCase())
-      );
-      setAddressSuggestions(filtered);
-    } else {
-      setAddressSuggestions([]);
-      alert("Digite pelo menos 3 caracteres para buscar um endereço mockado.");
+  const handleAddressSearch = async () => {
+    if (address.length < 3) {
+      alert("Digite pelo menos 3 caracteres para buscar um endereço.");
+      return;
+    }
+    
+    setIsSearching(true);
+    setAddressSuggestions([]);
+
+    try {
+      // Usando Nominatim (OpenStreetMap) para geocodificação
+      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=5&countrycodes=br`;
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data && data.length > 0) {
+        const results: GeocodedLocation[] = data.map((item: any) => ({
+          name: item.display_name,
+          lat: parseFloat(item.lat),
+          lng: parseFloat(item.lon),
+        }));
+        setAddressSuggestions(results);
+      } else {
+        alert("Nenhum endereço encontrado para a busca.");
+      }
+    } catch (error) {
+      console.error("Erro ao buscar endereço:", error);
+      alert("Erro na comunicação com o serviço de geocodificação.");
+    } finally {
+      setIsSearching(false);
     }
   };
 
-  const handleSelectLocation = (location: { lat: number, lng: number, name: string }) => {
+  const handleSelectLocation = (location: GeocodedLocation) => {
     setSelectedLocation(location);
     setAddress(location.name);
     setAddressSuggestions([]);
@@ -374,7 +395,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
                 onChange={handleAddressChange}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
-                    e.preventDefault(); // Previne o submit do form
+                    e.preventDefault();
                     handleAddressSearch();
                   }
                 }}
@@ -384,9 +405,11 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
               />
               <button 
                 onClick={handleAddressSearch}
-                className="bg-pmmg-navy text-white p-3 rounded-lg active:scale-95 transition-transform"
+                disabled={isSearching}
+                className="bg-pmmg-navy text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50"
               >
-                <span className="material-symbols-outlined text-xl">search</span>
+                <span className="material-symbols-outlined text-xl animate-spin" style={{ display: isSearching ? 'block' : 'none' }}>progress_activity</span>
+                <span className="material-symbols-outlined text-xl" style={{ display: isSearching ? 'none' : 'block' }}>search</span>
               </button>
             </div>
             
@@ -402,6 +425,9 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
                   </button>
                 ))}
               </div>
+            )}
+            {addressSuggestions.length === 0 && !isSearching && address.length > 2 && (
+              <p className="text-[10px] text-pmmg-red italic text-center mt-2">Nenhum resultado encontrado.</p>
             )}
           </div>
           
