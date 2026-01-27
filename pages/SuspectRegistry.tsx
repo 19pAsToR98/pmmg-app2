@@ -71,6 +71,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
           }
         });
       } else {
+        // Inicializa o mapa
         mapInstance.current = L.map(miniMapRef.current, {
           center: [lat, lng],
           zoom: 15,
@@ -85,10 +86,15 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
       }
 
       L.marker([lat, lng], { icon: TacticalMapIcon }).addTo(mapInstance.current);
+      mapInstance.current.invalidateSize(); // Garante que o mapa seja renderizado corretamente
     }
 
     return () => {
-      // Cleanup is handled by the component unmounting, but we ensure the map is removed if location changes significantly or component unmounts.
+      // Limpeza do mapa ao desmontar ou mudar de localização
+      if (mapInstance.current && !selectedLocation) {
+        mapInstance.current.remove();
+        mapInstance.current = null;
+      }
     };
   }, [selectedLocation]);
 
