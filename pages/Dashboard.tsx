@@ -110,9 +110,9 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
           {/* Button to navigate to registry (Replaced old management button) */}
           <button 
             onClick={() => navigateTo('registry')}
-            className="w-full mt-3 bg-pmmg-blue text-white text-[10px] font-bold py-2 rounded-xl uppercase tracking-widest flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+            className="w-full mt-3 bg-pmmg-navy text-white text-[10px] font-bold py-2 rounded-xl uppercase tracking-widest flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
           >
-            <span className="material-symbols-outlined text-lg">person_add</span>
+            <span className="material-symbols-outlined text-lg text-pmmg-yellow">person_add</span>
             Novo Registro
           </button>
         </section>
