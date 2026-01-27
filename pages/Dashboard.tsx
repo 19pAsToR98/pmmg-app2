@@ -61,22 +61,24 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
           </div>
         </div>
 
-        {/* Search and New Registry Section (Moved from main) */}
-        <section className="space-y-3">
-          <div className="relative group">
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-              <span className="material-symbols-outlined text-pmmg-navy text-xl">search</span>
-            </div>
-            <input 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-full pl-10 pr-4 py-3 bg-white rounded-xl border-2 border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-0 text-sm font-bold placeholder-pmmg-navy/40 shadow-sm" 
-              placeholder="BUSCAR INDIVÍDUO (NOME, CPF, ALCUNHA)" 
-              type="text" 
-            />
+        {/* Search Bar (Only this remains in the header) */}
+        <div className="relative group">
+          <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+            <span className="material-symbols-outlined text-pmmg-navy text-xl">search</span>
           </div>
-          
-          {/* Button to navigate to registry */}
+          <input 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="block w-full pl-10 pr-4 py-3 bg-white rounded-xl border-2 border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-0 text-sm font-bold placeholder-pmmg-navy/40 shadow-sm" 
+            placeholder="BUSCAR INDIVÍDUO (NOME, CPF, ALCUNHA)" 
+            type="text" 
+          />
+        </div>
+      </header>
+
+      <main className="flex-1 overflow-y-auto pb-32 no-scrollbar">
+        {/* New Registry Button (Moved back to main) */}
+        <section className="px-4 pt-4">
           <button 
             onClick={() => navigateTo('registry')}
             className="w-full bg-pmmg-navy text-white text-xs font-bold py-3 rounded-xl uppercase tracking-widest flex items-center justify-center gap-2 active:scale-[0.98] transition-transform border border-pmmg-yellow/30"
@@ -85,9 +87,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
             Novo Registro
           </button>
         </section>
-      </header>
-
-      <main className="flex-1 overflow-y-auto pb-32 no-scrollbar">
+        
         {/* Stats Grid */}
         <section className="px-4 pt-4 grid grid-cols-2 gap-3">
           <button onClick={() => handleCardClick('Foragido')} className="pmmg-card p-3 border-l-4 border-l-pmmg-red active:scale-[0.98] transition-transform text-left">
