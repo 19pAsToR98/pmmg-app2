@@ -525,7 +525,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         {/* Toggle Button for Legend Bar */}
         <button 
           onClick={() => setIsLegendOpen(prev => !prev)}
-          className="fixed bottom-[80px] left-1/2 transform -translate-x-1/2 z-[1001] w-16 h-6 bg-pmmg-navy text-pmmg-yellow rounded-t-xl shadow-xl flex items-center justify-center border-t-4 border-x-4 border-white active:scale-95 transition-transform"
+          className="fixed bottom-[80px] right-6 z-[1001] w-16 h-6 bg-pmmg-navy text-pmmg-yellow rounded-t-xl shadow-xl flex items-center justify-center border-t-4 border-x-4 border-white active:scale-95 transition-transform"
         >
           <span className={`material-symbols-outlined text-lg transition-transform ${isLegendOpen ? 'rotate-180' : 'rotate-0'}`}>
             keyboard_arrow_up
