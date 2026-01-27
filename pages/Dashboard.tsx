@@ -29,6 +29,14 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
   const handleCardClick = (status: Suspect['status']) => {
     navigateToSuspectsManagement(status);
   };
+  
+  const handleViewOnMap = (suspect: Suspect) => {
+    if (suspect.lat && suspect.lng) {
+      navigateTo('map', [suspect.lat, suspect.lng]);
+    } else {
+      alert("Localização não registrada para este indivíduo.");
+    }
+  };
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
@@ -51,7 +59,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                 <span className="w-1.5 h-1.5 bg-green-400 rounded-full"></span> Online
               </div>
             </div>
-            {/* Botão para Perfil (Substituindo AI Tools) */}
+            {/* Botão para Perfil */}
             <button 
               onClick={() => navigateTo('profileSettings')}
               className="bg-white/10 p-1.5 rounded-full border border-white/20 text-white"
@@ -131,54 +139,75 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
 
         <section className="px-4 space-y-4">
           {filteredSuspects.length > 0 ? filteredSuspects.map((alert) => (
-            <div key={alert.id} className="pmmg-card overflow-hidden transition-all active:scale-[0.98]">
+            <div key={alert.id} className="pmmg-card overflow-hidden transition-all">
               <div className="flex">
-                <div className="w-32 h-44 relative bg-slate-200 shrink-0">
-                  <img alt={alert.name} className="w-full h-full object-cover" src={alert.photoUrl} />
-                  <div className={`absolute top-0 left-0 text-white text-[8px] font-bold px-2 py-1 uppercase rounded-br-lg shadow-md ${
-                    alert.status === 'Foragido' ? 'bg-pmmg-red' : 
-                    alert.status === 'Suspeito' ? 'bg-pmmg-yellow text-pmmg-navy' :
-                    alert.status === 'Preso' ? 'bg-pmmg-blue' : 'bg-slate-700'
-                  }`}>
-                    {alert.status}
+                {/* Area clicável para Ficha Completa */}
+                <div 
+                  onClick={() => onOpenProfile(alert.id)}
+                  className="flex flex-1 cursor-pointer active:scale-[0.99] transition-transform"
+                >
+                  <div className="w-32 h-44 relative bg-slate-200 shrink-0">
+                    <img alt={alert.name} className="w-full h-full object-cover" src={alert.photoUrl} />
+                    <div className={`absolute top-0 left-0 text-white text-[8px] font-bold px-2 py-1 uppercase rounded-br-lg shadow-md ${
+                      alert.status === 'Foragido' ? 'bg-pmmg-red' : 
+                      alert.status === 'Suspeito' ? 'bg-pmmg-yellow text-pmmg-navy' :
+                      alert.status === 'Preso' ? 'bg-pmmg-blue' : 'bg-slate-700'
+                    }`}>
+                      {alert.status}
+                    </div>
+                  </div>
+                  <div className="flex-1 p-3 flex flex-col justify-between overflow-hidden">
+                    <div>
+                      <div className="flex justify-between items-start">
+                        <h4 className="font-bold text-sm text-pmmg-navy uppercase leading-tight truncate pr-1">{alert.name}</h4>
+                        <span className={`material-symbols-outlined fill-icon text-lg ${
+                          alert.status === 'Foragido' ? 'text-pmmg-red' : 'text-pmmg-yellow'
+                        }`}>
+                          {alert.status === 'Foragido' ? 'priority_high' : 'warning'}
+                        </span>
+                      </div>
+                      <p className="text-[10px] font-semibold text-slate-500 mt-1">CPF: {alert.cpf}</p>
+                      <div className="mt-2 space-y-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-[14px] text-pmmg-navy">location_on</span>
+                          <span className="text-[10px] text-slate-700 truncate">Visto em: {alert.lastSeen}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-[14px] text-pmmg-navy">history</span>
+                          <span className="text-[10px] text-slate-700">Há {alert.timeAgo}</span>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Botões de Ação (Ficha Completa e Compartilhar removidos daqui, pois o clique principal já abre a ficha) */}
                   </div>
                 </div>
-                <div className="flex-1 p-3 flex flex-col justify-between overflow-hidden">
-                  <div>
-                    <div className="flex justify-between items-start">
-                      <h4 className="font-bold text-sm text-pmmg-navy uppercase leading-tight truncate pr-1">{alert.name}</h4>
-                      <span className={`material-symbols-outlined fill-icon text-lg ${
-                        alert.status === 'Foragido' ? 'text-pmmg-red' : 'text-pmmg-yellow'
-                      }`}>
-                        {alert.status === 'Foragido' ? 'priority_high' : 'warning'}
-                      </span>
-                    </div>
-                    <p className="text-[10px] font-semibold text-slate-500 mt-1">CPF: {alert.cpf}</p>
-                    <div className="mt-2 space-y-1">
-                      <div className="flex items-center gap-1.5">
-                        <span className="material-symbols-outlined text-[14px] text-pmmg-navy">location_on</span>
-                        <span className="text-[10px] text-slate-700 truncate">Visto em: {alert.lastSeen}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="material-symbols-outlined text-[14px] text-pmmg-navy">history</span>
-                        <span className="text-[10px] text-slate-700">Há {alert.timeAgo}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={() => onOpenProfile(alert.id)}
-                      className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-2 rounded-lg uppercase tracking-wide"
-                    >
-                      Ficha Completa
-                    </button>
-                    <button 
-                      onClick={() => alert(`Compartilhando ficha de: ${alert.name}`)}
-                      className="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center"
-                    >
-                      <span className="material-symbols-outlined text-pmmg-navy text-lg">share</span>
-                    </button>
-                  </div>
+              </div>
+              
+              {/* Ações na parte inferior do card */}
+              <div className="p-3 pt-0 flex flex-col gap-2">
+                {/* Botão VER NO MAPA (Mantido) */}
+                {alert.lat && alert.lng && (
+                  <button 
+                    onClick={() => handleViewOnMap(alert)}
+                    className="w-full bg-pmmg-navy/5 text-pmmg-navy text-[9px] font-bold py-1.5 rounded-lg uppercase tracking-wide flex items-center justify-center gap-1 active:bg-pmmg-navy/10 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-sm">map</span>
+                    Ver no Mapa
+                  </button>
+                )}
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => onOpenProfile(alert.id)}
+                    className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-2 rounded-lg uppercase tracking-wide"
+                  >
+                    Ficha Completa
+                  </button>
+                  <button 
+                    onClick={() => alert(`Compartilhando ficha de: ${alert.name}`)}
+                    className="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center"
+                  >
+                    <span className="material-symbols-outlined text-pmmg-navy text-lg">share</span>
+                  </button>
                 </div>
               </div>
             </div>
