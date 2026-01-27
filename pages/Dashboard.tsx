@@ -132,7 +132,9 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
         <div className="px-4 pt-8 pb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="h-4 w-1.5 bg-pmmg-red rounded-full"></div>
-            <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-widest italic">Alertas e Registros Recentes ({searchTerm ? 'Filtrados' : ''})</h3>
+            <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-widest italic">
+              Alertas e Registros Recentes {searchTerm ? '(Filtrados)' : ''}
+            </h3>
           </div>
         </div>
 
