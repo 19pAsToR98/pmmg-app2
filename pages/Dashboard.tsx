@@ -171,33 +171,31 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                         <span className="material-symbols-outlined text-[14px] text-pmmg-navy">history</span>
                         <span className="text-[10px] text-slate-700">Há {alert.timeAgo}</span>
                       </div>
+                      {/* Link VER NO MAPA (Substituindo o botão) */}
+                      {alert.lat && alert.lng && (
+                        <div 
+                          onClick={() => handleViewOnMap(alert)}
+                          className="flex items-center gap-1.5 cursor-pointer active:opacity-70 transition-opacity"
+                        >
+                          <span className="material-symbols-outlined text-[14px] text-pmmg-blue fill-icon">map</span>
+                          <span className="text-[10px] text-pmmg-blue font-bold uppercase tracking-wider">Ver no Mapa</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <div className="flex flex-col gap-2">
-                    {/* Novo Botão VER NO MAPA */}
-                    {alert.lat && alert.lng && (
-                      <button 
-                        onClick={() => handleViewOnMap(alert)}
-                        className="w-full bg-pmmg-navy/5 text-pmmg-navy text-[9px] font-bold py-1.5 rounded-lg uppercase tracking-wide flex items-center justify-center gap-1 active:bg-pmmg-navy/10 transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-sm">map</span>
-                        Ver no Mapa
-                      </button>
-                    )}
-                    <div className="flex gap-2">
-                      <button 
-                        onClick={() => onOpenProfile(alert.id)}
-                        className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-2 rounded-lg uppercase tracking-wide"
-                      >
-                        Ficha Completa
-                      </button>
-                      <button 
-                        onClick={() => alert(`Compartilhando ficha de: ${alert.name}`)}
-                        className="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center"
-                      >
-                        <span className="material-symbols-outlined text-pmmg-navy text-lg">share</span>
-                      </button>
-                    </div>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => onOpenProfile(alert.id)}
+                      className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-2 rounded-lg uppercase tracking-wide"
+                    >
+                      Ficha Completa
+                    </button>
+                    <button 
+                      onClick={() => alert(`Compartilhando ficha de: ${alert.name}`)}
+                      className="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center"
+                    >
+                      <span className="material-symbols-outlined text-pmmg-navy text-lg">share</span>
+                    </button>
                   </div>
                 </div>
               </div>
