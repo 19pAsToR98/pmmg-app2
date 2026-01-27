@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import L from 'leaflet';
 import { Screen, Suspect } from '../types';
 import BottomNav from '../components/BottomNav';
 
@@ -13,9 +14,8 @@ interface SuspectProfileProps {
 const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, navigateTo, allSuspects, onOpenProfile }) => {
   const [expandedSection, setExpandedSection] = useState<string | null>('data');
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
-  // Removendo referências ao Leaflet
-  // const miniMapRef = useRef<HTMLDivElement>(null);
-  // const mapInstance = useRef<L.Map | null>(null);
+  const miniMapRef = useRef<HTMLDivElement>(null);
+  const mapInstance = useRef<L.Map | null>(null);
 
   const photos = suspect.photoUrls && suspect.photoUrls.length > 0 ? suspect.photoUrls : [suspect.photoUrl];
   const currentPhotoIndex = fullscreenImage ? photos.indexOf(fullscreenImage) : -1;
@@ -40,8 +40,6 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
     }
   };
 
-  // Removendo useEffect do Leaflet
-  /*
   useEffect(() => {
     if (miniMapRef.current && suspect.lat && suspect.lng && !mapInstance.current) {
       mapInstance.current = L.map(miniMapRef.current, {
@@ -75,7 +73,6 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
       }
     };
   }, [suspect]);
-  */
 
   const handleOpenMap = () => {
     if (suspect.lat && suspect.lng) {
@@ -223,11 +220,11 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                 </div>
                 <div>
                   <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase tracking-wider mb-0.5">Filiação (Genitora)</p>
-                    <p className="text-sm font-bold text-slate-800">{suspect.motherName || 'Não Informado'}</p>
-                  </div>
+                  <p className="text-sm font-bold text-slate-800">{suspect.motherName || 'Não Informado'}</p>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+          </div>
 
           <div className="pmmg-card">
              <div onClick={() => toggleSection('articles')} className="flex items-center justify-between p-4 cursor-pointer">
@@ -341,7 +338,6 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
             <p className="text-[8px] text-slate-400 mt-2 uppercase text-center font-bold italic tracking-wider">Clique para expandir (Cores Reais)</p>
           </div>
 
-          {/* Última Localização (Substituído o Mini-mapa Leaflet) */}
           <div className="pmmg-card overflow-hidden">
             <div className="p-4 flex items-center justify-between text-pmmg-navy bg-white/40">
               <div className="flex items-center gap-3">
@@ -350,11 +346,8 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
               </div>
               <span className="text-[9px] font-bold uppercase opacity-50">{suspect.lastSeen}</span>
             </div>
-            <div className="relative group cursor-pointer h-48 bg-slate-200 flex items-center justify-center" onClick={handleOpenMap}>
-              {/* Placeholder para o mapa estático */}
-              <div className="absolute inset-0 bg-pmmg-navy/5 flex items-center justify-center">
-                <span className="material-symbols-outlined text-pmmg-navy/20 text-6xl">map</span>
-              </div>
+            <div className="relative group cursor-pointer" onClick={handleOpenMap}>
+              <div ref={miniMapRef} className="h-48 w-full bg-slate-200 z-0 pointer-events-none"></div>
               <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors flex items-center justify-center">
                 <div className="bg-pmmg-navy/80 text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-xl backdrop-blur-sm transform scale-90 group-hover:scale-100 transition-transform">
                   <span className="material-symbols-outlined text-sm">open_in_full</span>

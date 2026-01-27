@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import L from 'leaflet';
 import { Screen, Suspect, Vehicle, Association } from '../types';
 import BottomNav from '../components/BottomNav';
 
@@ -15,15 +16,12 @@ const MOCK_ADDRESS_SUGGESTIONS = [
   { name: 'Praça da Liberdade, BH', lat: -19.9320, lng: -43.9381 },
 ];
 
-// Removendo TacticalMapIcon e referências ao Leaflet
-/*
 const TacticalMapIcon = L.divIcon({
   className: 'custom-location-icon',
   html: `<div class="w-6 h-6 bg-pmmg-navy rounded-full border-2 border-white flex items-center justify-center shadow-lg"><span class="material-symbols-outlined text-pmmg-yellow text-[14px] fill-icon">location_on</span></div>`,
   iconSize: [24, 24],
   iconAnchor: [12, 12]
 });
-*/
 
 
 const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, allSuspects }) => {
@@ -57,12 +55,10 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
   const [filteredSuspects, setFilteredSuspects] = useState<Suspect[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  // Removendo referências ao Leaflet
-  // const miniMapRef = useRef<HTMLDivElement>(null);
-  // const mapInstance = useRef<L.Map | null>(null);
+  const miniMapRef = useRef<HTMLDivElement>(null);
+  const mapInstance = useRef<L.Map | null>(null);
 
-  // --- Leaflet Minimap Effect (REMOVIDO) ---
-  /*
+  // --- Leaflet Minimap Effect ---
   useEffect(() => {
     if (miniMapRef.current && selectedLocation) {
       const { lat, lng } = selectedLocation;
@@ -95,7 +91,6 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
       // Cleanup is handled by the component unmounting, but we ensure the map is removed if location changes significantly or component unmounts.
     };
   }, [selectedLocation]);
-  */
 
   // --- Address Search Logic ---
   const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -404,10 +399,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
                 <p className="text-[10px] font-bold text-pmmg-navy uppercase tracking-wider">Localização Confirmada</p>
                 <span className="text-[9px] text-green-600 font-bold uppercase">GPS OK</span>
               </div>
-              {/* Substituído o mini-mapa por uma confirmação visual */}
-              <div className="h-12 w-full bg-pmmg-khaki/50 flex items-center justify-center">
-                <span className="text-[10px] text-pmmg-navy/50 font-medium">Endereço: {selectedLocation.name}</span>
-              </div>
+              <div ref={miniMapRef} className="h-40 w-full bg-slate-200 z-0"></div>
             </div>
           )}
         </div>

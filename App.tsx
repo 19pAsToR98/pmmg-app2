@@ -9,7 +9,7 @@ import TacticalChatRoom from './pages/TacticalChatRoom';
 import AITools from './pages/AITools';
 import RequestAccess from './pages/RequestAccess';
 import ProfileSettings from './pages/ProfileSettings';
-import GoogleTacticalMap from './pages/GoogleTacticalMap'; // Novo componente
+import TacticalMap from './pages/TacticalMap';
 import TacticalContacts from './pages/TacticalContacts';
 import GroupManagement from './pages/GroupManagement';
 import OnboardingSetup from './pages/OnboardingSetup'; // Novo componente
@@ -476,7 +476,7 @@ const App: React.FC = () => {
         />
       )}
       {currentScreen === 'map' && (
-        <GoogleTacticalMap 
+        <TacticalMap 
           navigateTo={navigateTo} 
           suspects={suspects} 
           onOpenProfile={openProfile} 
