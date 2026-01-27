@@ -176,6 +176,20 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                           <span className="material-symbols-outlined text-[14px] text-pmmg-navy">history</span>
                           <span className="text-[10px] text-slate-700">Há {alert.timeAgo}</span>
                         </div>
+                        
+                        {/* NOVO LINK DISCRETO 'VER NO MAPA' */}
+                        {alert.lat && alert.lng && (
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation(); // Previne que o clique abra a ficha
+                              handleViewOnMap(alert);
+                            }}
+                            className="flex items-center gap-1.5 text-[10px] font-bold text-pmmg-blue uppercase hover:underline pt-1"
+                          >
+                            <span className="material-symbols-outlined text-[14px] text-pmmg-blue">map</span>
+                            Ver no Mapa
+                          </button>
+                        )}
                       </div>
                     </div>
                     {/* Botões de Ação (Ficha Completa e Compartilhar removidos daqui, pois o clique principal já abre a ficha) */}
@@ -183,32 +197,20 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                 </div>
               </div>
               
-              {/* Ações na parte inferior do card */}
-              <div className="p-3 pt-0 flex flex-col gap-2">
-                {/* Botão VER NO MAPA (Mantido) */}
-                {alert.lat && alert.lng && (
-                  <button 
-                    onClick={() => handleViewOnMap(alert)}
-                    className="w-full bg-pmmg-navy/5 text-pmmg-navy text-[9px] font-bold py-1.5 rounded-lg uppercase tracking-wide flex items-center justify-center gap-1 active:bg-pmmg-navy/10 transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-sm">map</span>
-                    Ver no Mapa
-                  </button>
-                )}
-                <div className="flex gap-2">
-                  <button 
-                    onClick={() => onOpenProfile(alert.id)}
-                    className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-2 rounded-lg uppercase tracking-wide"
-                  >
-                    Ficha Completa
-                  </button>
-                  <button 
-                    onClick={() => alert(`Compartilhando ficha de: ${alert.name}`)}
-                    className="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center"
-                  >
-                    <span className="material-symbols-outlined text-pmmg-navy text-lg">share</span>
-                  </button>
-                </div>
+              {/* Ações na parte inferior do card (Mantendo Ficha Completa e Compartilhar) */}
+              <div className="p-3 pt-0 flex gap-2">
+                <button 
+                  onClick={() => onOpenProfile(alert.id)}
+                  className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-2 rounded-lg uppercase tracking-wide"
+                >
+                  Ficha Completa
+                </button>
+                <button 
+                  onClick={() => alert(`Compartilhando ficha de: ${alert.name}`)}
+                  className="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center"
+                >
+                  <span className="material-symbols-outlined text-pmmg-navy text-lg">share</span>
+                </button>
               </div>
             </div>
           )) : (
