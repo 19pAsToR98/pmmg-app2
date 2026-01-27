@@ -324,16 +324,17 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
                 <div key={idx} className="relative shrink-0">
                   <div className="w-32 h-44 bg-white rounded-xl overflow-hidden border-2 border-pmmg-navy shadow-lg">
                     <img src={src} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
+                    {/* Botão de exclusão movido para dentro do contêiner da imagem, posicionado no canto superior direito */}
+                    <button 
+                      onClick={() => removePhoto(idx)}
+                      className="absolute top-1 right-1 bg-pmmg-red text-white w-5 h-5 rounded-full flex items-center justify-center shadow-md border border-white"
+                    >
+                      <span className="material-symbols-outlined text-xs">close</span>
+                    </button>
+                    {idx === 0 && (
+                      <div className="absolute bottom-2 left-2 bg-pmmg-navy text-white text-[8px] font-bold px-2 py-0.5 rounded uppercase tracking-widest border border-white/20">Principal</div>
+                    )}
                   </div>
-                  <button 
-                    onClick={() => removePhoto(idx)}
-                    className="absolute -top-2 -right-2 bg-pmmg-red text-white w-6 h-6 rounded-full flex items-center justify-center shadow-md"
-                  >
-                    <span className="material-symbols-outlined text-xs">close</span>
-                  </button>
-                  {idx === 0 && (
-                    <div className="absolute bottom-2 left-2 bg-pmmg-navy text-white text-[8px] font-bold px-2 py-0.5 rounded uppercase tracking-widest border border-white/20">Principal</div>
-                  )}
                 </div>
               ))}
               <button 
