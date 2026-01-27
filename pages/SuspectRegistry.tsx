@@ -113,6 +113,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
       setAddressSuggestions(filtered);
     } else {
       setAddressSuggestions([]);
+      alert("Digite pelo menos 3 caracteres para buscar um endereço mockado.");
     }
   };
 
