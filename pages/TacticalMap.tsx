@@ -30,7 +30,6 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   const [newMarkerData, setNewMarkerData] = useState<Omit<CustomMarker, 'id'> | null>(null);
   const [editingMarker, setEditingMarker] = useState<CustomMarker | null>(null);
   const [currentZoom, setCurrentZoom] = useState(14); // Estado para rastrear o zoom
-  const [showLegend, setShowLegend] = useState(false); // Novo estado para a legenda
 
   // Filtragem dos suspeitos
   const filteredSuspects = suspects.filter(s => 
@@ -342,14 +341,6 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {/* Botão para Legenda */}
-            <button 
-              onClick={() => setShowLegend(prev => !prev)}
-              className={`p-2 rounded-full border transition-all ${showLegend ? 'bg-pmmg-yellow text-pmmg-navy border-pmmg-yellow shadow-lg' : 'bg-white/10 text-white border-white/20'}`}
-            >
-              <span className="material-symbols-outlined text-lg">menu_book</span>
-            </button>
-            {/* Botão para Adicionar Marcador */}
             <button 
               onClick={() => {
                 setIsAddingMarker(prev => !prev);
@@ -360,7 +351,6 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             >
               <span className="material-symbols-outlined text-lg">add_location_alt</span>
             </button>
-            {/* Botão para Recenter */}
             <button onClick={recenter} className="bg-white/10 p-2 rounded-full border border-white/20 text-white active:bg-white/20">
               <span className="material-symbols-outlined text-lg">my_location</span>
             </button>
@@ -484,7 +474,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         )}
 
         {/* Interactive Legend */}
-        <div className={`absolute bottom-32 right-4 z-[1000] transition-all duration-300 ${showLegend ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
+        <div className="absolute bottom-32 right-4 z-[1000]">
           <div className="bg-white/95 backdrop-blur-md p-3 rounded-2xl shadow-2xl border border-pmmg-navy/10 flex flex-col gap-2.5">
             <p className="text-[8px] font-black text-pmmg-navy/40 uppercase tracking-widest border-b border-pmmg-navy/5 pb-1 mb-1">Legenda Tática</p>
             
