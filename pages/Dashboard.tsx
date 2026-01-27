@@ -141,7 +141,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
           {filteredSuspects.length > 0 ? filteredSuspects.map((alert) => (
             <div key={alert.id} className="pmmg-card overflow-hidden transition-all">
               <div className="flex">
-                {/* Area clicável para Ficha Completa */}
+                {/* Area clicável para Ficha Completa (Foto e Texto) */}
                 <div 
                   onClick={() => onOpenProfile(alert.id)}
                   className="flex flex-1 cursor-pointer active:scale-[0.99] transition-transform"
@@ -177,7 +177,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                           <span className="text-[10px] text-slate-700">Há {alert.timeAgo}</span>
                         </div>
                         
-                        {/* NOVO LINK DISCRETO 'VER NO MAPA' */}
+                        {/* LINK DISCRETO 'VER NO MAPA' */}
                         {alert.lat && alert.lng && (
                           <button 
                             onClick={(e) => {
@@ -192,12 +192,11 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                         )}
                       </div>
                     </div>
-                    {/* Botões de Ação (Ficha Completa e Compartilhar removidos daqui, pois o clique principal já abre a ficha) */}
                   </div>
                 </div>
               </div>
               
-              {/* Ações na parte inferior do card (Mantendo Ficha Completa e Compartilhar) */}
+              {/* Ações na parte inferior do card (Ficha Completa e Compartilhar) */}
               <div className="p-3 pt-0 flex gap-2">
                 <button 
                   onClick={() => onOpenProfile(alert.id)}
