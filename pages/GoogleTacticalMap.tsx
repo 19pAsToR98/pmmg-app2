@@ -145,7 +145,7 @@ const GoogleTacticalMap: React.FC<GoogleTacticalMapProps> = ({ navigateTo, suspe
     const iconName = s.status === 'Foragido' ? 'priority_high' : 'warning';
     const unicode = ICON_UNICODE_MAP[iconName] || '\ue800'; // Fallback icon
 
-    // Usando Material Symbols como SVG para o Google Maps Marker
+    // Incluindo a definição da fonte dentro do SVG para garantir o carregamento
     const svg = `
       <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
         <style>
