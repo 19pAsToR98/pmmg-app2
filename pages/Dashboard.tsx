@@ -61,7 +61,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
           </div>
         </div>
 
-        {/* Search Bar (Only this remains in the header) */}
+        {/* Search Bar (Fixed in header) */}
         <div className="relative group">
           <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
             <span className="material-symbols-outlined text-pmmg-navy text-xl">search</span>
@@ -77,17 +77,6 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
       </header>
 
       <main className="flex-1 overflow-y-auto pb-32 no-scrollbar">
-        {/* New Registry Button (Moved back to main) */}
-        <section className="px-4 pt-4">
-          <button 
-            onClick={() => navigateTo('registry')}
-            className="w-full bg-pmmg-navy text-white text-xs font-bold py-3 rounded-xl uppercase tracking-widest flex items-center justify-center gap-2 active:scale-[0.98] transition-transform border border-pmmg-yellow/30"
-          >
-            <span className="material-symbols-outlined text-lg text-pmmg-yellow">person_add</span>
-            Novo Registro
-          </button>
-        </section>
-        
         {/* Stats Grid */}
         <section className="px-4 pt-4 grid grid-cols-2 gap-3">
           <button onClick={() => handleCardClick('Foragido')} className="pmmg-card p-3 border-l-4 border-l-pmmg-red active:scale-[0.98] transition-transform text-left">
@@ -117,6 +106,17 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
               <span className="text-2xl font-black text-slate-600">{stats.cancelados}</span>
               <span className="material-symbols-outlined text-slate-400">cancel</span>
             </div>
+          </button>
+        </section>
+        
+        {/* New Registry Button (Moved here, below stats) */}
+        <section className="px-4 pt-4">
+          <button 
+            onClick={() => navigateTo('registry')}
+            className="w-full bg-pmmg-navy text-white text-xs font-bold py-3 rounded-xl uppercase tracking-widest flex items-center justify-center gap-2 active:scale-[0.98] transition-transform border border-pmmg-yellow/30"
+          >
+            <span className="material-symbols-outlined text-lg text-pmmg-yellow">person_add</span>
+            Novo Registro
           </button>
         </section>
 
