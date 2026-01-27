@@ -1,276 +1,200 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Screen, Suspect } from '../types';
 import BottomNav from '../components/BottomNav';
 
 interface DashboardProps {
   navigateTo: (screen: Screen) => void;
-  navigateToSuspectsManagement: (statusFilter: Suspect['status'] | 'Todos') => void;
+  navigateToSuspectsManagement: (status: Suspect['status'] | 'Todos') => void;
   onOpenProfile: (id: string) => void;
   suspects: Suspect[];
 }
 
-const statusMap = {
-  'Foragido': { label: 'Foragido', color: 'pmmg-red', icon: 'warning' },
-  'Suspeito': { label: 'Suspeito', color: 'pmmg-yellow', icon: 'visibility' },
-  'Preso': { label: 'Preso', color: 'pmmg-dark-grey', icon: 'lock' },
-  'CPF Cancelado': { label: 'CPF Cancelado', color: 'pmmg-dark-grey', icon: 'person_off' },
-};
-
 const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsManagement, onOpenProfile, suspects }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const { totalCount, statusCounts, recentSuspects } = useMemo(() => {
-    const counts = {
-      'Suspeito': 0,
-      'Foragido': 0,
-      'Preso': 0,
-      'CPF Cancelado': 0,
-    };
+  // Quick filter for recent alerts on the dashboard (limited to top 5 if no search term)
+  const filteredSuspects = suspects.filter(s => 
+    s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    s.cpf.includes(searchTerm) ||
+    (s.nickname && s.nickname.toLowerCase().includes(searchTerm.toLowerCase()))
+  ).slice(0, searchTerm ? suspects.length : 5); 
 
-    suspects.forEach(s => {
-      if (s.status in counts) {
-        counts[s.status as keyof typeof counts]++;
-      }
-    });
+  const stats = {
+    foragidos: suspects.filter(s => s.status === 'Foragido').length,
+    suspeitos: suspects.filter(s => s.status === 'Suspeito').length,
+    presos: suspects.filter(s => s.status === 'Preso').length,
+    cancelados: suspects.filter(s => s.status === 'CPF Cancelado').length,
+  };
 
-    // Mocking 'Abordados' count as total - Preso - CPF Cancelado
-    const total = suspects.length;
-    const abordados = total - counts['Preso'] - counts['CPF Cancelado'];
-
-    // Filter and sort recent suspects (top 2, excluding 'Preso' or 'CPF Cancelado')
-    const recent = suspects
-      .filter(s => s.status !== 'Preso' && s.status !== 'CPF Cancelado')
-      .slice(0, 2);
-
-    return {
-      totalCount: total,
-      statusCounts: {
-        ...counts,
-        'Abordados': Math.max(0, abordados)
-      },
-      recentSuspects: recent
-    };
-  }, [suspects]);
-
-  const filteredSuspects = useMemo(() => {
-    if (!searchTerm) return [];
-    const termLower = searchTerm.toLowerCase();
-    return suspects.filter(s => 
-      s.name.toLowerCase().includes(termLower) || 
-      s.cpf.includes(searchTerm)
-    ).slice(0, 5);
-  }, [suspects, searchTerm]);
+  const handleCardClick = (status: Suspect['status']) => {
+    navigateToSuspectsManagement(status);
+  };
 
   return (
-    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden relative">
-      <header className="bg-pmmg-navy px-5 pt-10 pb-8 rounded-b-[2.5rem] shadow-2xl relative z-10 shrink-0">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center p-1.5 shadow-inner">
-              <span className="material-symbols-outlined text-pmmg-navy text-2xl">shield</span>
-            </div>
-            <div>
-              <h1 className="font-black text-lg text-white leading-tight tracking-tight">TACTICAL DB</h1>
-              <p className="text-[10px] text-pmmg-khaki font-bold uppercase tracking-widest">Personal Manager</p>
-            </div>
+    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
+      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-xl">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 shrink-0 bg-white rounded-full flex items-center justify-center p-1 border-2 border-pmmg-red shadow-inner">
+            <span className="material-symbols-outlined text-pmmg-navy text-2xl">shield</span>
           </div>
-          <button 
-            onClick={() => navigateTo('profileSettings')}
-            className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center border border-white/20 backdrop-blur-sm active:scale-95 transition-transform"
-          >
-            <span className="material-symbols-outlined text-white">person</span>
-          </button>
+          <div>
+            <h1 className="font-bold text-sm leading-none text-white uppercase tracking-tight">PMMG OPERACIONAL</h1>
+            <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">Quartel General</p>
+          </div>
         </div>
-        <div className="relative group">
-          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-            <span className="material-symbols-outlined text-pmmg-navy/50 text-2xl">search</span>
+        <div className="flex items-center gap-2">
+          <div className="text-right mr-2">
+            <div className="text-[9px] text-white/50 uppercase font-bold">Patrulha 402</div>
+            <div className="text-[10px] text-green-400 font-bold uppercase flex items-center justify-end gap-1">
+              <span className="w-1.5 h-1.5 bg-green-400 rounded-full"></span> Online
+            </div>
           </div>
-          <input 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="block w-full pl-12 pr-4 py-4 bg-white border-0 focus:ring-4 focus:ring-pmmg-yellow rounded-2xl text-base font-medium placeholder-pmmg-navy/40 shadow-lg" 
-            placeholder="Pesquisar Nome ou CPF" 
-            type="text" 
-          />
+          {/* Botão para Cadastro de Indivíduo (Registry) */}
+          <button 
+            onClick={() => navigateTo('registry')}
+            className="bg-pmmg-yellow/20 p-1.5 rounded-full border border-pmmg-yellow/50 text-pmmg-yellow"
+          >
+            <span className="material-symbols-outlined text-xl">person_add</span>
+          </button>
+          {/* Botão para AI Tools */}
+          <button 
+            onClick={() => navigateTo('aiTools')}
+            className="bg-white/10 p-1.5 rounded-full border border-white/20 text-white"
+          >
+            <span className="material-symbols-outlined text-xl">psychology</span>
+          </button>
         </div>
       </header>
 
-      <main className="flex-1 px-5 -mt-4 space-y-6 relative z-0 overflow-y-auto pb-32 no-scrollbar">
-        
-        {/* Search Results Overlay */}
-        {searchTerm && (
-          <div className="absolute top-20 left-0 right-0 z-20 px-5">
-            <div className="pmmg-card p-3 space-y-2">
-              <p className="text-[10px] font-bold text-pmmg-navy/60 uppercase tracking-widest">
-                Resultados da Busca ({filteredSuspects.length})
-              </p>
-              {filteredSuspects.length > 0 ? filteredSuspects.map(s => {
-                const statusInfo = statusMap[s.status as keyof typeof statusMap];
-                if (!statusInfo) return null;
-                
-                return (
-                  <button 
-                    key={s.id}
-                    onClick={() => {
-                      onOpenProfile(s.id);
-                      setSearchTerm('');
-                    }}
-                    className="flex items-center p-2 gap-3 bg-pmmg-khaki-light/50 rounded-lg w-full text-left active:bg-pmmg-khaki/70 transition-colors"
-                  >
-                    <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-100 shrink-0">
-                      <img alt="Photo" className="w-full h-full object-cover" src={s.photoUrl}/>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-xs text-pmmg-navy uppercase truncate">{s.name}</h4>
-                      <p className="text-[9px] font-medium text-slate-500">CPF: {s.cpf.substring(0, 3)}.***.***-{s.cpf.substring(s.cpf.length - 2)}</p>
-                    </div>
-                    <div className={`px-2 py-0.5 rounded-md bg-${statusInfo.color}/10 text-${statusInfo.color} text-[7px] font-black uppercase shrink-0`}>
-                      {s.status}
-                    </div>
-                  </button>
-                );
-              }) : (
-                <p className="text-[10px] text-pmmg-navy/50 mt-2 text-center italic">Nenhum resultado encontrado.</p>
-              )}
-              {filteredSuspects.length === 5 && (
-                <button 
-                  onClick={() => {
-                    navigateToSuspectsManagement('Todos');
-                    setSearchTerm('');
-                  }}
-                  className="w-full text-center text-[9px] font-bold text-pmmg-blue uppercase pt-2 border-t border-pmmg-navy/5 hover:underline"
-                >
-                  Ver mais resultados...
-                </button>
-              )}
+      <main className="flex-1 overflow-y-auto pb-32 no-scrollbar">
+        {/* Stats Grid */}
+        <section className="px-4 pt-4 grid grid-cols-2 gap-3">
+          <button onClick={() => handleCardClick('Foragido')} className="pmmg-card p-3 border-l-4 border-l-pmmg-red active:scale-[0.98] transition-transform text-left">
+            <span className="text-[10px] font-bold uppercase text-pmmg-navy/60 block mb-1">Foragidos</span>
+            <div className="flex items-end justify-between">
+              <span className="text-2xl font-black text-pmmg-red">{stats.foragidos}</span>
+              <span className="material-symbols-outlined text-pmmg-red/30">release_alert</span>
             </div>
-          </div>
-        )}
+          </button>
+          <button onClick={() => handleCardClick('Suspeito')} className="pmmg-card p-3 border-l-4 border-l-pmmg-yellow active:scale-[0.98] transition-transform text-left">
+            <span className="text-[10px] font-bold uppercase text-pmmg-navy/60 block mb-1">Suspeitos</span>
+            <div className="flex items-end justify-between">
+              <span className="text-2xl font-black text-pmmg-navy">{stats.suspeitos}</span>
+              <span className="material-symbols-outlined text-pmmg-yellow">visibility</span>
+            </div>
+          </button>
+          <button onClick={() => handleCardClick('Preso')} className="pmmg-card p-3 border-l-4 border-l-pmmg-blue active:scale-[0.98] transition-transform text-left">
+            <span className="text-[10px] font-bold uppercase text-pmmg-navy/60 block mb-1">Presos</span>
+            <div className="flex items-end justify-between">
+              <span className="text-2xl font-black text-pmmg-blue">{stats.presos}</span>
+              <span className="material-symbols-outlined text-pmmg-blue/30">lock</span>
+            </div>
+          </button>
+          <button onClick={() => handleCardClick('CPF Cancelado')} className="pmmg-card p-3 border-l-4 border-l-slate-600 active:scale-[0.98] transition-transform text-left">
+            <span className="text-[10px] font-bold uppercase text-pmmg-navy/60 block mb-1">CPF Cancelado</span>
+            <div className="flex items-end justify-between">
+              <span className="text-2xl font-black text-slate-600">{stats.cancelados}</span>
+              <span className="material-symbols-outlined text-slate-400">cancel</span>
+            </div>
+          </button>
+        </section>
 
-        {/* Only show main content if search is inactive */}
-        {!searchTerm && (
-          <>
-            <section className="space-y-3">
-              <div className="flex items-center justify-between px-1">
-                <h3 className="text-[11px] font-black text-pmmg-navy uppercase tracking-widest">Meu Banco de Dados</h3>
-                <span className="text-[10px] font-bold text-pmmg-navy/70">Total: {totalCount}</span>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {/* Abordados */}
-                <button 
-                  onClick={() => navigateToSuspectsManagement('Todos')}
-                  className="pmmg-card p-4 flex flex-col transition-transform active:scale-95"
-                >
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Abordados</span>
-                  <span className="text-2xl font-black text-pmmg-navy mt-1">{statusCounts.Abordados}</span>
-                </button>
-                
-                {/* Suspeitos */}
-                <button 
-                  onClick={() => navigateToSuspectsManagement('Suspeito')}
-                  className="pmmg-card p-4 flex flex-col border-l-4 border-pmmg-yellow transition-transform active:scale-95"
-                >
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Suspeitos</span>
-                  <span className="text-2xl font-black text-pmmg-navy mt-1">{statusCounts.Suspeito}</span>
-                </button>
-                
-                {/* Foragidos */}
-                <button 
-                  onClick={() => navigateToSuspectsManagement('Foragido')}
-                  className="pmmg-card p-4 flex flex-col border-l-4 border-pmmg-red transition-transform active:scale-95"
-                >
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Foragidos</span>
-                  <span className="text-2xl font-black text-pmmg-red mt-1">{statusCounts.Foragido}</span>
-                </button>
-                
-                {/* CPF Cancelado */}
-                <button 
-                  onClick={() => navigateToSuspectsManagement('CPF Cancelado')}
-                  className="pmmg-card p-4 flex flex-col border-l-4 border-pmmg-dark-grey transition-transform active:scale-95"
-                >
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">CPF Cancelado</span>
-                  <span className="text-2xl font-black text-pmmg-dark-grey mt-1">{statusCounts['CPF Cancelado']}</span>
-                </button>
-              </div>
-            </section>
-            
-            <section className="flex justify-center">
-              <button 
-                onClick={() => navigateTo('registry')}
-                className="w-full bg-pmmg-navy hover:bg-pmmg-navy/90 text-white py-4 rounded-2xl flex items-center justify-center gap-3 shadow-xl active:scale-95 transition-all"
-              >
-                <span className="material-symbols-outlined fill-icon text-pmmg-yellow text-2xl">person_add</span>
-                <span className="font-extrabold uppercase tracking-tight">Novo Cadastro</span>
-              </button>
-            </section>
-            
-            <section className="space-y-3">
-              <h3 className="text-[11px] font-black text-pmmg-navy uppercase tracking-widest px-1">Ferramentas de IA</h3>
-              <div className="grid grid-cols-2 gap-3">
-                <button 
-                  onClick={() => navigateTo('aiTools')}
-                  className="bg-white p-4 rounded-2xl shadow-sm border border-pmmg-navy/5 flex flex-col items-center gap-2 active:bg-slate-50 active:scale-95 transition-all"
-                >
-                  <div className="w-12 h-12 rounded-full bg-pmmg-blue/10 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-pmmg-blue text-2xl">minor_crash</span>
+        {/* Search */}
+        <section className="px-4 pt-6">
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+              <span className="material-symbols-outlined text-pmmg-navy text-xl">search</span>
+            </div>
+            <input 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="block w-full pl-10 pr-4 py-4 bg-white border-2 border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-0 rounded-2xl text-sm font-bold placeholder-pmmg-navy/40 shadow-sm" 
+              placeholder="BUSCAR INDIVÍDUO (NOME, CPF, ALCUNHA)" 
+              type="text" 
+            />
+          </div>
+          
+          {/* Button to navigate to full management page */}
+          <button 
+            onClick={() => navigateToSuspectsManagement('Todos')}
+            className="w-full mt-3 bg-pmmg-navy text-pmmg-yellow text-[10px] font-bold py-2 rounded-xl uppercase tracking-widest flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+          >
+            <span className="material-symbols-outlined text-lg">manage_search</span>
+            Consulta e Gerenciamento Completo
+          </button>
+        </section>
+
+        {/* Recent Alerts */}
+        <div className="px-4 pt-8 pb-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-1.5 bg-pmmg-red rounded-full"></div>
+            <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-widest italic">Alertas e Registros Recentes ({searchTerm ? 'Filtrados' : 'Top 5'})</h3>
+          </div>
+          <span className="text-[10px] font-bold text-pmmg-navy/40 uppercase">{filteredSuspects.length} Encontrados</span>
+        </div>
+
+        <section className="px-4 space-y-4">
+          {filteredSuspects.length > 0 ? filteredSuspects.map((alert) => (
+            <div key={alert.id} className="pmmg-card overflow-hidden transition-all active:scale-[0.98]">
+              <div className="flex">
+                <div className="w-32 h-44 relative bg-slate-200 shrink-0">
+                  <img alt={alert.name} className="w-full h-full object-cover" src={alert.photoUrl} />
+                  <div className={`absolute top-0 left-0 text-white text-[8px] font-bold px-2 py-1 uppercase rounded-br-lg shadow-md ${
+                    alert.status === 'Foragido' ? 'bg-pmmg-red' : 
+                    alert.status === 'Suspeito' ? 'bg-pmmg-yellow text-pmmg-navy' :
+                    alert.status === 'Preso' ? 'bg-pmmg-blue' : 'bg-slate-700'
+                  }`}>
+                    {alert.status}
                   </div>
-                  <span className="text-[10px] font-bold text-pmmg-navy uppercase text-center">Consultar Placa</span>
-                </button>
-                <button 
-                  onClick={() => navigateTo('aiTools')}
-                  className="bg-white p-4 rounded-2xl shadow-sm border border-pmmg-navy/5 flex flex-col items-center gap-2 active:bg-slate-50 active:scale-95 transition-all"
-                >
-                  <div className="w-12 h-12 rounded-full bg-pmmg-yellow/10 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-pmmg-yellow text-2xl">psychology</span>
+                </div>
+                <div className="flex-1 p-3 flex flex-col justify-between overflow-hidden">
+                  <div>
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-bold text-sm text-pmmg-navy uppercase leading-tight truncate pr-1">{alert.name}</h4>
+                      <span className={`material-symbols-outlined fill-icon text-lg ${
+                        alert.status === 'Foragido' ? 'text-pmmg-red' : 'text-pmmg-yellow'
+                      }`}>
+                        {alert.status === 'Foragido' ? 'priority_high' : 'warning'}
+                      </span>
+                    </div>
+                    <p className="text-[10px] font-semibold text-slate-500 mt-1">CPF: {alert.cpf}</p>
+                    <div className="mt-2 space-y-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[14px] text-pmmg-navy">location_on</span>
+                        <span className="text-[10px] text-slate-700 truncate">Visto em: {alert.lastSeen}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[14px] text-pmmg-navy">history</span>
+                        <span className="text-[10px] text-slate-700">Há {alert.timeAgo}</span>
+                      </div>
+                    </div>
                   </div>
-                  <span className="text-[10px] font-bold text-pmmg-navy uppercase text-center">Assistente de Relatos</span>
-                </button>
-              </div>
-            </section>
-            
-            <section className="space-y-3 pb-4">
-              <div className="flex items-center justify-between px-1">
-                <h3 className="text-[11px] font-black text-pmmg-navy uppercase tracking-widest">Registros Recentes</h3>
-                <button 
-                  onClick={() => navigateToSuspectsManagement('Todos')}
-                  className="text-[10px] font-bold text-pmmg-blue uppercase hover:underline"
-                >
-                  Ver Todos ({totalCount})
-                </button>
-              </div>
-              <div className="space-y-2">
-                {recentSuspects.map(s => {
-                  const statusInfo = statusMap[s.status as keyof typeof statusMap];
-                  if (!statusInfo) return null;
-                  
-                  return (
+                  <div className="flex gap-2">
                     <button 
-                      key={s.id}
-                      onClick={() => onOpenProfile(s.id)}
-                      className="pmmg-card flex items-center p-3 gap-3 active:bg-slate-50 transition-colors w-full text-left"
+                      onClick={() => onOpenProfile(alert.id)}
+                      className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-2 rounded-lg uppercase tracking-wide"
                     >
-                      <div className="w-14 h-14 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-100">
-                        <img alt="Photo" className="w-full h-full object-cover" src={s.photoUrl}/>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-bold text-sm text-pmmg-navy uppercase truncate">{s.name}</h4>
-                        <p className="text-[10px] font-medium text-slate-400">CPF: {s.cpf.substring(0, 3)}.***.***-{s.cpf.substring(s.cpf.length - 2)}</p>
-                      </div>
-                      <div className={`px-2 py-1 rounded-md bg-${statusInfo.color}/10 text-${statusInfo.color} text-[8px] font-black uppercase`}>
-                        {s.status}
-                      </div>
+                      Ficha Completa
                     </button>
-                  );
-                })}
-                {recentSuspects.length === 0 && (
-                  <p className="text-center text-xs text-slate-400 italic py-4">Nenhum registro recente para exibir.</p>
-                )}
+                    <button 
+                      onClick={() => alert(`Compartilhando ficha de: ${alert.name}`)}
+                      className="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center"
+                    >
+                      <span className="material-symbols-outlined text-pmmg-navy text-lg">share</span>
+                    </button>
+                  </div>
+                </div>
               </div>
-            </section>
-          </>
-        )}
+            </div>
+          )) : (
+            <div className="text-center py-10 opacity-40">
+              <span className="material-symbols-outlined text-5xl">person_search</span>
+              <p className="text-xs font-bold uppercase mt-2">Nenhum registro encontrado</p>
+            </div>
+          )}
+        </section>
       </main>
-      
+
       <BottomNav activeScreen="dashboard" navigateTo={navigateTo} />
     </div>
   );
