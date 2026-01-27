@@ -27,6 +27,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
   const [status, setStatus] = useState<Suspect['status']>('Suspeito');
   const [name, setName] = useState('');
   const [cpf, setCpf] = useState('');
+  const [rg, setRg] = useState(''); // NOVO ESTADO RG
   const [nickname, setNickname] = useState('');
   const [motherName, setMotherName] = useState('');
   const [birthDate, setBirthDate] = useState('');
@@ -36,7 +37,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
   const [photos, setPhotos] = useState<string[]>([]);
   const [showOnMap, setShowOnMap] = useState(true);
   
-  // New States for Address, Vehicles, Associations
+  // States for Address, Vehicles, Associations
   const [address, setAddress] = useState('');
   const [selectedLocation, setSelectedLocation] = useState<GeocodedLocation | null>(null);
   const [addressSuggestions, setAddressSuggestions] = useState<GeocodedLocation[]>([]);
@@ -247,6 +248,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
       name,
       nickname,
       cpf,
+      rg, // INCLUINDO RG
       status,
       lastSeen,
       timeAgo: 'Agora',
@@ -381,7 +383,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
           </button>
         </div>
 
-        {/* --- Endereço Section (NEW) --- */}
+        {/* --- Endereço Section (Existing) --- */}
         <div className="flex items-center gap-2 mb-4 mt-8">
           <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
           <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Endereço e Localização</h3>
@@ -442,7 +444,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
           )}
         </div>
 
-        {/* --- Dados Pessoais (Existing) --- */}
+        {/* --- Dados Pessoais (Updated) --- */}
         <div className="flex items-center gap-2 mb-4 mt-8">
           <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
           <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Dados Pessoais</h3>
@@ -470,12 +472,34 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
               />
             </div>
             <div>
+              <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">RG (Registro Geral)</label>
+              <input 
+                value={rg}
+                onChange={(e) => setRg(e.target.value)}
+                className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+                placeholder="0.000.000" 
+                type="text" 
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
               <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Alcunha / Vulgo</label>
               <input 
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
                 className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
                 placeholder="Ex: Baiano" 
+                type="text" 
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Data de Nascimento</label>
+              <input 
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value)}
+                className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+                placeholder="DD/MM/AAAA" 
                 type="text" 
               />
             </div>
@@ -489,18 +513,6 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
               className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
               placeholder="Cicatriz no braço, tatuagem no pescoço, etc." 
             />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Data de Nascimento</label>
-              <input 
-                value={birthDate}
-                onChange={(e) => setBirthDate(e.target.value)}
-                className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
-                placeholder="DD/MM/AAAA" 
-                type="text" 
-              />
-            </div>
           </div>
           <div>
             <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Nome da Mãe</label>

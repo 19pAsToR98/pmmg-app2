@@ -28,6 +28,7 @@ export interface Suspect {
   name: string;
   nickname?: string;
   cpf: string;
+  rg?: string; // NOVO: Registro Geral
   status: 'Foragido' | 'Suspeito' | 'Preso' | 'CPF Cancelado';
   lastSeen: string;
   timeAgo: string;
