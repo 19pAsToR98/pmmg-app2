@@ -30,7 +30,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   const [newMarkerData, setNewMarkerData] = useState<Omit<CustomMarker, 'id'> | null>(null);
   const [editingMarker, setEditingMarker] = useState<CustomMarker | null>(null);
   const [currentZoom, setCurrentZoom] = useState(14); // Estado para rastrear o zoom
-  const [showLegend, setShowLegend] = useState(false); // Novo estado para a legenda
+  const [isLegendOpen, setIsLegendOpen] = useState(false); // Novo estado para a barra de legenda
 
   // Filtragem dos suspeitos
   const filteredSuspects = suspects.filter(s => 
@@ -357,9 +357,6 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             </button>
           </div>
         </div>
-
-        {/* Tactical Filters Chips - REMOVIDO */}
-        
       </header>
 
       <div className="flex-1 relative">
@@ -473,63 +470,65 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           </div>
         )}
 
-        {/* Interactive Legend */}
-        <div className={`absolute bottom-32 right-4 z-[1000] transition-all duration-300 ${showLegend ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10 pointer-events-none'}`}>
-          <div className="bg-white/95 backdrop-blur-md p-3 rounded-2xl shadow-2xl border border-pmmg-navy/10 flex flex-col gap-2.5">
-            <p className="text-[8px] font-black text-pmmg-navy/40 uppercase tracking-widest border-b border-pmmg-navy/5 pb-1 mb-1">Legenda Tática</p>
-            
-            {/* Foragido (Photo style) */}
-            <button 
-              onClick={() => setActiveFilter('Foragido')}
-              className={`flex items-center gap-2 group transition-opacity ${activeFilter !== 'Todos' && activeFilter !== 'Foragido' ? 'opacity-40' : 'opacity-100'}`}
-            >
-               <div className={`w-4 h-4 ${usePhotoMarker ? 'rounded-md border-2 bg-slate-300' : 'rounded-full bg-pmmg-red flex items-center justify-center'} border-pmmg-red shadow-sm`}>
-                 {!usePhotoMarker && <span className="material-symbols-outlined text-white text-[10px] fill-icon">priority_high</span>}
-               </div>
-               <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">Foragido</span>
-            </button>
-            
-            {/* Suspeito (Photo style) */}
-            <button 
-              onClick={() => setActiveFilter('Suspeito')}
-              className={`flex items-center gap-2 group transition-opacity ${activeFilter !== 'Todos' && activeFilter !== 'Suspeito' ? 'opacity-40' : 'opacity-100'}`}
-            >
-               <div className={`w-4 h-4 ${usePhotoMarker ? 'rounded-md border-2 bg-slate-300' : 'rounded-full bg-pmmg-yellow flex items-center justify-center'} border-pmmg-yellow shadow-sm`}>
-                 {!usePhotoMarker && <span className="material-symbols-outlined text-pmmg-navy text-[10px] fill-icon">warning</span>}
-               </div>
-               <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">Suspeito</span>
-            </button>
-            
-            {/* Oficial */}
-            <div className="flex items-center gap-2">
-               <div className="w-3.5 h-3.5 bg-pmmg-blue rounded-full border-2 border-white shadow-sm ring-1 ring-pmmg-blue/50"></div>
-               <span className="text-[9px] font-bold text-pmmg-navy uppercase">Oficial</span>
-            </div>
-            
-            {/* Ponto Tático */}
-            <div className="flex items-center gap-2">
-               <div className="w-3.5 h-3.5 bg-pmmg-gold rounded-full border-2 border-white shadow-sm ring-1 ring-pmmg-gold/30"></div>
-               <span className="text-[9px] font-bold text-pmmg-navy uppercase">Ponto Tático</span>
-            </div>
-            
-            {activeFilter !== 'Todos' && (
+        {/* Legend Bar (Fixed above BottomNav) */}
+        <div className={`fixed bottom-[80px] left-0 right-0 z-[1000] max-w-md mx-auto transition-transform duration-300 ${isLegendOpen ? 'translate-y-0' : 'translate-y-[100%]'}`}>
+          <div className="bg-white/95 backdrop-blur-md p-3 rounded-t-2xl shadow-2xl border-t border-pmmg-navy/10">
+            <div className="flex flex-wrap gap-x-4 gap-y-2 justify-center">
+              <p className="text-[8px] font-black text-pmmg-navy/40 uppercase tracking-widest w-full text-center mb-1">Legenda Tática</p>
+              
+              {/* Foragido */}
               <button 
-                onClick={() => setActiveFilter('Todos')}
-                className="mt-1 text-[8px] font-black text-pmmg-red uppercase border-t border-pmmg-navy/5 pt-2"
+                onClick={() => setActiveFilter('Foragido')}
+                className={`flex items-center gap-1 group transition-opacity ${activeFilter !== 'Todos' && activeFilter !== 'Foragido' ? 'opacity-40' : 'opacity-100'}`}
               >
-                Limpar Filtros
+                 <div className={`w-3 h-3 ${usePhotoMarker ? 'rounded-sm border-2 bg-slate-300' : 'rounded-full bg-pmmg-red flex items-center justify-center'} border-pmmg-red shadow-sm`}>
+                   {!usePhotoMarker && <span className="material-symbols-outlined text-white text-[8px] fill-icon">priority_high</span>}
+                 </div>
+                 <span className="text-[8px] font-bold text-pmmg-navy uppercase group-hover:underline">Foragido</span>
               </button>
-            )}
+              
+              {/* Suspeito */}
+              <button 
+                onClick={() => setActiveFilter('Suspeito')}
+                className={`flex items-center gap-1 group transition-opacity ${activeFilter !== 'Todos' && activeFilter !== 'Suspeito' ? 'opacity-40' : 'opacity-100'}`}
+              >
+                 <div className={`w-3 h-3 ${usePhotoMarker ? 'rounded-sm border-2 bg-slate-300' : 'rounded-full bg-pmmg-yellow flex items-center justify-center'} border-pmmg-yellow shadow-sm`}>
+                   {!usePhotoMarker && <span className="material-symbols-outlined text-pmmg-navy text-[8px] fill-icon">warning</span>}
+                 </div>
+                 <span className="text-[8px] font-bold text-pmmg-navy uppercase group-hover:underline">Suspeito</span>
+              </button>
+              
+              {/* Oficial */}
+              <div className="flex items-center gap-1">
+                 <div className="w-3 h-3 bg-pmmg-blue rounded-full border-2 border-white shadow-sm ring-1 ring-pmmg-blue/50"></div>
+                 <span className="text-[8px] font-bold text-pmmg-navy uppercase">Oficial</span>
+              </div>
+              
+              {/* Ponto Tático */}
+              <div className="flex items-center gap-1">
+                 <div className="w-3 h-3 bg-pmmg-gold rounded-full border-2 border-white shadow-sm ring-1 ring-pmmg-gold/30"></div>
+                 <span className="text-[8px] font-bold text-pmmg-navy uppercase">Ponto Tático</span>
+              </div>
+              
+              {activeFilter !== 'Todos' && (
+                <button 
+                  onClick={() => setActiveFilter('Todos')}
+                  className="text-[8px] font-black text-pmmg-red uppercase ml-2"
+                >
+                  Limpar Filtros
+                </button>
+              )}
+            </div>
           </div>
         </div>
         
-        {/* FAB para Legenda */}
+        {/* Toggle Button for Legend Bar */}
         <button 
-          onClick={() => setShowLegend(prev => !prev)}
-          className="fixed bottom-[100px] right-6 z-[1000] w-12 h-12 bg-pmmg-navy text-pmmg-yellow rounded-full shadow-xl flex items-center justify-center border-4 border-white active:scale-95 transition-transform"
+          onClick={() => setIsLegendOpen(prev => !prev)}
+          className="fixed bottom-[80px] left-1/2 transform -translate-x-1/2 z-[1001] w-16 h-6 bg-pmmg-navy text-pmmg-yellow rounded-t-xl shadow-xl flex items-center justify-center border-t-4 border-x-4 border-white active:scale-95 transition-transform"
         >
-          <span className="material-symbols-outlined text-2xl fill-icon">
-            {showLegend ? 'close' : 'menu_book'}
+          <span className={`material-symbols-outlined text-lg transition-transform ${isLegendOpen ? 'rotate-180' : 'rotate-0'}`}>
+            keyboard_arrow_up
           </span>
         </button>
       </div>
