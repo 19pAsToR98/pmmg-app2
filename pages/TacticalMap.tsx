@@ -522,13 +522,13 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           </div>
         </div>
         
-        {/* Toggle Button for Legend Bar */}
+        {/* Toggle Button for Legend Bar (Moved to bottom right) */}
         <button 
           onClick={() => setIsLegendOpen(prev => !prev)}
-          className="fixed bottom-[80px] left-1/2 transform -translate-x-1/2 z-[1001] w-16 h-6 bg-pmmg-navy text-pmmg-yellow rounded-t-xl shadow-xl flex items-center justify-center border-t-4 border-x-4 border-white active:scale-95 transition-transform"
+          className="fixed bottom-[100px] right-6 z-[1001] w-12 h-12 bg-pmmg-navy text-pmmg-yellow rounded-full shadow-xl flex items-center justify-center border-4 border-white active:scale-95 transition-transform"
         >
-          <span className={`material-symbols-outlined text-lg transition-transform ${isLegendOpen ? 'rotate-180' : 'rotate-0'}`}>
-            keyboard_arrow_up
+          <span className={`material-symbols-outlined text-2xl transition-transform ${isLegendOpen ? 'rotate-180' : 'rotate-0'}`}>
+            {isLegendOpen ? 'close' : 'menu_book'}
           </span>
         </button>
       </div>
