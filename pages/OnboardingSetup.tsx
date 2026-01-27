@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import L from 'leaflet';
 import { Screen, UserRank } from '../types';
 import RankBadge from '../components/RankBadge';
 
@@ -27,74 +26,14 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number, lng: number, name: string } | null>(null);
   const [citySuggestions, setCitySuggestions] = useState<typeof MOCK_CITIES>([]);
 
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<L.Map | null>(null);
-  const markerInstance = useRef<L.Marker | null>(null);
+  // Removendo referências ao Leaflet
+  // const mapContainerRef = useRef<HTMLDivElement>(null);
+  // const mapInstance = useRef<L.Map | null>(null);
+  // const markerInstance = useRef<L.Marker | null>(null);
 
   // --- Map/City Logic ---
   
-  // Efeito para inicializar o mapa quando o Passo 3 é atingido
-  useEffect(() => {
-    if (step !== 3 || !mapContainerRef.current) return;
-
-    // Define a localização inicial (BH como fallback)
-    const initialLocation = selectedLocation || MOCK_CITIES[0];
-    
-    const icon = L.divIcon({
-      className: 'custom-location-icon',
-      html: `<div class="w-8 h-8 bg-pmmg-navy rounded-full border-2 border-pmmg-yellow flex items-center justify-center shadow-lg"><span class="material-symbols-outlined text-pmmg-yellow text-[16px] fill-icon">location_on</span></div>`,
-      iconSize: [32, 32],
-      iconAnchor: [16, 16]
-    });
-
-    if (!mapInstance.current) {
-      // 1. Inicializa o mapa
-      mapInstance.current = L.map(mapContainerRef.current, {
-        center: [initialLocation.lat, initialLocation.lng],
-        zoom: 12,
-        zoomControl: false,
-        dragging: false,
-        touchZoom: false,
-        scrollWheelZoom: false,
-        doubleClickZoom: false,
-        boxZoom: false
-      });
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance.current);
-      
-      markerInstance.current = L.marker([initialLocation.lat, initialLocation.lng], { icon }).addTo(mapInstance.current);
-      
-      // Define a cidade inicial se ainda não estiver definida
-      if (!city) {
-          setCity(initialLocation.name);
-          setSelectedLocation(initialLocation);
-      }
-
-    } else {
-      // Se o mapa já existe, apenas garante que a visualização esteja correta
-      mapInstance.current.setView([initialLocation.lat, initialLocation.lng], 12);
-      markerInstance.current?.setLatLng([initialLocation.lat, initialLocation.lng]);
-    }
-    
-    // Força o Leaflet a recalcular o tamanho do container
-    mapInstance.current.invalidateSize();
-
-    return () => {
-      // Cleanup: Se o passo mudar, remove o mapa para evitar vazamento de memória
-      if (step !== 3 && mapInstance.current) {
-        mapInstance.current.remove();
-        mapInstance.current = null;
-      }
-    };
-  }, [step]); 
-
-  // Efeito para atualizar o marcador quando selectedLocation muda
-  useEffect(() => {
-    if (step === 3 && selectedLocation && mapInstance.current && markerInstance.current) {
-      mapInstance.current.setView([selectedLocation.lat, selectedLocation.lng], 12);
-      markerInstance.current.setLatLng([selectedLocation.lat, selectedLocation.lng]);
-    }
-  }, [selectedLocation, step]);
-
+  // Removendo useEffects relacionados ao Leaflet
 
   const handleCitySearchChange = (term: string) => {
     setCitySearchTerm(term);
@@ -224,15 +163,16 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
               )}
             </div>
             
-            {/* Exibe o mapa se uma cidade foi selecionada ou se estamos no passo 3 (usando fallback) */}
-            {(city || step === 3) && (
+            {/* Exibe a cidade selecionada sem o mapa Leaflet */}
+            {city && (
               <div className="pmmg-card overflow-hidden">
                 <div className="p-3 bg-pmmg-navy/5 flex items-center justify-between">
-                  <p className="text-[10px] font-bold text-pmmg-navy uppercase tracking-wider">Cidade Selecionada: {city || 'Carregando...'}</p>
+                  <p className="text-[10px] font-bold text-pmmg-navy uppercase tracking-wider">Cidade Selecionada: {city}</p>
                   <span className="text-[9px] text-green-600 font-bold uppercase">OK</span>
                 </div>
-                {/* O mapa precisa de uma altura definida */}
-                <div ref={mapContainerRef} className="h-48 w-full bg-slate-200 z-0"></div>
+                <div className="h-12 w-full bg-pmmg-khaki/50 flex items-center justify-center">
+                    <span className="text-[10px] text-pmmg-navy/50 font-medium">Localização definida para {city}</span>
+                </div>
               </div>
             )}
           </div>
