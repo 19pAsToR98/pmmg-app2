@@ -21,6 +21,7 @@ const INITIAL_SUSPECTS: Suspect[] = [
     name: 'Ricardo "Sombra" Silveira',
     nickname: 'Sombra',
     cpf: '084.123.456-09',
+    rg: '1.234.567',
     status: 'Foragido',
     lastSeen: 'Praça da Liberdade, BH',
     timeAgo: '23 min',
@@ -44,6 +45,7 @@ const INITIAL_SUSPECTS: Suspect[] = [
     name: 'Marcos Aurélio Lima',
     nickname: 'Marquinhos',
     cpf: '112.987.654-54',
+    rg: '2.345.678',
     status: 'Suspeito',
     lastSeen: 'Mercado Central, BH',
     timeAgo: '1 hora',
@@ -65,6 +67,7 @@ const INITIAL_SUSPECTS: Suspect[] = [
     name: 'Fernanda Rocha',
     nickname: 'Nanda',
     cpf: '222.333.444-55',
+    rg: '3.456.789',
     status: 'Suspeito',
     lastSeen: 'Rua da Bahia, BH',
     timeAgo: '3 dias',
@@ -83,6 +86,7 @@ const INITIAL_SUSPECTS: Suspect[] = [
     name: 'Carlos "Gordo" Oliveira',
     nickname: 'Gordo',
     cpf: '333.444.555-66',
+    rg: '4.567.890',
     status: 'Preso',
     lastSeen: 'Penitenciária Nelson Hungria',
     timeAgo: '1 ano',
@@ -101,6 +105,7 @@ const INITIAL_SUSPECTS: Suspect[] = [
     name: 'Patrícia Mendes',
     nickname: 'Paty',
     cpf: '444.555.666-77',
+    rg: '5.678.901',
     status: 'Foragido',
     lastSeen: 'Avenida Afonso Pena, 1500',
     timeAgo: '5 horas',
@@ -119,6 +124,7 @@ const INITIAL_SUSPECTS: Suspect[] = [
     name: 'Roberto Souza',
     nickname: 'Beto',
     cpf: '555.666.777-88',
+    rg: '6.789.012',
     status: 'CPF Cancelado',
     lastSeen: 'Registro Antigo',
     timeAgo: '2 anos',
@@ -213,6 +219,7 @@ const App: React.FC = () => {
   const [suspects, setSuspects] = useState<Suspect[]>(INITIAL_SUSPECTS);
   const [customMarkers, setCustomMarkers] = useState<CustomMarker[]>(INITIAL_CUSTOM_MARKERS);
   const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null);
+  const [editingSuspectId, setEditingSuspectId] = useState<string | null>(null); // NOVO ESTADO PARA EDIÇÃO
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
   
   // User Profile States (Updated to reflect new onboarding)
@@ -234,6 +241,11 @@ const App: React.FC = () => {
     if (center) setMapCenter(center);
     else if (screen !== 'map') setMapCenter(null);
     setCurrentScreen(screen);
+    
+    // Limpa o ID de edição ao navegar para outra tela que não seja o registro
+    if (screen !== 'registry') {
+      setEditingSuspectId(null);
+    }
   };
   
   const navigateToSuspectsManagement = (statusFilter: Suspect['status'] | 'Todos' = 'Todos') => {
@@ -246,7 +258,7 @@ const App: React.FC = () => {
     navigateTo('chatRoom');
   };
 
-  // --- Lógica de Contatos ---
+  // --- Lógica de Contatos (Omitida para brevidade, sem alterações) ---
 
   const getContactStatus = (officerId: string): ContactStatus | null => {
     return contacts.find(c => c.officerId === officerId)?.status || null;
@@ -361,6 +373,14 @@ const App: React.FC = () => {
     setSuspects([newSuspect, ...suspects]);
     navigateTo('dashboard');
   };
+  
+  const updateSuspect = (updatedSuspect: Suspect) => {
+    setSuspects(prev => prev.map(s => s.id === updatedSuspect.id ? updatedSuspect : s));
+    setEditingSuspectId(null);
+    setSelectedSuspectId(updatedSuspect.id); // Volta para o perfil atualizado
+    navigateTo('profile');
+    alert(`Ficha de ${updatedSuspect.name} atualizada com sucesso.`);
+  };
 
   const deleteSuspects = (ids: string[]) => {
     setSuspects(prev => prev.filter(s => !ids.includes(s.id)));
@@ -387,6 +407,11 @@ const App: React.FC = () => {
     setCurrentScreen('profile');
   };
   
+  const handleEditProfile = (id: string) => {
+    setEditingSuspectId(id);
+    navigateTo('registry');
+  };
+  
   const handleOnboardingComplete = (name: string, rank: UserRank, city: string) => {
     setUserName(name);
     setUserRank(rank);
@@ -410,6 +435,7 @@ const App: React.FC = () => {
   };
 
   const selectedSuspect = suspects.find(s => s.id === selectedSuspectId) || suspects[0];
+  const suspectToEdit = suspects.find(s => s.id === editingSuspectId);
   const activeChat = chats.find(c => c.id === activeChatId);
   
   // Chats que o usuário participa (Individual Aceito OU Grupo que inclui 'EU')
@@ -436,8 +462,25 @@ const App: React.FC = () => {
       {currentScreen === 'onboardingSetup' && isRegistered && <OnboardingSetup onComplete={handleOnboardingComplete} />}
       
       {currentScreen === 'dashboard' && <Dashboard navigateTo={navigateTo} navigateToSuspectsManagement={navigateToSuspectsManagement} onOpenProfile={openProfile} suspects={suspects} />}
-      {currentScreen === 'registry' && <SuspectRegistry navigateTo={navigateTo} onSave={addSuspect} allSuspects={suspects} />}
-      {currentScreen === 'profile' && <SuspectProfile suspect={selectedSuspect} onBack={() => navigateTo('dashboard')} navigateTo={navigateTo} allSuspects={suspects} onOpenProfile={openProfile} />}
+      {currentScreen === 'registry' && (
+        <SuspectRegistry 
+          navigateTo={navigateTo} 
+          onSave={addSuspect} 
+          onUpdate={updateSuspect} // Passando a função de atualização
+          currentSuspect={suspectToEdit} // Passando o suspeito a ser editado
+          allSuspects={suspects} 
+        />
+      )}
+      {currentScreen === 'profile' && selectedSuspect && (
+        <SuspectProfile 
+          suspect={selectedSuspect} 
+          onBack={() => navigateTo('dashboard')} 
+          navigateTo={navigateTo} 
+          allSuspects={suspects} 
+          onOpenProfile={openProfile}
+          onEdit={handleEditProfile} // Passando a função de edição
+        />
+      )}
       {currentScreen === 'suspectsManagement' && (
         <SuspectsManagement
           navigateTo={navigateTo}

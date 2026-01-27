@@ -6,6 +6,8 @@ import BottomNav from '../components/BottomNav';
 interface SuspectRegistryProps {
   navigateTo: (screen: Screen) => void;
   onSave: (suspect: Suspect) => void;
+  onUpdate: (suspect: Suspect) => void; // NOVO: Função para atualizar
+  currentSuspect?: Suspect | null; // NOVO: Suspeito a ser editado
   allSuspects: Suspect[];
 }
 
@@ -23,26 +25,35 @@ const TacticalMapIcon = L.divIcon({
 });
 
 
-const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, allSuspects }) => {
-  const [status, setStatus] = useState<Suspect['status']>('Suspeito');
-  const [name, setName] = useState('');
-  const [cpf, setCpf] = useState('');
-  const [rg, setRg] = useState(''); // NOVO ESTADO RG
-  const [nickname, setNickname] = useState('');
-  const [motherName, setMotherName] = useState('');
-  const [birthDate, setBirthDate] = useState('');
-  const [description, setDescription] = useState('');
+const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, onUpdate, currentSuspect, allSuspects }) => {
+  const isEditing = !!currentSuspect;
+  
+  // Inicializa estados com dados do suspeito atual se estiver editando
+  const [status, setStatus] = useState<Suspect['status']>(currentSuspect?.status || 'Suspeito');
+  const [name, setName] = useState(currentSuspect?.name || '');
+  const [cpf, setCpf] = useState(currentSuspect?.cpf || '');
+  const [rg, setRg] = useState(currentSuspect?.rg || '');
+  const [nickname, setNickname] = useState(currentSuspect?.nickname || '');
+  const [motherName, setMotherName] = useState(currentSuspect?.motherName || '');
+  const [birthDate, setBirthDate] = useState(currentSuspect?.birthDate || '');
+  const [description, setDescription] = useState(currentSuspect?.description || '');
   const [currentArticle, setCurrentArticle] = useState('');
-  const [articles, setArticles] = useState<string[]>([]);
-  const [photos, setPhotos] = useState<string[]>([]);
-  const [showOnMap, setShowOnMap] = useState(true);
+  const [articles, setArticles] = useState<string[]>(currentSuspect?.articles || []);
+  const [photos, setPhotos] = useState<string[]>(currentSuspect?.photoUrls || (currentSuspect?.photoUrl ? [currentSuspect.photoUrl] : []));
+  const [showOnMap, setShowOnMap] = useState(currentSuspect?.showOnMap ?? true);
   
   // States for Address, Vehicles, Associations
-  const [address, setAddress] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState<GeocodedLocation | null>(null);
+  const initialAddress = currentSuspect?.lastSeen || '';
+  const initialLat = currentSuspect?.lat;
+  const initialLng = currentSuspect?.lng;
+  
+  const [address, setAddress] = useState(initialAddress);
+  const [selectedLocation, setSelectedLocation] = useState<GeocodedLocation | null>(
+    (initialLat && initialLng) ? { name: initialAddress, lat: initialLat, lng: initialLng } : null
+  );
   const [addressSuggestions, setAddressSuggestions] = useState<GeocodedLocation[]>([]);
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [associations, setAssociations] = useState<Association[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>(currentSuspect?.vehicles || []);
+  const [associations, setAssociations] = useState<Association[]>(currentSuspect?.associations || []);
   const [isSearching, setIsSearching] = useState(false);
 
   // Vehicle Input States
@@ -243,15 +254,15 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
     const lng = selectedLocation?.lng || (-43.9 + (Math.random() * 0.05 - 0.025));
     const lastSeen = selectedLocation?.name || 'Local do Registro';
 
-    const newSuspect: Suspect = {
-      id: Date.now().toString(),
+    const suspectData: Suspect = {
+      id: currentSuspect?.id || Date.now().toString(), // Usa ID existente se estiver editando
       name,
       nickname,
       cpf,
-      rg, // INCLUINDO RG
+      rg,
       status,
       lastSeen,
-      timeAgo: 'Agora',
+      timeAgo: isEditing ? currentSuspect!.timeAgo : 'Agora', // Mantém o tempo se estiver editando
       photoUrl: primaryPhoto,
       photoUrls: photos.length > 0 ? photos : [primaryPhoto],
       birthDate,
@@ -261,22 +272,28 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
       lat,
       lng,
       showOnMap,
-      vehicles, // Include vehicles
-      associations, // Include associations
+      vehicles,
+      associations,
     };
 
-    onSave(newSuspect);
+    if (isEditing) {
+      onUpdate(suspectData);
+    } else {
+      onSave(suspectData);
+    }
   };
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
       <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 shrink-0 bg-white rounded-full flex items-center justify-center p-1 border-2 border-pmmg-red">
-            <span className="material-symbols-outlined text-pmmg-navy text-2xl">shield</span>
-          </div>
+          <button onClick={() => navigateTo(isEditing ? 'profile' : 'dashboard')} className="text-white active:scale-90 transition-transform">
+            <span className="material-symbols-outlined">arrow_back_ios</span>
+          </button>
           <div>
-            <h1 className="font-bold text-sm leading-none text-white uppercase tracking-tight">Cadastro de Indivíduo</h1>
+            <h1 className="font-bold text-sm leading-none text-white uppercase tracking-tight">
+              {isEditing ? 'Editar Ficha' : 'Cadastro de Indivíduo'}
+            </h1>
             <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">SISTEMA OPERACIONAL</p>
           </div>
         </div>
@@ -687,8 +704,8 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, a
             onClick={handleSave}
             className="w-full bg-pmmg-navy text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-3 uppercase tracking-widest active:scale-[0.98] transition-transform"
           >
-            <span className="material-symbols-outlined">save</span>
-            Salvar Registro
+            <span className="material-symbols-outlined">{isEditing ? 'save' : 'person_add'}</span>
+            {isEditing ? 'Salvar Alterações' : 'Salvar Registro'}
           </button>
         </div>
       </main>

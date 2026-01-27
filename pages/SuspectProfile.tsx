@@ -9,9 +9,10 @@ interface SuspectProfileProps {
   navigateTo: (screen: Screen, center?: [number, number]) => void;
   allSuspects: Suspect[];
   onOpenProfile: (id: string) => void;
+  onEdit: (id: string) => void; // NOVO: Função para iniciar a edição
 }
 
-const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, navigateTo, allSuspects, onOpenProfile }) => {
+const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, navigateTo, allSuspects, onOpenProfile, onEdit }) => {
   const [expandedSection, setExpandedSection] = useState<string | null>('data');
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const miniMapRef = useRef<HTMLDivElement>(null);
@@ -146,6 +147,13 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <button 
+            onClick={() => onEdit(suspect.id)} 
+            className="bg-pmmg-yellow text-pmmg-navy p-1.5 rounded-full border border-pmmg-yellow/50 active:scale-95 transition-transform"
+            title="Editar Ficha"
+          >
+            <span className="material-symbols-outlined text-xl fill-icon">edit</span>
+          </button>
           <button onClick={() => alert('Compartilhando...')} className="bg-white/10 p-1.5 rounded-full">
             <span className="material-symbols-outlined text-white text-xl">share</span>
           </button>
