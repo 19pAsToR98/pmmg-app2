@@ -3,6 +3,7 @@ import { Screen, Suspect, CustomMarker } from '../types';
 import BottomNav from '../components/BottomNav';
 import GoogleMapWrapper from '../components/GoogleMapWrapper';
 import { MarkerF, InfoWindowF } from '@react-google-maps/api';
+import { ICON_PATHS } from '../utils/iconPaths';
 
 interface TacticalMapProps {
   navigateTo: (screen: Screen) => void;
@@ -192,19 +193,13 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         iconName = 'pin_drop';
       }
       
-      // Using SVG for custom icon to embed Material Symbol
-      // FIX: Added style attribute to explicitly set font variation settings (FILL and Wght)
+      const pathData = ICON_PATHS[iconName] || ICON_PATHS['warning']; // Fallback to warning path
+      
+      // Usando SVG Path
       const svg = `
         <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <circle cx="12" cy="12" r="10" fill="${colorClass}" stroke="#ffffff" stroke-width="2"/>
-          <text 
-            x="12" y="17" 
-            font-family="Material Symbols Outlined" 
-            font-size="14" 
-            fill="${textColor}" 
-            text-anchor="middle"
-            style="font-variation-settings: 'FILL' 1, 'wght' 700;"
-          >${iconName}</text>
+          <path d="${pathData}" fill="${textColor}" transform="translate(0 0)"/>
         </svg>
       `;
       
@@ -221,18 +216,13 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
 
     const colorHex = markerData.color.replace('bg-pmmg-gold', '#d4af37').replace('bg-pmmg-red', '#e31c1c').replace('bg-pmmg-blue', '#0047ab').replace('bg-green-500', '#22c55e');
     
-    // FIX: Added style attribute to explicitly set font variation settings (FILL and Wght)
+    const pathData = ICON_PATHS[markerData.icon] || ICON_PATHS['flag']; // Fallback to flag path
+    
+    // Usando SVG Path (32x32 viewBox, path 24x24, scaled and translated)
     const svg = `
       <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
         <circle cx="16" cy="16" r="14" fill="${colorHex}" stroke="#ffffff" stroke-width="2"/>
-        <text 
-          x="16" y="22" 
-          font-family="Material Symbols Outlined" 
-          font-size="16" 
-          fill="#ffffff" 
-          text-anchor="middle"
-          style="font-variation-settings: 'FILL' 1, 'wght' 700;"
-        >${markerData.icon}</text>
+        <path d="${pathData}" fill="#ffffff" transform="translate(4 4)"/>
       </svg>
     `;
     
@@ -294,9 +284,9 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               position={userPos}
               icon={{
                 url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                  <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="16" cy="16" r="14" fill="#0047ab" stroke="#ffffff" stroke-width="4"/>
-                    <text x="16" y="22" font-family="Material Symbols Outlined" font-size="18" fill="#ffffff" text-anchor="middle">person</text>
+                  <svg width="32" height="32" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" fill="#0047ab" stroke="#ffffff" stroke-width="2"/>
+                    <path d="${ICON_PATHS['person']}" fill="#ffffff" transform="translate(0 0)"/>
                   </svg>
                 `),
                 scaledSize: new window.google.maps.Size(32, 32),
@@ -436,7 +426,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                 url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
                   <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="20" cy="20" r="18" fill="#e31c1c" stroke="#ffffff" stroke-width="4"/>
-                    <text x="20" y="26" font-family="Material Symbols Outlined" font-size="24" fill="#ffffff" text-anchor="middle">pin_drop</text>
+                    <path d="${ICON_PATHS['pin_drop']}" fill="#ffffff" transform="translate(8 8) scale(1.0)"/>
                   </svg>
                 `),
                 scaledSize: new window.google.maps.Size(40, 40),

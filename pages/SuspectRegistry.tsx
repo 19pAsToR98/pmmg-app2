@@ -3,6 +3,7 @@ import { Screen, Suspect, Vehicle, Association } from '../types';
 import BottomNav from '../components/BottomNav';
 import GoogleMapWrapper from '../components/GoogleMapWrapper';
 import { MarkerF } from '@react-google-maps/api';
+import { ICON_PATHS } from '../utils/iconPaths';
 
 interface SuspectRegistryProps {
   navigateTo: (screen: Screen) => void;
@@ -315,10 +316,12 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
     const color = '#002147';
     const iconName = 'location_on';
     
+    const pathData = ICON_PATHS[iconName];
+    
     const svg = `
       <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
         <circle cx="16" cy="16" r="14" fill="${color}" stroke="#ffcc00" stroke-width="2"/>
-        <text x="16" y="22" font-family="Material Symbols Outlined" font-size="16" fill="#ffcc00" text-anchor="middle">location_on</text>
+        <path d="${pathData}" fill="#ffcc00" transform="translate(4 4)"/>
       </svg>
     `;
     
@@ -435,7 +438,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
         {/* Map Visibility Toggle (Existing) */}
         <div className="mt-6 pmmg-card p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-pmmg-navy">map</span>
+            <span className="material-symbols-outlined">map</span>
             <div>
               <p className="text-sm font-bold text-pmmg-navy uppercase leading-none">Exibir no Mapa Tático</p>
               <p className="text-[10px] text-slate-500 mt-1">Marcar a última localização conhecida no mapa.</p>
