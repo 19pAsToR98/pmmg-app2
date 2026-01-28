@@ -267,6 +267,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
             <h2 className="text-xl font-bold text-pmmg-navy uppercase tracking-tight">Avatar Tático</h2>
             <p className="text-sm text-slate-600">Selecione o avatar que representará você e o assistente de IA na plataforma.</p>
             
+            {/* Container do Slider: Fundo branco sólido */}
             <div className="relative flex items-center justify-center pt-8 pb-4 bg-white rounded-xl shadow-inner">
               
               {/* Previous Button */}
@@ -279,7 +280,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
 
               {/* Avatar Display */}
               <div className="flex flex-col items-center text-center transition-all duration-300 ease-in-out">
-                <div className="w-48 h-48 overflow-hidden mb-4"> {/* Aumentado o tamanho */}
+                <div className="w-48 h-48 overflow-hidden mb-4">
                   <img 
                     src={currentOption.avatar.url} 
                     alt={currentOption.avatar.name} 
@@ -332,7 +333,8 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
       </header>
 
       <main className="flex-1 overflow-y-auto pb-24 no-scrollbar px-4 pt-6">
-        <div className="pmmg-card p-6">
+        {/* Aplicando fundo branco sólido ao container principal do passo 4 */}
+        <div className={`rounded-xl shadow-md p-6 ${step === 4 ? 'bg-white' : 'pmmg-card'}`}>
           {renderStepContent()}
         </div>
       </main>
