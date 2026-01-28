@@ -1,44 +1,32 @@
 import React from 'react';
 import { Screen, UserRank } from '../types';
 import BottomNav from '../components/BottomNav';
-import RankBadge from '../components/RankBadge'; // Importando RankBadge
 
 interface AIToolsProps {
   navigateTo: (screen: Screen) => void;
   userRank: UserRank;
-  userName: string; // Adicionando userName para calcular iniciais
 }
 
-const AITools: React.FC<AIToolsProps> = ({ navigateTo, userRank, userName }) => {
+const AITools: React.FC<AIToolsProps> = ({ navigateTo, userRank }) => {
   const rankLabel = userRank === 'Subtenente' ? 'Subtenente' : 
                    userRank.includes('Sargento') ? 'Sargento' : 
                    userRank;
-                   
-  // FIX: Ensure userName is defined before splitting
-  const safeUserName = userName || '';
-  const rankInitials = safeUserName.split(' ').map(n => n[0]).join('');
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
-      <header className="bg-pmmg-navy px-4 pt-12 pb-8 rounded-b-[40px] shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-pmmg-yellow/10 rounded-full -mr-16 -mt-16"></div>
-        <div className="relative z-10 flex items-center justify-between">
-          <button onClick={() => navigateTo('dashboard')} className="text-white p-2 rounded-full active:bg-white/10">
-            <span className="material-symbols-outlined">arrow_back_ios</span>
-          </button>
-          <div className="text-center flex-1 mx-4">
-            <h1 className="text-xl font-bold text-white uppercase tracking-tight">Central de Inteligência</h1>
+      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-xl">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 shrink-0 bg-white rounded-full flex items-center justify-center p-1 border-2 border-pmmg-red">
+            <span className="material-symbols-outlined text-pmmg-navy text-2xl">shield</span>
+          </div>
+          <div>
+            <h1 className="font-bold text-sm leading-none text-white uppercase tracking-tight">Central de Inteligência</h1>
             <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">PMMG Tactical AI Tools</p>
           </div>
-          {/* Avatar do Usuário */}
-          <div className="relative">
-            <div className="w-10 h-10 rounded-full border-2 border-pmmg-yellow/80 p-0.5 bg-white/10 overflow-hidden shadow-xl flex items-center justify-center">
-              <span className="text-pmmg-navy text-sm font-bold">{rankInitials}</span>
-            </div>
-            <div className="absolute -bottom-2 -right-2 p-1 bg-pmmg-navy rounded-lg border-2 border-pmmg-yellow shadow-lg">
-              <RankBadge rank={userRank} size="sm" />
-            </div>
-          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="material-symbols-outlined text-pmmg-yellow animate-pulse">psychology</span>
+          <span className="text-[10px] font-bold text-white uppercase">IA Ativa</span>
         </div>
       </header>
 
@@ -64,12 +52,11 @@ const AITools: React.FC<AIToolsProps> = ({ navigateTo, userRank, userName }) => 
         <div className="px-6 pb-4">
           <div className="grid grid-cols-2 gap-4">
             {[
-              { label: 'Consultar Placa', icon: 'photo_camera', screen: 'licensePlateConsultation' as Screen },
-              { label: 'Boletim por Voz', icon: 'mic', screen: 'voiceReport' as Screen },
+              { label: 'Consultar Placa', icon: 'photo_camera' },
+              { label: 'Boletim por Voz', icon: 'mic' },
             ].map((tool) => (
               <button 
                 key={tool.label}
-                onClick={() => navigateTo(tool.screen)}
                 className="relative overflow-hidden bg-pmmg-navy text-white p-4 rounded-xl flex flex-col items-center justify-center gap-3 active:scale-95 transition-transform border-b-4 border-black/30 shadow-lg"
               >
                 <div className="bg-white/10 p-3 rounded-lg mb-1">
@@ -93,7 +80,7 @@ const AITools: React.FC<AIToolsProps> = ({ navigateTo, userRank, userName }) => 
         </div>
       </main>
 
-      <BottomNav activeScreen="aiTools" navigateTo={navigateTo} />
+      <BottomNav activeScreen="profileSettings" navigateTo={navigateTo} />
     </div>
   );
 };
