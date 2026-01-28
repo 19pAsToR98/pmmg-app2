@@ -20,6 +20,9 @@ importers:
       leaflet:
         specifier: 1.9.4
         version: 1.9.4
+      leaflet-providers:
+        specifier: ^3.0.0
+        version: 3.0.0
       react:
         specifier: ^19.2.3
         version: 19.2.3
@@ -703,6 +706,9 @@ packages:
   kleur@4.1.5:
     resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
     engines: {node: '>=6'}
+
+  leaflet-providers@3.0.0:
+    resolution: {integrity: sha512-PWwsWRpf7xMrCofRUfWR6FBdw2v08j48tXCLQCoS1PinxPpVU70AQTr9N3NcbTIONiF9nS6m45LxBWVYx2i+wg==}
 
   leaflet@1.9.4:
     resolution: {integrity: sha512-nxS1ynzJOmOlHp+iL3FyWqK89GtNL8U8rvlMOsQdTTssxZwCXh8N2NB3GDQOL+YR3XnWyZAxwQixURb+FA74PA==}
@@ -1621,6 +1627,8 @@ snapshots:
   kleur@3.0.3: {}
 
   kleur@4.1.5: {}
+
+  leaflet-providers@3.0.0: {}
 
   leaflet@1.9.4: {}
 
