@@ -14,6 +14,44 @@ interface GoogleMapWrapperProps {
   onClick?: (e: google.maps.MapMouseEvent) => void;
 }
 
+const MAP_STYLES: google.maps.MapTypeStyle[] = [
+  // Oculta todos os Pontos de Interesse (POIs)
+  {
+    featureType: "poi",
+    stylers: [{ visibility: "off" }]
+  },
+  // Oculta ícones de transporte público
+  {
+    featureType: "transit",
+    elementType: "labels.icon",
+    stylers: [{ visibility: "off" }]
+  },
+  // Opcional: Simplifica a geometria das estradas para um visual mais limpo
+  {
+    featureType: "road",
+    elementType: "geometry",
+    stylers: [{ lightness: 100 }, { visibility: "simplified" }]
+  },
+  // Opcional: Simplifica rótulos de estradas
+  {
+    featureType: "road",
+    elementType: "labels.text",
+    stylers: [{ visibility: "off" }]
+  },
+  // Opcional: Simplifica rótulos de áreas
+  {
+    featureType: "administrative",
+    elementType: "labels.text",
+    stylers: [{ visibility: "off" }]
+  },
+  // Opcional: Mantém rótulos de cidades/países
+  {
+    featureType: "administrative.locality",
+    elementType: "labels.text",
+    stylers: [{ visibility: "on" }]
+  }
+];
+
 const GoogleMapWrapper: React.FC<GoogleMapWrapperProps> = ({ 
   children, 
   center, 
@@ -55,18 +93,7 @@ const GoogleMapWrapper: React.FC<GoogleMapWrapperProps> = ({
         streetViewControl: false,
         mapTypeControl: false,
         fullscreenControl: false,
-        styles: [
-          // Estilo simples para manter a estética PMMG (removendo pontos de interesse não essenciais)
-          {
-            featureType: "poi",
-            stylers: [{ visibility: "off" }]
-          },
-          {
-            featureType: "transit",
-            elementType: "labels.icon",
-            stylers: [{ visibility: "off" }]
-          }
-        ],
+        styles: MAP_STYLES, // Aplicando os novos estilos limpos
         ...options,
       }}
       onLoad={onLoad}
