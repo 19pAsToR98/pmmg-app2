@@ -479,6 +479,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             className="absolute left-0 top-1/2 transform -translate-x-full -translate-y-1/2 bg-pmmg-navy p-1.5 rounded-l-xl shadow-xl text-pmmg-yellow"
           >
             <span className="material-symbols-outlined text-lg">
+              {/* Lógica Invertida: Se aberto, aponta para fechar (esquerda). Se fechado, aponta para abrir (direita). */}
               {isSidebarOpen ? 'arrow_back_ios' : 'arrow_forward_ios'}
             </span>
           </button>
