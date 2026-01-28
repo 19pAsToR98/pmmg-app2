@@ -78,7 +78,8 @@ const PlateConsultation: React.FC<PlateConsultationProps> = ({ navigateTo, userR
                 value={plate}
                 onChange={(e) => setPlate(e.target.value.toUpperCase())}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                className="flex-1 px-4 py-3 bg-white border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm font-bold uppercase tracking-widest" 
+                // Adicionando min-w-0 para garantir que o input possa se comprimir
+                className="flex-1 min-w-0 px-4 py-3 bg-white border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm font-bold uppercase tracking-widest" 
                 placeholder="Ex: ABC1234 ou ABC-1234" 
                 type="text" 
                 maxLength={8}
@@ -94,7 +95,7 @@ const PlateConsultation: React.FC<PlateConsultationProps> = ({ navigateTo, userR
                 capture="environment"
               />
               
-              {/* Camera Button - Adicionado shrink-0 */}
+              {/* Camera Button - shrink-0 */}
               <button 
                 onClick={triggerFileInput}
                 className="bg-pmmg-red text-white p-3 rounded-lg active:scale-95 transition-transform shrink-0"
@@ -103,7 +104,7 @@ const PlateConsultation: React.FC<PlateConsultationProps> = ({ navigateTo, userR
                 <span className="material-symbols-outlined text-xl">photo_camera</span>
               </button>
 
-              {/* Search Button - Adicionado shrink-0 */}
+              {/* Search Button - shrink-0 */}
               <button 
                 onClick={handleSearch}
                 disabled={plate.length < 7}
