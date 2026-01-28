@@ -18,7 +18,7 @@ const MOCK_CITIES = [
   { name: 'Montes Claros', lat: -16.7342, lng: -43.8611 },
 ];
 
-// NEW: Avatar options
+// NEW: Avatar options (Masculino agora é o primeiro)
 const AVATAR_OPTIONS: { gender: 'Masculino' | 'Feminino', avatar: UserAvatar }[] = [
   { gender: 'Masculino', avatar: { name: 'Cabo Loso', url: 'https://iili.io/fiLMgHX.gif' } },
   { gender: 'Feminino', avatar: { name: 'Sgt Bisonha', url: 'https://iili.io/fiLMrRn.gif' } },
@@ -291,7 +291,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
                 {/* Nome do Personagem */}
                 <div className="bg-pmmg-navy text-white px-4 py-2 rounded-full shadow-lg">
                   <p className="text-lg font-black uppercase tracking-widest">{currentOption.avatar.name}</p>
-                  <p className="text-[10px] font-bold text-pmmg-yellow uppercase">{currentOption.gender}</p>
+                  {/* Gênero removido */}
                 </div>
               </div>
 
