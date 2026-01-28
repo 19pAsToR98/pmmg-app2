@@ -52,10 +52,8 @@ const AITools: React.FC<AIToolsProps> = ({ navigateTo, userRank }) => {
         <div className="px-6 pb-4">
           <div className="grid grid-cols-2 gap-4">
             {[
-              { label: 'Analisar Comportamento', icon: 'visibility' },
-              { label: 'Previsão de Crime', icon: 'query_stats' },
-              { label: 'Leitura de Placa IA', icon: 'photo_camera' },
-              { label: 'Relatório por Voz', icon: 'mic' },
+              { label: 'Consultar Placa', icon: 'photo_camera' },
+              { label: 'Boletim por Voz', icon: 'mic' },
             ].map((tool) => (
               <button 
                 key={tool.label}
