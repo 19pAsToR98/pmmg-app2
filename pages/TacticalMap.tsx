@@ -30,6 +30,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   const [newMarkerData, setNewMarkerData] = useState<Omit<CustomMarker, 'id'> | null>(null);
   const [editingMarker, setEditingMarker] = useState<CustomMarker | null>(null);
   const [currentZoom, setCurrentZoom] = useState(14); // Estado para rastrear o zoom
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // NOVO: Estado para o painel lateral
 
   // Filtragem dos suspeitos
   const filteredSuspects = suspects.filter(s => 
@@ -356,15 +357,11 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             </button>
           </div>
         </div>
-
-        {/* Tactical Filters Chips - REMOVIDO */}
-        
       </header>
 
       <div className="flex-1 relative">
         <div ref={mapContainerRef} className="w-full h-full" style={{ zIndex: 1 }} />
         
-        {/* Floating Counter (REMOVIDO) */}
         {/* Adding Marker Mode Indicator (Non-blocking) */}
         {isAddingMarker && (
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[1001] pointer-events-none">
@@ -473,9 +470,21 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           </div>
         )}
 
-        {/* Interactive Legend */}
-        <div className="absolute bottom-32 right-4 z-[1000]">
-          <div className="bg-white/95 backdrop-blur-md p-3 rounded-2xl shadow-2xl border border-pmmg-navy/10 flex flex-col gap-2.5">
+        {/* SIDEBAR OCULTÁVEL (Legenda Tática) */}
+        <div className={`absolute top-0 right-0 z-[1000] h-full pt-4 pb-32 transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-[calc(100%-30px)]'}`}>
+          
+          {/* Botão de Toggle (Centralizado Verticalmente) */}
+          <button 
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="absolute left-0 top-1/2 transform -translate-x-full -translate-y-1/2 bg-white/95 backdrop-blur-md p-2 rounded-l-xl shadow-xl border border-pmmg-navy/10 text-pmmg-navy"
+          >
+            <span className="material-symbols-outlined text-lg">
+              {isSidebarOpen ? 'arrow_back_ios' : 'arrow_forward_ios'}
+            </span>
+          </button>
+
+          {/* Conteúdo do Painel */}
+          <div className="bg-white/95 backdrop-blur-md p-3 rounded-l-2xl shadow-2xl border border-pmmg-navy/10 flex flex-col gap-2.5 h-full overflow-y-auto w-64">
             <p className="text-[8px] font-black text-pmmg-navy/40 uppercase tracking-widest border-b border-pmmg-navy/5 pb-1 mb-1">Legenda Tática</p>
             
             {/* Foragido (Photo style) */}
@@ -500,10 +509,32 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">Suspeito</span>
             </button>
             
+            {/* Preso */}
+            <button 
+              onClick={() => setActiveFilter('Preso')}
+              className={`flex items-center gap-2 group transition-opacity ${activeFilter !== 'Todos' && activeFilter !== 'Preso' ? 'opacity-40' : 'opacity-100'}`}
+            >
+               <div className={`w-4 h-4 rounded-full bg-pmmg-blue flex items-center justify-center border-pmmg-blue shadow-sm`}>
+                 <span className="material-symbols-outlined text-white text-[10px] fill-icon">lock</span>
+               </div>
+               <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">Preso</span>
+            </button>
+
+            {/* CPF Cancelado */}
+            <button 
+              onClick={() => setActiveFilter('CPF Cancelado')}
+              className={`flex items-center gap-2 group transition-opacity ${activeFilter !== 'Todos' && activeFilter !== 'CPF Cancelado' ? 'opacity-40' : 'opacity-100'}`}
+            >
+               <div className={`w-4 h-4 rounded-full bg-slate-700 flex items-center justify-center border-slate-700 shadow-sm`}>
+                 <span className="material-symbols-outlined text-white text-[10px] fill-icon">cancel</span>
+               </div>
+               <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">CPF Cancelado</span>
+            </button>
+            
             {/* Oficial */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 pt-2 border-t border-pmmg-navy/5">
                <div className="w-3.5 h-3.5 bg-pmmg-blue rounded-full border-2 border-white shadow-sm ring-1 ring-pmmg-blue/50"></div>
-               <span className="text-[9px] font-bold text-pmmg-navy uppercase">Oficial</span>
+               <span className="text-[9px] font-bold text-pmmg-navy uppercase">Oficial (Você)</span>
             </div>
             
             {/* Ponto Tático */}
@@ -515,11 +546,19 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             {activeFilter !== 'Todos' && (
               <button 
                 onClick={() => setActiveFilter('Todos')}
-                className="mt-1 text-[8px] font-black text-pmmg-red uppercase border-t border-pmmg-navy/5 pt-2"
+                className="mt-2 text-[8px] font-black text-pmmg-red uppercase border-t border-pmmg-navy/5 pt-2 text-left"
               >
-                Limpar Filtros
+                Limpar Filtros ({activeFilter})
               </button>
             )}
+
+            {/* Espaço para futuras opções */}
+            <div className="mt-4 pt-4 border-t border-pmmg-navy/5">
+              <p className="text-[8px] font-black text-pmmg-navy/40 uppercase tracking-widest mb-2">Opções Futuras</p>
+              <button className="w-full text-left text-[10px] font-bold text-pmmg-navy/70 uppercase py-1.5 px-2 rounded hover:bg-pmmg-navy/5 transition-colors">
+                <span className="material-symbols-outlined text-sm mr-1">layers</span> Gerenciar Camadas
+              </button>
+            </div>
           </div>
         </div>
       </div>
