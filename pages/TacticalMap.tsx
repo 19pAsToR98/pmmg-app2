@@ -195,11 +195,11 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       
       const pathData = ICON_PATHS[iconName] || ICON_PATHS['warning']; // Fallback to warning path
       
-      // Usando SVG Path
+      // Usando SVG Path (24x24)
       const svg = `
         <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <circle cx="12" cy="12" r="10" fill="${colorClass}" stroke="#ffffff" stroke-width="2"/>
-          <path d="${pathData}" fill="${textColor}" transform="translate(0 0)"/>
+          <path d="${pathData}" fill="${textColor}"/>
         </svg>
       `;
       
@@ -218,7 +218,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
     
     const pathData = ICON_PATHS[markerData.icon] || ICON_PATHS['flag']; // Fallback to flag path
     
-    // Usando SVG Path (32x32 viewBox, path 24x24, scaled and translated)
+    // Usando SVG Path (32x32 viewBox, path 24x24, transladado em 4px para centralizar)
     const svg = `
       <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
         <circle cx="16" cy="16" r="14" fill="${colorHex}" stroke="#ffffff" stroke-width="2"/>
@@ -286,7 +286,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                 url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
                   <svg width="32" height="32" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="12" cy="12" r="10" fill="#0047ab" stroke="#ffffff" stroke-width="2"/>
-                    <path d="${ICON_PATHS['person']}" fill="#ffffff" transform="translate(0 0)"/>
+                    <path d="${ICON_PATHS['person']}" fill="#ffffff"/>
                   </svg>
                 `),
                 scaledSize: new window.google.maps.Size(32, 32),
