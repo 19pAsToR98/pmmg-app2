@@ -52,11 +52,12 @@ const AITools: React.FC<AIToolsProps> = ({ navigateTo, userRank }) => {
         <div className="px-6 pb-4">
           <div className="grid grid-cols-2 gap-4">
             {[
-              { label: 'Consultar Placa', icon: 'photo_camera' },
-              { label: 'Boletim por Voz', icon: 'mic' },
+              { label: 'Consultar Placa', icon: 'photo_camera', screen: 'plateConsultation' },
+              { label: 'Boletim por Voz', icon: 'mic', screen: 'voiceReport' },
             ].map((tool) => (
               <button 
                 key={tool.label}
+                onClick={() => navigateTo(tool.screen as Screen)}
                 className="relative overflow-hidden bg-pmmg-navy text-white p-4 rounded-xl flex flex-col items-center justify-center gap-3 active:scale-95 transition-transform border-b-4 border-black/30 shadow-lg"
               >
                 <div className="bg-white/10 p-3 rounded-lg mb-1">

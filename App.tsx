@@ -13,6 +13,8 @@ import TacticalMap from './pages/TacticalMap';
 import TacticalContacts from './pages/TacticalContacts';
 import OnboardingSetup from './pages/OnboardingSetup'; // Novo componente
 import SuspectsManagement from './pages/SuspectsManagement'; // Novo componente
+import PlateConsultation from './pages/PlateConsultation'; // NOVO
+import VoiceReport from './pages/VoiceReport'; // NOVO
 
 const INITIAL_SUSPECTS: Suspect[] = [
   {
@@ -433,6 +435,21 @@ const App: React.FC = () => {
         />
       )}
       {currentScreen === 'aiTools' && <AITools navigateTo={navigateTo} userRank={userRank} />}
+      
+      {/* NOVAS TELAS DE IA */}
+      {currentScreen === 'plateConsultation' && (
+        <PlateConsultation 
+          navigateTo={navigateTo} 
+          userRank={userRank} 
+        />
+      )}
+      {currentScreen === 'voiceReport' && (
+        <VoiceReport 
+          navigateTo={navigateTo} 
+          userRank={userRank} 
+        />
+      )}
+      
       {currentScreen === 'profileSettings' && (
         <ProfileSettings 
           navigateTo={navigateTo} 
