@@ -143,6 +143,8 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   };
 
   const getSuspectIcon = (suspect: Suspect) => {
+    if (typeof window === 'undefined' || !window.google || !window.google.maps) return undefined; // Safety check
+
     if (usePhotoMarker) {
       // Photo Marker (Zoomed In)
       return {
@@ -175,6 +177,8 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   };
   
   const getCustomMarkerIcon = (markerData: CustomMarker) => {
+    if (typeof window === 'undefined' || !window.google || !window.google.maps) return undefined; // Safety check
+
     const colorHex = markerData.color.replace('bg-pmmg-gold', '#d4af37').replace('bg-pmmg-red', '#e31c1c').replace('bg-pmmg-blue', '#0047ab').replace('bg-green-500', '#22c55e');
     
     const svg = `

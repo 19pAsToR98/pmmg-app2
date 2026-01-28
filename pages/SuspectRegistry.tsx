@@ -310,13 +310,15 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
   
   // Helper function to generate marker icon for mini-maps
   const getMiniMapIcon = () => {
+    if (typeof window === 'undefined' || !window.google || !window.google.maps) return undefined; // Safety check
+
     const color = '#002147';
     const iconName = 'location_on';
     
     const svg = `
       <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
         <circle cx="16" cy="16" r="14" fill="${color}" stroke="#ffcc00" stroke-width="2"/>
-        <text x="16" y="22" font-family="Material Symbols Outlined" font-size="16" fill="#ffcc00" text-anchor="middle">${iconName}</text>
+        <text x="16" y="22" font-family="Material Symbols Outlined" font-size="16" fill="#ffcc00" text-anchor="middle">location_on</text>
       </svg>
     `;
     

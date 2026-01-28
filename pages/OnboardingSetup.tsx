@@ -105,6 +105,8 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
   };
 
   const getCityMarkerIcon = () => {
+    if (typeof window === 'undefined' || !window.google || !window.google.maps) return undefined; // Safety check
+
     const svg = `
       <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
         <circle cx="16" cy="16" r="14" fill="#002147" stroke="#ffcc00" stroke-width="2"/>
