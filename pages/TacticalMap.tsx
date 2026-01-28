@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import L from 'leaflet';
-import 'leaflet-providers'; // Importa o plugin leaflet-providers
 import { Screen, Suspect, CustomMarker } from '../types';
 import BottomNav from '../components/BottomNav';
 
@@ -19,10 +18,6 @@ type MapFilter = 'Todos' | 'Foragido' | 'Suspeito' | 'Preso' | 'CPF Cancelado';
 type LocationFilter = 'residence' | 'approach'; // Residência/Última Loc. ou Endereço de Abordagem
 
 const ZOOM_THRESHOLD = 15; // Nível de zoom para alternar para fotos
-
-// Chave de API do Google Maps (Deve ser carregada de forma segura, ex: variáveis de ambiente)
-// Usaremos uma variável de ambiente simulada por enquanto.
-const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY || 'YOUR_GOOGLE_MAPS_API_KEY';
 
 const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenProfile, initialCenter, customMarkers, addCustomMarker, updateCustomMarker, deleteCustomMarker }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -114,20 +109,9 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
     mapInstanceRef.current = map;
     setCurrentZoom(map.getZoom());
 
-    // --- Configuração do Provedor de Tiles do Google Maps ---
-    if (GOOGLE_MAPS_API_KEY && GOOGLE_MAPS_API_KEY !== 'YOUR_GOOGLE_MAPS_API_KEY') {
-        // Se a chave estiver configurada, usa o Google Maps
-        L.tileLayer.provider('GoogleMaps.Roadmap', {
-            apiKey: GOOGLE_MAPS_API_KEY
-        }).addTo(map);
-    } else {
-        // Caso contrário, volta para o OpenStreetMap (Fallback)
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap'
-        }).addTo(map);
-        console.warn("Chave GOOGLE_MAPS_API_KEY não configurada. Usando OpenStreetMap como fallback.");
-    }
-    // -------------------------------------------------------
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
 
     markersLayerRef.current = L.layerGroup().addTo(map);
     customMarkersLayerRef.current = L.layerGroup().addTo(map);
