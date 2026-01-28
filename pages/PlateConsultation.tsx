@@ -94,20 +94,20 @@ const PlateConsultation: React.FC<PlateConsultationProps> = ({ navigateTo, userR
                 capture="environment"
               />
               
-              {/* Camera Button */}
+              {/* Camera Button - Adicionado shrink-0 */}
               <button 
                 onClick={triggerFileInput}
-                className="bg-pmmg-red text-white p-3 rounded-lg active:scale-95 transition-transform"
+                className="bg-pmmg-red text-white p-3 rounded-lg active:scale-95 transition-transform shrink-0"
                 title="Abrir Câmera para OCR"
               >
                 <span className="material-symbols-outlined text-xl">photo_camera</span>
               </button>
 
-              {/* Search Button */}
+              {/* Search Button - Adicionado shrink-0 */}
               <button 
                 onClick={handleSearch}
                 disabled={plate.length < 7}
-                className="bg-pmmg-navy text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50"
+                className="bg-pmmg-navy text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50 shrink-0"
                 title="Pesquisar Placa"
               >
                 <span className="material-symbols-outlined text-xl">search</span>
