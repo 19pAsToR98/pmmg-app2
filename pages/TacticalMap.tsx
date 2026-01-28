@@ -237,7 +237,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           onLoad={handleMapLoad}
           onClick={handleMapClick}
           options={{
-            mapTypeId: 'hybrid', // Exemplo: satélite com rótulos
+            mapTypeId: 'roadmap', // Alterado de 'hybrid' para 'roadmap'
           }}
         >
           {/* Marcador do Usuário (Oficial) */}
@@ -282,7 +282,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               locationType = 'Última Localização';
             } else if (locationFilter === 'approach' && suspect.approachLat && suspect.approachLng) {
               lat = suspect.approachLat;
-              lng = suspect.approachLng;
+              lng = suspect.lng;
               locationName = suspect.approachAddress;
               locationType = 'Endereço de Abordagem';
             }
