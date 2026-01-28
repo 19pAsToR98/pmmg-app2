@@ -15,8 +15,14 @@ interface SuspectProfileProps {
 const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, navigateTo, allSuspects, onOpenProfile, onEdit }) => {
   const [expandedSection, setExpandedSection] = useState<string | null>('data');
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
-  const miniMapRef = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<L.Map | null>(null);
+  
+  // Refs para os dois mapas
+  const lastSeenMiniMapRef = useRef<HTMLDivElement>(null);
+  const approachMiniMapRef = useRef<HTMLDivElement>(null);
+  
+  // Instâncias Leaflet
+  const lastSeenMapInstance = useRef<L.Map | null>(null);
+  const approachMapInstance = useRef<L.Map | null>(null);
 
   const photos = suspect.photoUrls && suspect.photoUrls.length > 0 ? suspect.photoUrls : [suspect.photoUrl];
   const currentPhotoIndex = fullscreenImage ? photos.indexOf(fullscreenImage) : -1;
@@ -41,9 +47,10 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
     }
   };
 
+  // Efeito para o Mapa de Última Localização (Last Seen)
   useEffect(() => {
-    if (miniMapRef.current && suspect.lat && suspect.lng && !mapInstance.current) {
-      mapInstance.current = L.map(miniMapRef.current, {
+    if (lastSeenMiniMapRef.current && suspect.lat && suspect.lng && !lastSeenMapInstance.current) {
+      lastSeenMapInstance.current = L.map(lastSeenMiniMapRef.current, {
         center: [suspect.lat, suspect.lng],
         zoom: 15,
         zoomControl: false,
@@ -54,7 +61,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
         boxZoom: false
       });
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance.current);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(lastSeenMapInstance.current);
 
       const color = suspect.status === 'Foragido' ? 'bg-pmmg-red' : 'bg-pmmg-yellow';
       const suspectIcon = L.divIcon({
@@ -64,16 +71,51 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
         iconAnchor: [16, 16]
       });
 
-      L.marker([suspect.lat, suspect.lng], { icon: suspectIcon }).addTo(mapInstance.current);
+      L.marker([suspect.lat, suspect.lng], { icon: suspectIcon }).addTo(lastSeenMapInstance.current);
     }
 
     return () => {
-      if (mapInstance.current) {
-        mapInstance.current.remove();
-        mapInstance.current = null;
+      if (lastSeenMapInstance.current) {
+        lastSeenMapInstance.current.remove();
+        lastSeenMapInstance.current = null;
       }
     };
   }, [suspect]);
+  
+  // Efeito para o Mapa de Endereço da Abordagem (Approach Address)
+  useEffect(() => {
+    if (approachMiniMapRef.current && suspect.approachLat && suspect.approachLng && !approachMapInstance.current) {
+      approachMapInstance.current = L.map(approachMiniMapRef.current, {
+        center: [suspect.approachLat, suspect.approachLng],
+        zoom: 15,
+        zoomControl: false,
+        dragging: false,
+        touchZoom: false,
+        scrollWheelZoom: false,
+        doubleClickZoom: false,
+        boxZoom: false
+      });
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(approachMapInstance.current);
+
+      const approachIcon = L.divIcon({
+        className: 'custom-approach-icon',
+        html: `<div class="w-8 h-8 bg-pmmg-navy rounded-full border-2 border-pmmg-yellow flex items-center justify-center shadow-lg"><span class="material-symbols-outlined text-pmmg-yellow text-[16px] fill-icon">pin_drop</span></div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
+      });
+
+      L.marker([suspect.approachLat, suspect.approachLng], { icon: approachIcon }).addTo(approachMapInstance.current);
+    }
+
+    return () => {
+      if (approachMapInstance.current) {
+        approachMapInstance.current.remove();
+        approachMapInstance.current = null;
+      }
+    };
+  }, [suspect.approachLat, suspect.approachLng]);
+
 
   const handleOpenMap = () => {
     if (suspect.lat && suspect.lng) {
@@ -362,16 +404,17 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
             <p className="text-[8px] text-slate-400 mt-2 uppercase text-center font-bold italic tracking-wider">Clique para expandir (Cores Reais)</p>
           </div>
 
+          {/* Última Localização (Ocorrência/Residência) */}
           <div className="pmmg-card overflow-hidden">
             <div className="p-4 flex items-center justify-between text-pmmg-navy bg-white/40">
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined">location_on</span>
-                <span className="text-sm font-bold uppercase">Última Localização</span>
+                <span className="text-sm font-bold uppercase">Última Localização (Ocorrência/Residência)</span>
               </div>
               <span className="text-[9px] font-bold uppercase opacity-50">{suspect.lastSeen}</span>
             </div>
             <div className="relative group cursor-pointer" onClick={handleOpenMap}>
-              <div ref={miniMapRef} className="h-48 w-full bg-slate-200 z-0 pointer-events-none"></div>
+              <div ref={lastSeenMiniMapRef} className="h-48 w-full bg-slate-200 z-0 pointer-events-none"></div>
               <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors flex items-center justify-center">
                 <div className="bg-pmmg-navy/80 text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-xl backdrop-blur-sm transform scale-90 group-hover:scale-100 transition-transform">
                   <span className="material-symbols-outlined text-sm">open_in_full</span>
@@ -381,8 +424,8 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
             </div>
           </div>
           
-          {/* NOVO: Endereço da Abordagem */}
-          {suspect.approachAddress && (
+          {/* Endereço da Abordagem (NOVO MAPA) */}
+          {suspect.approachAddress && suspect.approachLat && suspect.approachLng && (
             <div className="pmmg-card overflow-hidden">
               <div className="p-4 flex items-center justify-between text-pmmg-navy bg-white/40">
                 <div className="flex items-center gap-3">
@@ -391,12 +434,15 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                 </div>
                 <span className="text-[9px] font-bold uppercase opacity-50">{suspect.approachAddress}</span>
               </div>
-              {suspect.approachLat && suspect.approachLng && (
-                <div className="p-4 border-t border-pmmg-navy/5">
-                  <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase tracking-wider mb-1">Coordenadas Registradas</p>
-                  <p className="text-sm font-bold text-slate-800">{suspect.approachLat.toFixed(5)}, {suspect.approachLng.toFixed(5)}</p>
+              <div className="relative group cursor-pointer" onClick={() => navigateTo('map', [suspect.approachLat!, suspect.approachLng!])}>
+                <div ref={approachMiniMapRef} className="h-48 w-full bg-slate-200 z-0 pointer-events-none"></div>
+                <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors flex items-center justify-center">
+                  <div className="bg-pmmg-navy/80 text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-xl backdrop-blur-sm transform scale-90 group-hover:scale-100 transition-transform">
+                    <span className="material-symbols-outlined text-sm">open_in_full</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Abrir Mapa Geral</span>
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
           )}
         </div>
