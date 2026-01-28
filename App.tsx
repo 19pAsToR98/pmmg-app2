@@ -434,7 +434,7 @@ const App: React.FC = () => {
           onSendMessage={handleSendMessage}
         />
       )}
-      {currentScreen === 'aiTools' && <AITools navigateTo={navigateTo} userRank={userRank} />}
+      {currentScreen === 'aiTools' && <AITools navigateTo={navigateTo} userRank={userRank} userName={userName} />}
       
       {/* NOVAS TELAS DE FERRAMENTAS IA */}
       {currentScreen === 'licensePlateConsultation' && (
