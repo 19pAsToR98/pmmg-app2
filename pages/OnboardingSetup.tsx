@@ -33,7 +33,10 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
   const [citySearchTerm, setCitySearchTerm] = useState('');
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number, lng: number, name: string } | null>(null);
   const [citySuggestions, setCitySuggestions] = useState<typeof MOCK_CITIES>([]);
-  const [selectedAvatar, setSelectedAvatar] = useState<UserAvatar | null>(null); // NEW State
+  
+  // NEW State for Avatar selection index
+  const [selectedAvatarIndex, setSelectedAvatarIndex] = useState(0);
+  const selectedAvatar = AVATAR_OPTIONS[selectedAvatarIndex].avatar;
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
@@ -134,16 +137,13 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
       alert("Por favor, selecione sua cidade padrão.");
       return;
     }
-    if (step === 4 && !selectedAvatar) { // NEW check for step 4
-      alert("Por favor, selecione um avatar.");
-      return;
-    }
+    // No step 4, we assume an avatar is selected since selectedAvatar is derived from index 0 by default.
     
-    if (step < 4) { // Changed from 3 to 4
+    if (step < 4) { 
       setStep(step + 1);
     } else {
       // Final Step
-      onComplete(name.trim(), rank, city.trim(), selectedAvatar!); // Updated onComplete call
+      onComplete(name.trim(), rank, city.trim(), selectedAvatar); 
     }
   };
 
@@ -151,6 +151,16 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
     if (step > 1) {
       setStep(step - 1);
     }
+  };
+  
+  const handleAvatarChange = (direction: 'next' | 'prev') => {
+    setSelectedAvatarIndex(prev => {
+      if (direction === 'next') {
+        return (prev + 1) % AVATAR_OPTIONS.length;
+      } else {
+        return (prev - 1 + AVATAR_OPTIONS.length) % AVATAR_OPTIONS.length;
+      }
+    });
   };
 
   const renderStepContent = () => {
@@ -249,46 +259,57 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
             )}
           </div>
         );
-      case 4: // NEW STEP: Avatar Selection
+      case 4: // NEW STEP: Avatar Selection (Slider)
+        const currentOption = AVATAR_OPTIONS[selectedAvatarIndex];
+        
         return (
           <div className="space-y-6">
             <h2 className="text-xl font-bold text-pmmg-navy uppercase tracking-tight">Avatar Tático</h2>
             <p className="text-sm text-slate-600">Selecione o avatar que representará você e o assistente de IA na plataforma.</p>
             
-            <div className="flex justify-center gap-6">
-              {AVATAR_OPTIONS.map((option) => (
-                <button
-                  key={option.gender}
-                  onClick={() => setSelectedAvatar(option.avatar)}
-                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border-4 transition-all ${
-                    selectedAvatar?.name === option.avatar.name
-                      ? 'bg-pmmg-navy border-pmmg-yellow shadow-lg scale-105'
-                      : 'bg-white border-transparent opacity-70'
-                  }`}
-                >
-                  <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-white shadow-md">
-                    <img 
-                      src={option.avatar.url} 
-                      alt={option.avatar.name} 
-                      className="w-full h-full object-cover" 
-                    />
-                  </div>
-                  <span className={`text-[10px] font-black uppercase ${selectedAvatar?.name === option.avatar.name ? 'text-pmmg-yellow' : 'text-pmmg-navy'}`}>
-                    {option.avatar.name}
-                  </span>
-                  <span className={`text-[8px] font-bold uppercase ${selectedAvatar?.name === option.avatar.name ? 'text-pmmg-yellow/80' : 'text-slate-500'}`}>
-                    {option.gender}
-                  </span>
-                </button>
-              ))}
+            <div className="relative flex items-center justify-center p-4 bg-pmmg-navy/5 rounded-xl border border-pmmg-navy/10 shadow-inner">
+              
+              {/* Previous Button */}
+              <button
+                onClick={() => handleAvatarChange('prev')}
+                className="absolute left-0 z-10 p-2 rounded-full bg-white/80 text-pmmg-navy shadow-md active:scale-95 transition-transform ml-2"
+              >
+                <span className="material-symbols-outlined">arrow_back_ios</span>
+              </button>
+
+              {/* Avatar Display */}
+              <div className="flex flex-col items-center text-center transition-all duration-300 ease-in-out">
+                <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-pmmg-yellow/80 p-1 bg-white shadow-2xl mb-4">
+                  <img 
+                    src={currentOption.avatar.url} 
+                    alt={currentOption.avatar.name} 
+                    className="w-full h-full object-cover rounded-full" 
+                  />
+                </div>
+                <div className="bg-pmmg-navy text-white px-4 py-2 rounded-full shadow-lg">
+                  <p className="text-lg font-black uppercase tracking-widest">{currentOption.avatar.name}</p>
+                  <p className="text-[10px] font-bold text-pmmg-yellow uppercase">{currentOption.gender}</p>
+                </div>
+              </div>
+
+              {/* Next Button */}
+              <button
+                onClick={() => handleAvatarChange('next')}
+                className="absolute right-0 z-10 p-2 rounded-full bg-white/80 text-pmmg-navy shadow-md active:scale-95 transition-transform mr-2"
+              >
+                <span className="material-symbols-outlined">arrow_forward_ios</span>
+              </button>
             </div>
             
-            {selectedAvatar && (
-              <div className="text-center pt-4 border-t border-pmmg-navy/10">
-                <p className="text-pmmg-navy font-bold uppercase text-sm">Avatar Selecionado:</p>
-                <p className="text-pmmg-red font-black text-lg mt-1">{selectedAvatar.name}</p>
-              </div>
-            )}
+            {/* Dots Indicator */}
+            <div className="flex justify-center gap-2 pt-2">
+              {AVATAR_OPTIONS.map((_, index) => (
+                <div 
+                  key={index}
+                  className={`w-2 h-2 rounded-full transition-all ${selectedAvatarIndex === index ? 'bg-pmmg-navy w-4' : 'bg-slate-300'}`}
+                ></div>
+              ))}
+            </div>
           </div>
         );
       default:
