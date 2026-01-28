@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Screen, UserRank } from '../types';
+import { Screen, UserRank, UserAvatar } from '../types';
 import BottomNav from '../components/BottomNav';
 import RankBadge from '../components/RankBadge';
 
@@ -9,11 +8,12 @@ interface ProfileSettingsProps {
   onBack: () => void;
   currentRank: UserRank;
   onRankChange: (rank: UserRank) => void;
+  userAvatar: UserAvatar;
 }
 
 const RANKS: UserRank[] = ['Soldado', 'Cabo', '3º Sargento', '2º Sargento', '1º Sargento', 'Subtenente'];
 
-const ProfileSettings: React.FC<ProfileSettingsProps> = ({ navigateTo, onBack, currentRank, onRankChange }) => {
+const ProfileSettings: React.FC<ProfileSettingsProps> = ({ navigateTo, onBack, currentRank, onRankChange, userAvatar }) => {
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
       <header className="bg-pmmg-navy px-6 pt-12 pb-8 rounded-b-[40px] shadow-2xl relative overflow-hidden">
@@ -21,7 +21,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ navigateTo, onBack, c
         <div className="relative z-10 flex flex-col items-center">
           <div className="relative mb-4">
             <div className="w-28 h-28 rounded-full border-4 border-pmmg-yellow/80 p-1 bg-white/10 overflow-hidden shadow-xl">
-              <img alt="Officer" className="w-full h-full object-cover rounded-full grayscale" src="https://picsum.photos/seed/officer/200/200" />
+              <img alt={userAvatar.name} className="w-full h-full object-cover rounded-full grayscale" src={userAvatar.url} />
             </div>
             <div className="absolute -bottom-2 -right-2 p-1 bg-pmmg-navy rounded-lg border-2 border-pmmg-yellow shadow-lg">
               <RankBadge rank={currentRank} size="sm" />

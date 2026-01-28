@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Screen, Suspect, UserRank, CustomMarker, Officer, Chat, ChatMessage, Contact, ContactStatus } from './types';
+import { Screen, Suspect, UserRank, CustomMarker, Officer, Chat, ChatMessage, Contact, ContactStatus, UserAvatar } from './types';
 import WelcomeScreen from './pages/WelcomeScreen'; // Renomeado
 import Dashboard from './pages/Dashboard';
 import SuspectRegistry from './pages/SuspectRegistry';
@@ -183,6 +183,11 @@ const MOCK_CHATS: Chat[] = [
   },
 ];
 
+const DEFAULT_AVATAR: UserAvatar = { 
+  name: 'Cabo Loso', 
+  url: 'https://iili.io/fiLMgHX.gif' 
+};
+
 
 const App: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>('welcomeScreen');
@@ -197,6 +202,7 @@ const App: React.FC = () => {
   const [userName, setUserName] = useState('Rodrigo Alves');
   const [userCity, setUserCity] = useState('Belo Horizonte');
   const [isRegistered, setIsRegistered] = useState(false); // New state for registration status
+  const [userAvatar, setUserAvatar] = useState<UserAvatar>(DEFAULT_AVATAR); // NEW State for Avatar
   
   // Suspect Management Filter State
   const [initialSuspectFilter, setInitialSuspectFilter] = useState<Suspect['status'] | 'Todos'>('Todos');
@@ -344,10 +350,11 @@ const App: React.FC = () => {
     navigateTo('registry');
   };
   
-  const handleOnboardingComplete = (name: string, rank: UserRank, city: string) => {
+  const handleOnboardingComplete = (name: string, rank: UserRank, city: string, avatar: UserAvatar) => {
     setUserName(name);
     setUserRank(rank);
     setUserCity(city);
+    setUserAvatar(avatar);
     navigateTo('dashboard');
   };
 
@@ -456,6 +463,7 @@ const App: React.FC = () => {
           onBack={() => navigateTo('dashboard')} 
           currentRank={userRank} 
           onRankChange={setUserRank}
+          userAvatar={userAvatar}
         />
       )}
       {currentScreen === 'map' && (

@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import L from 'leaflet';
-import { Screen, UserRank } from '../types';
+import { Screen, UserRank, UserAvatar } from '../types';
 import RankBadge from '../components/RankBadge';
 
 interface OnboardingSetupProps {
-  onComplete: (name: string, rank: UserRank, city: string) => void;
+  onComplete: (name: string, rank: UserRank, city: string, avatar: UserAvatar) => void;
 }
 
 const RANKS: UserRank[] = ['Soldado', 'Cabo', '3º Sargento', '2º Sargento', '1º Sargento', 'Subtenente'];
@@ -18,6 +18,13 @@ const MOCK_CITIES = [
   { name: 'Montes Claros', lat: -16.7342, lng: -43.8611 },
 ];
 
+// NEW: Avatar options
+const AVATAR_OPTIONS: { gender: 'Masculino' | 'Feminino', avatar: UserAvatar }[] = [
+  { gender: 'Masculino', avatar: { name: 'Cabo Loso', url: 'https://iili.io/fiLMgHX.gif' } },
+  { gender: 'Feminino', avatar: { name: 'Sgt Bisonha', url: 'https://iili.io/fiLMrRn.gif' } },
+];
+
+
 const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
@@ -26,6 +33,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
   const [citySearchTerm, setCitySearchTerm] = useState('');
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number, lng: number, name: string } | null>(null);
   const [citySuggestions, setCitySuggestions] = useState<typeof MOCK_CITIES>([]);
+  const [selectedAvatar, setSelectedAvatar] = useState<UserAvatar | null>(null); // NEW State
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
@@ -126,12 +134,16 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
       alert("Por favor, selecione sua cidade padrão.");
       return;
     }
+    if (step === 4 && !selectedAvatar) { // NEW check for step 4
+      alert("Por favor, selecione um avatar.");
+      return;
+    }
     
-    if (step < 3) {
+    if (step < 4) { // Changed from 3 to 4
       setStep(step + 1);
     } else {
       // Final Step
-      onComplete(name.trim(), rank, city.trim());
+      onComplete(name.trim(), rank, city.trim(), selectedAvatar!); // Updated onComplete call
     }
   };
 
@@ -229,10 +241,52 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
               <div className="pmmg-card overflow-hidden">
                 <div className="p-3 bg-pmmg-navy/5 flex items-center justify-between">
                   <p className="text-[10px] font-bold text-pmmg-navy uppercase tracking-wider">Cidade Selecionada: {city || 'Carregando...'}</p>
-                  <span className="text-[9px] text-green-600 font-bold uppercase">OK</span>
+                  <span className="text-[9px] text-green-600 font-bold uppercase">GPS OK</span>
                 </div>
                 {/* O mapa precisa de uma altura definida */}
                 <div ref={mapContainerRef} className="h-48 w-full bg-slate-200 z-0"></div>
+              </div>
+            )}
+          </div>
+        );
+      case 4: // NEW STEP: Avatar Selection
+        return (
+          <div className="space-y-6">
+            <h2 className="text-xl font-bold text-pmmg-navy uppercase tracking-tight">Avatar Tático</h2>
+            <p className="text-sm text-slate-600">Selecione o avatar que representará você e o assistente de IA na plataforma.</p>
+            
+            <div className="flex justify-center gap-6">
+              {AVATAR_OPTIONS.map((option) => (
+                <button
+                  key={option.gender}
+                  onClick={() => setSelectedAvatar(option.avatar)}
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border-4 transition-all ${
+                    selectedAvatar?.name === option.avatar.name
+                      ? 'bg-pmmg-navy border-pmmg-yellow shadow-lg scale-105'
+                      : 'bg-white border-transparent opacity-70'
+                  }`}
+                >
+                  <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-white shadow-md">
+                    <img 
+                      src={option.avatar.url} 
+                      alt={option.avatar.name} 
+                      className="w-full h-full object-cover" 
+                    />
+                  </div>
+                  <span className={`text-[10px] font-black uppercase ${selectedAvatar?.name === option.avatar.name ? 'text-pmmg-yellow' : 'text-pmmg-navy'}`}>
+                    {option.avatar.name}
+                  </span>
+                  <span className={`text-[8px] font-bold uppercase ${selectedAvatar?.name === option.avatar.name ? 'text-pmmg-yellow/80' : 'text-slate-500'}`}>
+                    {option.gender}
+                  </span>
+                </button>
+              ))}
+            </div>
+            
+            {selectedAvatar && (
+              <div className="text-center pt-4 border-t border-pmmg-navy/10">
+                <p className="text-pmmg-navy font-bold uppercase text-sm">Avatar Selecionado:</p>
+                <p className="text-pmmg-red font-black text-lg mt-1">{selectedAvatar.name}</p>
               </div>
             )}
           </div>
@@ -251,7 +305,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
           </div>
           <div>
             <h1 className="font-bold text-sm leading-none text-white uppercase tracking-tight">Configuração Inicial</h1>
-            <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">Passo {step} de 3</p>
+            <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">Passo {step} de 4</p>
           </div>
         </div>
       </header>
@@ -275,7 +329,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
             onClick={handleNext}
             className="flex-[3] bg-pmmg-navy text-white font-bold py-3 rounded-xl text-xs uppercase flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
           >
-            {step === 3 ? (
+            {step === 4 ? (
               <>
                 <span className="material-symbols-outlined text-pmmg-yellow">check_circle</span>
                 Concluir Configuração

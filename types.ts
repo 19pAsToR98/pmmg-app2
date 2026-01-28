@@ -2,6 +2,11 @@ export type Screen = 'welcomeScreen' | 'dashboard' | 'registry' | 'profile' | 'c
 
 export type UserRank = 'Soldado' | 'Cabo' | '3º Sargento' | '2º Sargento' | '1º Sargento' | 'Subtenente';
 
+export interface UserAvatar {
+  name: string;
+  url: string;
+}
+
 export interface Vehicle {
   plate: string;
   model: string;
