@@ -193,12 +193,17 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                 {suspect.nickname && <p className="text-pmmg-yellow text-xs font-semibold mt-1">Vulgo: "{suspect.nickname}"</p>}
               </div>
               
-              <div className="bg-white/5 border border-white/10 p-2.5 rounded-xl backdrop-blur-sm">
-                <p className="text-[9px] text-pmmg-yellow/60 font-bold uppercase tracking-widest mb-1">Descrição Tática</p>
-                <p className="text-[10px] text-white/90 leading-snug italic font-medium">
-                  {suspect.description || "Nenhuma observação física registrada no prontuário."}
+              {/* Descrição Tática (Removido o container e título) */}
+              {suspect.description && (
+                <p className="text-[10px] text-white/90 leading-snug italic font-medium bg-white/5 border border-white/10 p-2.5 rounded-xl backdrop-blur-sm">
+                  {suspect.description}
                 </p>
-              </div>
+              )}
+              {!suspect.description && (
+                <p className="text-[10px] text-white/60 leading-snug italic font-medium p-2.5">
+                  Nenhuma observação física registrada no prontuário.
+                </p>
+              )}
             </div>
           </div>
         </section>
