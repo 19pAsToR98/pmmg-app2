@@ -164,7 +164,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
         {/* Header Section with Photo and Text side-by-side */}
         <section className="p-4 bg-gradient-to-b from-pmmg-navy to-pmmg-navy/80 pb-12 rounded-b-[2rem] shadow-xl">
           
-          <div className="flex gap-4 relative">
+          <div className="flex gap-4 relative items-start"> {/* Adicionado items-start aqui */}
             {/* Bloco da Foto (Esquerda) */}
             <div className="shrink-0">
               <div 
@@ -183,7 +183,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
             </div>
             
             {/* Bloco de Texto (Direita) */}
-            <div className="flex-1 flex flex-col justify-between">
+            <div className="flex-1 flex flex-col justify-start"> {/* Alterado justify-between para justify-start */}
               <div className="flex justify-end mb-2">
                 <span className={`text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg border border-white/20 uppercase tracking-widest ${
                   suspect.status === 'Foragido' ? 'bg-pmmg-red animate-pulse' : 
