@@ -205,8 +205,9 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             });
         } else {
             // Simple Icon Marker (Zoomed Out)
+            // FIX: Substituindo a chamada a isSuspect por uma verificação direta
             const colorClass = suspect.status === 'Foragido' ? 'bg-pmmg-red' : 
-                               isSuspect(suspect.status) ? 'bg-pmmg-yellow' : 'bg-pmmg-navy';
+                               suspect.status === 'Suspeito' ? 'bg-pmmg-yellow' : 'bg-pmmg-navy';
             const iconName = suspect.status === 'Foragido' ? 'priority_high' : 'warning';
             
             const simpleIconHtml = `
@@ -471,10 +472,9 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         )}
 
         {/* SIDEBAR OCULTÁVEL (Legenda Tática) */}
-        {/* O painel agora é um filho direto do contêiner flex-1 relative, garantindo centralização correta */}
         <div className={`absolute top-0 right-0 z-[1000] h-full transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
           
-          {/* Botão de Toggle (Centralizado Verticalmente em relação ao H-FULL do painel) */}
+          {/* Botão de Toggle (Centralizado Verticalmente) */}
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="absolute left-0 top-1/2 transform -translate-x-full -translate-y-1/2 bg-pmmg-navy p-1.5 rounded-l-xl shadow-xl text-pmmg-yellow"
