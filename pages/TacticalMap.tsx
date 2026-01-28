@@ -15,6 +15,7 @@ interface TacticalMapProps {
 }
 
 type MapFilter = 'Todos' | 'Foragido' | 'Suspeito' | 'Preso' | 'CPF Cancelado';
+type LocationFilter = 'residence' | 'approach'; // Residência/Última Loc. ou Endereço de Abordagem
 
 const ZOOM_THRESHOLD = 15; // Nível de zoom para alternar para fotos
 
@@ -26,20 +27,18 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   
   const [userPos, setUserPos] = useState<[number, number] | null>(null);
   const [activeFilter, setActiveFilter] = useState<MapFilter>('Todos');
+  const [locationFilter, setLocationFilter] = useState<LocationFilter>('residence'); // NOVO: Filtro de localização
   const [isAddingMarker, setIsAddingMarker] = useState(false);
   const [newMarkerData, setNewMarkerData] = useState<Omit<CustomMarker, 'id'> | null>(null);
   const [editingMarker, setEditingMarker] = useState<CustomMarker | null>(null);
   const [currentZoom, setCurrentZoom] = useState(14); // Estado para rastrear o zoom
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // NOVO: Estado para o painel lateral
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); 
 
   // Filtragem dos suspeitos
   const filteredSuspects = suspects.filter(s => 
     (s.showOnMap === undefined || s.showOnMap === true) && 
     (activeFilter === 'Todos' || s.status === activeFilter)
   );
-
-  // Variável de controle de zoom acessível no JSX
-  const usePhotoMarker = currentZoom >= ZOOM_THRESHOLD;
 
   const handleMapClick = (e: L.LeafletMouseEvent) => {
     if (isAddingMarker) {
@@ -60,7 +59,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       const marker: CustomMarker = {
         ...newMarkerData,
         id: Date.now().toString(),
-      } as CustomMarker; // Casting para garantir que o tipo está correto
+      } as CustomMarker;
       addCustomMarker(marker);
       setNewMarkerData(null);
     }
@@ -82,12 +81,10 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   const handleDeleteMarker = (id: string) => {
     if (window.confirm("Tem certeza que deseja excluir este ponto tático?")) {
       deleteCustomMarker(id);
-      // Fechar o popup se estiver aberto
       mapInstanceRef.current?.closePopup();
     }
   };
   
-  // Função para simular o compartilhamento de localização
   const handleShareLocation = useCallback((lat: number, lng: number, title: string) => {
     const locationLink = `https://maps.google.com/maps?q=${lat},${lng}`;
     alert(`Localização de ${title} pronta para compartilhamento:\n\nCoordenadas: ${lat.toFixed(5)}, ${lng.toFixed(5)}\nLink (Simulado): ${locationLink}`);
@@ -107,7 +104,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       zoomControl: false 
     });
     mapInstanceRef.current = map;
-    setCurrentZoom(map.getZoom()); // Inicializa o estado de zoom
+    setCurrentZoom(map.getZoom());
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap'
@@ -116,7 +113,6 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
     markersLayerRef.current = L.layerGroup().addTo(map);
     customMarkersLayerRef.current = L.layerGroup().addTo(map);
 
-    // Listener para atualizar o zoom
     const handleZoomChange = () => {
       setCurrentZoom(map.getZoom());
     };
@@ -153,7 +149,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
     };
   }, [initialCenter]);
 
-  // 2. Gerenciamento do Listener de Clique e Cursor (Depende de isAddingMarker)
+  // 2. Gerenciamento do Listener de Clique e Cursor
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map) return;
@@ -173,7 +169,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   }, [isAddingMarker]);
 
 
-  // 3. Atualização de Marcadores de Suspeitos (Depende de filteredSuspects E currentZoom)
+  // 3. Atualização de Marcadores de Suspeitos (Unificado)
   useEffect(() => {
     if (!markersLayerRef.current) return;
     
@@ -182,8 +178,24 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
     const localUsePhotoMarker = currentZoom >= ZOOM_THRESHOLD;
 
     filteredSuspects.forEach(suspect => {
-      // --- Marcador de Última Localização/Residência (Principal) ---
-      if (suspect.lat && suspect.lng) {
+      let lat: number | undefined;
+      let lng: number | undefined;
+      let locationName: string | undefined;
+      let locationType: 'Última Localização' | 'Endereço de Abordagem';
+      
+      if (locationFilter === 'residence' && suspect.lat && suspect.lng) {
+        lat = suspect.lat;
+        lng = suspect.lng;
+        locationName = suspect.lastSeen;
+        locationType = 'Última Localização';
+      } else if (locationFilter === 'approach' && suspect.approachLat && suspect.approachLng) {
+        lat = suspect.approachLat;
+        lng = suspect.approachLng;
+        locationName = suspect.approachAddress;
+        locationType = 'Endereço de Abordagem';
+      }
+
+      if (lat && lng) {
         
         let suspectIcon;
         
@@ -208,7 +220,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             // Simple Icon Marker (Zoomed Out)
             const colorClass = suspect.status === 'Foragido' ? 'bg-pmmg-red' : 
                                suspect.status === 'Suspeito' ? 'bg-pmmg-yellow' : 'bg-pmmg-navy';
-            const iconName = suspect.status === 'Foragido' ? 'priority_high' : 'warning';
+            const iconName = locationFilter === 'residence' ? (suspect.status === 'Foragido' ? 'priority_high' : 'warning') : 'pin_drop';
             
             const simpleIconHtml = `
               <div class="w-6 h-6 ${colorClass} rounded-full border-2 border-white flex items-center justify-center shadow-md">
@@ -224,7 +236,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             });
         }
 
-        const marker = L.marker([suspect.lat, suspect.lng], { icon: suspectIcon }).addTo(markersLayerRef.current!);
+        const marker = L.marker([lat, lng], { icon: suspectIcon }).addTo(markersLayerRef.current!);
         
         const popupContent = document.createElement('div');
         popupContent.className = "p-2 min-w-[150px]";
@@ -233,7 +245,8 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             <div class="w-10 h-10 rounded bg-slate-200 overflow-hidden"><img src="${suspect.photoUrl}" class="w-full h-full object-cover"></div>
             <div>
               <p class="font-bold text-[10px] text-pmmg-navy uppercase leading-tight">${suspect.name}</p>
-              <p class="text-[9px] text-slate-500 font-bold uppercase">${suspect.status} (Última Localização)</p>
+              <p class="text-[9px] text-pmmg-blue font-bold uppercase">${locationType}</p>
+              <p class="text-[9px] text-slate-500 mt-1">${locationName || 'Local não especificado'}</p>
             </div>
           </div>
           <div class="flex gap-2 mt-3">
@@ -250,72 +263,19 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           document.getElementById(`btn-profile-${suspect.id}`)?.addEventListener('click', () => {
             onOpenProfile(suspect.id);
           });
-          // New listener for sharing suspect location
           document.getElementById(`btn-share-suspect-${suspect.id}`)?.addEventListener('click', () => {
-            if (suspect.lat && suspect.lng) {
-              handleShareLocation(suspect.lat, suspect.lng, suspect.name);
-            }
+            handleShareLocation(lat!, lng!, `${locationType} de ${suspect.name}`);
           });
         });
 
-        if (initialCenter && suspect.lat === initialCenter[0] && suspect.lng === initialCenter[1]) {
+        if (initialCenter && lat === initialCenter[0] && lng === initialCenter[1]) {
           marker.openPopup();
         }
       }
-      
-      // --- Marcador de Endereço de Abordagem (Secundário) ---
-      if (suspect.approachLat && suspect.approachLng) {
-        const approachIconHtml = `
-          <div class="w-6 h-6 bg-pmmg-blue rounded-full border-2 border-white flex items-center justify-center shadow-md">
-            <span class="material-symbols-outlined text-white text-[14px] fill-icon">pin_drop</span>
-          </div>
-        `;
-        
-        const approachIcon = L.divIcon({
-          className: 'custom-approach-icon',
-          html: approachIconHtml,
-          iconSize: [24, 24],
-          iconAnchor: [12, 12]
-        });
-
-        const approachMarker = L.marker([suspect.approachLat, suspect.approachLng], { icon: approachIcon }).addTo(markersLayerRef.current!);
-        
-        const approachPopupContent = document.createElement('div');
-        approachPopupContent.className = "p-2 min-w-[150px]";
-        approachPopupContent.innerHTML = `
-          <div class="flex items-center gap-2 mb-2">
-            <div class="w-10 h-10 rounded bg-slate-200 overflow-hidden"><img src="${suspect.photoUrl}" class="w-full h-full object-cover"></div>
-            <div>
-              <p class="font-bold text-[10px] text-pmmg-navy uppercase leading-tight">${suspect.name}</p>
-              <p class="text-[9px] text-pmmg-blue font-bold uppercase">Endereço de Abordagem</p>
-              <p class="text-[9px] text-slate-500 mt-1">${suspect.approachAddress || 'Local não especificado'}</p>
-            </div>
-          </div>
-          <div class="flex gap-2 mt-3">
-            <button id="btn-profile-approach-${suspect.id}" class="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider">Ver Ficha</button>
-            <button id="btn-share-approach-${suspect.id}" class="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center">
-              <span class="material-symbols-outlined text-pmmg-navy text-lg">share</span>
-            </button>
-          </div>
-        `;
-
-        approachMarker.bindPopup(approachPopupContent);
-        
-        approachMarker.on('popupopen', () => {
-          document.getElementById(`btn-profile-approach-${suspect.id}`)?.addEventListener('click', () => {
-            onOpenProfile(suspect.id);
-          });
-          document.getElementById(`btn-share-approach-${suspect.id}`)?.addEventListener('click', () => {
-            if (suspect.approachLat && suspect.approachLng) {
-              handleShareLocation(suspect.approachLat, suspect.approachLng, `Abordagem de ${suspect.name}`);
-            }
-          });
-        });
-      }
     });
-  }, [filteredSuspects, initialCenter, activeFilter, onOpenProfile, currentZoom, handleShareLocation]);
+  }, [filteredSuspects, initialCenter, activeFilter, locationFilter, onOpenProfile, currentZoom, handleShareLocation]);
 
-  // 4. Atualização de Marcadores Personalizados (Depende de customMarkers)
+  // 4. Atualização de Marcadores Personalizados (Sem alteração)
   useEffect(() => {
     if (!customMarkersLayerRef.current) return;
     
@@ -539,15 +499,37 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           <div className="bg-white/95 backdrop-blur-md p-3 rounded-l-2xl shadow-2xl border border-pmmg-navy/10 flex flex-col gap-2.5 h-full overflow-y-auto w-64">
             <p className="text-[8px] font-black text-pmmg-navy/40 uppercase tracking-widest border-b border-pmmg-navy/5 pb-1 mb-1">Legenda Tática</p>
             
+            {/* --- Filtro de Localização --- */}
+            <div className="pt-2 pb-3 border-b border-pmmg-navy/5">
+              <p className="text-[9px] font-black text-pmmg-navy/60 uppercase tracking-wider mb-2">Tipo de Localização</p>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => setLocationFilter('residence')}
+                  className={`flex-1 text-[9px] font-bold uppercase py-1.5 rounded-lg transition-all ${locationFilter === 'residence' ? 'bg-pmmg-navy text-white shadow-md' : 'bg-slate-100 text-pmmg-navy/70'}`}
+                >
+                  <span className="material-symbols-outlined text-sm mr-1">location_on</span> Residência
+                </button>
+                <button 
+                  onClick={() => setLocationFilter('approach')}
+                  className={`flex-1 text-[9px] font-bold uppercase py-1.5 rounded-lg transition-all ${locationFilter === 'approach' ? 'bg-pmmg-navy text-white shadow-md' : 'bg-slate-100 text-pmmg-navy/70'}`}
+                >
+                  <span className="material-symbols-outlined text-sm mr-1">pin_drop</span> Abordagem
+                </button>
+              </div>
+            </div>
+            
+            {/* --- Filtro de Status (Mantido) --- */}
+            <p className="text-[8px] font-black text-pmmg-navy/40 uppercase tracking-widest border-b border-pmmg-navy/5 pb-1 mb-1 pt-2">Filtro por Status</p>
+
             {/* Foragido (Photo style) */}
             <button 
               onClick={() => setActiveFilter('Foragido')}
               className={`flex items-center gap-2 group transition-opacity ${activeFilter !== 'Todos' && activeFilter !== 'Foragido' ? 'opacity-40' : 'opacity-100'}`}
             >
-               <div className={`w-4 h-4 ${usePhotoMarker ? 'rounded-md border-2 bg-slate-300' : 'rounded-full bg-pmmg-red flex items-center justify-center'} border-pmmg-red shadow-sm`}>
-                 {!usePhotoMarker && <span className="material-symbols-outlined text-white text-[10px] fill-icon">priority_high</span>}
+               <div className={`w-4 h-4 ${localUsePhotoMarker ? 'rounded-md border-2 bg-slate-300' : 'rounded-full bg-pmmg-red flex items-center justify-center'} border-pmmg-red shadow-sm`}>
+                 {!localUsePhotoMarker && <span className="material-symbols-outlined text-white text-[10px] fill-icon">priority_high</span>}
                </div>
-               <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">Foragido (Última Loc.)</span>
+               <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">Foragido</span>
             </button>
             
             {/* Suspeito (Photo style) */}
@@ -555,10 +537,10 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               onClick={() => setActiveFilter('Suspeito')}
               className={`flex items-center gap-2 group transition-opacity ${activeFilter !== 'Todos' && activeFilter !== 'Suspeito' ? 'opacity-40' : 'opacity-100'}`}
             >
-               <div className={`w-4 h-4 ${usePhotoMarker ? 'rounded-md border-2 bg-slate-300' : 'rounded-full bg-pmmg-yellow flex items-center justify-center'} border-pmmg-yellow shadow-sm`}>
-                 {!usePhotoMarker && <span className="material-symbols-outlined text-pmmg-navy text-[10px] fill-icon">warning</span>}
+               <div className={`w-4 h-4 ${localUsePhotoMarker ? 'rounded-md border-2 bg-slate-300' : 'rounded-full bg-pmmg-yellow flex items-center justify-center'} border-pmmg-yellow shadow-sm`}>
+                 {!localUsePhotoMarker && <span className="material-symbols-outlined text-pmmg-navy text-[10px] fill-icon">warning</span>}
                </div>
-               <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">Suspeito (Última Loc.)</span>
+               <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">Suspeito</span>
             </button>
             
             {/* Preso */}
@@ -583,16 +565,18 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">CPF Cancelado</span>
             </button>
             
-            {/* Marcador de Abordagem (NOVO) */}
-            <div className="flex items-center gap-2 pt-2 border-t border-pmmg-navy/5">
-               <div className="w-4 h-4 bg-pmmg-navy rounded-full border-2 border-white flex items-center justify-center shadow-sm ring-1 ring-pmmg-navy/50">
-                 <span className="material-symbols-outlined text-pmmg-yellow text-[10px] fill-icon">pin_drop</span>
-               </div>
-               <span className="text-[9px] font-bold text-pmmg-navy uppercase">Endereço de Abordagem</span>
-            </div>
+            {/* Marcador de Abordagem (Legenda) */}
+            {locationFilter === 'approach' && (
+              <div className="flex items-center gap-2 pt-2 border-t border-pmmg-navy/5">
+                 <div className="w-4 h-4 bg-pmmg-navy rounded-full border-2 border-white flex items-center justify-center shadow-sm ring-1 ring-pmmg-navy/50">
+                   <span className="material-symbols-outlined text-pmmg-yellow text-[10px] fill-icon">pin_drop</span>
+                 </div>
+                 <span className="text-[9px] font-bold text-pmmg-navy uppercase">Abordagem Ativa</span>
+              </div>
+            )}
             
             {/* Oficial */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 pt-2 border-t border-pmmg-navy/5">
                <div className="w-3.5 h-3.5 bg-pmmg-blue rounded-full border-2 border-white shadow-sm ring-1 ring-pmmg-blue/50"></div>
                <span className="text-[9px] font-bold text-pmmg-navy uppercase">Oficial (Você)</span>
             </div>
