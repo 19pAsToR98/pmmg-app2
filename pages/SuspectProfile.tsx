@@ -319,7 +319,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase tracking-wider truncate">{association.relationship}</p>
-                        <h4 className="text-sm font-bold text-pmmg-navy truncate}>{associatedSuspect.name}</h4>
+                        <h4 className="text-sm font-bold text-pmmg-navy truncate">{associatedSuspect.name}</h4>
                       </div>
                       <span className="material-symbols-outlined text-pmmg-navy/40 text-lg shrink-0">arrow_forward_ios</span>
                     </div>
