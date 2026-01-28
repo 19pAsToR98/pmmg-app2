@@ -193,10 +193,18 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       }
       
       // Using SVG for custom icon to embed Material Symbol
+      // FIX: Added style attribute to explicitly set font variation settings (FILL and Wght)
       const svg = `
         <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <circle cx="12" cy="12" r="10" fill="${colorClass}" stroke="#ffffff" stroke-width="2"/>
-          <text x="12" y="17" font-family="Material Symbols Outlined" font-size="14" fill="${textColor}" text-anchor="middle">${iconName}</text>
+          <text 
+            x="12" y="17" 
+            font-family="Material Symbols Outlined" 
+            font-size="14" 
+            fill="${textColor}" 
+            text-anchor="middle"
+            style="font-variation-settings: 'FILL' 1, 'wght' 700;"
+          >${iconName}</text>
         </svg>
       `;
       
@@ -213,10 +221,18 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
 
     const colorHex = markerData.color.replace('bg-pmmg-gold', '#d4af37').replace('bg-pmmg-red', '#e31c1c').replace('bg-pmmg-blue', '#0047ab').replace('bg-green-500', '#22c55e');
     
+    // FIX: Added style attribute to explicitly set font variation settings (FILL and Wght)
     const svg = `
       <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
         <circle cx="16" cy="16" r="14" fill="${colorHex}" stroke="#ffffff" stroke-width="2"/>
-        <text x="16" y="22" font-family="Material Symbols Outlined" font-size="16" fill="#ffffff" text-anchor="middle">${markerData.icon}</text>
+        <text 
+          x="16" y="22" 
+          font-family="Material Symbols Outlined" 
+          font-size="16" 
+          fill="#ffffff" 
+          text-anchor="middle"
+          style="font-variation-settings: 'FILL' 1, 'wght' 700;"
+        >${markerData.icon}</text>
       </svg>
     `;
     
@@ -314,7 +330,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               locationType = 'Última Localização';
             } else if (locationFilter === 'approach' && suspect.approachLat && suspect.approachLng) {
               lat = suspect.approachLat;
-              lng = suspect.approachLng;
+              lng = suspect.lng;
               locationName = suspect.approachAddress;
               locationType = 'Endereço de Abordagem';
             }
