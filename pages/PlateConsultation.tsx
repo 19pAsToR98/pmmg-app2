@@ -69,10 +69,10 @@ const PlateConsultation: React.FC<PlateConsultationProps> = ({ navigateTo, userR
           </div>
         </div>
 
-        {/* Input Section */}
+        {/* Input Section (Simplified) */}
         <section className="mt-4 space-y-4">
           <div className="pmmg-card p-4 space-y-3">
-            <h3 className="text-[11px] font-bold text-pmmg-navy/60 uppercase tracking-wider">Consulta Manual</h3>
+            <h3 className="text-[11px] font-bold text-pmmg-navy/60 uppercase tracking-wider">Consulta de Veículo</h3>
             <div className="flex gap-2">
               <input 
                 value={plate}
@@ -83,35 +83,38 @@ const PlateConsultation: React.FC<PlateConsultationProps> = ({ navigateTo, userR
                 type="text" 
                 maxLength={8}
               />
+              
+              {/* Hidden file input for camera access */}
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handlePhotoUpload} 
+                accept="image/*" 
+                className="hidden" 
+                capture="environment"
+              />
+              
+              {/* Camera Button */}
+              <button 
+                onClick={triggerFileInput}
+                className="bg-pmmg-red text-white p-3 rounded-lg active:scale-95 transition-transform"
+                title="Abrir Câmera para OCR"
+              >
+                <span className="material-symbols-outlined text-xl">photo_camera</span>
+              </button>
+
+              {/* Search Button */}
               <button 
                 onClick={handleSearch}
                 disabled={plate.length < 7}
                 className="bg-pmmg-navy text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50"
+                title="Pesquisar Placa"
               >
                 <span className="material-symbols-outlined text-xl">search</span>
               </button>
             </div>
-          </div>
-
-          <div className="pmmg-card p-4 space-y-3">
-            <h3 className="text-[11px] font-bold text-pmmg-navy/60 uppercase tracking-wider">Leitura por Imagem (OCR)</h3>
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              onChange={handlePhotoUpload} 
-              accept="image/*" 
-              className="hidden" 
-              capture="environment"
-            />
-            <button 
-              onClick={triggerFileInput}
-              className="w-full bg-pmmg-red text-white font-bold py-3 rounded-xl shadow-md flex items-center justify-center gap-3 uppercase tracking-widest active:scale-95 transition-transform"
-            >
-              <span className="material-symbols-outlined text-lg">photo_camera</span>
-              Abrir Câmera
-            </button>
             <p className="text-[9px] text-slate-400 mt-2 italic text-center uppercase font-medium">
-              A IA fará a leitura automática da placa na imagem.
+              Insira a placa ou use a câmera para leitura automática (OCR).
             </p>
           </div>
         </section>
