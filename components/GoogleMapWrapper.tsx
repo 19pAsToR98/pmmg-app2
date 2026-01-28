@@ -15,40 +15,56 @@ interface GoogleMapWrapperProps {
 }
 
 const MAP_STYLES: google.maps.MapTypeStyle[] = [
-  // Oculta todos os Pontos de Interesse (POIs)
+  // Oculta todos os Pontos de Interesse (POIs) e seus rótulos
   {
     featureType: "poi",
+    stylers: [{ visibility: "off" }]
+  },
+  // Oculta edifícios e seus rótulos
+  {
+    featureType: "landscape.man_made",
+    stylers: [{ visibility: "off" }]
+  },
+  // Oculta parques e áreas verdes (que são POIs de paisagem)
+  {
+    featureType: "landscape.natural.landcover",
+    elementType: "labels",
     stylers: [{ visibility: "off" }]
   },
   // Oculta ícones de transporte público
   {
     featureType: "transit",
-    elementType: "labels.icon",
     stylers: [{ visibility: "off" }]
   },
-  // Opcional: Simplifica a geometria das estradas para um visual mais limpo
+  // Simplifica estradas e remove rótulos
+  {
+    featureType: "road",
+    elementType: "labels",
+    stylers: [{ visibility: "off" }]
+  },
+  // Simplifica a geometria das estradas
   {
     featureType: "road",
     elementType: "geometry",
     stylers: [{ lightness: 100 }, { visibility: "simplified" }]
   },
-  // Opcional: Simplifica rótulos de estradas
-  {
-    featureType: "road",
-    elementType: "labels.text",
-    stylers: [{ visibility: "off" }]
-  },
-  // Opcional: Simplifica rótulos de áreas
+  // Oculta rótulos administrativos (como bairros)
   {
     featureType: "administrative",
     elementType: "labels.text",
     stylers: [{ visibility: "off" }]
   },
-  // Opcional: Mantém rótulos de cidades/países
+  // Mantém apenas rótulos de cidades/países (localidades maiores)
   {
     featureType: "administrative.locality",
     elementType: "labels.text",
     stylers: [{ visibility: "on" }]
+  },
+  // Oculta rótulos de água
+  {
+    featureType: "water",
+    elementType: "labels",
+    stylers: [{ visibility: "off" }]
   }
 ];
 
