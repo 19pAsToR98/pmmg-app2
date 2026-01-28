@@ -205,7 +205,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             });
         } else {
             // Simple Icon Marker (Zoomed Out)
-            // FIX: Substituindo a chamada a isSuspect por uma verificação direta
+            // FIX: Corrigido o erro de função indefinida
             const colorClass = suspect.status === 'Foragido' ? 'bg-pmmg-red' : 
                                suspect.status === 'Suspeito' ? 'bg-pmmg-yellow' : 'bg-pmmg-navy';
             const iconName = suspect.status === 'Foragido' ? 'priority_high' : 'warning';
@@ -472,7 +472,8 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         )}
 
         {/* SIDEBAR OCULTÁVEL (Legenda Tática) */}
-        <div className={`absolute top-0 right-0 z-[1000] h-full transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        {/* FIX: Usando bottom-[80px] para garantir que o painel pare acima do BottomNav fixo */}
+        <div className={`absolute top-0 right-0 z-[1000] bottom-[80px] transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
           
           {/* Botão de Toggle (Centralizado Verticalmente) */}
           <button 
