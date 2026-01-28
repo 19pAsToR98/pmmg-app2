@@ -69,34 +69,32 @@ const PlateConsultation: React.FC<PlateConsultationProps> = ({ navigateTo, userR
           </div>
         </div>
 
-        {/* Minimalist Input Section */}
-        <section className="mt-4 space-y-6">
-          
-          {/* Consulta Manual */}
-          <div className="flex gap-2 p-2 bg-white/70 rounded-xl shadow-md border border-pmmg-navy/10">
-            <input 
-              value={plate}
-              onChange={(e) => setPlate(e.target.value.toUpperCase())}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              className="flex-1 px-4 py-3 bg-transparent border-none focus:ring-0 text-lg font-black uppercase tracking-widest placeholder-pmmg-navy/40" 
-              placeholder="ABC1234" 
-              type="text" 
-              maxLength={8}
-            />
-            <button 
-              onClick={handleSearch}
-              disabled={plate.length < 7}
-              className="bg-pmmg-navy text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50 shrink-0"
-            >
-              <span className="material-symbols-outlined text-xl">search</span>
-            </button>
-          </div>
-          
-          <p className="text-[10px] font-bold text-pmmg-navy/60 uppercase tracking-wider text-center">OU</p>
-
-          {/* Leitura por Imagem */}
+        {/* Input Section */}
+        <section className="mt-4 space-y-4">
           <div className="pmmg-card p-4 space-y-3">
-            <h3 className="text-[11px] font-bold text-pmmg-navy/60 uppercase tracking-wider text-center">Leitura por Imagem (OCR)</h3>
+            <h3 className="text-[11px] font-bold text-pmmg-navy/60 uppercase tracking-wider">Consulta Manual</h3>
+            <div className="flex gap-2">
+              <input 
+                value={plate}
+                onChange={(e) => setPlate(e.target.value.toUpperCase())}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                className="flex-1 px-4 py-3 bg-white border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm font-bold uppercase tracking-widest" 
+                placeholder="Ex: ABC1234 ou ABC-1234" 
+                type="text" 
+                maxLength={8}
+              />
+              <button 
+                onClick={handleSearch}
+                disabled={plate.length < 7}
+                className="bg-pmmg-navy text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50"
+              >
+                <span className="material-symbols-outlined text-xl">search</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="pmmg-card p-4 space-y-3">
+            <h3 className="text-[11px] font-bold text-pmmg-navy/60 uppercase tracking-wider">Leitura por Imagem (OCR)</h3>
             <input 
               type="file" 
               ref={fileInputRef} 
