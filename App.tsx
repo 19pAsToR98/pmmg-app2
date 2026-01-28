@@ -183,9 +183,10 @@ const MOCK_CHATS: Chat[] = [
   },
 ];
 
+// ATUALIZADO: Usando uma imagem de perfil genérica para o usuário
 const DEFAULT_USER_AVATAR: UserAvatar = { 
-  name: 'Cabo Loso', 
-  url: 'https://iili.io/fiLMgHX.gif' 
+  name: 'Oficial PMMG', 
+  url: 'https://i.pravatar.cc/150?img=5' // Imagem de perfil genérica
 };
 
 // Avatar padrão para a IA antes do onboarding
