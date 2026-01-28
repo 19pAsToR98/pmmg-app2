@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import L from 'leaflet';
 import { Screen, Suspect, CustomMarker } from '../types';
 import BottomNav from '../components/BottomNav';
+import GoogleMapWrapper from '../components/GoogleMapWrapper';
+import { MarkerF, InfoWindowF } from '@react-google-maps/api';
 
 interface TacticalMapProps {
   navigateTo: (screen: Screen) => void;
@@ -15,24 +16,28 @@ interface TacticalMapProps {
 }
 
 type MapFilter = 'Todos' | 'Foragido' | 'Suspeito' | 'Preso' | 'CPF Cancelado';
-type LocationFilter = 'residence' | 'approach'; // Residência/Última Loc. ou Endereço de Abordagem
+type LocationFilter = 'residence' | 'approach';
 
 const ZOOM_THRESHOLD = 15; // Nível de zoom para alternar para fotos
 
+// Default center for BH
+const DEFAULT_CENTER = { lat: -19.9167, lng: -43.9345 };
+
 const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenProfile, initialCenter, customMarkers, addCustomMarker, updateCustomMarker, deleteCustomMarker }) => {
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-  const markersLayerRef = useRef<L.LayerGroup | null>(null);
-  const customMarkersLayerRef = useRef<L.LayerGroup | null>(null);
+  const mapRef = useRef<google.maps.Map | null>(null);
   
-  const [userPos, setUserPos] = useState<[number, number] | null>(null);
+  const [userPos, setUserPos] = useState<{ lat: number, lng: number } | null>(null);
   const [activeFilter, setActiveFilter] = useState<MapFilter>('Todos');
-  const [locationFilter, setLocationFilter] = useState<LocationFilter>('residence'); // NOVO: Filtro de localização
+  const [locationFilter, setLocationFilter] = useState<LocationFilter>('residence');
   const [isAddingMarker, setIsAddingMarker] = useState(false);
   const [newMarkerData, setNewMarkerData] = useState<Omit<CustomMarker, 'id'> | null>(null);
   const [editingMarker, setEditingMarker] = useState<CustomMarker | null>(null);
-  const [currentZoom, setCurrentZoom] = useState(14); // Estado para rastrear o zoom
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); 
+  const [currentZoom, setCurrentZoom] = useState(initialCenter ? 17 : 14);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [activeInfoWindow, setActiveInfoWindow] = useState<string | null>(null); // ID do marcador com InfoWindow aberta
+
+  // Center state managed by initialCenter prop or user position
+  const center = initialCenter ? { lat: initialCenter[0], lng: initialCenter[1] } : userPos || DEFAULT_CENTER;
 
   // Filtragem dos suspeitos
   const filteredSuspects = suspects.filter(s => 
@@ -40,14 +45,40 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
     (activeFilter === 'Todos' || s.status === activeFilter)
   );
 
-  // Variável de controle de zoom acessível no escopo do componente
   const usePhotoMarker = currentZoom >= ZOOM_THRESHOLD;
 
-  const handleMapClick = (e: L.LeafletMouseEvent) => {
-    if (isAddingMarker) {
+  const handleMapLoad = useCallback((map: google.maps.Map) => {
+    mapRef.current = map;
+    map.addListener('zoom_changed', () => {
+      setCurrentZoom(map.getZoom());
+    });
+    
+    // Se houver um initialCenter, abre o InfoWindow correspondente
+    if (initialCenter) {
+        // Find the suspect or custom marker at the initial center
+        const targetSuspect = filteredSuspects.find(s => 
+            (locationFilter === 'residence' && s.lat === initialCenter[0] && s.lng === initialCenter[1]) ||
+            (locationFilter === 'approach' && s.approachLat === initialCenter[0] && s.approachLng === initialCenter[1])
+        );
+        if (targetSuspect) {
+            setActiveInfoWindow(`suspect-${targetSuspect.id}`);
+        } else {
+            const targetCustom = customMarkers.find(m => m.lat === initialCenter[0] && m.lng === initialCenter[1]);
+            if (targetCustom) {
+                setActiveInfoWindow(`custom-${targetCustom.id}`);
+            }
+        }
+    }
+
+  }, [initialCenter, filteredSuspects, customMarkers, locationFilter]);
+
+  const handleMapClick = (e: google.maps.MapMouseEvent) => {
+    setActiveInfoWindow(null); // Fecha qualquer InfoWindow aberta
+    
+    if (isAddingMarker && e.latLng) {
       setNewMarkerData({
-        lat: e.latlng.lat,
-        lng: e.latlng.lng,
+        lat: e.latLng.lat(),
+        lng: e.latLng.lng(),
         title: 'Novo Ponto Tático',
         description: 'Detalhes do ponto de interesse.',
         icon: 'flag',
@@ -84,7 +115,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   const handleDeleteMarker = (id: string) => {
     if (window.confirm("Tem certeza que deseja excluir este ponto tático?")) {
       deleteCustomMarker(id);
-      mapInstanceRef.current?.closePopup();
+      setActiveInfoWindow(null);
     }
   };
   
@@ -93,253 +124,73 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
     alert(`Localização de ${title} pronta para compartilhamento:\n\nCoordenadas: ${lat.toFixed(5)}, ${lng.toFixed(5)}\nLink (Simulado): ${locationLink}`);
   }, []);
 
-
-  // 1. Inicialização do Mapa e Listeners de Zoom (Roda apenas uma vez)
+  // User Geolocation
   useEffect(() => {
-    if (!mapContainerRef.current || mapInstanceRef.current) return;
-
-    const fallbackPos: [number, number] = [-19.9167, -43.9345];
-    const startPos = initialCenter || fallbackPos;
-    
-    const map = L.map(mapContainerRef.current, {
-      center: startPos,
-      zoom: initialCenter ? 17 : 14,
-      zoomControl: false 
-    });
-    mapInstanceRef.current = map;
-    setCurrentZoom(map.getZoom());
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap'
-    }).addTo(map);
-
-    markersLayerRef.current = L.layerGroup().addTo(map);
-    customMarkersLayerRef.current = L.layerGroup().addTo(map);
-
-    const handleZoomChange = () => {
-      setCurrentZoom(map.getZoom());
-    };
-    map.on('zoomend', handleZoomChange);
-
-    // Localização do usuário
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const { latitude, longitude } = position.coords;
-          setUserPos([latitude, longitude]);
-          
-          if (!initialCenter && mapInstanceRef.current) {
-            mapInstanceRef.current.setView([latitude, longitude], 15);
-          }
-          
-          const officerIcon = L.divIcon({
-            className: 'custom-officer-icon',
-            html: `<div class="w-8 h-8 bg-pmmg-blue rounded-full border-4 border-white flex items-center justify-center shadow-lg ring-2 ring-pmmg-blue/50"><span class="material-symbols-outlined text-white text-[18px]">person</span></div>`,
-            iconSize: [32, 32],
-            iconAnchor: [16, 16]
-          });
-          L.marker([latitude, longitude], { icon: officerIcon }).addTo(map).bindPopup("Você (Oficial)");
+          setUserPos({ lat: position.coords.latitude, lng: position.coords.longitude });
         }
       );
     }
-
-    return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.off('zoomend', handleZoomChange);
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-    };
-  }, [initialCenter]);
-
-  // 2. Gerenciamento do Listener de Clique e Cursor
-  useEffect(() => {
-    const map = mapInstanceRef.current;
-    if (!map) return;
-
-    if (isAddingMarker) {
-      map.on('click', handleMapClick);
-      map.getContainer().style.cursor = 'crosshair';
-    } else {
-      map.off('click', handleMapClick);
-      map.getContainer().style.cursor = '';
-    }
-
-    return () => {
-      map.off('click', handleMapClick);
-      map.getContainer().style.cursor = '';
-    };
-  }, [isAddingMarker]);
-
-
-  // 3. Atualização de Marcadores de Suspeitos (Unificado)
-  useEffect(() => {
-    if (!markersLayerRef.current) return;
-    
-    markersLayerRef.current.clearLayers();
-    
-    // Usa a variável de estado do componente
-    const localUsePhotoMarker = currentZoom >= ZOOM_THRESHOLD;
-
-    filteredSuspects.forEach(suspect => {
-      let lat: number | undefined;
-      let lng: number | undefined;
-      let locationName: string | undefined;
-      let locationType: 'Última Localização' | 'Endereço de Abordagem';
-      
-      if (locationFilter === 'residence' && suspect.lat && suspect.lng) {
-        lat = suspect.lat;
-        lng = suspect.lng;
-        locationName = suspect.lastSeen;
-        locationType = 'Última Localização';
-      } else if (locationFilter === 'approach' && suspect.approachLat && suspect.approachLng) {
-        lat = suspect.approachLat;
-        lng = suspect.approachLng;
-        locationName = suspect.approachAddress;
-        locationType = 'Endereço de Abordagem';
-      }
-
-      if (lat && lng) {
-        
-        let suspectIcon;
-        
-        if (localUsePhotoMarker) {
-            // Photo Marker (Zoomed In)
-            const borderColorClass = suspect.status === 'Foragido' ? 'border-pmmg-red' : 
-                                     suspect.status === 'Suspeito' ? 'border-pmmg-yellow' : 'border-pmmg-navy';
-            
-            const suspectIconHtml = `
-              <div class="w-10 h-10 bg-white shadow-xl border-4 ${borderColorClass} overflow-hidden ring-2 ring-white/50 rounded-lg">
-                <img src="${suspect.photoUrl}" class="w-full h-full object-cover" alt="${suspect.name}">
-              </div>
-            `;
-            
-            suspectIcon = L.divIcon({
-              className: 'custom-suspect-photo-icon',
-              html: suspectIconHtml,
-              iconSize: [48, 48],
-              iconAnchor: [24, 24]
-            });
-        } else {
-            // Simple Icon Marker (Zoomed Out)
-            const colorClass = suspect.status === 'Foragido' ? 'bg-pmmg-red' : 
-                               suspect.status === 'Suspeito' ? 'bg-pmmg-yellow' : 'bg-pmmg-navy';
-            const iconName = locationFilter === 'residence' ? (suspect.status === 'Foragido' ? 'priority_high' : 'warning') : 'pin_drop';
-            
-            const simpleIconHtml = `
-              <div class="w-6 h-6 ${colorClass} rounded-full border-2 border-white flex items-center justify-center shadow-md">
-                <span class="material-symbols-outlined text-white text-[14px] fill-icon">${iconName}</span>
-              </div>
-            `;
-            
-            suspectIcon = L.divIcon({
-              className: 'custom-suspect-simple-icon',
-              html: simpleIconHtml,
-              iconSize: [24, 24],
-              iconAnchor: [12, 12]
-            });
-        }
-
-        const marker = L.marker([lat, lng], { icon: suspectIcon }).addTo(markersLayerRef.current!);
-        
-        const popupContent = document.createElement('div');
-        popupContent.className = "p-2 min-w-[150px]";
-        popupContent.innerHTML = `
-          <div class="flex items-center gap-2 mb-2">
-            <div class="w-10 h-10 rounded bg-slate-200 overflow-hidden"><img src="${suspect.photoUrl}" class="w-full h-full object-cover"></div>
-            <div>
-              <p class="font-bold text-[10px] text-pmmg-navy uppercase leading-tight">${suspect.name}</p>
-              <p class="text-[9px] text-pmmg-blue font-bold uppercase">${locationType}</p>
-              <p class="text-[9px] text-slate-500 mt-1">${locationName || 'Local não especificado'}</p>
-            </div>
-          </div>
-          <div class="flex gap-2 mt-3">
-            <button id="btn-profile-${suspect.id}" class="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider">Ver Ficha</button>
-            <button id="btn-share-suspect-${suspect.id}" class="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center">
-              <span class="material-symbols-outlined text-pmmg-navy text-lg">share</span>
-            </button>
-          </div>
-        `;
-
-        marker.bindPopup(popupContent);
-        
-        marker.on('popupopen', () => {
-          document.getElementById(`btn-profile-${suspect.id}`)?.addEventListener('click', () => {
-            onOpenProfile(suspect.id);
-          });
-          document.getElementById(`btn-share-suspect-${suspect.id}`)?.addEventListener('click', () => {
-            handleShareLocation(lat!, lng!, `${locationType} de ${suspect.name}`);
-          });
-        });
-
-        if (initialCenter && lat === initialCenter[0] && lng === initialCenter[1]) {
-          marker.openPopup();
-        }
-      }
-    });
-  }, [filteredSuspects, initialCenter, activeFilter, locationFilter, onOpenProfile, currentZoom, handleShareLocation]);
-
-  // 4. Atualização de Marcadores Personalizados (Sem alteração)
-  useEffect(() => {
-    if (!customMarkersLayerRef.current) return;
-    
-    customMarkersLayerRef.current.clearLayers();
-
-    customMarkers.forEach(markerData => {
-      const customIcon = L.divIcon({
-        className: 'custom-marker-icon',
-        html: `<div class="w-8 h-8 ${markerData.color} rounded-full border-2 border-white flex items-center justify-center shadow-lg"><span class="material-symbols-outlined text-white text-[16px] fill-icon">${markerData.icon}</span></div>`,
-        iconSize: [32, 32],
-        iconAnchor: [16, 16]
-      });
-
-      const marker = L.marker([markerData.lat, markerData.lng], { icon: customIcon }).addTo(customMarkersLayerRef.current!);
-      
-      const popupContent = document.createElement('div');
-      popupContent.className = "p-2 min-w-[150px]";
-      popupContent.innerHTML = `
-        <div class="p-2 min-w-[150px]">
-          <p class="font-bold text-[11px] text-pmmg-navy uppercase leading-tight">${markerData.title}</p>
-          <p class="text-[10px] text-slate-600 mt-1">${markerData.description}</p>
-          <div class="flex gap-2 mt-3">
-            <button id="edit-btn-${markerData.id}" class="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center">
-              <span class="material-symbols-outlined text-sm">edit</span>
-            </button>
-            <button id="share-btn-${markerData.id}" class="flex-1 bg-pmmg-blue text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center">
-              <span class="material-symbols-outlined text-sm">share</span>
-            </button>
-            <button id="delete-btn-${markerData.id}" class="px-3 bg-pmmg-red text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center">
-              <span class="material-symbols-outlined text-sm">delete</span>
-            </button>
-          </div>
-        </div>
-      `;
-      
-      marker.bindPopup(popupContent);
-
-      marker.on('popupopen', () => {
-        document.getElementById(`edit-btn-${markerData.id}`)?.addEventListener('click', () => {
-          setEditingMarker(markerData);
-          mapInstanceRef.current?.closePopup();
-        });
-        document.getElementById(`delete-btn-${markerData.id}`)?.addEventListener('click', () => {
-          handleDeleteMarker(markerData.id);
-        });
-        // New listener for sharing custom marker location
-        document.getElementById(`share-btn-${markerData.id}`)?.addEventListener('click', () => {
-          handleShareLocation(markerData.lat, markerData.lng, markerData.title);
-        });
-      });
-    });
-  }, [customMarkers, handleDeleteMarker, handleShareLocation]);
+  }, []);
 
   const recenter = () => {
-    if (userPos && mapInstanceRef.current) {
-      mapInstanceRef.current.setView(userPos, 16);
+    if (userPos && mapRef.current) {
+      mapRef.current.setCenter(userPos);
+      mapRef.current.setZoom(16);
     }
   };
 
-  // Determina qual modal de configuração exibir (Novo ou Edição)
+  const getSuspectIcon = (suspect: Suspect) => {
+    if (usePhotoMarker) {
+      // Photo Marker (Zoomed In)
+      return {
+        url: suspect.photoUrl,
+        scaledSize: new window.google.maps.Size(40, 40),
+        origin: new window.google.maps.Point(0, 0),
+        anchor: new window.google.maps.Point(20, 20),
+        labelOrigin: new window.google.maps.Point(20, 45),
+      };
+    } else {
+      // Simple Icon Marker (Zoomed Out)
+      const colorClass = suspect.status === 'Foragido' ? '#e31c1c' : 
+                         suspect.status === 'Suspeito' ? '#ffcc00' : '#002147';
+      const iconName = locationFilter === 'residence' ? (suspect.status === 'Foragido' ? 'priority_high' : 'warning') : 'pin_drop';
+      
+      // Using SVG for custom icon to embed Material Symbol
+      const svg = `
+        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" fill="${colorClass}" stroke="#ffffff" stroke-width="2"/>
+          <text x="12" y="17" font-family="Material Symbols Outlined" font-size="14" fill="${suspect.status === 'Suspeito' ? '#002147' : '#ffffff'}" text-anchor="middle">${iconName}</text>
+        </svg>
+      `;
+      
+      return {
+        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+        scaledSize: new window.google.maps.Size(24, 24),
+        anchor: new window.google.maps.Point(12, 12),
+      };
+    }
+  };
+  
+  const getCustomMarkerIcon = (markerData: CustomMarker) => {
+    const colorHex = markerData.color.replace('bg-pmmg-gold', '#d4af37').replace('bg-pmmg-red', '#e31c1c').replace('bg-pmmg-blue', '#0047ab').replace('bg-green-500', '#22c55e');
+    
+    const svg = `
+      <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="14" fill="${colorHex}" stroke="#ffffff" stroke-width="2"/>
+        <text x="16" y="22" font-family="Material Symbols Outlined" font-size="16" fill="#ffffff" text-anchor="middle">${markerData.icon}</text>
+      </svg>
+    `;
+    
+    return {
+      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+      scaledSize: new window.google.maps.Size(32, 32),
+      anchor: new window.google.maps.Point(16, 16),
+    };
+  };
+
   const activeMarkerData = newMarkerData || editingMarker;
   const isEditing = !!editingMarker;
 
@@ -375,17 +226,175 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       </header>
 
       <div className="flex-1 relative">
-        <div ref={mapContainerRef} className="w-full h-full" style={{ zIndex: 1 }} />
-        
-        {/* Adding Marker Mode Indicator (Non-blocking) */}
-        {isAddingMarker && (
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[1001] pointer-events-none">
-            <div className="bg-pmmg-red text-white p-2 rounded-full shadow-xl border-4 border-white animate-pulse">
-              <span className="material-symbols-outlined text-3xl">pin_drop</span>
-            </div>
-          </div>
-        )}
+        <GoogleMapWrapper
+          center={center}
+          zoom={currentZoom}
+          mapContainerClassName="w-full h-full"
+          onLoad={handleMapLoad}
+          onClick={handleMapClick}
+          options={{
+            mapTypeId: 'hybrid', // Exemplo: satélite com rótulos
+          }}
+        >
+          {/* Marcador do Usuário (Oficial) */}
+          {userPos && (
+            <MarkerF
+              position={userPos}
+              icon={{
+                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                  <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="16" cy="16" r="14" fill="#0047ab" stroke="#ffffff" stroke-width="4"/>
+                    <text x="16" y="22" font-family="Material Symbols Outlined" font-size="18" fill="#ffffff" text-anchor="middle">person</text>
+                  </svg>
+                `),
+                scaledSize: new window.google.maps.Size(32, 32),
+                anchor: new window.google.maps.Point(16, 16),
+              }}
+              title="Você (Oficial)"
+              onClick={() => setActiveInfoWindow('user-pos')}
+            />
+          )}
+          
+          {activeInfoWindow === 'user-pos' && userPos && (
+            <InfoWindowF position={userPos} onCloseClick={() => setActiveInfoWindow(null)}>
+              <div className="p-2">
+                <p className="font-bold text-pmmg-navy text-sm">Você (Oficial)</p>
+                <p className="text-[10px] text-slate-500">Localização Atual</p>
+              </div>
+            </InfoWindowF>
+          )}
 
+          {/* Marcadores de Suspeitos */}
+          {filteredSuspects.map(suspect => {
+            let lat: number | undefined;
+            let lng: number | undefined;
+            let locationName: string | undefined;
+            let locationType: 'Última Localização' | 'Endereço de Abordagem';
+            
+            if (locationFilter === 'residence' && suspect.lat && suspect.lng) {
+              lat = suspect.lat;
+              lng = suspect.lng;
+              locationName = suspect.lastSeen;
+              locationType = 'Última Localização';
+            } else if (locationFilter === 'approach' && suspect.approachLat && suspect.approachLng) {
+              lat = suspect.approachLat;
+              lng = suspect.approachLng;
+              locationName = suspect.approachAddress;
+              locationType = 'Endereço de Abordagem';
+            }
+
+            if (lat && lng) {
+              const position = { lat, lng };
+              const markerId = `suspect-${suspect.id}`;
+              
+              return (
+                <React.Fragment key={markerId}>
+                  <MarkerF
+                    position={position}
+                    icon={getSuspectIcon(suspect)}
+                    title={suspect.name}
+                    onClick={() => setActiveInfoWindow(markerId)}
+                  />
+                  
+                  {activeInfoWindow === markerId && (
+                    <InfoWindowF position={position} onCloseClick={() => setActiveInfoWindow(null)}>
+                      <div className="p-2 min-w-[150px]">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-10 h-10 rounded bg-slate-200 overflow-hidden"><img src={suspect.photoUrl} className="w-full h-full object-cover" alt={suspect.name} /></div>
+                          <div>
+                            <p className="font-bold text-[10px] text-pmmg-navy uppercase leading-tight">{suspect.name}</p>
+                            <p className="text-[9px] text-pmmg-blue font-bold uppercase">{locationType}</p>
+                            <p className="text-[9px] text-slate-500 mt-1">{locationName || 'Local não especificado'}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 mt-3">
+                          <button 
+                            onClick={() => onOpenProfile(suspect.id)} 
+                            className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider"
+                          >
+                            Ver Ficha
+                          </button>
+                          <button 
+                            onClick={() => handleShareLocation(lat, lng, `${locationType} de ${suspect.name}`)} 
+                            className="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center"
+                          >
+                            <span className="material-symbols-outlined text-pmmg-navy text-lg">share</span>
+                          </button>
+                        </div>
+                      </div>
+                    </InfoWindowF>
+                  )}
+                </React.Fragment>
+              );
+            }
+            return null;
+          })}
+
+          {/* Marcadores Personalizados */}
+          {customMarkers.map(markerData => {
+            const position = { lat: markerData.lat, lng: markerData.lng };
+            const markerId = `custom-${markerData.id}`;
+            
+            return (
+              <React.Fragment key={markerId}>
+                <MarkerF
+                  position={position}
+                  icon={getCustomMarkerIcon(markerData)}
+                  title={markerData.title}
+                  onClick={() => setActiveInfoWindow(markerId)}
+                />
+                
+                {activeInfoWindow === markerId && (
+                  <InfoWindowF position={position} onCloseClick={() => setActiveInfoWindow(null)}>
+                    <div className="p-2 min-w-[150px]">
+                      <p className="font-bold text-[11px] text-pmmg-navy uppercase leading-tight">{markerData.title}</p>
+                      <p className="text-[10px] text-slate-600 mt-1">{markerData.description}</p>
+                      <div className="flex gap-2 mt-3">
+                        <button 
+                          onClick={() => { setEditingMarker(markerData); setActiveInfoWindow(null); }}
+                          className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center"
+                        >
+                          <span className="material-symbols-outlined text-sm">edit</span>
+                        </button>
+                        <button 
+                          onClick={() => handleShareLocation(markerData.lat, markerData.lng, markerData.title)}
+                          className="flex-1 bg-pmmg-blue text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center"
+                        >
+                          <span className="material-symbols-outlined text-sm">share</span>
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteMarker(markerData.id)}
+                          className="px-3 bg-pmmg-red text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center"
+                        >
+                          <span className="material-symbols-outlined text-sm">delete</span>
+                        </button>
+                      </div>
+                    </div>
+                  </InfoWindowF>
+                )}
+              </React.Fragment>
+            );
+          })}
+          
+          {/* Marcador de Adição (Se ativo) */}
+          {isAddingMarker && (
+            <MarkerF
+              position={center}
+              icon={{
+                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                  <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="20" cy="20" r="18" fill="#e31c1c" stroke="#ffffff" stroke-width="4"/>
+                    <text x="20" y="26" font-family="Material Symbols Outlined" font-size="24" fill="#ffffff" text-anchor="middle">pin_drop</text>
+                  </svg>
+                `),
+                scaledSize: new window.google.maps.Size(40, 40),
+                anchor: new window.google.maps.Point(20, 40), // Anchor slightly lower for pin effect
+              }}
+              title="Clique no mapa para posicionar"
+            />
+          )}
+        </GoogleMapWrapper>
+        
         {/* Marker Configuration Modal (New or Edit) */}
         {activeMarkerData && (
           <div className="absolute inset-0 z-[1002] bg-black/50 flex items-center justify-center p-4">
@@ -494,7 +503,6 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             className="absolute left-0 top-1/2 transform -translate-x-full -translate-y-1/2 bg-pmmg-navy p-1.5 rounded-l-xl shadow-xl text-pmmg-yellow"
           >
             <span className="material-symbols-outlined text-lg">
-              {/* Lógica Invertida: Se aberto, aponta para fechar (direita). Se fechado, aponta para abrir (esquerda). */}
               {isSidebarOpen ? 'arrow_forward_ios' : 'arrow_back_ios'}
             </span>
           </button>

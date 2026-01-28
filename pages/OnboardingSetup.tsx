@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import L from 'leaflet';
 import { Screen, UserRank, UserAvatar } from '../types';
 import RankBadge from '../components/RankBadge';
+import GoogleMapWrapper from '../components/GoogleMapWrapper';
+import { MarkerF } from '@react-google-maps/api';
 
 interface OnboardingSetupProps {
   onComplete: (name: string, rank: UserRank, city: string, avatar: UserAvatar) => void;
@@ -31,80 +32,21 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
   const [rank, setRank] = useState<UserRank>('Soldado'); // Padrão: Soldado
   const [city, setCity] = useState('');
   const [citySearchTerm, setCitySearchTerm] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState<{ lat: number, lng: number, name: string } | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<{ lat: number, lng: number, name: string } | null>(MOCK_CITIES[0]); // Default to BH
   const [citySuggestions, setCitySuggestions] = useState<typeof MOCK_CITIES>([]);
   
   // NEW State for Avatar selection index
   const [selectedAvatarIndex, setSelectedAvatarIndex] = useState(0);
   const selectedAvatar = AVATAR_OPTIONS[selectedAvatarIndex].avatar;
 
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<L.Map | null>(null);
-  const markerInstance = useRef<L.Marker | null>(null);
-
   // --- Map/City Logic ---
   
-  // Efeito para inicializar o mapa quando o Passo 3 é atingido
+  // Efeito para garantir que a cidade inicial seja definida
   useEffect(() => {
-    if (step !== 3 || !mapContainerRef.current) return;
-
-    // Define a localização inicial (BH como fallback)
-    const initialLocation = selectedLocation || MOCK_CITIES[0];
-    
-    const icon = L.divIcon({
-      className: 'custom-location-icon',
-      html: `<div class="w-8 h-8 bg-pmmg-navy rounded-full border-2 border-pmmg-yellow flex items-center justify-center shadow-lg"><span class="material-symbols-outlined text-pmmg-yellow text-[16px] fill-icon">location_on</span></div>`,
-      iconSize: [32, 32],
-      iconAnchor: [16, 16]
-    });
-
-    if (!mapInstance.current) {
-      // 1. Inicializa o mapa
-      mapInstance.current = L.map(mapContainerRef.current, {
-        center: [initialLocation.lat, initialLocation.lng],
-        zoom: 12,
-        zoomControl: false,
-        dragging: false,
-        touchZoom: false,
-        scrollWheelZoom: false,
-        doubleClickZoom: false,
-        boxZoom: false
-      });
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance.current);
-      
-      markerInstance.current = L.marker([initialLocation.lat, initialLocation.lng], { icon }).addTo(mapInstance.current);
-      
-      // Define a cidade inicial se ainda não estiver definida
-      if (!city) {
-          setCity(initialLocation.name);
-          setSelectedLocation(initialLocation);
-      }
-
-    } else {
-      // Se o mapa já existe, apenas garante que a visualização esteja correta
-      mapInstance.current.setView([initialLocation.lat, initialLocation.lng], 12);
-      markerInstance.current?.setLatLng([initialLocation.lat, initialLocation.lng]);
+    if (!city && selectedLocation) {
+        setCity(selectedLocation.name);
     }
-    
-    // Força o Leaflet a recalcular o tamanho do container
-    mapInstance.current.invalidateSize();
-
-    return () => {
-      // Cleanup: Se o passo mudar, remove o mapa para evitar vazamento de memória
-      if (step !== 3 && mapInstance.current) {
-        mapInstance.current.remove();
-        mapInstance.current = null;
-      }
-    };
-  }, [step]); 
-
-  // Efeito para atualizar o marcador quando selectedLocation muda
-  useEffect(() => {
-    if (step === 3 && selectedLocation && mapInstance.current && markerInstance.current) {
-      mapInstance.current.setView([selectedLocation.lat, selectedLocation.lng], 12);
-      markerInstance.current.setLatLng([selectedLocation.lat, selectedLocation.lng]);
-    }
-  }, [selectedLocation, step]);
+  }, [city, selectedLocation]);
 
 
   const handleCitySearchChange = (term: string) => {
@@ -137,7 +79,6 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
       alert("Por favor, selecione sua cidade padrão.");
       return;
     }
-    // No step 4, we assume an avatar is selected since selectedAvatar is derived from index 0 by default.
     
     if (step < 4) { 
       setStep(step + 1);
@@ -161,6 +102,21 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
         return (prev - 1 + AVATAR_OPTIONS.length) % AVATAR_OPTIONS.length;
       }
     });
+  };
+
+  const getCityMarkerIcon = () => {
+    const svg = `
+      <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="14" fill="#002147" stroke="#ffcc00" stroke-width="2"/>
+        <text x="16" y="22" font-family="Material Symbols Outlined" font-size="16" fill="#ffcc00" text-anchor="middle">location_on</text>
+      </svg>
+    `;
+    
+    return {
+      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+      scaledSize: new window.google.maps.Size(32, 32),
+      anchor: new window.google.maps.Point(16, 16),
+    };
   };
 
   const renderStepContent = () => {
@@ -247,14 +203,30 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
             </div>
             
             {/* Exibe o mapa se uma cidade foi selecionada ou se estamos no passo 3 (usando fallback) */}
-            {(city || step === 3) && (
+            {selectedLocation && (
               <div className="pmmg-card overflow-hidden">
                 <div className="p-3 bg-pmmg-navy/5 flex items-center justify-between">
                   <p className="text-[10px] font-bold text-pmmg-navy uppercase tracking-wider">Cidade Selecionada: {city || 'Carregando...'}</p>
                   <span className="text-[9px] text-green-600 font-bold uppercase">GPS OK</span>
                 </div>
-                {/* O mapa precisa de uma altura definida */}
-                <div ref={mapContainerRef} className="h-48 w-full bg-slate-200 z-0"></div>
+                {/* Google Map Wrapper */}
+                <GoogleMapWrapper
+                  center={selectedLocation}
+                  zoom={12}
+                  mapContainerClassName="h-48 w-full z-0"
+                  options={{
+                    disableDefaultUI: true,
+                    draggable: false,
+                    scrollwheel: false,
+                    zoomControl: false,
+                    mapTypeId: 'roadmap'
+                  }}
+                >
+                  <MarkerF
+                    position={selectedLocation}
+                    icon={getCityMarkerIcon()}
+                  />
+                </GoogleMapWrapper>
               </div>
             )}
           </div>
