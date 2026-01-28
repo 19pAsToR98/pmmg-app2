@@ -478,10 +478,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="absolute left-0 top-1/2 transform -translate-x-full -translate-y-1/2 bg-pmmg-navy p-2 rounded-l-xl shadow-xl border border-pmmg-navy/10 text-pmmg-yellow"
           >
-            <span 
-              className="material-symbols-outlined text-lg"
-              style={{ fontVariationSettings: `'wght' 200` }}
-            >
+            <span className="material-symbols-outlined text-lg">
               {isSidebarOpen ? 'arrow_back_ios' : 'arrow_forward_ios'}
             </span>
           </button>
