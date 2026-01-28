@@ -267,23 +267,23 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
             <h2 className="text-xl font-bold text-pmmg-navy uppercase tracking-tight">Avatar Tático</h2>
             <p className="text-sm text-slate-600">Selecione o avatar que representará você e o assistente de IA na plataforma.</p>
             
-            <div className="relative flex items-center justify-center p-4 bg-pmmg-navy/5 rounded-xl border border-pmmg-navy/10 shadow-inner">
+            <div className="relative flex items-center justify-center pt-8 pb-4">
               
               {/* Previous Button */}
               <button
                 onClick={() => handleAvatarChange('prev')}
-                className="absolute left-0 z-10 p-2 rounded-full bg-white/80 text-pmmg-navy shadow-md active:scale-95 transition-transform ml-2"
+                className="absolute left-0 z-10 p-2 rounded-full bg-pmmg-navy/10 text-pmmg-navy shadow-md active:scale-95 transition-transform ml-2"
               >
                 <span className="material-symbols-outlined">arrow_back_ios</span>
               </button>
 
               {/* Avatar Display */}
               <div className="flex flex-col items-center text-center transition-all duration-300 ease-in-out">
-                <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-pmmg-yellow/80 p-1 bg-white shadow-2xl mb-4">
+                <div className="w-48 h-48 overflow-hidden mb-4"> {/* Aumentado o tamanho */}
                   <img 
                     src={currentOption.avatar.url} 
                     alt={currentOption.avatar.name} 
-                    className="w-full h-full object-cover rounded-full" 
+                    className="w-full h-full object-contain" 
                   />
                 </div>
                 <div className="bg-pmmg-navy text-white px-4 py-2 rounded-full shadow-lg">
@@ -295,7 +295,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
               {/* Next Button */}
               <button
                 onClick={() => handleAvatarChange('next')}
-                className="absolute right-0 z-10 p-2 rounded-full bg-white/80 text-pmmg-navy shadow-md active:scale-95 transition-transform mr-2"
+                className="absolute right-0 z-10 p-2 rounded-full bg-pmmg-navy/10 text-pmmg-navy shadow-md active:scale-95 transition-transform mr-2"
               >
                 <span className="material-symbols-outlined">arrow_forward_ios</span>
               </button>
