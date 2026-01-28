@@ -14,7 +14,9 @@ const AITools: React.FC<AIToolsProps> = ({ navigateTo, userRank, userName }) => 
                    userRank.includes('Sargento') ? 'Sargento' : 
                    userRank;
                    
-  const rankInitials = userName.split(' ').map(n => n[0]).join('');
+  // FIX: Ensure userName is defined before splitting
+  const safeUserName = userName || '';
+  const rankInitials = safeUserName.split(' ').map(n => n[0]).join('');
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">

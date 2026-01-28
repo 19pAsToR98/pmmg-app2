@@ -37,8 +37,10 @@ const VoiceReport: React.FC<VoiceReportProps> = ({ navigateTo, userRank, userNam
     }
   };
 
-  const rankInitials = userName.split(' ').map(n => n[0]).join('');
-  const officerName = userName.split(' ')[0];
+  // FIX: Ensure userName is defined before splitting
+  const safeUserName = userName || '';
+  const rankInitials = safeUserName.split(' ').map(n => n[0]).join('');
+  const officerName = safeUserName.split(' ')[0];
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
