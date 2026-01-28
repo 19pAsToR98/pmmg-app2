@@ -267,7 +267,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
             <h2 className="text-xl font-bold text-pmmg-navy uppercase tracking-tight">Avatar Tático</h2>
             <p className="text-sm text-slate-600">Selecione o avatar que representará você e o assistente de IA na plataforma.</p>
             
-            <div className="relative flex items-center justify-center pt-8 pb-4">
+            <div className="relative flex items-center justify-center pt-8 pb-4 bg-white rounded-xl shadow-inner">
               
               {/* Previous Button */}
               <button
