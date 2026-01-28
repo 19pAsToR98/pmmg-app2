@@ -45,6 +45,9 @@ export interface Suspect {
   description?: string;
   lat?: number;
   lng?: number;
+  approachAddress?: string; // NOVO: Endereço da abordagem
+  approachLat?: number; // NOVO: Latitude da abordagem
+  approachLng?: number; // NOVO: Longitude da abordagem
   vehicles?: Vehicle[];
   associations?: Association[];
   showOnMap?: boolean; // NEW: Controla se o marcador deve ser exibido no mapa tático

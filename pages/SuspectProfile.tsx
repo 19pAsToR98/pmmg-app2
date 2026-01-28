@@ -380,6 +380,25 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
               </div>
             </div>
           </div>
+          
+          {/* NOVO: Endereço da Abordagem */}
+          {suspect.approachAddress && (
+            <div className="pmmg-card overflow-hidden">
+              <div className="p-4 flex items-center justify-between text-pmmg-navy bg-white/40">
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined">pin_drop</span>
+                  <span className="text-sm font-bold uppercase">Endereço da Abordagem</span>
+                </div>
+                <span className="text-[9px] font-bold uppercase opacity-50">{suspect.approachAddress}</span>
+              </div>
+              {suspect.approachLat && suspect.approachLng && (
+                <div className="p-4 border-t border-pmmg-navy/5">
+                  <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase tracking-wider mb-1">Coordenadas Registradas</p>
+                  <p className="text-sm font-bold text-slate-800">{suspect.approachLat.toFixed(5)}, {suspect.approachLng.toFixed(5)}</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </main>
 
