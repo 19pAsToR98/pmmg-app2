@@ -284,9 +284,9 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               position={userPos}
               icon={{
                 url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                  <svg width="32" height="32" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" fill="#0047ab" stroke="#ffffff" stroke-width="2"/>
-                    <path d="${ICON_PATHS['person']}" fill="#ffffff"/>
+                  <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="16" cy="16" r="14" fill="#0047ab" stroke="#ffffff" stroke-width="2"/>
+                    <path d="${ICON_PATHS['person']}" fill="#ffffff" transform="translate(4 4)"/>
                   </svg>
                 `),
                 scaledSize: new window.google.maps.Size(32, 32),
@@ -426,7 +426,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                 url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
                   <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="20" cy="20" r="18" fill="#e31c1c" stroke="#ffffff" stroke-width="4"/>
-                    <path d="${ICON_PATHS['pin_drop']}" fill="#ffffff" transform="translate(8 8) scale(1.0)"/>
+                    <path d="${ICON_PATHS['pin_drop']}" fill="#ffffff" transform="translate(8 8)"/>
                   </svg>
                 `),
                 scaledSize: new window.google.maps.Size(40, 40),
