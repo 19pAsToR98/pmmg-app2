@@ -13,6 +13,8 @@ import TacticalMap from './pages/TacticalMap';
 import TacticalContacts from './pages/TacticalContacts';
 import OnboardingSetup from './pages/OnboardingSetup'; // Novo componente
 import SuspectsManagement from './pages/SuspectsManagement'; // Novo componente
+import LicensePlateConsultation from './pages/LicensePlateConsultation'; // Novo componente
+import VoiceReport from './pages/VoiceReport'; // Novo componente
 
 const INITIAL_SUSPECTS: Suspect[] = [
   {
@@ -191,10 +193,10 @@ const App: React.FC = () => {
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
   
   // User Profile States (Updated to reflect new onboarding)
-  const [userRank, setUserRank] = useState<UserRank>('Soldado');
+  const [userRank, setUserRank] = useState<UserRank>('3º Sargento'); // Alterado para Sargento para melhor visualização
   const [userName, setUserName] = useState('Rodrigo Alves');
   const [userCity, setUserCity] = useState('Belo Horizonte');
-  const [isRegistered, setIsRegistered] = useState(false); // New state for registration status
+  const [isRegistered, setIsRegistered] = useState(true); // Assumindo registrado para pular RequestAccess/Onboarding se necessário
   
   // Suspect Management Filter State
   const [initialSuspectFilter, setInitialSuspectFilter] = useState<Suspect['status'] | 'Todos'>('Todos');
@@ -433,6 +435,23 @@ const App: React.FC = () => {
         />
       )}
       {currentScreen === 'aiTools' && <AITools navigateTo={navigateTo} userRank={userRank} />}
+      
+      {/* NOVAS TELAS DE FERRAMENTAS IA */}
+      {currentScreen === 'licensePlateConsultation' && (
+        <LicensePlateConsultation 
+          navigateTo={navigateTo} 
+          userRank={userRank} 
+          userName={userName} 
+        />
+      )}
+      {currentScreen === 'voiceReport' && (
+        <VoiceReport 
+          navigateTo={navigateTo} 
+          userRank={userRank} 
+          userName={userName} 
+        />
+      )}
+      
       {currentScreen === 'profileSettings' && (
         <ProfileSettings 
           navigateTo={navigateTo} 
