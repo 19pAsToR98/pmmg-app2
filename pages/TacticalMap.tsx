@@ -195,11 +195,11 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       
       const pathData = ICON_PATHS[iconName] || ICON_PATHS['warning']; // Fallback to warning path
       
-      // Usando SVG Path (24x24)
+      // Usando SVG Path (24x24) - REGRA DE OURO 1
       const svg = `
         <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <circle cx="12" cy="12" r="10" fill="${colorClass}" stroke="#ffffff" stroke-width="2"/>
-          <path d="${pathData}" fill="${textColor}"/>
+          <path d="${pathData}" fill="${textColor}" transform="translate(4 4) scale(0.7)"/>
         </svg>
       `;
       
@@ -218,11 +218,11 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
     
     const pathData = ICON_PATHS[markerData.icon] || ICON_PATHS['flag']; // Fallback to flag path
     
-    // Usando SVG Path (32x32 viewBox, path 24x24, transladado em 4px para centralizar)
+    // Usando SVG Path (32x32) - REGRA DE OURO 2
     const svg = `
       <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
         <circle cx="16" cy="16" r="14" fill="${colorHex}" stroke="#ffffff" stroke-width="2"/>
-        <path d="${pathData}" fill="#ffffff" transform="translate(4 4)"/>
+        <path d="${pathData}" fill="#ffffff" transform="translate(6 6) scale(0.75)"/>
       </svg>
     `;
     
@@ -278,7 +278,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             mapTypeId: 'roadmap', // Alterado de 'hybrid' para 'roadmap'
           }}
         >
-          {/* Marcador do Usuário (Oficial) */}
+          {/* Marcador do Usuário (Oficial) - 32x32, REGRA DE OURO 2 */}
           {userPos && (
             <MarkerF
               position={userPos}
@@ -286,7 +286,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                 url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
                   <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="16" cy="16" r="14" fill="#0047ab" stroke="#ffffff" stroke-width="2"/>
-                    <path d="${ICON_PATHS['person']}" fill="#ffffff" transform="translate(4 4)"/>
+                    <path d="${ICON_PATHS['person']}" fill="#ffffff" transform="translate(6 6) scale(0.75)"/>
                   </svg>
                 `),
                 scaledSize: new window.google.maps.Size(32, 32),
@@ -306,7 +306,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             </InfoWindowF>
           )}
 
-          {/* Marcadores de Suspeitos */}
+          {/* Marcadores de Suspeitos - 24x24, REGRA DE OURO 1 */}
           {filteredSuspects.map(suspect => {
             let lat: number | undefined;
             let lng: number | undefined;
@@ -372,7 +372,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             return null;
           })}
 
-          {/* Marcadores Personalizados */}
+          {/* Marcadores Personalizados - 32x32, REGRA DE OURO 2 */}
           {customMarkers.map(markerData => {
             const position = { lat: markerData.lat, lng: markerData.lng };
             const markerId = `custom-${markerData.id}`;
@@ -418,7 +418,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             );
           })}
           
-          {/* Marcador de Adição (Se ativo) */}
+          {/* Marcador de Adição (40x40) - Usando escala 0.75 e translate(11 11) */}
           {isAddingMarker && (
             <MarkerF
               position={center}
@@ -426,7 +426,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                 url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
                   <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="20" cy="20" r="18" fill="#e31c1c" stroke="#ffffff" stroke-width="4"/>
-                    <path d="${ICON_PATHS['pin_drop']}" fill="#ffffff" transform="translate(8 8)"/>
+                    <path d="${ICON_PATHS['pin_drop']}" fill="#ffffff" transform="translate(11 11) scale(0.75)"/>
                   </svg>
                 `),
                 scaledSize: new window.google.maps.Size(40, 40),

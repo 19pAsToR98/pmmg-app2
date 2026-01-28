@@ -318,10 +318,11 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
     
     const pathData = ICON_PATHS[iconName];
     
+    // Aplicando REGRA DE OURO 2: translate(6 6) scale(0.75)
     const svg = `
       <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
         <circle cx="16" cy="16" r="14" fill="${color}" stroke="#ffcc00" stroke-width="2"/>
-        <path d="${pathData}" fill="#ffcc00" transform="translate(4 4)"/>
+        <path d="${pathData}" fill="#ffcc00" transform="translate(6 6) scale(0.75)"/>
       </svg>
     `;
     
