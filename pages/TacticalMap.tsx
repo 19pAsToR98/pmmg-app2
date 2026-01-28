@@ -156,15 +156,47 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       };
     } else {
       // Simple Icon Marker (Zoomed Out)
-      const colorClass = suspect.status === 'Foragido' ? '#e31c1c' : 
-                         suspect.status === 'Suspeito' ? '#ffcc00' : '#002147';
-      const iconName = locationFilter === 'residence' ? (suspect.status === 'Foragido' ? 'priority_high' : 'warning') : 'pin_drop';
+      let colorClass: string;
+      let iconName: string;
+      let textColor: string;
+
+      switch (suspect.status) {
+        case 'Foragido':
+          colorClass = '#e31c1c'; // pmmg-red
+          iconName = 'priority_high';
+          textColor = '#ffffff';
+          break;
+        case 'Suspeito':
+          colorClass = '#ffcc00'; // pmmg-yellow
+          iconName = 'warning';
+          textColor = '#002147'; // pmmg-navy (para contraste no amarelo)
+          break;
+        case 'Preso':
+          colorClass = '#0047ab'; // pmmg-blue
+          iconName = 'lock';
+          textColor = '#ffffff';
+          break;
+        case 'CPF Cancelado':
+          colorClass = '#475569'; // slate-600
+          iconName = 'cancel';
+          textColor = '#ffffff';
+          break;
+        default:
+          colorClass = '#002147'; // pmmg-navy
+          iconName = 'person';
+          textColor = '#ffffff';
+      }
+      
+      // Se o filtro de localização for 'approach', usamos 'pin_drop'
+      if (locationFilter === 'approach') {
+        iconName = 'pin_drop';
+      }
       
       // Using SVG for custom icon to embed Material Symbol
       const svg = `
         <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <circle cx="12" cy="12" r="10" fill="${colorClass}" stroke="#ffffff" stroke-width="2"/>
-          <text x="12" y="17" font-family="Material Symbols Outlined" font-size="14" fill="${suspect.status === 'Suspeito' ? '#002147' : '#ffffff'}" text-anchor="middle">${iconName}</text>
+          <text x="12" y="17" font-family="Material Symbols Outlined" font-size="14" fill="${textColor}" text-anchor="middle">${iconName}</text>
         </svg>
       `;
       
@@ -282,7 +314,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               locationType = 'Última Localização';
             } else if (locationFilter === 'approach' && suspect.approachLat && suspect.approachLng) {
               lat = suspect.approachLat;
-              lng = suspect.lng;
+              lng = suspect.approachLng;
               locationName = suspect.approachAddress;
               locationType = 'Endereço de Abordagem';
             }
