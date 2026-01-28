@@ -1,13 +1,14 @@
 import React from 'react';
-import { Screen, UserRank } from '../types';
+import { Screen, UserRank, UserAvatar } from '../types';
 import BottomNav from '../components/BottomNav';
 
 interface AIToolsProps {
   navigateTo: (screen: Screen) => void;
   userRank: UserRank;
+  aiAvatar: UserAvatar; // NOVO: Avatar do Assistente de IA
 }
 
-const AITools: React.FC<AIToolsProps> = ({ navigateTo, userRank }) => {
+const AITools: React.FC<AIToolsProps> = ({ navigateTo, userRank, aiAvatar }) => {
   const rankLabel = userRank === 'Subtenente' ? 'Subtenente' : 
                    userRank.includes('Sargento') ? 'Sargento' : 
                    userRank;
@@ -33,11 +34,11 @@ const AITools: React.FC<AIToolsProps> = ({ navigateTo, userRank }) => {
       <main className="flex-1 overflow-y-auto pb-32 no-scrollbar">
         <div className="flex flex-col items-center pt-8 px-6">
           <div className="relative w-64 h-64 mb-6">
-            <div className="w-full h-full rounded-full overflow-hidden relative shadow-2xl">
+            <div className="w-full h-full rounded-full overflow-hidden relative shadow-2xl border-4 border-pmmg-navy/10">
                <img 
-                alt="AI Mascot" 
-                className="w-full h-full object-cover rounded-full" 
-                src="https://regularmei.com.br/wp-content/uploads/2026/01/ai_mascot.gif" 
+                alt={aiAvatar.name} 
+                className="w-full h-full object-contain rounded-full" 
+                src={aiAvatar.url} 
               />
             </div>
             <div className="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-4 border-pmmg-khaki"></div>
@@ -74,7 +75,7 @@ const AITools: React.FC<AIToolsProps> = ({ navigateTo, userRank }) => {
             <span className="material-symbols-outlined text-pmmg-navy fill-icon">memory</span>
             <div>
               <div className="text-[10px] font-bold text-pmmg-navy uppercase">Rede Neural Operacional</div>
-              <div className="text-[9px] text-pmmg-navy/60">Sessão Segura: {rankLabel} Rodrigo</div>
+              <div className="text-[9px] text-pmmg-navy/60">Sessão Segura: {aiAvatar.name}</div>
             </div>
           </div>
           <span className="text-[10px] font-bold text-green-700 bg-green-100 px-2 py-1 rounded">ESTÁVEL</span>

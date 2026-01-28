@@ -183,9 +183,15 @@ const MOCK_CHATS: Chat[] = [
   },
 ];
 
-const DEFAULT_AVATAR: UserAvatar = { 
+const DEFAULT_USER_AVATAR: UserAvatar = { 
   name: 'Cabo Loso', 
   url: 'https://iili.io/fiLMgHX.gif' 
+};
+
+// Avatar padrão para a IA antes do onboarding
+const DEFAULT_AI_AVATAR: UserAvatar = {
+  name: 'AI Assistente',
+  url: 'https://regularmei.com.br/wp-content/uploads/2026/01/ai_mascot.gif'
 };
 
 
@@ -197,12 +203,15 @@ const App: React.FC = () => {
   const [editingSuspectId, setEditingSuspectId] = useState<string | null>(null); // NOVO ESTADO PARA EDIÇÃO
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
   
-  // User Profile States (Updated to reflect new onboarding)
+  // User Profile States
   const [userRank, setUserRank] = useState<UserRank>('Soldado');
   const [userName, setUserName] = useState('Rodrigo Alves');
   const [userCity, setUserCity] = useState('Belo Horizonte');
   const [isRegistered, setIsRegistered] = useState(false); // New state for registration status
-  const [userAvatar, setUserAvatar] = useState<UserAvatar>(DEFAULT_AVATAR); // NEW State for Avatar
+  const [userAvatar, setUserAvatar] = useState<UserAvatar>(DEFAULT_USER_AVATAR); // User's avatar (fixed for now)
+  
+  // AI Avatar State (Selected during onboarding)
+  const [aiAvatar, setAiAvatar] = useState<UserAvatar>(DEFAULT_AI_AVATAR);
   
   // Suspect Management Filter State
   const [initialSuspectFilter, setInitialSuspectFilter] = useState<Suspect['status'] | 'Todos'>('Todos');
@@ -350,11 +359,13 @@ const App: React.FC = () => {
     navigateTo('registry');
   };
   
+  // ATUALIZADO: Agora salva o avatar no estado aiAvatar
   const handleOnboardingComplete = (name: string, rank: UserRank, city: string, avatar: UserAvatar) => {
     setUserName(name);
     setUserRank(rank);
     setUserCity(city);
-    setUserAvatar(avatar);
+    setAiAvatar(avatar); // Salva o avatar selecionado para a IA
+    // Mantemos o userAvatar como DEFAULT_USER_AVATAR
     navigateTo('dashboard');
   };
 
@@ -441,7 +452,7 @@ const App: React.FC = () => {
           onSendMessage={handleSendMessage}
         />
       )}
-      {currentScreen === 'aiTools' && <AITools navigateTo={navigateTo} userRank={userRank} />}
+      {currentScreen === 'aiTools' && <AITools navigateTo={navigateTo} userRank={userRank} aiAvatar={aiAvatar} />}
       
       {/* NOVAS TELAS DE IA */}
       {currentScreen === 'plateConsultation' && (
