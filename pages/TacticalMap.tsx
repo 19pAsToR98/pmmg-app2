@@ -194,41 +194,6 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       anchor: new window.google.maps.Point(16, 16),
     };
   };
-  
-  const getUserMarkerIcon = () => {
-    if (typeof window === 'undefined' || !window.google || !window.google.maps) return undefined; // Safety check
-    
-    const svg = `
-      <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="16" cy="16" r="14" fill="#0047ab" stroke="#ffffff" stroke-width="4"/>
-        <text x="16" y="22" font-family="Material Symbols Outlined" font-size="18" fill="#ffffff" text-anchor="middle">person</text>
-      </svg>
-    `;
-    
-    return {
-      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-      scaledSize: new window.google.maps.Size(32, 32),
-      anchor: new window.google.maps.Point(16, 16),
-    };
-  };
-  
-  const getAddingMarkerIcon = () => {
-    if (typeof window === 'undefined' || !window.google || !window.google.maps) return undefined; // Safety check
-    
-    const svg = `
-      <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="20" cy="20" r="18" fill="#e31c1c" stroke="#ffffff" stroke-width="4"/>
-        <text x="20" y="26" font-family="Material Symbols Outlined" font-size="24" fill="#ffffff" text-anchor="middle">pin_drop</text>
-      </svg>
-    `;
-    
-    return {
-      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-      scaledSize: new window.google.maps.Size(40, 40),
-      anchor: new window.google.maps.Point(20, 40), // Anchor slightly lower for pin effect
-    };
-  };
-
 
   const activeMarkerData = newMarkerData || editingMarker;
   const isEditing = !!editingMarker;
@@ -272,14 +237,23 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           onLoad={handleMapLoad}
           onClick={handleMapClick}
           options={{
-            mapTypeId: 'hybrid', // Revertido para 'hybrid' (Satélite com rótulos)
+            mapTypeId: 'roadmap', // Alterado de 'hybrid' para 'roadmap'
           }}
         >
           {/* Marcador do Usuário (Oficial) */}
           {userPos && (
             <MarkerF
               position={userPos}
-              icon={getUserMarkerIcon()}
+              icon={{
+                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                  <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="16" cy="16" r="14" fill="#0047ab" stroke="#ffffff" stroke-width="4"/>
+                    <text x="16" y="22" font-family="Material Symbols Outlined" font-size="18" fill="#ffffff" text-anchor="middle">person</text>
+                  </svg>
+                `),
+                scaledSize: new window.google.maps.Size(32, 32),
+                anchor: new window.google.maps.Point(16, 16),
+              }}
               title="Você (Oficial)"
               onClick={() => setActiveInfoWindow('user-pos')}
             />
@@ -308,7 +282,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               locationType = 'Última Localização';
             } else if (locationFilter === 'approach' && suspect.approachLat && suspect.approachLng) {
               lat = suspect.approachLat;
-              lng = suspect.approachLng;
+              lng = suspect.lng;
               locationName = suspect.approachAddress;
               locationType = 'Endereço de Abordagem';
             }
@@ -410,7 +384,16 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           {isAddingMarker && (
             <MarkerF
               position={center}
-              icon={getAddingMarkerIcon()}
+              icon={{
+                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                  <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="20" cy="20" r="18" fill="#e31c1c" stroke="#ffffff" stroke-width="4"/>
+                    <text x="20" y="26" font-family="Material Symbols Outlined" font-size="24" fill="#ffffff" text-anchor="middle">pin_drop</text>
+                  </svg>
+                `),
+                scaledSize: new window.google.maps.Size(40, 40),
+                anchor: new window.google.maps.Point(20, 40), // Anchor slightly lower for pin effect
+              }}
               title="Clique no mapa para posicionar"
             />
           )}
