@@ -30,7 +30,8 @@ const SuspectListItem: React.FC<SuspectListItemProps> = ({
     <div 
       onClick={() => handleCardClick(s.id)}
       {...longPressProps}
-      className={`pmmg-card flex p-3 gap-4 items-center transition-all shadow-sm border-l-4 border-l-pmmg-navy relative ${
+      // Removendo pmmg-card e ajustando o estilo de fundo e sombra
+      className={`flex p-3 gap-4 items-center transition-all shadow-md rounded-xl bg-white/80 border border-pmmg-navy/10 border-l-4 border-l-pmmg-navy relative ${
         isSelectionMode ? (isSelected ? 'bg-pmmg-red/10 border-l-pmmg-red ring-1 ring-pmmg-red' : 'opacity-70') : 'active:scale-[0.98]'
       }`}
     >
