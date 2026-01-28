@@ -161,39 +161,11 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
       </header>
 
       <main className="flex-1 overflow-y-auto pb-32 no-scrollbar">
-        {/* Header Section with Static Photo - NO FILTER */}
+        {/* Header Section with Photo and Text side-by-side */}
         <section className="p-4 bg-gradient-to-b from-pmmg-navy to-pmmg-navy/80 pb-12 rounded-b-[2rem] shadow-xl">
           
-          {/* Bloco de Texto (Topo) */}
-          <div className="mb-4">
-            <div className="flex justify-between items-start mb-2">
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-white uppercase leading-tight">{suspect.name}</h2>
-                {suspect.nickname && <p className="text-pmmg-yellow text-sm font-semibold mt-1">Vulgo: "{suspect.nickname}"</p>}
-              </div>
-              <span className={`text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg border border-white/20 uppercase tracking-widest shrink-0 ${
-                suspect.status === 'Foragido' ? 'bg-pmmg-red animate-pulse' : 
-                suspect.status === 'Suspeito' ? 'bg-pmmg-yellow text-pmmg-navy' : 'bg-pmmg-blue'
-              }`}>
-                {suspect.status}
-              </span>
-            </div>
-            
-            {/* Descrição Tática */}
-            {suspect.description && (
-              <p className="text-[10px] text-white/90 leading-snug italic font-medium mt-2">
-                {suspect.description}
-              </p>
-            )}
-            {!suspect.description && (
-              <p className="text-[10px] text-white/60 leading-snug italic font-medium mt-2">
-                Nenhuma observação física registrada no prontuário.
-              </p>
-            )}
-          </div>
-
-          {/* Bloco da Foto (Abaixo do Texto) */}
-          <div className="flex justify-center">
+          <div className="flex gap-4 relative">
+            {/* Bloco da Foto (Esquerda) */}
             <div className="shrink-0">
               <div 
                 className="w-32 h-40 bg-slate-300 rounded-2xl border-2 border-pmmg-yellow/50 overflow-hidden shadow-2xl relative cursor-pointer active:scale-[0.98] transition-transform"
@@ -208,6 +180,35 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                   <span className="material-symbols-outlined text-white text-sm">zoom_in</span>
                 </div>
               </div>
+            </div>
+            
+            {/* Bloco de Texto (Direita) */}
+            <div className="flex-1 flex flex-col justify-between">
+              <div className="flex justify-end mb-2">
+                <span className={`text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg border border-white/20 uppercase tracking-widest ${
+                  suspect.status === 'Foragido' ? 'bg-pmmg-red animate-pulse' : 
+                  suspect.status === 'Suspeito' ? 'bg-pmmg-yellow text-pmmg-navy' : 'bg-pmmg-blue'
+                }`}>
+                  {suspect.status}
+                </span>
+              </div>
+              
+              <div className="mb-2">
+                <h2 className="text-xl font-bold text-white uppercase leading-tight">{suspect.name}</h2>
+                {suspect.nickname && <p className="text-pmmg-yellow text-xs font-semibold mt-1">Vulgo: "{suspect.nickname}"</p>}
+              </div>
+              
+              {/* Descrição Tática */}
+              {suspect.description && (
+                <p className="text-[10px] text-white/90 leading-snug italic font-medium">
+                  {suspect.description}
+                </p>
+              )}
+              {!suspect.description && (
+                <p className="text-[10px] text-white/60 leading-snug italic font-medium">
+                  Nenhuma observação física registrada no prontuário.
+                </p>
+              )}
             </div>
           </div>
         </section>
