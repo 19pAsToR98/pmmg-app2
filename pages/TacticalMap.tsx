@@ -40,6 +40,9 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
     (activeFilter === 'Todos' || s.status === activeFilter)
   );
 
+  // Variável de controle de zoom acessível no escopo do componente
+  const usePhotoMarker = currentZoom >= ZOOM_THRESHOLD;
+
   const handleMapClick = (e: L.LeafletMouseEvent) => {
     if (isAddingMarker) {
       setNewMarkerData({
@@ -175,6 +178,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
     
     markersLayerRef.current.clearLayers();
     
+    // Usa a variável de estado do componente
     const localUsePhotoMarker = currentZoom >= ZOOM_THRESHOLD;
 
     filteredSuspects.forEach(suspect => {
@@ -522,58 +526,36 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             <p className="text-[8px] font-black text-pmmg-navy/40 uppercase tracking-widest border-b border-pmmg-navy/5 pb-1 mb-1 pt-2">Filtro por Status</p>
 
             {/* Foragido (Photo style) */}
-            <button 
-              onClick={() => setActiveFilter('Foragido')}
-              className={`flex items-center gap-2 group transition-opacity ${activeFilter !== 'Todos' && activeFilter !== 'Foragido' ? 'opacity-40' : 'opacity-100'}`}
-            >
-               <div className={`w-4 h-4 ${localUsePhotoMarker ? 'rounded-md border-2 bg-slate-300' : 'rounded-full bg-pmmg-red flex items-center justify-center'} border-pmmg-red shadow-sm`}>
-                 {!localUsePhotoMarker && <span className="material-symbols-outlined text-white text-[10px] fill-icon">priority_high</span>}
+            <div className="flex items-center gap-2">
+               <div className={`w-4 h-4 ${usePhotoMarker ? 'rounded-md border-2 bg-slate-300' : 'rounded-full bg-pmmg-red flex items-center justify-center'} border-pmmg-red shadow-sm`}>
+                 {!usePhotoMarker && <span className="material-symbols-outlined text-white text-[10px] fill-icon">priority_high</span>}
                </div>
-               <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">Foragido</span>
-            </button>
+               <span className="text-[9px] font-bold text-pmmg-navy uppercase">Foragido</span>
+            </div>
             
             {/* Suspeito (Photo style) */}
-            <button 
-              onClick={() => setActiveFilter('Suspeito')}
-              className={`flex items-center gap-2 group transition-opacity ${activeFilter !== 'Todos' && activeFilter !== 'Suspeito' ? 'opacity-40' : 'opacity-100'}`}
-            >
-               <div className={`w-4 h-4 ${localUsePhotoMarker ? 'rounded-md border-2 bg-slate-300' : 'rounded-full bg-pmmg-yellow flex items-center justify-center'} border-pmmg-yellow shadow-sm`}>
-                 {!localUsePhotoMarker && <span className="material-symbols-outlined text-pmmg-navy text-[10px] fill-icon">warning</span>}
+            <div className="flex items-center gap-2">
+               <div className={`w-4 h-4 ${usePhotoMarker ? 'rounded-md border-2 bg-slate-300' : 'rounded-full bg-pmmg-yellow flex items-center justify-center'} border-pmmg-yellow shadow-sm`}>
+                 {!usePhotoMarker && <span className="material-symbols-outlined text-pmmg-navy text-[10px] fill-icon">warning</span>}
                </div>
-               <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">Suspeito</span>
-            </button>
+               <span className="text-[9px] font-bold text-pmmg-navy uppercase">Suspeito</span>
+            </div>
             
             {/* Preso */}
-            <button 
-              onClick={() => setActiveFilter('Preso')}
-              className={`flex items-center gap-2 group transition-opacity ${activeFilter !== 'Todos' && activeFilter !== 'Preso' ? 'opacity-40' : 'opacity-100'}`}
-            >
+            <div className="flex items-center gap-2">
                <div className={`w-4 h-4 rounded-full bg-pmmg-blue flex items-center justify-center border-pmmg-blue shadow-sm`}>
                  <span className="material-symbols-outlined text-white text-[10px] fill-icon">lock</span>
                </div>
-               <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">Preso</span>
-            </button>
+               <span className="text-[9px] font-bold text-pmmg-navy uppercase">Preso</span>
+            </div>
 
             {/* CPF Cancelado */}
-            <button 
-              onClick={() => setActiveFilter('CPF Cancelado')}
-              className={`flex items-center gap-2 group transition-opacity ${activeFilter !== 'Todos' && activeFilter !== 'CPF Cancelado' ? 'opacity-40' : 'opacity-100'}`}
-            >
+            <div className="flex items-center gap-2">
                <div className={`w-4 h-4 rounded-full bg-slate-700 flex items-center justify-center border-slate-700 shadow-sm`}>
                  <span className="material-symbols-outlined text-white text-[10px] fill-icon">cancel</span>
                </div>
-               <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">CPF Cancelado</span>
-            </button>
-            
-            {/* Marcador de Abordagem (Legenda) */}
-            {locationFilter === 'approach' && (
-              <div className="flex items-center gap-2 pt-2 border-t border-pmmg-navy/5">
-                 <div className="w-4 h-4 bg-pmmg-navy rounded-full border-2 border-white flex items-center justify-center shadow-sm ring-1 ring-pmmg-navy/50">
-                   <span className="material-symbols-outlined text-pmmg-yellow text-[10px] fill-icon">pin_drop</span>
-                 </div>
-                 <span className="text-[9px] font-bold text-pmmg-navy uppercase">Abordagem Ativa</span>
-              </div>
-            )}
+               <span className="text-[9px] font-bold text-pmmg-navy uppercase">CPF Cancelado</span>
+            </div>
             
             {/* Oficial */}
             <div className="flex items-center gap-2 pt-2 border-t border-pmmg-navy/5">
