@@ -182,6 +182,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
     const localUsePhotoMarker = currentZoom >= ZOOM_THRESHOLD;
 
     filteredSuspects.forEach(suspect => {
+      // --- Marcador de Última Localização/Residência (Principal) ---
       if (suspect.lat && suspect.lng) {
         
         let suspectIcon;
@@ -232,7 +233,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             <div class="w-10 h-10 rounded bg-slate-200 overflow-hidden"><img src="${suspect.photoUrl}" class="w-full h-full object-cover"></div>
             <div>
               <p class="font-bold text-[10px] text-pmmg-navy uppercase leading-tight">${suspect.name}</p>
-              <p class="text-[9px] text-slate-500 font-bold uppercase">${suspect.status}</p>
+              <p class="text-[9px] text-slate-500 font-bold uppercase">${suspect.status} (Última Localização)</p>
             </div>
           </div>
           <div class="flex gap-2 mt-3">
@@ -260,6 +261,56 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         if (initialCenter && suspect.lat === initialCenter[0] && suspect.lng === initialCenter[1]) {
           marker.openPopup();
         }
+      }
+      
+      // --- Marcador de Endereço de Abordagem (Secundário) ---
+      if (suspect.approachLat && suspect.approachLng) {
+        const approachIconHtml = `
+          <div class="w-6 h-6 bg-pmmg-blue rounded-full border-2 border-white flex items-center justify-center shadow-md">
+            <span class="material-symbols-outlined text-white text-[14px] fill-icon">pin_drop</span>
+          </div>
+        `;
+        
+        const approachIcon = L.divIcon({
+          className: 'custom-approach-icon',
+          html: approachIconHtml,
+          iconSize: [24, 24],
+          iconAnchor: [12, 12]
+        });
+
+        const approachMarker = L.marker([suspect.approachLat, suspect.approachLng], { icon: approachIcon }).addTo(markersLayerRef.current!);
+        
+        const approachPopupContent = document.createElement('div');
+        approachPopupContent.className = "p-2 min-w-[150px]";
+        approachPopupContent.innerHTML = `
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-10 h-10 rounded bg-slate-200 overflow-hidden"><img src="${suspect.photoUrl}" class="w-full h-full object-cover"></div>
+            <div>
+              <p class="font-bold text-[10px] text-pmmg-navy uppercase leading-tight">${suspect.name}</p>
+              <p class="text-[9px] text-pmmg-blue font-bold uppercase">Endereço de Abordagem</p>
+              <p class="text-[9px] text-slate-500 mt-1">${suspect.approachAddress || 'Local não especificado'}</p>
+            </div>
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button id="btn-profile-approach-${suspect.id}" class="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider">Ver Ficha</button>
+            <button id="btn-share-approach-${suspect.id}" class="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center">
+              <span class="material-symbols-outlined text-pmmg-navy text-lg">share</span>
+            </button>
+          </div>
+        `;
+
+        approachMarker.bindPopup(approachPopupContent);
+        
+        approachMarker.on('popupopen', () => {
+          document.getElementById(`btn-profile-approach-${suspect.id}`)?.addEventListener('click', () => {
+            onOpenProfile(suspect.id);
+          });
+          document.getElementById(`btn-share-approach-${suspect.id}`)?.addEventListener('click', () => {
+            if (suspect.approachLat && suspect.approachLng) {
+              handleShareLocation(suspect.approachLat, suspect.approachLng, `Abordagem de ${suspect.name}`);
+            }
+          });
+        });
       }
     });
   }, [filteredSuspects, initialCenter, activeFilter, onOpenProfile, currentZoom, handleShareLocation]);
@@ -496,7 +547,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                <div className={`w-4 h-4 ${usePhotoMarker ? 'rounded-md border-2 bg-slate-300' : 'rounded-full bg-pmmg-red flex items-center justify-center'} border-pmmg-red shadow-sm`}>
                  {!usePhotoMarker && <span className="material-symbols-outlined text-white text-[10px] fill-icon">priority_high</span>}
                </div>
-               <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">Foragido</span>
+               <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">Foragido (Última Loc.)</span>
             </button>
             
             {/* Suspeito (Photo style) */}
@@ -507,7 +558,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                <div className={`w-4 h-4 ${usePhotoMarker ? 'rounded-md border-2 bg-slate-300' : 'rounded-full bg-pmmg-yellow flex items-center justify-center'} border-pmmg-yellow shadow-sm`}>
                  {!usePhotoMarker && <span className="material-symbols-outlined text-pmmg-navy text-[10px] fill-icon">warning</span>}
                </div>
-               <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">Suspeito</span>
+               <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">Suspeito (Última Loc.)</span>
             </button>
             
             {/* Preso */}
@@ -532,8 +583,16 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                <span className="text-[9px] font-bold text-pmmg-navy uppercase group-hover:underline">CPF Cancelado</span>
             </button>
             
-            {/* Oficial */}
+            {/* Marcador de Abordagem (NOVO) */}
             <div className="flex items-center gap-2 pt-2 border-t border-pmmg-navy/5">
+               <div className="w-4 h-4 bg-pmmg-navy rounded-full border-2 border-white flex items-center justify-center shadow-sm ring-1 ring-pmmg-navy/50">
+                 <span className="material-symbols-outlined text-pmmg-yellow text-[10px] fill-icon">pin_drop</span>
+               </div>
+               <span className="text-[9px] font-bold text-pmmg-navy uppercase">Endereço de Abordagem</span>
+            </div>
+            
+            {/* Oficial */}
+            <div className="flex items-center gap-2">
                <div className="w-3.5 h-3.5 bg-pmmg-blue rounded-full border-2 border-white shadow-sm ring-1 ring-pmmg-blue/50"></div>
                <span className="text-[9px] font-bold text-pmmg-navy uppercase">Oficial (Você)</span>
             </div>
