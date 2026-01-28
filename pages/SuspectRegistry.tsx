@@ -42,6 +42,11 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
   const [photos, setPhotos] = useState<string[]>(currentSuspect?.photoUrls || (currentSuspect?.photoUrl ? [currentSuspect.photoUrl] : []));
   const [showOnMap, setShowOnMap] = useState(currentSuspect?.showOnMap ?? true);
   
+  // --- States for Vehicles and Associations (CORRIGIDO) ---
+  const [vehicles, setVehicles] = useState<Vehicle[]>(currentSuspect?.vehicles || []);
+  const [associations, setAssociations] = useState<Association[]>(currentSuspect?.associations || []);
+  // ------------------------------------------------------
+
   // --- States for Last Seen Address (Ocorrência/Residência) ---
   const initialLastSeenAddress = currentSuspect?.lastSeen || '';
   const initialLastSeenLat = currentSuspect?.lat;
