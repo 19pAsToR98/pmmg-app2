@@ -13,7 +13,6 @@ const Store: React.FC<StoreProps> = ({ navigateTo }) => {
     { name: 'Lanterna Tática de Alta Potência', description: 'Iluminação robusta para operações noturnas.', link: 'https://www.exemplo.com/lanterna', icon: 'flashlight_on' },
     { name: 'Botas Táticas Impermeáveis', description: 'Conforto e durabilidade em qualquer terreno.', link: 'https://www.exemplo.com/botas', icon: 'hiking' },
     { name: 'Mochila de Assalto 30L', description: 'Compacta e resistente para missões rápidas.', link: 'https://www.exemplo.com/mochila', icon: 'backpack' },
-    { name: 'Luvas Táticas Antiderrapantes', description: 'Aderência e proteção para manuseio de equipamentos.', link: 'https://www.exemplo.com/luvas', icon: 'gloves' },
   ];
 
   return (
