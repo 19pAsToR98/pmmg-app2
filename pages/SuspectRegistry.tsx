@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import L from 'leaflet';
 import { Screen, Suspect, Vehicle, Association } from '../types';
 import BottomNav from '../components/BottomNav';
+import GoogleMapWrapper from '../components/GoogleMapWrapper';
+import { MarkerF } from '@react-google-maps/api';
+import { ICON_PATHS } from '../utils/iconPaths';
 
 interface SuspectRegistryProps {
   navigateTo: (screen: Screen) => void;
@@ -16,14 +18,6 @@ interface GeocodedLocation {
   lat: number;
   lng: number;
 }
-
-const TacticalMapIcon = L.divIcon({
-  className: 'custom-location-icon',
-  html: `<div class="w-6 h-6 bg-pmmg-navy rounded-full border-2 border-white flex items-center justify-center shadow-lg"><span class="material-symbols-outlined text-pmmg-yellow text-[14px] fill-icon">location_on</span></div>`,
-  iconSize: [24, 24],
-  iconAnchor: [12, 12]
-});
-
 
 const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, onUpdate, currentSuspect, allSuspects }) => {
   const isEditing = !!currentSuspect;
@@ -42,11 +36,10 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
   const [photos, setPhotos] = useState<string[]>(currentSuspect?.photoUrls || (currentSuspect?.photoUrl ? [currentSuspect.photoUrl] : []));
   const [showOnMap, setShowOnMap] = useState(currentSuspect?.showOnMap ?? true);
   
-  // --- States for Vehicles and Associations (CORRIGIDO) ---
+  // --- States for Vehicles and Associations ---
   const [vehicles, setVehicles] = useState<Vehicle[]>(currentSuspect?.vehicles || []);
   const [associations, setAssociations] = useState<Association[]>(currentSuspect?.associations || []);
-  // ------------------------------------------------------
-
+  
   // --- States for Last Seen Address (Ocorrência/Residência) ---
   const initialLastSeenAddress = currentSuspect?.lastSeen || '';
   const initialLastSeenLat = currentSuspect?.lat;
@@ -82,48 +75,10 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
   const [filteredSuspects, setFilteredSuspects] = useState<Suspect[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const miniMapRef = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<L.Map | null>(null);
-
-  // --- Leaflet Minimap Effect (Uses Last Seen Location) ---
-  useEffect(() => {
-    if (miniMapRef.current && selectedLastSeenLocation) {
-      const { lat, lng } = selectedLastSeenLocation;
-      
-      if (mapInstance.current) {
-        mapInstance.current.setView([lat, lng], 15);
-        mapInstance.current.eachLayer((layer) => {
-          if (layer instanceof L.Marker) {
-            layer.remove();
-          }
-        });
-      } else {
-        // Inicializa o mapa
-        mapInstance.current = L.map(miniMapRef.current, {
-          center: [lat, lng],
-          zoom: 15,
-          zoomControl: false,
-          dragging: false,
-          touchZoom: false,
-          scrollWheelZoom: false,
-          doubleClickZoom: false,
-          boxZoom: false
-        });
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance.current);
-      }
-
-      L.marker([lat, lng], { icon: TacticalMapIcon }).addTo(mapInstance.current);
-      mapInstance.current.invalidateSize(); // Garante que o mapa seja renderizado corretamente
-    }
-
-    return () => {
-      // Limpeza do mapa ao desmontar ou mudar de localização
-      if (mapInstance.current && !selectedLastSeenLocation) {
-        mapInstance.current.remove();
-        mapInstance.current = null;
-      }
-    };
-  }, [selectedLastSeenLocation]);
+  
+  // Default center for map wrapper if no location is selected
+  const defaultMapCenter = { lat: -19.9167, lng: -43.9345 }; 
+  const mapCenter = selectedLastSeenLocation || defaultMapCenter;
 
   // --- Address Search Logic (Real Geocoding via Nominatim) ---
   
@@ -353,6 +308,31 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
       onSave(suspectData);
     }
   };
+  
+  // Helper function to generate marker icon for mini-maps
+  const getMiniMapIcon = () => {
+    if (typeof window === 'undefined' || !window.google || !window.google.maps) return undefined; // Safety check
+
+    const color = '#002147';
+    const iconName = 'location_on';
+    
+    const pathData = ICON_PATHS[iconName];
+    
+    // Aplicando REGRA DE OURO 2: translate(6 6) scale(0.75)
+    const svg = `
+      <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="14" fill="${color}" stroke="#ffcc00" stroke-width="2"/>
+        <path d="${pathData}" fill="#ffcc00" transform="translate(6 6) scale(0.75)"/>
+      </svg>
+    `;
+    
+    return {
+      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+      scaledSize: new window.google.maps.Size(32, 32),
+      anchor: new window.google.maps.Point(16, 16),
+    };
+  };
+
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
@@ -430,6 +410,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
           )}
         </div>
 
+        {/* Status Section (Existing) */}
         <p className="text-[10px] font-bold uppercase text-pmmg-navy/70 mb-3 mt-4 text-center tracking-wider">Status de Monitoramento</p>
         <div className="grid grid-cols-4 gap-2">
           {[
@@ -458,7 +439,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
         {/* Map Visibility Toggle (Existing) */}
         <div className="mt-6 pmmg-card p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-pmmg-navy">map</span>
+            <span className="material-symbols-outlined">map</span>
             <div>
               <p className="text-sm font-bold text-pmmg-navy uppercase leading-none">Exibir no Mapa Tático</p>
               <p className="text-[10px] text-slate-500 mt-1">Marcar a última localização conhecida no mapa.</p>
@@ -569,19 +550,35 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
             )}
           </div>
           
-          {/* Minimap (Only shows Last Seen Location) */}
+          {/* Minimap (Only shows Last Seen Location) - Google Maps */}
           {selectedLastSeenLocation && (
             <div className="pmmg-card overflow-hidden">
               <div className="p-3 bg-pmmg-navy/5 flex items-center justify-between">
                 <p className="text-[10px] font-bold text-pmmg-navy uppercase tracking-wider">Localização Confirmada (Ocorrência/Residência)</p>
                 <span className="text-[9px] text-green-600 font-bold uppercase">GPS OK</span>
               </div>
-              <div ref={miniMapRef} className="h-40 w-full bg-slate-200 z-0"></div>
+              <GoogleMapWrapper
+                center={mapCenter}
+                zoom={15}
+                mapContainerClassName="h-40 w-full z-0"
+                options={{
+                  disableDefaultUI: true,
+                  draggable: false,
+                  scrollwheel: false,
+                  zoomControl: false,
+                  mapTypeId: 'roadmap'
+                }}
+              >
+                <MarkerF
+                  position={mapCenter}
+                  icon={getMiniMapIcon()}
+                />
+              </GoogleMapWrapper>
             </div>
           )}
         </div>
 
-        {/* --- Dados Pessoais (Updated) --- */}
+        {/* --- Dados Pessoais (Existing) --- */}
         <div className="flex items-center gap-2 mb-4 mt-8">
           <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
           <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Dados Pessoais</h3>
@@ -663,7 +660,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
           </div>
         </div>
 
-        {/* --- Veículos Section (NEW) --- */}
+        {/* --- Veículos Section (Existing) --- */}
         <div className="flex items-center gap-2 mb-4 mt-8">
           <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
           <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Veículos Cadastrados ({vehicles.length})</h3>
@@ -716,7 +713,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
           </div>
         </div>
 
-        {/* --- Ligações Section (NEW) --- */}
+        {/* --- Ligações Section (Existing) --- */}
         <div className="flex items-center gap-2 mb-4 mt-8">
           <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
           <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Ligações e Associações ({associations.length})</h3>
@@ -741,6 +738,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
                 </button>
               </div>
             );
+            
           })}
           <div className="pt-2 space-y-2 border-t border-pmmg-navy/10">
             <input 
