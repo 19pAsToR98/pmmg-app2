@@ -19,6 +19,37 @@ interface GeocodedLocation {
   lng: number;
 }
 
+const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
+
+// Função auxiliar para buscar endereço usando a API de Geocodificação do Google
+const searchGoogleAddress = async (address: string): Promise<GeocodedLocation[]> => {
+  if (!GOOGLE_MAPS_API_KEY) {
+    console.error("GOOGLE_MAPS_API_KEY is missing.");
+    return [];
+  }
+  
+  // Usando components=country:br para focar no Brasil e language=pt-BR
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&components=country:br&language=pt-BR&key=${GOOGLE_MAPS_API_KEY}`;
+  const response = await fetch(url);
+  const data = await response.json();
+
+  if (data.status === 'OK' && data.results.length > 0) {
+    // Mapeia os 5 primeiros resultados para sugestões
+    return data.results.slice(0, 5).map((item: any) => ({
+      name: item.formatted_address,
+      lat: item.geometry.location.lat,
+      lng: item.geometry.location.lng,
+    }));
+  }
+  
+  if (data.status !== 'ZERO_RESULTS') {
+    console.error("Google Geocoding Error Status:", data.status, data.error_message);
+  }
+  
+  return [];
+};
+
+
 const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, onUpdate, currentSuspect, allSuspects }) => {
   const isEditing = !!currentSuspect;
   
@@ -80,7 +111,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
   const defaultMapCenter = { lat: -19.9167, lng: -43.9345 }; 
   const mapCenter = selectedLastSeenLocation || defaultMapCenter;
 
-  // --- Address Search Logic (Real Geocoding via Nominatim) ---
+  // --- Address Search Logic (Google Geocoding) ---
   
   // Last Seen Handlers
   const handleLastSeenAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,24 +130,16 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
     setLastSeenAddressSuggestions([]);
 
     try {
-      // Usando Nominatim (OpenStreetMap) para geocodificação
-      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(lastSeenAddress)}&format=json&limit=5&countrycodes=br`;
-      const response = await fetch(url);
-      const data = await response.json();
+      const results = await searchGoogleAddress(lastSeenAddress);
 
-      if (data && data.length > 0) {
-        const results: GeocodedLocation[] = data.map((item: any) => ({
-          name: item.display_name,
-          lat: parseFloat(item.lat),
-          lng: parseFloat(item.lon),
-        }));
+      if (results.length > 0) {
         setLastSeenAddressSuggestions(results);
       } else {
-        alert("Nenhum endereço encontrado para a busca.");
+        alert("Nenhum endereço encontrado para a busca no Google Maps.");
       }
     } catch (error) {
       console.error("Erro ao buscar endereço:", error);
-      alert("Erro na comunicação com o serviço de geocodificação.");
+      alert("Erro na comunicação com o serviço de geocodificação do Google.");
     } finally {
       setIsLastSeenSearching(false);
     }
@@ -145,23 +168,16 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
     setApproachAddressSuggestions([]);
 
     try {
-      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(approachAddress)}&format=json&limit=5&countrycodes=br`;
-      const response = await fetch(url);
-      const data = await response.json();
+      const results = await searchGoogleAddress(approachAddress);
 
-      if (data && data.length > 0) {
-        const results: GeocodedLocation[] = data.map((item: any) => ({
-          name: item.display_name,
-          lat: parseFloat(item.lat),
-          lng: parseFloat(item.lon),
-        }));
+      if (results.length > 0) {
         setApproachAddressSuggestions(results);
       } else {
-        alert("Nenhum endereço encontrado para a busca.");
+        alert("Nenhum endereço encontrado para a busca no Google Maps.");
       }
     } catch (error) {
       console.error("Erro ao buscar endereço:", error);
-      alert("Erro na comunicação com o serviço de geocodificação.");
+      alert("Erro na comunicação com o serviço de geocodificação do Google.");
     } finally {
       setIsApproachSearching(false);
     }
