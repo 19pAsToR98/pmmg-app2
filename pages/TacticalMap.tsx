@@ -48,6 +48,11 @@ const SuspectPhotoMarker = memo<{
     return suspect.status === 'Foragido' ? 'priority_high' : 'warning';
   };
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // IMPEDE QUE O CLIQUE SE PROPAGUE PARA O MAPA
+    onClick();
+  };
+
   return (
     <OverlayViewF
       position={position}
@@ -55,7 +60,7 @@ const SuspectPhotoMarker = memo<{
       getPixelPositionOffset={() => ({ x: 0, y: 0 })}
     >
       <div 
-        onClick={onClick}
+        onClick={handleClick}
         style={{ cursor: 'pointer' }}
         className="relative group"
       >
@@ -96,6 +101,12 @@ const CustomMarkerComponent = memo<{
   position: { lat: number; lng: number };
   onClick: () => void;
 }>(({ markerData, position, onClick }) => {
+  
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // IMPEDE QUE O CLIQUE SE PROPAGUE PARA O MAPA
+    onClick();
+  };
+
   return (
     <OverlayViewF
       position={position}
@@ -103,7 +114,7 @@ const CustomMarkerComponent = memo<{
       getPixelPositionOffset={() => ({ x: 0, y: 0 })}
     >
       <div 
-        onClick={onClick}
+        onClick={handleClick}
         style={{ cursor: 'pointer' }}
         className="relative group"
       >
@@ -125,6 +136,12 @@ const UserMarkerComponent = memo<{
   position: { lat: number; lng: number };
   onClick: () => void;
 }>(({ position, onClick }) => {
+  
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // IMPEDE QUE O CLIQUE SE PROPAGUE PARA O MAPA
+    onClick();
+  };
+
   return (
     <OverlayViewF
       position={position}
@@ -132,7 +149,7 @@ const UserMarkerComponent = memo<{
       getPixelPositionOffset={() => ({ x: 0, y: 0 })}
     >
       <div 
-        onClick={onClick}
+        onClick={handleClick}
         style={{ cursor: 'pointer' }}
         className="relative group"
       >
@@ -347,7 +364,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               locationType = 'Última Localização';
             } else if (locationFilter === 'approach' && suspect.approachLat && suspect.approachLng) {
               lat = suspect.approachLat;
-              lng = suspect.approachLng; // ✅ CORRIGIDO: era suspect.lng
+              lng = suspect.approachLng;
               locationName = suspect.approachAddress;
               locationType = 'Endereço de Abordagem';
             }
