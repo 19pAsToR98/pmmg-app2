@@ -273,9 +273,26 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
     }
   };
   
-  const handleShareLocation = useCallback((lat: number, lng: number, title: string) => {
+  const handleShareLocation = useCallback(async (lat: number, lng: number, title: string) => {
     const locationLink = `https://maps.google.com/maps?q=${lat},${lng}`;
-    alert(`Localização de ${title} pronta para compartilhamento:\n\nCoordenadas: ${lat.toFixed(5)}, ${lng.toFixed(5)}\nLink (Simulado): ${locationLink}`);
+    const shareText = `🚨 PMMG TÁTICO - Localização Compartilhada 🚨\n\n📍 Ponto: ${title}\n🔗 Link do Mapa: ${locationLink}\n\nCoord: ${lat.toFixed(5)}, ${lng.toFixed(5)}\n(Via Sistema Operacional PMMG)`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Localização Tática: ${title}`,
+          text: shareText,
+          url: locationLink,
+        });
+      } catch (error) {
+        console.error('Erro ao usar navigator.share:', error);
+        // Fallback para alert se o compartilhamento falhar ou for cancelado
+        alert(shareText);
+      }
+    } else {
+      // Fallback para desktop ou navegadores sem suporte
+      alert(shareText);
+    }
   }, []);
 
   // User Geolocation
