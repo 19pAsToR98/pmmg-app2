@@ -184,8 +184,9 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       const borderSize = 3;
       const innerSize = size - 2 * borderSize;
       
+      // CORREÇÃO: Adicionando xmlns:xlink e usando xlink:href
       const svg = `
-        <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+        <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
           <!-- Borda colorida (Status) -->
           <circle cx="${size / 2}" cy="${size / 2}" r="${size / 2 - 1}" fill="none" stroke="${colorHex}" stroke-width="${borderSize}"/>
           <!-- Imagem do Suspeito (Clip Path) -->
@@ -194,8 +195,10 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               <circle cx="${size / 2}" cy="${size / 2}" r="${innerSize / 2}"/>
             </clipPath>
           </defs>
+          <!-- Fallback background in case image fails -->
+          <rect x="${borderSize}" y="${borderSize}" width="${innerSize}" height="${innerSize}" fill="#cccccc" clip-path="url(#circleClip)"/>
           <image 
-            href="${suspect.photoUrl}" 
+            xlink:href="${suspect.photoUrl}" 
             x="${borderSize}" 
             y="${borderSize}" 
             width="${innerSize}" 
