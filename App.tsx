@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Screen, Suspect, UserRank, CustomMarker, Officer, Chat, ChatMessage, Contact, ContactStatus, UserAvatar } from './types';
+import { Screen, Suspect, UserRank, CustomMarker, Officer, Chat, ChatMessage, Contact, ContactStatus, UserAvatar, Group, GroupPost } from './types';
 import WelcomeScreen from './pages/WelcomeScreen'; // Renomeado
 import Dashboard from './pages/Dashboard';
 import SuspectRegistry from './pages/SuspectRegistry';
 import SuspectProfile from './pages/SuspectProfile';
-import TacticalChatList from './pages/TacticalChatList';
 import TacticalChatRoom from './pages/TacticalChatRoom';
 import AITools from './pages/AITools';
 import RequestAccess from './pages/RequestAccess';
@@ -15,7 +14,10 @@ import SuspectsManagement from './pages/SuspectsManagement'; // Novo componente
 import PlateConsultation from './pages/PlateConsultation'; // NOVO
 import VoiceReport from './pages/VoiceReport'; // NOVO
 import Store from './pages/Store'; // NOVO: Loja
-import ProfileSettings from './pages/ProfileSettings'; // Mantendo a importação para evitar erro de referência no Dashboard, mas removendo o roteamento principal.
+import ProfileSettings from './pages/ProfileSettings';
+import GroupsList from './pages/GroupsList'; // NOVO: Lista de Grupos
+import GroupCreation from './pages/GroupCreation'; // NOVO: Criação de Grupo
+import GroupDetail from './pages/GroupDetail'; // NOVO: Detalhe do Grupo
 
 const INITIAL_SUSPECTS: Suspect[] = [
   {
@@ -184,6 +186,34 @@ const MOCK_CHATS: Chat[] = [
   },
 ];
 
+const MOCK_GROUPS: Group[] = [
+  {
+    id: 'g1',
+    name: 'Patrulha Tática 402',
+    description: 'Grupo de coordenação da Patrulha 402, 5º BPM.',
+    adminIds: ['EU'],
+    memberIds: ['EU', 'o1', 'o3'],
+    pendingInviteIds: [],
+    groupPhotoUrl: 'https://picsum.photos/seed/patrulha/100/100',
+    posts: [
+      {
+        id: 'p1',
+        suspectId: '1', // Ricardo "Sombra" Silveira
+        authorId: 'o1',
+        observation: 'Suspeito visto na área de cobertura. Prioridade máxima.',
+        timestamp: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+      },
+      {
+        id: 'p2',
+        suspectId: '5', // Patrícia Mendes
+        authorId: 'EU',
+        observation: 'Adicionando ficha de Patrícia. Possível rota de fuga para Contagem.',
+        timestamp: new Date().toISOString(), // Now
+      }
+    ]
+  }
+];
+
 // ATUALIZADO: Usando uma imagem de perfil genérica para o usuário
 const DEFAULT_USER_AVATAR: UserAvatar = { 
   name: 'Oficial PMMG', 
@@ -202,15 +232,15 @@ const App: React.FC = () => {
   const [suspects, setSuspects] = useState<Suspect[]>(INITIAL_SUSPECTS);
   const [customMarkers, setCustomMarkers] = useState<CustomMarker[]>(INITIAL_CUSTOM_MARKERS);
   const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null);
-  const [editingSuspectId, setEditingSuspectId] = useState<string | null>(null); // NOVO ESTADO PARA EDIÇÃO
+  const [editingSuspectId, setEditingSuspectId] = useState<string | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
   
   // User Profile States
   const [userRank, setUserRank] = useState<UserRank>('Soldado');
   const [userName, setUserName] = useState('Rodrigo Alves');
   const [userCity, setUserCity] = useState('Belo Horizonte');
-  const [isRegistered, setIsRegistered] = useState(false); // New state for registration status
-  const [userAvatar, setUserAvatar] = useState<UserAvatar>(DEFAULT_USER_AVATAR); // User's avatar (fixed for now)
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [userAvatar, setUserAvatar] = useState<UserAvatar>(DEFAULT_USER_AVATAR);
   
   // AI Avatar State (Selected during onboarding)
   const [aiAvatar, setAiAvatar] = useState<UserAvatar>(DEFAULT_AI_AVATAR);
@@ -223,16 +253,23 @@ const App: React.FC = () => {
   const [chats, setChats] = useState<Chat[]>(MOCK_CHATS);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [contacts, setContacts] = useState<Contact[]>(INITIAL_CONTACTS);
+  
+  // Group States
+  const [groups, setGroups] = useState<Group[]>(MOCK_GROUPS);
+  const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
 
   const navigateTo = (screen: Screen, center?: [number, number]) => {
     if (center) setMapCenter(center);
     else if (screen !== 'map') setMapCenter(null);
     setCurrentScreen(screen);
     
-    // Limpa o ID de edição ao navegar para outra tela que não seja o registro
     if (screen !== 'registry') {
       setEditingSuspectId(null);
     }
+    
+    // Limpa IDs ativos ao sair das telas de detalhe
+    if (screen !== 'chatRoom') setActiveChatId(null);
+    if (screen !== 'groupDetail') setActiveGroupId(null);
   };
   
   const navigateToSuspectsManagement = (statusFilter: Suspect['status'] | 'Todos' = 'Todos') => {
@@ -240,21 +277,56 @@ const App: React.FC = () => {
     navigateTo('suspectsManagement');
   };
 
+  // --- Lógica de Grupos ---
+  
+  const handleCreateGroup = (newGroupData: Omit<Group, 'id' | 'posts'>) => {
+    const newGroup: Group = {
+      ...newGroupData,
+      id: `g${Date.now()}`,
+      posts: [],
+    };
+    setGroups(prev => [...prev, newGroup]);
+    alert(`Grupo ${newGroup.name} criado com sucesso! Convites enviados.`);
+  };
+  
+  const handleShareSuspect = (groupId: string, suspectId: string, observation: string) => {
+    const newPost: GroupPost = {
+      id: `p${Date.now()}`,
+      suspectId,
+      authorId: 'EU', // Current user
+      observation,
+      timestamp: new Date().toISOString(),
+    };
+    
+    setGroups(prev => prev.map(group => {
+      if (group.id === groupId) {
+        // Adiciona o novo post no início para que seja o mais recente
+        return { ...group, posts: [newPost, ...group.posts] };
+      }
+      return group;
+    }));
+    alert('Ficha compartilhada no grupo com sucesso!');
+  };
+  
+  const openGroup = (groupId: string) => {
+    setActiveGroupId(groupId);
+    navigateTo('groupDetail');
+  };
+
+  // --- Lógica de Chats Individuais ---
+
   const openChat = (chatId: string) => {
     setActiveChatId(chatId);
     navigateTo('chatRoom');
   };
-
-  // --- Lógica de Contatos ---
 
   const getContactStatus = (officerId: string): ContactStatus | null => {
     return contacts.find(c => c.officerId === officerId)?.status || null;
   };
 
   const onSendRequest = (officerId: string) => {
-    if (getContactStatus(officerId)) return; // Já existe um relacionamento
+    if (getContactStatus(officerId)) return;
     
-    // Simula o envio de uma solicitação (o usuário atual é o requerente)
     const newContact: Contact = { officerId, status: 'Pending', isRequester: true };
     setContacts(prev => [...prev, newContact]);
     alert(`Solicitação de contato enviada para ${officers.find(o => o.id === officerId)?.name}. (Simulação)`);
@@ -265,7 +337,6 @@ const App: React.FC = () => {
       c.officerId === officerId ? { ...c, status: 'Accepted', isRequester: false } : c
     ));
     
-    // Cria o chat individual imediatamente após aceitar
     startIndividualChat(officerId, true);
     alert(`Contato com ${officers.find(o => o.id === officerId)?.name} aceito!`);
   };
@@ -283,7 +354,6 @@ const App: React.FC = () => {
       return;
     }
 
-    // 1. Verificar se já existe um chat individual com este oficial
     const existingChat = chats.find(chat => 
       chat.type === 'individual' && (chat.participants.includes(officerId) && chat.participants.includes('EU'))
     );
@@ -293,7 +363,6 @@ const App: React.FC = () => {
       return;
     }
 
-    // 2. Criar um novo chat
     const officer = officers.find(o => o.id === officerId);
     if (!officer) return;
 
@@ -301,7 +370,7 @@ const App: React.FC = () => {
       id: `c_${officerId}`,
       type: 'individual',
       name: `${officer.rank}. ${officer.name.split(' ')[1]} (${officer.unit})`,
-      participants: [officerId, 'EU'], // 'EU' representa o usuário logado
+      participants: [officerId, 'EU'],
       lastMessage: 'Inicie a conversa tática.',
       lastTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       unreadCount: 0,
@@ -314,8 +383,6 @@ const App: React.FC = () => {
     openChat(newChat.id);
   };
   
-  // Removendo onJoinGroup e onSaveGroup
-
   // --- Lógica de Dados ---
 
   const addSuspect = (newSuspect: Suspect) => {
@@ -326,14 +393,13 @@ const App: React.FC = () => {
   const updateSuspect = (updatedSuspect: Suspect) => {
     setSuspects(prev => prev.map(s => s.id === updatedSuspect.id ? updatedSuspect : s));
     setEditingSuspectId(null);
-    setSelectedSuspectId(updatedSuspect.id); // Volta para o perfil atualizado
+    setSelectedSuspectId(updatedSuspect.id);
     navigateTo('profile');
     alert(`Ficha de ${updatedSuspect.name} atualizada com sucesso.`);
   };
 
   const deleteSuspects = (ids: string[]) => {
     setSuspects(prev => prev.filter(s => !ids.includes(s.id)));
-    // Também remover marcadores customizados se houver IDs correspondentes (embora improvável)
     setCustomMarkers(prev => prev.filter(m => !ids.includes(m.id)));
   };
 
@@ -361,13 +427,11 @@ const App: React.FC = () => {
     navigateTo('registry');
   };
   
-  // ATUALIZADO: Agora salva o avatar no estado aiAvatar
   const handleOnboardingComplete = (name: string, rank: UserRank, city: string, avatar: UserAvatar) => {
     setUserName(name);
     setUserRank(rank);
     setUserCity(city);
-    setAiAvatar(avatar); // Salva o avatar selecionado para a IA
-    // Mantemos o userAvatar como DEFAULT_USER_AVATAR
+    setAiAvatar(avatar);
     navigateTo('dashboard');
   };
 
@@ -379,7 +443,7 @@ const App: React.FC = () => {
           messages: [...chat.messages, message],
           lastMessage: message.text || (message.type === 'alert' ? 'Alerta Tático' : 'Imagem'),
           lastTime: message.time,
-          unreadCount: 0, // Clear unread count when sending a message
+          unreadCount: 0,
         };
       }
       return chat;
@@ -389,11 +453,15 @@ const App: React.FC = () => {
   const selectedSuspect = suspects.find(s => s.id === selectedSuspectId) || suspects[0];
   const suspectToEdit = suspects.find(s => s.id === editingSuspectId);
   const activeChat = chats.find(c => c.id === activeChatId);
+  const activeGroup = groups.find(g => g.id === activeGroupId);
   
   // Chats que o usuário participa (AGORA APENAS INDIVIDUAIS ACEITOS)
   const userChats = chats.filter(chat => 
     chat.type === 'individual' && contacts.some(c => c.officerId === chat.participants.find(p => p !== 'EU') && c.status === 'Accepted')
   );
+  
+  // Grupos que o usuário é membro
+  const userGroups = groups.filter(g => g.memberIds.includes('EU'));
   
   // Filtra oficiais que são contatos aceitos e estão online
   const acceptedOnlineOfficers = officers.filter(o => 
@@ -414,8 +482,8 @@ const App: React.FC = () => {
         <SuspectRegistry 
           navigateTo={navigateTo} 
           onSave={addSuspect} 
-          onUpdate={updateSuspect} // Passando a função de atualização
-          currentSuspect={suspectToEdit} // Passando o suspeito a ser editado
+          onUpdate={updateSuspect}
+          currentSuspect={suspectToEdit}
           allSuspects={suspects} 
         />
       )}
@@ -426,7 +494,7 @@ const App: React.FC = () => {
           navigateTo={navigateTo} 
           allSuspects={suspects} 
           onOpenProfile={openProfile}
-          onEdit={handleEditProfile} // Passando a função de edição
+          onEdit={handleEditProfile}
         />
       )}
       {currentScreen === 'suspectsManagement' && (
@@ -435,28 +503,54 @@ const App: React.FC = () => {
           onOpenProfile={openProfile}
           suspects={suspects}
           initialStatusFilter={initialSuspectFilter}
-          deleteSuspects={deleteSuspects} // Passando a função de exclusão
+          deleteSuspects={deleteSuspects}
         />
       )}
-      {currentScreen === 'chatList' && (
-        <TacticalChatList 
+      
+      {/* NOVO: Grupos List */}
+      {currentScreen === 'groupsList' && (
+        <GroupsList 
           navigateTo={navigateTo} 
+          userGroups={userGroups}
           userChats={userChats} 
-          officers={acceptedOnlineOfficers} 
+          officers={officers} 
+          allSuspects={suspects}
+          openGroup={openGroup}
           openChat={openChat} 
           pendingRequestsCount={contacts.filter(c => c.status === 'Pending' && !c.isRequester).length}
         />
       )}
+      
+      {/* NOVO: Criação de Grupo */}
+      {currentScreen === 'groupCreation' && (
+        <GroupCreation
+          navigateTo={navigateTo}
+          allOfficers={officers}
+          onCreateGroup={handleCreateGroup}
+        />
+      )}
+      
+      {/* NOVO: Detalhe do Grupo */}
+      {currentScreen === 'groupDetail' && activeGroup && (
+        <GroupDetail
+          navigateTo={navigateTo}
+          group={activeGroup}
+          allOfficers={officers}
+          allSuspects={suspects}
+          onOpenProfile={openProfile}
+          onShareSuspect={handleShareSuspect}
+        />
+      )}
+      
       {currentScreen === 'chatRoom' && activeChat && (
         <TacticalChatRoom 
           chat={activeChat} 
-          onBack={() => navigateTo('chatList')} 
+          onBack={() => navigateTo('groupsList')} // Volta para a lista de grupos/chats
           onSendMessage={handleSendMessage}
         />
       )}
       {currentScreen === 'aiTools' && <AITools navigateTo={navigateTo} userRank={userRank} aiAvatar={aiAvatar} />}
       
-      {/* NOVAS TELAS DE IA */}
       {currentScreen === 'plateConsultation' && (
         <PlateConsultation 
           navigateTo={navigateTo} 
@@ -470,14 +564,12 @@ const App: React.FC = () => {
         />
       )}
       
-      {/* NOVO: Tela da Loja */}
       {currentScreen === 'store' && (
         <Store 
           navigateTo={navigateTo} 
         />
       )}
       
-      {/* REMOVIDO: ProfileSettings não está mais na BottomNav, mas mantemos o componente caso seja acessado de outra forma (ex: Dashboard) */}
       {currentScreen === 'profileSettings' && (
         <ProfileSettings 
           navigateTo={navigateTo} 

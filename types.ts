@@ -1,4 +1,4 @@
-export type Screen = 'welcomeScreen' | 'dashboard' | 'registry' | 'profile' | 'chatList' | 'chatRoom' | 'aiTools' | 'requestAccess' | 'store' | 'map' | 'contacts' | 'groupManagement' | 'onboardingSetup' | 'suspectsManagement' | 'plateConsultation' | 'voiceReport';
+export type Screen = 'welcomeScreen' | 'dashboard' | 'registry' | 'profile' | 'groupsList' | 'chatRoom' | 'aiTools' | 'requestAccess' | 'store' | 'map' | 'contacts' | 'groupCreation' | 'groupDetail' | 'onboardingSetup' | 'suspectsManagement' | 'plateConsultation' | 'voiceReport';
 
 export type UserRank = 'Soldado' | 'Cabo' | '3º Sargento' | '2º Sargento' | '1º Sargento' | 'Subtenente';
 
@@ -83,6 +83,25 @@ export interface Officer {
   unit: string;
   photoUrl: string;
   isOnline: boolean;
+}
+
+export interface GroupPost {
+  id: string;
+  suspectId: string; // ID da ficha compartilhada
+  authorId: string; // ID do oficial que compartilhou
+  observation: string; // Observação do autor
+  timestamp: string; // Data e hora do post (ISO string or formatted string)
+}
+
+export interface Group {
+  id: string;
+  name: string;
+  description: string;
+  adminIds: string[];
+  memberIds: string[]; // Includes admins
+  pendingInviteIds: string[]; // Officers invited but not yet joined
+  posts: GroupPost[];
+  groupPhotoUrl?: string;
 }
 
 export interface GroupParticipant extends Officer {
