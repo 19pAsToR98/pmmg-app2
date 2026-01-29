@@ -1,4 +1,4 @@
-export type Screen = 'welcomeScreen' | 'dashboard' | 'registry' | 'profile' | 'chatList' | 'chatRoom' | 'aiTools' | 'requestAccess' | 'profileSettings' | 'map' | 'contacts' | 'groupManagement' | 'onboardingSetup' | 'suspectsManagement' | 'plateConsultation' | 'voiceReport';
+export type Screen = 'welcomeScreen' | 'dashboard' | 'registry' | 'profile' | 'chatList' | 'chatRoom' | 'aiTools' | 'requestAccess' | 'store' | 'map' | 'contacts' | 'groupManagement' | 'onboardingSetup' | 'suspectsManagement' | 'plateConsultation' | 'voiceReport';
 
 export type UserRank = 'Soldado' | 'Cabo' | '3º Sargento' | '2º Sargento' | '1º Sargento' | 'Subtenente';
 

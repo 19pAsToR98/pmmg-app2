@@ -8,13 +8,14 @@ import TacticalChatList from './pages/TacticalChatList';
 import TacticalChatRoom from './pages/TacticalChatRoom';
 import AITools from './pages/AITools';
 import RequestAccess from './pages/RequestAccess';
-import ProfileSettings from './pages/ProfileSettings';
 import TacticalMap from './pages/TacticalMap';
 import TacticalContacts from './pages/TacticalContacts';
 import OnboardingSetup from './pages/OnboardingSetup'; // Novo componente
 import SuspectsManagement from './pages/SuspectsManagement'; // Novo componente
 import PlateConsultation from './pages/PlateConsultation'; // NOVO
 import VoiceReport from './pages/VoiceReport'; // NOVO
+import Store from './pages/Store'; // NOVO: Loja
+import ProfileSettings from './pages/ProfileSettings'; // Mantendo a importação para evitar erro de referência no Dashboard, mas removendo o roteamento principal.
 
 const INITIAL_SUSPECTS: Suspect[] = [
   {
@@ -469,6 +470,14 @@ const App: React.FC = () => {
         />
       )}
       
+      {/* NOVO: Tela da Loja */}
+      {currentScreen === 'store' && (
+        <Store 
+          navigateTo={navigateTo} 
+        />
+      )}
+      
+      {/* REMOVIDO: ProfileSettings não está mais na BottomNav, mas mantemos o componente caso seja acessado de outra forma (ex: Dashboard) */}
       {currentScreen === 'profileSettings' && (
         <ProfileSettings 
           navigateTo={navigateTo} 
@@ -478,6 +487,7 @@ const App: React.FC = () => {
           userAvatar={userAvatar}
         />
       )}
+      
       {currentScreen === 'map' && (
         <TacticalMap 
           navigateTo={navigateTo} 

@@ -10,9 +10,9 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeScreen, navigateTo }) => {
   const tabs = [
     { id: 'dashboard', label: 'Painel', icon: 'dashboard' },
     { id: 'map', label: 'Mapa', icon: 'map' },
-    { id: 'aiTools', label: 'Assistente', icon: 'psychology' }, // Removido 'badge: 0'
+    { id: 'aiTools', label: 'Assistente', icon: 'psychology' }, 
     { id: 'chatList', label: 'Tropa', icon: 'groups' },
-    { id: 'profileSettings', label: 'Perfil', icon: 'person' },
+    { id: 'store', label: 'Loja', icon: 'store' }, // NOVO: Loja
   ];
 
   // Nota: O badge de alertas (registry) foi removido, mas mantive a estrutura para o caso de futuros badges.
