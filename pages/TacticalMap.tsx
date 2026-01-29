@@ -25,7 +25,8 @@ const ZOOM_THRESHOLD = 15; // Nível de zoom para alternar para fotos
 const DEFAULT_CENTER = { lat: -19.9167, lng: -43.9345 };
 
 const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenProfile, initialCenter, customMarkers, addCustomMarker, updateCustomMarker, deleteCustomMarker }) => {
-  const mapRef = useRef<google.maps.Map | null>(mapRef);
+  // CORREÇÃO: Inicializando useRef com null
+  const mapRef = useRef<google.maps.Map | null>(null);
   
   const [userPos, setUserPos] = useState<{ lat: number, lng: number } | null>(null);
   const [activeFilter, setActiveFilter] = useState<MapFilter>('Todos');
