@@ -285,9 +285,10 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           url: locationLink,
         });
       } catch (error) {
-        console.error('Erro ao usar navigator.share:', error);
-        // Fallback para alert se o compartilhamento falhar ou for cancelado
-        alert(shareText);
+        // Se o usuário cancelar, ou houver erro, apenas logamos.
+        if (error instanceof Error && error.name !== 'AbortError') {
+            console.error('Erro ao usar navigator.share:', error);
+        }
       }
     } else {
       // Fallback para desktop ou navegadores sem suporte
