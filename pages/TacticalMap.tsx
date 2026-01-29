@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { Screen, Suspect, CustomMarker } from '../types';
 import BottomNav from '../components/BottomNav';
 import GoogleMapWrapper from '../components/GoogleMapWrapper';
-import { MarkerF, InfoWindowF } from '@react-google-maps/api';
+import { MarkerF, InfoWindowF, OverlayViewF, OverlayView } from '@react-google-maps/api';
 import { ICON_PATHS } from '../utils/iconPaths';
 
 interface TacticalMapProps {
@@ -23,6 +23,129 @@ const ZOOM_THRESHOLD = 15; // Nível de zoom para alternar para fotos
 
 // Default center for BH
 const DEFAULT_CENTER = { lat: -19.9167, lng: -43.9345 };
+
+// ✅ NOVO COMPONENTE: Marcador de Suspeito com Foto/Ícone
+const SuspectPhotoMarker = memo<{
+  suspect: Suspect;
+  position: { lat: number; lng: number };
+  onClick: () => void;
+  usePhotoMarker: boolean;
+  locationFilter: LocationFilter;
+}>(({ suspect, position, onClick, usePhotoMarker, locationFilter }) => {
+  
+  // Determinar cor da borda baseado no status
+  const getBorderColorClass = () => {
+    switch (suspect.status) {
+      case 'Foragido': return 'border-pmmg-red';
+      case 'Suspeito': return 'border-pmmg-yellow';
+      default: return 'border-pmmg-navy';
+    }
+  };
+
+  // Ícone baseado no filtro de localização
+  const getIconName = () => {
+    if (locationFilter === 'approach') return 'pin_drop';
+    return suspect.status === 'Foragido' ? 'priority_high' : 'warning';
+  };
+
+  return (
+    <OverlayViewF
+      position={position}
+      mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+      getPixelPositionOffset={() => ({ x: 0, y: 0 })}
+    >
+      <div 
+        onClick={onClick}
+        style={{ cursor: 'pointer' }}
+        className="relative group"
+      >
+        {usePhotoMarker ? (
+          // ✅ FOTO COM BORDA COLORIDA (como no Leaflet)
+          <div 
+            className={`w-10 h-10 bg-white shadow-xl ${getBorderColorClass()} border-4 overflow-hidden ring-2 ring-white/50 rounded-lg`}
+            title={suspect.name}
+          >
+            <img 
+              src={suspect.photoUrl} 
+              alt={suspect.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        ) : (
+          // ✅ ÍCONE SIMPLES (como no Leaflet)
+          <div 
+            className={`w-6 h-6 rounded-full border-2 border-white flex items-center justify-center shadow-md ${
+              suspect.status === 'Foragido' ? 'bg-pmmg-red' :
+              suspect.status === 'Suspeito' ? 'bg-pmmg-yellow' : 'bg-pmmg-navy'
+            }`}
+            title={suspect.name}
+          >
+            <span className="material-symbols-outlined text-white text-[14px] fill-icon">
+              {getIconName()}
+            </span>
+          </div>
+        )}
+      </div>
+    </OverlayViewF>
+  );
+});
+
+// ✅ NOVO COMPONENTE: Marcador Customizado com HTML
+const CustomMarkerComponent = memo<{
+  markerData: CustomMarker;
+  position: { lat: number; lng: number };
+  onClick: () => void;
+}>(({ markerData, position, onClick }) => {
+  return (
+    <OverlayViewF
+      position={position}
+      mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+      getPixelPositionOffset={() => ({ x: 0, y: 0 })}
+    >
+      <div 
+        onClick={onClick}
+        style={{ cursor: 'pointer' }}
+        className="relative group"
+      >
+        <div 
+          className={`w-8 h-8 ${markerData.color} rounded-full border-2 border-white flex items-center justify-center shadow-lg`}
+          title={markerData.title}
+        >
+          <span className="material-symbols-outlined text-white text-[16px] fill-icon">
+            {markerData.icon}
+          </span>
+        </div>
+      </div>
+    </OverlayViewF>
+  );
+});
+
+// ✅ NOVO COMPONENTE: Marcador do Usuário com HTML
+const UserMarkerComponent = memo<{
+  position: { lat: number; lng: number };
+  onClick: () => void;
+}>(({ position, onClick }) => {
+  return (
+    <OverlayViewF
+      position={position}
+      mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+      getPixelPositionOffset={() => ({ x: 0, y: 0 })}
+    >
+      <div 
+        onClick={onClick}
+        style={{ cursor: 'pointer' }}
+        className="relative group"
+      >
+        <div 
+          className="w-8 h-8 bg-pmmg-blue rounded-full border-4 border-white flex items-center justify-center shadow-lg ring-2 ring-pmmg-blue/50"
+          title="Você (Oficial)"
+        >
+          <span className="material-symbols-outlined text-white text-[18px]">person</span>
+        </div>
+      </div>
+    </OverlayViewF>
+  );
+});
 
 const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenProfile, initialCenter, customMarkers, addCustomMarker, updateCustomMarker, deleteCustomMarker }) => {
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -51,7 +174,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   const handleMapLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
     map.addListener('zoom_changed', () => {
-      setCurrentZoom(map.getZoom());
+      setCurrentZoom(map.getZoom() ?? 14);
     });
     
     // Se houver um initialCenter, abre o InfoWindow correspondente
@@ -131,6 +254,9 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setUserPos({ lat: position.coords.latitude, lng: position.coords.longitude });
+        },
+        (error) => {
+          console.error('Erro ao obter localização:', error);
         }
       );
     }
@@ -141,96 +267,6 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       mapRef.current.setCenter(userPos);
       mapRef.current.setZoom(16);
     }
-  };
-
-  const getSuspectIcon = (suspect: Suspect) => {
-    if (typeof window === 'undefined' || !window.google || !window.google.maps) return undefined; // Safety check
-
-    if (usePhotoMarker) {
-      // Photo Marker (Zoomed In)
-      return {
-        url: suspect.photoUrl,
-        scaledSize: new window.google.maps.Size(40, 40),
-        origin: new window.google.maps.Point(0, 0),
-        anchor: new window.google.maps.Point(20, 20),
-        labelOrigin: new window.google.maps.Point(20, 45),
-      };
-    } else {
-      // Simple Icon Marker (Zoomed Out)
-      let colorClass: string;
-      let iconName: string;
-      let textColor: string;
-
-      switch (suspect.status) {
-        case 'Foragido':
-          colorClass = '#e31c1c'; // pmmg-red
-          iconName = 'priority_high';
-          textColor = '#ffffff';
-          break;
-        case 'Suspeito':
-          colorClass = '#ffcc00'; // pmmg-yellow
-          iconName = 'warning';
-          textColor = '#002147'; // pmmg-navy (para contraste no amarelo)
-          break;
-        case 'Preso':
-          colorClass = '#0047ab'; // pmmg-blue
-          iconName = 'lock';
-          textColor = '#ffffff';
-          break;
-        case 'CPF Cancelado':
-          colorClass = '#475569'; // slate-600
-          iconName = 'cancel';
-          textColor = '#ffffff';
-          break;
-        default:
-          colorClass = '#002147'; // pmmg-navy
-          iconName = 'person';
-          textColor = '#ffffff';
-      }
-      
-      // Se o filtro de localização for 'approach', usamos 'pin_drop'
-      if (locationFilter === 'approach') {
-        iconName = 'pin_drop';
-      }
-      
-      const pathData = ICON_PATHS[iconName] || ICON_PATHS['warning']; // Fallback to warning path
-      
-      // Usando SVG Path (24x24) - REGRA DE OURO 1
-      const svg = `
-        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="12" r="10" fill="${colorClass}" stroke="#ffffff" stroke-width="2"/>
-          <path d="${pathData}" fill="${textColor}" transform="translate(4 4) scale(0.7)"/>
-        </svg>
-      `;
-      
-      return {
-        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-        scaledSize: new window.google.maps.Size(24, 24),
-        anchor: new window.google.maps.Point(12, 12),
-      };
-    }
-  };
-  
-  const getCustomMarkerIcon = (markerData: CustomMarker) => {
-    if (typeof window === 'undefined' || !window.google || !window.google.maps) return undefined; // Safety check
-
-    const colorHex = markerData.color.replace('bg-pmmg-gold', '#d4af37').replace('bg-pmmg-red', '#e31c1c').replace('bg-pmmg-blue', '#0047ab').replace('bg-green-500', '#22c55e');
-    
-    const pathData = ICON_PATHS[markerData.icon] || ICON_PATHS['flag']; // Fallback to flag path
-    
-    // Usando SVG Path (32x32) - REGRA DE OURO 2
-    const svg = `
-      <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="16" cy="16" r="14" fill="${colorHex}" stroke="#ffffff" stroke-width="2"/>
-        <path d="${pathData}" fill="#ffffff" transform="translate(6 6) scale(0.75)"/>
-      </svg>
-    `;
-    
-    return {
-      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-      scaledSize: new window.google.maps.Size(32, 32),
-      anchor: new window.google.maps.Point(16, 16),
-    };
   };
 
   const activeMarkerData = newMarkerData || editingMarker;
@@ -275,38 +311,29 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           onLoad={handleMapLoad}
           onClick={handleMapClick}
           options={{
-            mapTypeId: 'roadmap', // Alterado de 'hybrid' para 'roadmap'
+            mapTypeId: 'roadmap',
           }}
         >
-          {/* Marcador do Usuário (Oficial) - 32x32, REGRA DE OURO 2 */}
+          {/* ✅ MARCADOR DO USUÁRIO COM HTML COMPLETO */}
           {userPos && (
-            <MarkerF
-              position={userPos}
-              icon={{
-                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                  <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="16" cy="16" r="14" fill="#0047ab" stroke="#ffffff" stroke-width="2"/>
-                    <path d="${ICON_PATHS['person']}" fill="#ffffff" transform="translate(6 6) scale(0.75)"/>
-                  </svg>
-                `),
-                scaledSize: new window.google.maps.Size(32, 32),
-                anchor: new window.google.maps.Point(16, 16),
-              }}
-              title="Você (Oficial)"
-              onClick={() => setActiveInfoWindow('user-pos')}
-            />
-          )}
-          
-          {activeInfoWindow === 'user-pos' && userPos && (
-            <InfoWindowF position={userPos} onCloseClick={() => setActiveInfoWindow(null)}>
-              <div className="p-2">
-                <p className="font-bold text-pmmg-navy text-sm">Você (Oficial)</p>
-                <p className="text-[10px] text-slate-500">Localização Atual</p>
-              </div>
-            </InfoWindowF>
+            <>
+              <UserMarkerComponent
+                position={userPos}
+                onClick={() => setActiveInfoWindow('user-pos')}
+              />
+              
+              {activeInfoWindow === 'user-pos' && (
+                <InfoWindowF position={userPos} onCloseClick={() => setActiveInfoWindow(null)}>
+                  <div className="p-2">
+                    <p className="font-bold text-pmmg-navy text-sm">Você (Oficial)</p>
+                    <p className="text-[10px] text-slate-500">Localização Atual</p>
+                  </div>
+                </InfoWindowF>
+              )}
+            </>
           )}
 
-          {/* Marcadores de Suspeitos - 24x24, REGRA DE OURO 1 */}
+          {/* ✅ MARCADORES DE SUSPEITOS COM FOTOS/ÍCONES */}
           {filteredSuspects.map(suspect => {
             let lat: number | undefined;
             let lng: number | undefined;
@@ -320,7 +347,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               locationType = 'Última Localização';
             } else if (locationFilter === 'approach' && suspect.approachLat && suspect.approachLng) {
               lat = suspect.approachLat;
-              lng = suspect.lng;
+              lng = suspect.approachLng; // ✅ CORRIGIDO: era suspect.lng
               locationName = suspect.approachAddress;
               locationType = 'Endereço de Abordagem';
             }
@@ -331,18 +358,22 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               
               return (
                 <React.Fragment key={markerId}>
-                  <MarkerF
+                  {/* ✅ USANDO OverlayViewF COM HTML COMPLETO */}
+                  <SuspectPhotoMarker
+                    suspect={suspect}
                     position={position}
-                    icon={getSuspectIcon(suspect)}
-                    title={suspect.name}
                     onClick={() => setActiveInfoWindow(markerId)}
+                    usePhotoMarker={usePhotoMarker}
+                    locationFilter={locationFilter}
                   />
                   
                   {activeInfoWindow === markerId && (
                     <InfoWindowF position={position} onCloseClick={() => setActiveInfoWindow(null)}>
                       <div className="p-2 min-w-[150px]">
                         <div className="flex items-center gap-2 mb-2">
-                          <div className="w-10 h-10 rounded bg-slate-200 overflow-hidden"><img src={suspect.photoUrl} className="w-full h-full object-cover" alt={suspect.name} /></div>
+                          <div className="w-10 h-10 rounded bg-slate-200 overflow-hidden">
+                            <img src={suspect.photoUrl} className="w-full h-full object-cover" alt={suspect.name} />
+                          </div>
                           <div>
                             <p className="font-bold text-[10px] text-pmmg-navy uppercase leading-tight">{suspect.name}</p>
                             <p className="text-[9px] text-pmmg-blue font-bold uppercase">{locationType}</p>
@@ -372,17 +403,16 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             return null;
           })}
 
-          {/* Marcadores Personalizados - 32x32, REGRA DE OURO 2 */}
+          {/* ✅ MARCADORES PERSONALIZADOS COM HTML COMPLETO */}
           {customMarkers.map(markerData => {
             const position = { lat: markerData.lat, lng: markerData.lng };
             const markerId = `custom-${markerData.id}`;
             
             return (
               <React.Fragment key={markerId}>
-                <MarkerF
+                <CustomMarkerComponent
+                  markerData={markerData}
                   position={position}
-                  icon={getCustomMarkerIcon(markerData)}
-                  title={markerData.title}
                   onClick={() => setActiveInfoWindow(markerId)}
                 />
                 
@@ -418,7 +448,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             );
           })}
           
-          {/* Marcador de Adição (40x40) - Usando escala 0.75 e translate(11 11) */}
+          {/* Marcador de Adição (40x40) - Mantido como SVG */}
           {isAddingMarker && (
             <MarkerF
               position={center}
@@ -430,7 +460,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                   </svg>
                 `),
                 scaledSize: new window.google.maps.Size(40, 40),
-                anchor: new window.google.maps.Point(20, 40), // Anchor slightly lower for pin effect
+                anchor: new window.google.maps.Point(20, 40),
               }}
               title="Clique no mapa para posicionar"
             />
