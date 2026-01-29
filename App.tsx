@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Screen, Suspect, UserRank, CustomMarker, Officer, Chat, ChatMessage, Contact, ContactStatus, UserAvatar, Group, GroupPost } from './types';
+import { Screen, Suspect, UserRank, CustomMarker, Officer, Contact, ContactStatus, UserAvatar, Group, GroupPost } from './types';
 import WelcomeScreen from './pages/WelcomeScreen'; // Renomeado
 import Dashboard from './pages/Dashboard';
 import SuspectRegistry from './pages/SuspectRegistry';
 import SuspectProfile from './pages/SuspectProfile';
-import TacticalChatRoom from './pages/TacticalChatRoom';
 import AITools from './pages/AITools';
 import RequestAccess from './pages/RequestAccess';
 import TacticalMap from './pages/TacticalMap';
@@ -168,24 +167,6 @@ const INITIAL_CONTACTS: Contact[] = [
   { officerId: 'o2', status: 'Pending', isRequester: false }, // o2 sent a request to 'EU'
 ];
 
-const MOCK_CHATS: Chat[] = [
-  { 
-    id: 'c_o1', // Chat individual com o1 (Aceito)
-    type: 'individual', 
-    name: 'Sgt. Douglas (1º BPM)', 
-    participants: ['o1', 'EU'], 
-    lastMessage: 'Relatório de averiguação K9 concluído no Ponto Central.', 
-    lastTime: '12:30', 
-    unreadCount: 1, 
-    icon: 'person', 
-    active: true,
-    messages: [
-      { id: 'm3', sender: 'Eu', initials: 'EU', text: 'Sargento, o relatório foi enviado.', time: '12:25', isMe: true, type: 'text' },
-      { id: 'm4', sender: 'Sgt. Douglas', initials: 'SD', text: 'Relatório de averiguação K9 concluído no Ponto Central.', time: '12:30', isMe: false, type: 'text' },
-    ]
-  },
-];
-
 const MOCK_GROUPS: Group[] = [
   {
     id: 'g1',
@@ -248,10 +229,8 @@ const App: React.FC = () => {
   // Suspect Management Filter State
   const [initialSuspectFilter, setInitialSuspectFilter] = useState<Suspect['status'] | 'Todos'>('Todos');
   
-  // Chat/Social States
+  // Social States (Only Officers and Contacts remain)
   const [officers, setOfficers] = useState<Officer[]>(MOCK_OFFICERS);
-  const [chats, setChats] = useState<Chat[]>(MOCK_CHATS);
-  const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [contacts, setContacts] = useState<Contact[]>(INITIAL_CONTACTS);
   
   // Group States
@@ -268,7 +247,6 @@ const App: React.FC = () => {
     }
     
     // Limpa IDs ativos ao sair das telas de detalhe
-    if (screen !== 'chatRoom') setActiveChatId(null);
     if (screen !== 'groupDetail') setActiveGroupId(null);
   };
   
@@ -313,12 +291,7 @@ const App: React.FC = () => {
     navigateTo('groupDetail');
   };
 
-  // --- Lógica de Chats Individuais ---
-
-  const openChat = (chatId: string) => {
-    setActiveChatId(chatId);
-    navigateTo('chatRoom');
-  };
+  // --- Lógica de Contatos (para convites de grupo) ---
 
   const getContactStatus = (officerId: string): ContactStatus | null => {
     return contacts.find(c => c.officerId === officerId)?.status || null;
@@ -337,50 +310,12 @@ const App: React.FC = () => {
       c.officerId === officerId ? { ...c, status: 'Accepted', isRequester: false } : c
     ));
     
-    startIndividualChat(officerId, true);
     alert(`Contato com ${officers.find(o => o.id === officerId)?.name} aceito!`);
   };
 
   const onRejectRequest = (officerId: string) => {
     setContacts(prev => prev.filter(c => c.officerId !== officerId));
     alert(`Solicitação de contato de ${officers.find(o => o.id === officerId)?.name} rejeitada.`);
-  };
-
-  const startIndividualChat = (officerId: string, forceCreation = false) => {
-    const status = getContactStatus(officerId);
-    
-    if (status !== 'Accepted' && !forceCreation) {
-      alert("Você só pode iniciar um chat individual com contatos aceitos.");
-      return;
-    }
-
-    const existingChat = chats.find(chat => 
-      chat.type === 'individual' && (chat.participants.includes(officerId) && chat.participants.includes('EU'))
-    );
-
-    if (existingChat) {
-      openChat(existingChat.id);
-      return;
-    }
-
-    const officer = officers.find(o => o.id === officerId);
-    if (!officer) return;
-
-    const newChat: Chat = {
-      id: `c_${officerId}`,
-      type: 'individual',
-      name: `${officer.rank}. ${officer.name.split(' ')[1]} (${officer.unit})`,
-      participants: [officerId, 'EU'],
-      lastMessage: 'Inicie a conversa tática.',
-      lastTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      unreadCount: 0,
-      icon: 'person',
-      active: true,
-      messages: [],
-    };
-
-    setChats(prev => [...prev, newChat]);
-    openChat(newChat.id);
   };
   
   // --- Lógica de Dados ---
@@ -435,37 +370,16 @@ const App: React.FC = () => {
     navigateTo('dashboard');
   };
 
-  const handleSendMessage = (chatId: string, message: ChatMessage) => {
-    setChats(prevChats => prevChats.map(chat => {
-      if (chat.id === chatId) {
-        return {
-          ...chat,
-          messages: [...chat.messages, message],
-          lastMessage: message.text || (message.type === 'alert' ? 'Alerta Tático' : 'Imagem'),
-          lastTime: message.time,
-          unreadCount: 0,
-        };
-      }
-      return chat;
-    }));
-  };
-
   const selectedSuspect = suspects.find(s => s.id === selectedSuspectId) || suspects[0];
   const suspectToEdit = suspects.find(s => s.id === editingSuspectId);
-  const activeChat = chats.find(c => c.id === activeChatId);
   const activeGroup = groups.find(g => g.id === activeGroupId);
-  
-  // Chats que o usuário participa (AGORA APENAS INDIVIDUAIS ACEITOS)
-  const userChats = chats.filter(chat => 
-    chat.type === 'individual' && contacts.some(c => c.officerId === chat.participants.find(p => p !== 'EU') && c.status === 'Accepted')
-  );
   
   // Grupos que o usuário é membro
   const userGroups = groups.filter(g => g.memberIds.includes('EU'));
   
-  // Filtra oficiais que são contatos aceitos e estão online
-  const acceptedOnlineOfficers = officers.filter(o => 
-    o.isOnline && contacts.some(c => c.officerId === o.id && c.status === 'Accepted')
+  // Filtra oficiais que são contatos aceitos
+  const acceptedOfficers = officers.filter(o => 
+    contacts.some(c => c.officerId === o.id && c.status === 'Accepted')
   );
 
 
@@ -507,21 +421,19 @@ const App: React.FC = () => {
         />
       )}
       
-      {/* NOVO: Grupos List */}
+      {/* Grupos List */}
       {currentScreen === 'groupsList' && (
         <GroupsList 
           navigateTo={navigateTo} 
           userGroups={userGroups}
-          userChats={userChats} 
           officers={officers} 
           allSuspects={suspects}
           openGroup={openGroup}
-          openChat={openChat} 
           pendingRequestsCount={contacts.filter(c => c.status === 'Pending' && !c.isRequester).length}
         />
       )}
       
-      {/* NOVO: Criação de Grupo */}
+      {/* Criação de Grupo */}
       {currentScreen === 'groupCreation' && (
         <GroupCreation
           navigateTo={navigateTo}
@@ -530,7 +442,7 @@ const App: React.FC = () => {
         />
       )}
       
-      {/* NOVO: Detalhe do Grupo */}
+      {/* Detalhe do Grupo */}
       {currentScreen === 'groupDetail' && activeGroup && (
         <GroupDetail
           navigateTo={navigateTo}
@@ -542,13 +454,6 @@ const App: React.FC = () => {
         />
       )}
       
-      {currentScreen === 'chatRoom' && activeChat && (
-        <TacticalChatRoom 
-          chat={activeChat} 
-          onBack={() => navigateTo('groupsList')} // Volta para a lista de grupos/chats
-          onSendMessage={handleSendMessage}
-        />
-      )}
       {currentScreen === 'aiTools' && <AITools navigateTo={navigateTo} userRank={userRank} aiAvatar={aiAvatar} />}
       
       {currentScreen === 'plateConsultation' && (

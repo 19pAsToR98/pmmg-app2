@@ -17,12 +17,14 @@ const TacticalContacts: React.FC<TacticalContactsProps> = ({ navigateTo, officer
   // Mock de todos os oficiais disponíveis para busca (excluindo o usuário atual, que é 'EU')
   const availableOfficers = officers.filter(o => 
     o.id !== 'EU' && 
-    !contacts.some(c => c.officerId === o.id) &&
+    !contacts.some(c => c.officerId === o.id && c.status === 'Accepted') && // Não mostra contatos já aceitos
+    !contacts.some(c => c.officerId === o.id && c.status === 'Pending' && c.isRequester) && // Não mostra solicitações enviadas
     (o.name.toLowerCase().includes(searchTerm.toLowerCase()) || o.unit.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const pendingRequests = contacts.filter(c => c.status === 'Pending' && !c.isRequester);
   const sentRequests = contacts.filter(c => c.status === 'Pending' && c.isRequester);
+  const acceptedContacts = contacts.filter(c => c.status === 'Accepted');
 
   const getOfficer = (id: string) => officers.find(o => o.id === id);
 
@@ -30,12 +32,12 @@ const TacticalContacts: React.FC<TacticalContactsProps> = ({ navigateTo, officer
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
       <header className="sticky top-0 z-50 bg-pmmg-navy text-white shadow-xl px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigateTo('chatList')} className="text-white">
+          <button onClick={() => navigateTo('groupsList')} className="text-white">
             <span className="material-symbols-outlined">arrow_back_ios</span>
           </button>
           <div>
             <h1 className="font-bold text-sm leading-none uppercase tracking-widest">Gestão de Contatos</h1>
-            <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">Solicitações e Busca Tática</p>
+            <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">Oficiais para Grupos Táticos</p>
           </div>
         </div>
       </header>
@@ -84,6 +86,35 @@ const TacticalContacts: React.FC<TacticalContactsProps> = ({ navigateTo, officer
           {searchTerm.length > 0 && availableOfficers.length === 0 && (
             <p className="text-center text-[10px] text-pmmg-navy/50 mt-4">Nenhum oficial encontrado ou já é seu contato.</p>
           )}
+        </section>
+
+        {/* Contatos Aceitos */}
+        <section className="mb-6">
+          <h3 className="text-[11px] font-bold text-pmmg-navy/60 uppercase tracking-wider mb-3 flex items-center gap-2">
+            Contatos Aceitos ({acceptedContacts.length})
+          </h3>
+          <div className="pmmg-card p-4 space-y-3">
+            {acceptedContacts.length > 0 ? acceptedContacts.map(contact => {
+              const officer = getOfficer(contact.officerId);
+              if (!officer) return null;
+              return (
+                <div key={officer.id} className="flex items-center justify-between border-b border-pmmg-navy/5 pb-3 last:border-b-0 last:pb-0">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-300">
+                      <img src={officer.photoUrl} alt={officer.name} className="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-pmmg-navy leading-tight">{officer.name}</p>
+                      <p className="text-[10px] text-slate-500">{officer.rank} • {officer.unit}</p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold text-green-600 uppercase">Aceito</span>
+                </div>
+              );
+            }) : (
+              <p className="text-xs text-slate-400 italic text-center py-2">Nenhum contato aceito.</p>
+            )}
+          </div>
         </section>
 
         {/* Solicitações Pendentes */}
@@ -159,7 +190,7 @@ const TacticalContacts: React.FC<TacticalContactsProps> = ({ navigateTo, officer
         </section>
       </main>
 
-      <BottomNav activeScreen="chatList" navigateTo={navigateTo} />
+      <BottomNav activeScreen="groupsList" navigateTo={navigateTo} />
     </div>
   );
 };

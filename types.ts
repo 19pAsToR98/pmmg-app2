@@ -1,4 +1,4 @@
-export type Screen = 'welcomeScreen' | 'dashboard' | 'registry' | 'profile' | 'groupsList' | 'chatRoom' | 'aiTools' | 'requestAccess' | 'store' | 'map' | 'contacts' | 'groupCreation' | 'groupDetail' | 'onboardingSetup' | 'suspectsManagement' | 'plateConsultation' | 'voiceReport';
+export type Screen = 'welcomeScreen' | 'dashboard' | 'registry' | 'profile' | 'groupsList' | 'aiTools' | 'requestAccess' | 'store' | 'map' | 'contacts' | 'groupCreation' | 'groupDetail' | 'onboardingSetup' | 'suspectsManagement' | 'plateConsultation' | 'voiceReport';
 
 export type UserRank = 'Soldado' | 'Cabo' | '3º Sargento' | '2º Sargento' | '1º Sargento' | 'Subtenente';
 
@@ -53,21 +53,6 @@ export interface Suspect {
   showOnMap?: boolean; // NEW: Controla se o marcador deve ser exibido no mapa tático
 }
 
-export interface ChatMessage {
-  id: string;
-  sender: string;
-  initials: string;
-  text: string;
-  time: string;
-  isMe: boolean;
-  type: 'text' | 'alert' | 'image';
-  alertData?: {
-    title: string;
-    description: string;
-    image: string;
-  };
-}
-
 export type ContactStatus = 'Pending' | 'Accepted' | 'Blocked';
 
 export interface Contact {
@@ -106,21 +91,4 @@ export interface Group {
 
 export interface GroupParticipant extends Officer {
   isAdmin: boolean;
-}
-
-export interface Chat {
-  id: string;
-  type: 'group' | 'individual';
-  name: string;
-  participants: string[]; // Officer IDs
-  lastMessage: string;
-  lastTime: string;
-  unreadCount: number;
-  icon: string;
-  active: boolean;
-  messages: ChatMessage[];
-  // Propriedades adicionais para grupos
-  description?: string;
-  groupPhotoUrl?: string;
-  admins?: string[]; // IDs dos administradores
 }

@@ -1,19 +1,17 @@
 import React, { useState } from 'react';
-import { Screen, Group, Officer, Chat, Suspect } from '../types';
+import { Screen, Group, Officer, Suspect } from '../types';
 import BottomNav from '../components/BottomNav';
 
 interface GroupsListProps {
   navigateTo: (screen: Screen) => void;
   userGroups: Group[];
-  userChats: Chat[]; // Chats individuais
   officers: Officer[]; // Contatos aceitos e online
   allSuspects: Suspect[]; // Adicionado para exibir o resumo do último post
   openGroup: (groupId: string) => void;
-  openChat: (chatId: string) => void;
   pendingRequestsCount: number;
 }
 
-const GroupsList: React.FC<GroupsListProps> = ({ navigateTo, userGroups, userChats, officers, allSuspects, openGroup, openChat, pendingRequestsCount }) => {
+const GroupsList: React.FC<GroupsListProps> = ({ navigateTo, userGroups, officers, allSuspects, openGroup, pendingRequestsCount }) => {
   const [searchTerm, setSearchTerm] = useState('');
   
   // Filtra grupos com base no termo de busca
@@ -22,26 +20,10 @@ const GroupsList: React.FC<GroupsListProps> = ({ navigateTo, userGroups, userCha
            group.description.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
-  // Filtra chats individuais (para exibição opcional ou contagem)
-  const getChatDisplayInfo = (chat: Chat) => {
-    const otherParticipantId = chat.participants.find(id => id !== 'EU');
-    const otherOfficer = officers.find(o => o.id === otherParticipantId);
-
-    if (otherOfficer) {
-      return { 
-        name: `${otherOfficer.rank}. ${otherOfficer.name.split(' ')[1]} (${otherOfficer.unit})`, 
-        icon: 'person',
-      };
-    }
-    return { name: chat.name, icon: 'person' };
-  };
-  
-  const totalUnreadChats = userChats.reduce((sum, chat) => sum + chat.unreadCount, 0);
-
   const renderGroupList = (groups: Group[]) => {
     return groups.length > 0 ? groups.map((group) => {
       // Pega o post mais recente (assumindo que o array de posts está ordenado ou que o último é o mais recente)
-      const lastPost = group.posts.length > 0 ? group.posts[group.posts.length - 1] : null;
+      const lastPost = group.posts.length > 0 ? group.posts[0] : null; // Posts são ordenados do mais novo para o mais velho no App.tsx
       const lastPostSuspect = lastPost ? allSuspects.find(s => s.id === lastPost.suspectId) : null;
       const lastPostAuthor = lastPost ? officers.find(o => o.id === lastPost.authorId) : null;
       
@@ -67,7 +49,6 @@ const GroupsList: React.FC<GroupsListProps> = ({ navigateTo, userGroups, userCha
             </div>
             <p className="text-xs text-slate-600 truncate leading-tight">{lastActivity}</p>
           </div>
-          {/* Não usamos unreadCount para grupos de posts por enquanto */}
         </div>
       );
     }) : (
@@ -107,7 +88,7 @@ const GroupsList: React.FC<GroupsListProps> = ({ navigateTo, userGroups, userCha
           <button 
             onClick={() => navigateTo('contacts')}
             className="w-9 h-9 flex items-center justify-center rounded-full bg-white/10 text-white border border-white/10 relative"
-            title="Gerenciar Contatos e Chats Individuais"
+            title="Gerenciar Contatos"
           >
             <span className="material-symbols-outlined text-xl">person_pin</span>
             {pendingRequestsCount > 0 && (
@@ -137,28 +118,6 @@ const GroupsList: React.FC<GroupsListProps> = ({ navigateTo, userGroups, userCha
           </div>
         </div>
         
-        {/* Link para Chats Individuais */}
-        <section className="px-4 mb-4">
-          <button 
-            onClick={() => navigateTo('contacts')}
-            className="w-full pmmg-card p-3 flex items-center justify-between border-l-4 border-l-pmmg-yellow active:scale-[0.98] transition-transform"
-          >
-            <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined text-pmmg-navy text-xl fill-icon">chat</span>
-              <span className="text-sm font-bold text-pmmg-navy uppercase">Chats Individuais</span>
-            </div>
-            <div className="flex items-center gap-2">
-              {totalUnreadChats > 0 && (
-                <span className="bg-pmmg-red text-white text-[10px] font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
-                  {totalUnreadChats}
-                </span>
-              )}
-              <span className="text-[10px] font-medium text-slate-500">{userChats.length} Ativos</span>
-              <span className="material-symbols-outlined text-pmmg-navy/40 text-lg">chevron_right</span>
-            </div>
-          </button>
-        </section>
-
         {/* Group List Content */}
         <section className="px-4 space-y-3">
           <h3 className="text-[11px] font-bold text-pmmg-navy/60 uppercase tracking-wider mb-3">
