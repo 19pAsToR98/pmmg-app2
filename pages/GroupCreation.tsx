@@ -4,7 +4,7 @@ import { Screen, Officer, Group } from '../types';
 interface GroupCreationProps {
   navigateTo: (screen: Screen) => void;
   allOfficers: Officer[];
-  onCreateGroup: (group: Omit<Group, 'id' | 'posts'>) => void;
+  onCreateGroup: (group: Omit<Group, 'id' | 'posts' | 'inviteCode'>) => void;
 }
 
 const GroupCreation: React.FC<GroupCreationProps> = ({ navigateTo, allOfficers, onCreateGroup }) => {
@@ -38,7 +38,7 @@ const GroupCreation: React.FC<GroupCreationProps> = ({ navigateTo, allOfficers, 
       return;
     }
     
-    const newGroupData: Omit<Group, 'id' | 'posts'> = {
+    const newGroupData: Omit<Group, 'id' | 'posts' | 'inviteCode'> = {
       name: groupName.trim(),
       description: description.trim(),
       adminIds: [currentUserId], // Current user is the admin

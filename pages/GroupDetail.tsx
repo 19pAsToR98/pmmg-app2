@@ -1,16 +1,43 @@
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { Screen, Suspect, Officer, UserRank, Group } from '../types';
 
-import React, { useState, useRef, useEffect } from 'react';
-import { TacticalGroup, Suspect, GroupPost, Screen } from '../types';
-
-interface TacticalGroupDetailProps {
-  group: TacticalGroup;
-  onBack: () => void;
-  onOpenProfile: (id: string) => void;
-  onSharePost: (groupId: string, suspectId: string, observation: string) => void;
-  suspects: Suspect[];
+// Define the expected enriched types based on App.tsx logic
+interface EnrichedGroupPost {
+  id: string;
+  suspectId: string;
+  authorId: string;
+  observation: string;
+  timestamp: string; // Formatted string
+  authorName: string;
+  authorRank: UserRank;
+  suspectName: string;
+  suspectPhoto: string;
 }
 
-const TacticalGroupDetail: React.FC<TacticalGroupDetailProps> = ({ group, onBack, onOpenProfile, onSharePost, suspects }) => {
+interface GroupParticipantDetail extends Officer {
+  isAdmin: boolean;
+  role: 'admin' | 'member';
+}
+
+interface EnrichedGroup extends Group {
+  members: GroupParticipantDetail[];
+  posts: EnrichedGroupPost[];
+}
+
+interface GroupDetailProps {
+  navigateTo: (screen: Screen) => void;
+  group: EnrichedGroup; // Using the enriched type
+  allOfficers: Officer[]; 
+  allSuspects: Suspect[]; 
+  onOpenProfile: (id: string) => void;
+  onShareSuspect: (groupId: string, suspectId: string, observation: string) => void;
+}
+
+type PostFilterStatus = Suspect['status'] | 'Todos';
+const STATUS_OPTIONS: PostFilterStatus[] = ['Todos', 'Foragido', 'Suspeito', 'Preso', 'CPF Cancelado'];
+
+
+const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspects, onOpenProfile, onShareSuspect }) => {
   const [activeTab, setActiveTab] = useState<'timeline' | 'members'>('timeline');
   const [viewMode, setViewMode] = useState<'list' | 'gallery'>('list');
   const [showShareModal, setShowShareModal] = useState(false);
@@ -20,13 +47,16 @@ const TacticalGroupDetail: React.FC<TacticalGroupDetailProps> = ({ group, onBack
 
   // Estados para filtros da Timeline
   const [postSearchQuery, setPostSearchQuery] = useState('');
-  const [postDateFilter, setPostDateFilter] = useState('');
-  const [postAuthorFilter, setPostAuthorFilter] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<PostFilterStatus>('Todos'); // NOVO: Filtro de status
+  const [postAuthorFilter, setPostAuthorFilter] = useState<string>('Todos'); // 'Todos' or authorId
   const [showTimelineFilters, setShowTimelineFilters] = useState(false);
   const timelineFilterRef = useRef<HTMLDivElement>(null);
 
-  // Extrair autores únicos que postaram no grupo
-  const uniqueAuthors = Array.from(new Set(group.posts.map(p => p.authorName)));
+  // Extrair autores únicos que postaram no grupo (para o dropdown de filtro)
+  const uniqueAuthors = useMemo(() => {
+    const authorIds = Array.from(new Set(group.posts.map(p => p.authorId)));
+    return group.members.filter(m => authorIds.includes(m.id));
+  }, [group.posts, group.members]);
 
   // Fechar menu de filtro ao clicar fora
   useEffect(() => {
@@ -39,51 +69,68 @@ const TacticalGroupDetail: React.FC<TacticalGroupDetailProps> = ({ group, onBack
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const filteredSuspects = suspects.filter(s => 
-    s.name.toLowerCase().includes(searchSuspect.toLowerCase()) || 
-    s.cpf.includes(searchSuspect) ||
-    (s.nickname && s.nickname.toLowerCase().includes(searchSuspect.toLowerCase()))
-  );
+  // Suspects filtering for the Share Modal
+  const suspectsForShare = useMemo(() => {
+    const term = searchSuspect.toLowerCase();
+    return allSuspects.filter(s => 
+      s.name.toLowerCase().includes(term) || 
+      s.cpf.includes(searchSuspect) ||
+      (s.nickname && s.nickname.toLowerCase().includes(term))
+    );
+  }, [searchSuspect, allSuspects]);
 
-  // Lógica de filtragem da Timeline (Busca + Data + Autor)
-  const filteredPosts = group.posts.filter(post => {
+  // Lógica de filtragem da Timeline
+  const filteredPosts = useMemo(() => {
     const query = postSearchQuery.toLowerCase();
     
-    const matchesSearch = !postSearchQuery || 
-      post.suspectName.toLowerCase().includes(query) ||
-      post.authorName.toLowerCase().includes(query) ||
-      post.observation.toLowerCase().includes(query);
-    
-    // Filtro de data simples comparando a string do timestamp
-    const matchesDate = !postDateFilter || post.timestamp.includes(postDateFilter.split('-').reverse().join('/'));
+    return group.posts.filter(post => {
+      // 1. Busca Unificada
+      const matchesSearch = !query || 
+        post.suspectName.toLowerCase().includes(query) ||
+        post.authorName.toLowerCase().includes(query) ||
+        post.observation.toLowerCase().includes(query);
+      
+      if (!matchesSearch) return false;
 
-    // Filtro de Autor
-    const matchesAuthor = !postAuthorFilter || post.authorName === postAuthorFilter;
+      // 2. Filtro de Autor
+      const matchesAuthor = postAuthorFilter === 'Todos' || post.authorId === postAuthorFilter;
+      if (!matchesAuthor) return false;
+      
+      // 3. Filtro de Status (Precisa buscar o status do suspeito original)
+      const suspect = allSuspects.find(s => s.id === post.suspectId);
+      const matchesStatus = statusFilter === 'Todos' || (suspect && suspect.status === statusFilter);
+      
+      return matchesStatus;
+    });
+  }, [group.posts, postSearchQuery, postAuthorFilter, statusFilter, allSuspects]);
 
-    return matchesSearch && matchesDate && matchesAuthor;
-  });
 
   const handleShare = () => {
-    if (selectedSuspectId) {
-      onSharePost(group.id, selectedSuspectId, observation);
+    if (selectedSuspectId && observation.trim()) {
+      onShareSuspect(group.id, selectedSuspectId, observation.trim());
       setSearchSuspect('');
       setSelectedSuspectId(null);
       setObservation('');
       setShowShareModal(false);
+    } else {
+      alert("Selecione um alvo e adicione uma observação.");
     }
   };
 
-  const clearAllFilters = () => {
-    setPostDateFilter('');
+  const handleClearFilters = () => {
     setPostSearchQuery('');
-    setPostAuthorFilter(null);
+    setStatusFilter('Todos');
+    setPostAuthorFilter('Todos');
+    setShowTimelineFilters(false);
   };
+  
+  const isFilterActive = postSearchQuery || statusFilter !== 'Todos' || postAuthorFilter !== 'Todos';
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden relative">
       <header className="bg-pmmg-navy px-4 pt-6 pb-4 shadow-xl z-50 shrink-0">
         <div className="flex items-center gap-3 mb-6">
-          <button onClick={onBack} className="text-white active:scale-90 transition-transform shrink-0">
+          <button onClick={() => navigateTo('groupsList')} className="text-white active:scale-90 transition-transform shrink-0">
             <span className="material-symbols-outlined">arrow_back_ios</span>
           </button>
           <div className="flex-1 min-w-0">
@@ -91,7 +138,11 @@ const TacticalGroupDetail: React.FC<TacticalGroupDetailProps> = ({ group, onBack
             <p className="text-[10px] font-bold text-pmmg-yellow tracking-wider uppercase mt-0.5">Código: {group.inviteCode}</p>
           </div>
           <button 
-            onClick={() => setShowShareModal(true)}
+            onClick={() => {
+              setSelectedSuspectId(null); // Reset selection
+              setObservation('');
+              setShowShareModal(true);
+            }}
             className="bg-pmmg-yellow text-pmmg-navy px-3 py-2 rounded-xl text-[9px] font-black uppercase shadow-lg flex items-center gap-2 active:scale-95 transition-transform shrink-0"
           >
             <span className="material-symbols-outlined text-sm font-bold">share</span>
@@ -119,7 +170,7 @@ const TacticalGroupDetail: React.FC<TacticalGroupDetailProps> = ({ group, onBack
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto pb-32 no-scrollbar">
+      <main className="flex-1 overflow-y-auto pb-4 no-scrollbar">
         {activeTab === 'timeline' ? (
           <div className="p-4 space-y-4">
             {/* Barra de Busca e Alternância de Visualização */}
@@ -134,7 +185,7 @@ const TacticalGroupDetail: React.FC<TacticalGroupDetailProps> = ({ group, onBack
                 />
               </div>
               
-              <div className="flex bg-white/40 p-1 rounded-2xl border border-white/20 shadow-sm">
+              <div className="flex bg-white/40 p-1 rounded-2xl border border-white/20 shadow-sm shrink-0">
                 <button 
                   onClick={() => setViewMode('list')}
                   className={`p-2 rounded-xl transition-all ${viewMode === 'list' ? 'bg-pmmg-navy text-pmmg-yellow shadow-md' : 'text-pmmg-navy/40'}`}
@@ -150,10 +201,10 @@ const TacticalGroupDetail: React.FC<TacticalGroupDetailProps> = ({ group, onBack
               </div>
 
               <button 
-                onClick={() => setShowTimelineFilters(!showTimelineFilters)}
-                className={`p-3 rounded-2xl flex items-center justify-center transition-all ${showTimelineFilters || postDateFilter || postAuthorFilter ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'bg-white/40 text-pmmg-navy border border-white/20'}`}
+                onClick={() => setShowTimelineFilters(prev => !prev)}
+                className={`p-3 rounded-2xl flex items-center justify-center transition-all shrink-0 ${isFilterActive ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'bg-white/40 text-pmmg-navy border border-white/20'}`}
               >
-                <span className={`material-symbols-outlined text-xl ${showTimelineFilters ? 'fill-icon' : ''}`}>tune</span>
+                <span className={`material-symbols-outlined text-xl ${isFilterActive ? 'fill-icon' : ''}`}>tune</span>
               </button>
 
               {/* Menu de Filtro da Timeline */}
@@ -164,24 +215,35 @@ const TacticalGroupDetail: React.FC<TacticalGroupDetailProps> = ({ group, onBack
                 >
                   <div className="flex items-center justify-between mb-4">
                     <h4 className="text-[9px] font-black uppercase tracking-widest text-pmmg-navy/60">Filtros Operacionais</h4>
-                    <button 
-                      onClick={clearAllFilters}
-                      className="text-[8px] font-black text-pmmg-red uppercase"
-                    >
-                      Limpar
-                    </button>
+                    {isFilterActive && (
+                      <button 
+                        onClick={handleClearFilters}
+                        className="text-[8px] font-black text-pmmg-red uppercase"
+                      >
+                        Limpar Tudo
+                      </button>
+                    )}
                   </div>
                   
                   <div className="space-y-5">
-                    {/* Filtro por Data */}
+                    {/* Filtro por Status */}
                     <div>
-                      <label className="block text-[8px] font-black uppercase text-pmmg-navy/40 mb-2 tracking-wider">Filtrar por Data</label>
-                      <input 
-                        type="date"
-                        value={postDateFilter}
-                        onChange={(e) => setPostDateFilter(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-xs font-bold text-pmmg-navy focus:ring-2 focus:ring-pmmg-navy/10"
-                      />
+                      <label className="block text-[8px] font-black uppercase text-pmmg-navy/40 mb-2 tracking-wider">Status do Indivíduo</label>
+                      <div className="flex flex-wrap gap-2 pb-1 no-scrollbar">
+                        {STATUS_OPTIONS.map(opt => (
+                          <button
+                            key={opt}
+                            onClick={() => setStatusFilter(opt)}
+                            className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all border shrink-0 ${
+                              statusFilter === opt 
+                              ? 'bg-pmmg-navy text-white border-pmmg-navy shadow-md' 
+                              : 'bg-slate-50 text-pmmg-navy/60 border-slate-200'
+                            }`}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
                     </div>
 
                     {/* Filtro por Autor */}
@@ -189,18 +251,18 @@ const TacticalGroupDetail: React.FC<TacticalGroupDetailProps> = ({ group, onBack
                       <label className="block text-[8px] font-black uppercase text-pmmg-navy/40 mb-2 tracking-wider">Filtrar por Integrante</label>
                       <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto no-scrollbar p-1">
                         <button 
-                          onClick={() => setPostAuthorFilter(null)}
-                          className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase border transition-all ${!postAuthorFilter ? 'bg-pmmg-navy text-white border-pmmg-navy' : 'bg-slate-50 text-pmmg-navy/40 border-slate-200'}`}
+                          onClick={() => setPostAuthorFilter('Todos')}
+                          className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase border transition-all shrink-0 ${postAuthorFilter === 'Todos' ? 'bg-pmmg-navy text-white border-pmmg-navy' : 'bg-slate-50 text-pmmg-navy/40 border-slate-200'}`}
                         >
                           Todos
                         </button>
-                        {uniqueAuthors.map(author => (
+                        {uniqueAuthors.map(officer => (
                           <button 
-                            key={author}
-                            onClick={() => setPostAuthorFilter(author)}
-                            className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase border transition-all ${postAuthorFilter === author ? 'bg-pmmg-navy text-white border-pmmg-navy' : 'bg-slate-50 text-pmmg-navy/40 border-slate-200'}`}
+                            key={officer.id}
+                            onClick={() => setPostAuthorFilter(officer.id)}
+                            className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase border transition-all shrink-0 ${postAuthorFilter === officer.id ? 'bg-pmmg-navy text-white border-pmmg-navy' : 'bg-slate-50 text-pmmg-navy/40 border-slate-200'}`}
                           >
-                            {author}
+                            {officer.rank.split(' ')[0]}. {officer.name.split(' ')[0]}
                           </button>
                         ))}
                       </div>
@@ -209,16 +271,16 @@ const TacticalGroupDetail: React.FC<TacticalGroupDetailProps> = ({ group, onBack
 
                   <button 
                     onClick={() => setShowTimelineFilters(false)}
-                    className="w-full mt-6 bg-pmmg-navy text-white py-3 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg"
+                    className="w-full mt-6 bg-pmmg-navy text-white py-3 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-transform"
                   >
-                    Aplicar Filtros
+                    Aplicar Filtros ({filteredPosts.length})
                   </button>
                 </div>
               )}
             </div>
 
             {/* Chips de filtros ativos */}
-            {(postSearchQuery || postDateFilter || postAuthorFilter) && (
+            {isFilterActive && (
               <div className="flex flex-wrap gap-2 mb-2">
                 {postSearchQuery && (
                   <div className="bg-pmmg-navy/10 text-pmmg-navy px-3 py-1 rounded-full text-[8px] font-black uppercase flex items-center gap-1 border border-pmmg-navy/10">
@@ -226,16 +288,16 @@ const TacticalGroupDetail: React.FC<TacticalGroupDetailProps> = ({ group, onBack
                     <button onClick={() => setPostSearchQuery('')} className="material-symbols-outlined text-xs">close</button>
                   </div>
                 )}
-                {postDateFilter && (
+                {statusFilter !== 'Todos' && (
                   <div className="bg-pmmg-navy/10 text-pmmg-navy px-3 py-1 rounded-full text-[8px] font-black uppercase flex items-center gap-1 border border-pmmg-navy/10">
-                    Data: {postDateFilter.split('-').reverse().join('/')}
-                    <button onClick={() => setPostDateFilter('')} className="material-symbols-outlined text-xs">close</button>
+                    Status: {statusFilter}
+                    <button onClick={() => setStatusFilter('Todos')} className="material-symbols-outlined text-xs">close</button>
                   </div>
                 )}
-                {postAuthorFilter && (
+                {postAuthorFilter !== 'Todos' && (
                   <div className="bg-pmmg-navy/10 text-pmmg-navy px-3 py-1 rounded-full text-[8px] font-black uppercase flex items-center gap-1 border border-pmmg-navy/10">
-                    Autor: {postAuthorFilter}
-                    <button onClick={() => setPostAuthorFilter(null)} className="material-symbols-outlined text-xs">close</button>
+                    Autor: {group.members.find(m => m.id === postAuthorFilter)?.name.split(' ')[0] || 'Desconhecido'}
+                    <button onClick={() => setPostAuthorFilter('Todos')} className="material-symbols-outlined text-xs">close</button>
                   </div>
                 )}
               </div>
@@ -265,7 +327,7 @@ const TacticalGroupDetail: React.FC<TacticalGroupDetailProps> = ({ group, onBack
 
                         <div 
                           onClick={() => onOpenProfile(post.suspectId)}
-                          className="flex p-3 gap-3 active:bg-slate-50 transition-colors"
+                          className="flex p-3 gap-3 active:bg-slate-50 transition-colors cursor-pointer"
                         >
                           <div className="w-20 h-24 bg-slate-200 rounded-lg overflow-hidden border border-slate-200 shrink-0 shadow-sm">
                             <img src={post.suspectPhoto} alt={post.suspectName} className="w-full h-full object-cover" />
@@ -297,7 +359,7 @@ const TacticalGroupDetail: React.FC<TacticalGroupDetailProps> = ({ group, onBack
                     <div 
                       key={post.id}
                       onClick={() => onOpenProfile(post.suspectId)}
-                      className="relative aspect-[3/4] pmmg-card overflow-hidden shadow-lg border-2 border-pmmg-navy/10 active:scale-95 transition-all"
+                      className="relative aspect-[3/4] pmmg-card overflow-hidden shadow-lg border-2 border-pmmg-navy/10 active:scale-95 transition-all cursor-pointer"
                     >
                       <img src={post.suspectPhoto} alt={post.suspectName} className="w-full h-full object-cover" />
                       
@@ -336,8 +398,11 @@ const TacticalGroupDetail: React.FC<TacticalGroupDetailProps> = ({ group, onBack
                 <p className="text-sm font-black text-pmmg-navy tracking-widest">{group.inviteCode}</p>
               </div>
               <button 
-                onClick={() => alert('Código de convite copiado!')}
-                className="w-10 h-10 bg-pmmg-navy text-white rounded-xl flex items-center justify-center shadow-lg active:scale-90"
+                onClick={() => {
+                  navigator.clipboard.writeText(group.inviteCode);
+                  alert('Código de convite copiado para a área de transferência!');
+                }}
+                className="w-10 h-10 bg-pmmg-navy text-white rounded-xl flex items-center justify-center shadow-lg active:scale-90 transition-transform"
               >
                 <span className="material-symbols-outlined text-lg">content_copy</span>
               </button>
@@ -346,8 +411,8 @@ const TacticalGroupDetail: React.FC<TacticalGroupDetailProps> = ({ group, onBack
             {group.members.map(member => (
               <div key={member.id} className="pmmg-card p-3 flex items-center justify-between shadow-sm border-l-4 border-l-pmmg-navy">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-pmmg-navy text-pmmg-yellow flex items-center justify-center text-xs font-black uppercase shadow-inner">
-                    {member.name.charAt(0)}
+                  <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-300 shrink-0">
+                    <img src={member.photoUrl} alt={member.name} className="w-full h-full object-cover" />
                   </div>
                   <div>
                     <h4 className="text-[11px] font-black text-pmmg-navy uppercase leading-none">{member.rank} {member.name}</h4>
@@ -357,7 +422,7 @@ const TacticalGroupDetail: React.FC<TacticalGroupDetailProps> = ({ group, onBack
                   </div>
                 </div>
                 {member.role !== 'admin' && (
-                  <button className="text-pmmg-red/40 hover:text-pmmg-red">
+                  <button className="text-pmmg-red/40 hover:text-pmmg-red active:scale-90 transition-transform">
                     <span className="material-symbols-outlined text-xl">person_remove</span>
                   </button>
                 )}
@@ -371,12 +436,12 @@ const TacticalGroupDetail: React.FC<TacticalGroupDetailProps> = ({ group, onBack
       {showShareModal && (
         <div className="fixed inset-0 z-[1000] flex items-end justify-center p-4 bg-pmmg-navy/80 backdrop-blur-md animate-in fade-in slide-in-from-bottom-10 duration-300">
           <div className="bg-white w-full max-w-sm rounded-[3rem] shadow-2xl p-6 flex flex-col max-h-[90vh]">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-6 shrink-0">
                <div>
                   <h3 className="text-lg font-black text-pmmg-navy uppercase leading-none">Compartilhar Ficha</h3>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Alimentar Rede de Inteligência</p>
                </div>
-               <button onClick={() => setShowShareModal(false)} className="w-10 h-10 bg-slate-100 rounded-full text-slate-400 flex items-center justify-center">
+               <button onClick={() => setShowShareModal(false)} className="w-10 h-10 bg-slate-100 rounded-full text-slate-400 flex items-center justify-center active:scale-90 transition-transform shrink-0">
                   <span className="material-symbols-outlined">close</span>
                </button>
             </div>
@@ -393,11 +458,11 @@ const TacticalGroupDetail: React.FC<TacticalGroupDetailProps> = ({ group, onBack
                   />
                 </div>
                 <div className="flex-1 overflow-y-auto no-scrollbar space-y-2 mb-4">
-                  {filteredSuspects.map(s => (
+                  {suspectsForShare.length > 0 ? suspectsForShare.map(s => (
                     <div 
                       key={s.id}
                       onClick={() => setSelectedSuspectId(s.id)}
-                      className="p-3 bg-slate-50 rounded-2xl flex items-center gap-3 border border-slate-100 active:bg-slate-100 transition-colors"
+                      className="p-3 bg-slate-50 rounded-2xl flex items-center gap-3 border border-slate-100 active:bg-slate-100 transition-colors cursor-pointer"
                     >
                       <img src={s.photoUrl} className="w-12 h-14 rounded-lg object-cover shadow-sm" />
                       <div>
@@ -405,21 +470,27 @@ const TacticalGroupDetail: React.FC<TacticalGroupDetailProps> = ({ group, onBack
                         <p className="text-[9px] font-bold text-slate-400 mt-0.5">{s.cpf}</p>
                       </div>
                     </div>
-                  ))}
+                  )) : (
+                    <p className="text-center text-[10px] text-pmmg-navy/50 mt-4">Nenhum suspeito encontrado.</p>
+                  )}
                 </div>
               </>
             ) : (
               <div className="space-y-6 flex-1 flex flex-col">
-                <div className="flex items-center gap-4 bg-pmmg-navy/5 p-4 rounded-3xl border border-pmmg-navy/5">
-                  <img src={suspects.find(s => s.id === selectedSuspectId)?.photoUrl} className="w-16 h-20 rounded-xl object-cover shadow-lg" />
+                <div className="flex items-center gap-4 bg-pmmg-navy/5 p-4 rounded-3xl border border-pmmg-navy/5 shrink-0">
+                  <img 
+                    src={allSuspects.find(s => s.id === selectedSuspectId)?.photoUrl} 
+                    className="w-16 h-20 rounded-xl object-cover shadow-lg" 
+                    alt="Suspect"
+                  />
                   <div>
                     <p className="text-[9px] font-black text-pmmg-navy/40 uppercase tracking-widest">Alvo Selecionado</p>
-                    <h4 className="text-sm font-black text-pmmg-navy uppercase mt-1">{suspects.find(s => s.id === selectedSuspectId)?.name}</h4>
-                    <button onClick={() => setSelectedSuspectId(null)} className="text-[9px] font-black text-pmmg-red uppercase mt-2">Alterar Alvo</button>
+                    <h4 className="text-sm font-black text-pmmg-navy uppercase mt-1">{allSuspects.find(s => s.id === selectedSuspectId)?.name}</h4>
+                    <button onClick={() => setSelectedSuspectId(null)} className="text-[9px] font-black text-pmmg-red uppercase mt-2 active:opacity-70 transition-opacity">Alterar Alvo</button>
                   </div>
                 </div>
 
-                <div className="flex-1">
+                <div className="flex-1 min-h-[150px]">
                   <label className="block text-[10px] font-black uppercase text-pmmg-navy/40 mb-2 ml-2 tracking-widest">Observação Tática</label>
                   <textarea 
                     autoFocus
@@ -432,7 +503,8 @@ const TacticalGroupDetail: React.FC<TacticalGroupDetailProps> = ({ group, onBack
 
                 <button 
                   onClick={handleShare}
-                  className="w-full bg-pmmg-navy text-white py-5 rounded-[2rem] text-sm font-black uppercase tracking-[0.2em] shadow-2xl active:scale-95 transition-transform"
+                  disabled={!observation.trim()}
+                  className="w-full bg-pmmg-navy text-white py-5 rounded-[2rem] text-sm font-black uppercase tracking-[0.2em] shadow-2xl active:scale-95 transition-transform disabled:opacity-50 shrink-0"
                 >
                   Confirmar Postagem
                 </button>
@@ -445,4 +517,4 @@ const TacticalGroupDetail: React.FC<TacticalGroupDetailProps> = ({ group, onBack
   );
 };
 
-export default TacticalGroupDetail;
+export default GroupDetail;

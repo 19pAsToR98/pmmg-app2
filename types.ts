@@ -87,8 +87,10 @@ export interface Group {
   pendingInviteIds: string[]; // Officers invited but not yet joined
   posts: GroupPost[];
   groupPhotoUrl?: string;
+  inviteCode: string; // ADDED
 }
 
 export interface GroupParticipant extends Officer {
   isAdmin: boolean;
+  role: 'admin' | 'member'; // ADDED role for easier rendering in GroupDetail
 }

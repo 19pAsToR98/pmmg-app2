@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Screen, Suspect, UserRank, CustomMarker, Officer, Contact, ContactStatus, UserAvatar, Group, GroupPost } from './types';
+import React, { useState, useMemo } from 'react';
+import { Screen, Suspect, UserRank, CustomMarker, Officer, Contact, ContactStatus, UserAvatar, Group, GroupPost, GroupParticipant } from './types';
 import WelcomeScreen from './pages/WelcomeScreen'; // Renomeado
 import Dashboard from './pages/Dashboard';
 import SuspectRegistry from './pages/SuspectRegistry';
@@ -176,6 +176,7 @@ const MOCK_GROUPS: Group[] = [
     memberIds: ['EU', 'o1', 'o3'],
     pendingInviteIds: [],
     groupPhotoUrl: 'https://picsum.photos/seed/patrulha/100/100',
+    inviteCode: 'P402-BH', // ADDED
     posts: [
       {
         id: 'p1',
@@ -206,6 +207,19 @@ const DEFAULT_AI_AVATAR: UserAvatar = {
   name: 'AI Assistente',
   url: 'https://regularmei.com.br/wp-content/uploads/2026/01/ai_mascot.gif'
 };
+
+// Define enriched types for GroupDetail consumption
+interface EnrichedGroupPost extends GroupPost {
+  authorName: string;
+  authorRank: UserRank;
+  suspectName: string;
+  suspectPhoto: string;
+}
+
+interface EnrichedGroup extends Group {
+  members: GroupParticipant[];
+  posts: EnrichedGroupPost[];
+}
 
 
 const App: React.FC = () => {
@@ -257,11 +271,12 @@ const App: React.FC = () => {
 
   // --- Lógica de Grupos ---
   
-  const handleCreateGroup = (newGroupData: Omit<Group, 'id' | 'posts'>) => {
+  const handleCreateGroup = (newGroupData: Omit<Group, 'id' | 'posts' | 'inviteCode'>) => {
     const newGroup: Group = {
       ...newGroupData,
       id: `g${Date.now()}`,
       posts: [],
+      inviteCode: `G${Math.floor(Math.random() * 9000) + 1000}-${newGroupData.name.slice(0, 2).toUpperCase()}`, // Generate mock invite code
     };
     setGroups(prev => [...prev, newGroup]);
     alert(`Grupo ${newGroup.name} criado com sucesso! Convites enviados.`);
@@ -381,6 +396,59 @@ const App: React.FC = () => {
   const acceptedOfficers = officers.filter(o => 
     contacts.some(c => c.officerId === o.id && c.status === 'Accepted')
   );
+  
+  // Data enrichment for GroupDetail
+  const enrichedActiveGroup: EnrichedGroup | null = useMemo(() => {
+    if (!activeGroup) return null;
+
+    // Include current user ('EU') in the list of all potential participants
+    const allParticipants: Officer[] = [...officers, { 
+      id: 'EU', 
+      name: userName, 
+      rank: userRank, 
+      unit: userCity, 
+      photoUrl: userAvatar.url, 
+      isOnline: true 
+    }];
+    
+    // 1. Enrich Members
+    const members: GroupParticipant[] = activeGroup.memberIds.map(memberId => {
+      const officer = allParticipants.find(o => o.id === memberId);
+      if (!officer) return null;
+      
+      const isAdmin = activeGroup.adminIds.includes(memberId);
+      return {
+        ...officer,
+        isAdmin,
+        role: isAdmin ? 'admin' : 'member',
+      } as GroupParticipant;
+    }).filter((m): m is GroupParticipant => m !== null);
+
+    // 2. Enrich Posts
+    const enrichedPosts: EnrichedGroupPost[] = activeGroup.posts.map(post => {
+      const author = allParticipants.find(o => o.id === post.authorId);
+      const suspect = suspects.find(s => s.id === post.suspectId);
+      
+      // Format timestamp for display (e.g., "DD/MM/YYYY HH:MM")
+      const date = new Date(post.timestamp);
+      const formattedTimestamp = `${date.toLocaleDateString('pt-BR')} ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+      
+      return {
+        ...post,
+        authorName: author?.name.split(' ')[0] || 'Oficial', // Use first name for brevity
+        authorRank: author?.rank || 'Soldado',
+        suspectName: suspect?.name || 'Indivíduo Desconhecido',
+        suspectPhoto: suspect?.photoUrl || 'https://picsum.photos/seed/placeholder/100/100',
+        timestamp: formattedTimestamp, // Use formatted timestamp
+      };
+    });
+
+    return {
+      ...activeGroup,
+      members,
+      posts: enrichedPosts,
+    };
+  }, [activeGroup, officers, suspects, userName, userRank, userCity, userAvatar.url]);
 
 
   return (
@@ -443,10 +511,10 @@ const App: React.FC = () => {
       )}
       
       {/* Detalhe do Grupo */}
-      {currentScreen === 'groupDetail' && activeGroup && (
+      {currentScreen === 'groupDetail' && enrichedActiveGroup && (
         <GroupDetail
           navigateTo={navigateTo}
-          group={activeGroup}
+          group={enrichedActiveGroup}
           allOfficers={officers}
           allSuspects={suspects}
           onOpenProfile={openProfile}
