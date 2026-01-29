@@ -10,11 +10,20 @@ interface GroupDetailProps {
   onShareSuspect: (groupId: string, suspectId: string, observation: string) => void;
 }
 
+type PostFilterStatus = Suspect['status'] | 'Todos';
+
+const STATUS_OPTIONS: PostFilterStatus[] = ['Todos', 'Foragido', 'Suspeito', 'Preso', 'CPF Cancelado'];
+
 const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allOfficers, allSuspects, onOpenProfile, onShareSuspect }) => {
   const [isSharing, setIsSharing] = useState(false);
   const [shareSuspectId, setShareSuspectId] = useState<string | null>(null);
   const [shareObservation, setShareObservation] = useState('');
   const [suspectSearchTerm, setSuspectSearchTerm] = useState('');
+  
+  // Filtros da Linha do Tempo
+  const [timelineSearchTerm, setTimelineSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<PostFilterStatus>('Todos');
+  const [authorFilterId, setAuthorFilterId] = useState<string>('Todos'); // 'Todos' ou Officer ID
 
   const getOfficer = (id: string) => allOfficers.find(o => o.id === id) || { name: 'Oficial Desconhecido', rank: 'N/D', unit: 'N/D', photoUrl: 'https://i.pravatar.cc/150?img=5', isOnline: false };
   const getSuspect = (id: string) => allSuspects.find(s => s.id === id);
@@ -26,6 +35,47 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allOfficer
       s.name.toLowerCase().includes(term) || s.cpf.includes(term)
     ).slice(0, 5);
   }, [suspectSearchTerm, allSuspects]);
+
+  // Membros do grupo para o filtro de autor
+  const groupMembers = useMemo(() => {
+    return allOfficers.filter(o => group.memberIds.includes(o.id));
+  }, [group.memberIds, allOfficers]);
+
+  // Lógica de Filtragem da Linha do Tempo
+  const filteredPosts = useMemo(() => {
+    const searchLower = timelineSearchTerm.toLowerCase().trim();
+    
+    // 1. Ordena os posts por data (mais recente primeiro)
+    const sorted = [...group.posts].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+    return sorted.filter(post => {
+      const suspect = getSuspect(post.suspectId);
+      if (!suspect) return false;
+
+      // 2. Filtro por Autor
+      if (authorFilterId !== 'Todos' && post.authorId !== authorFilterId) {
+        return false;
+      }
+
+      // 3. Filtro por Status
+      if (statusFilter !== 'Todos' && suspect.status !== statusFilter) {
+        return false;
+      }
+
+      // 4. Pesquisa por Termo (Nome, CPF, Observação)
+      if (searchLower) {
+        const matchesSearch = 
+          suspect.name.toLowerCase().includes(searchLower) ||
+          suspect.cpf.includes(searchLower) ||
+          post.observation.toLowerCase().includes(searchLower);
+        
+        if (!matchesSearch) return false;
+      }
+      
+      return true;
+    });
+  }, [group.posts, timelineSearchTerm, statusFilter, authorFilterId, allSuspects]);
+
 
   const handleShare = () => {
     if (shareSuspectId && shareObservation.trim()) {
@@ -55,11 +105,6 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allOfficer
       return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }) + ` ${time}`;
     }
   };
-
-  // Ordena os posts por data (mais recente primeiro)
-  const sortedPosts = useMemo(() => {
-    return [...group.posts].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-  }, [group.posts]);
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
@@ -93,12 +138,74 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allOfficer
             Compartilhar Ficha
           </button>
         </div>
+        
+        {/* --- Filtros e Pesquisa da Linha do Tempo --- */}
+        <section className="pmmg-card p-4 space-y-3">
+          <h3 className="text-[11px] font-bold text-pmmg-navy/60 uppercase tracking-wider">Filtros da Linha do Tempo</h3>
+          
+          {/* Pesquisa */}
+          <div className="relative">
+            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+              <span className="material-symbols-outlined text-pmmg-navy/50 text-xl">search</span>
+            </div>
+            <input 
+              value={timelineSearchTerm}
+              onChange={(e) => setTimelineSearchTerm(e.target.value)}
+              className="block w-full pl-10 pr-3 py-3 bg-white/60 border border-pmmg-navy/10 focus:border-pmmg-navy focus:ring-0 rounded-2xl text-sm placeholder-pmmg-navy/40" 
+              placeholder="Buscar por nome, CPF ou observação..." 
+              type="text" 
+            />
+          </div>
+
+          {/* Filtro de Status */}
+          <div>
+            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Status do Indivíduo</label>
+            <div className="flex overflow-x-auto gap-2 pb-1 no-scrollbar">
+              {STATUS_OPTIONS.map(opt => (
+                <button
+                  key={opt}
+                  onClick={() => setStatusFilter(opt)}
+                  className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all border shrink-0 ${
+                    statusFilter === opt 
+                    ? 'bg-pmmg-navy text-white border-pmmg-navy shadow-md' 
+                    : 'bg-slate-50 text-pmmg-navy/60 border-slate-200'
+                  }`}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {/* Filtro de Autor */}
+          <div>
+            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Autor do Post</label>
+            <select
+              value={authorFilterId}
+              onChange={(e) => setAuthorFilterId(e.target.value)}
+              className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm"
+            >
+              <option value="Todos">Todos os Oficiais</option>
+              {groupMembers.map(officer => (
+                <option key={officer.id} value={officer.id}>
+                  {officer.rank}. {officer.name} ({officer.unit})
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="text-center pt-2">
+            <span className="text-[10px] font-black text-pmmg-red uppercase tracking-widest italic">
+              {filteredPosts.length} posts encontrados
+            </span>
+          </div>
+        </section>
 
         {/* Linha do Tempo de Posts */}
         <section className="space-y-6">
-          <h3 className="text-[11px] font-bold text-pmmg-navy/60 uppercase tracking-wider border-b border-pmmg-navy/10 pb-2">Linha do Tempo Tática</h3>
+          <h3 className="text-[11px] font-bold text-pmmg-navy/60 uppercase tracking-wider border-b border-pmmg-navy/10 pb-2">Resultados da Linha do Tempo</h3>
           
-          {sortedPosts.length > 0 ? sortedPosts.map((post) => {
+          {filteredPosts.length > 0 ? filteredPosts.map((post) => {
             const author = getOfficer(post.authorId);
             const suspect = getSuspect(post.suspectId);
             
@@ -149,14 +256,14 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allOfficer
             );
           }) : (
             <div className="text-center py-10 opacity-40">
-              <span className="material-symbols-outlined text-5xl">folder_open</span>
-              <p className="text-xs font-bold uppercase mt-2">Nenhuma ficha compartilhada neste grupo.</p>
+              <span className="material-symbols-outlined text-5xl">person_search</span>
+              <p className="text-xs font-bold uppercase mt-2">Nenhum post corresponde aos filtros.</p>
             </div>
           )}
         </section>
       </main>
 
-      {/* Modal de Compartilhamento */}
+      {/* Modal de Compartilhamento (Mantido) */}
       {isSharing && (
         <div className="fixed inset-0 z-[1000] bg-black/50 flex items-center justify-center p-4">
           <div className="bg-white p-5 rounded-xl shadow-2xl w-full max-w-sm">
@@ -231,8 +338,6 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allOfficer
           </div>
         </div>
       )}
-
-      {/* BottomNav is not needed here as this is a detail screen, but we must ensure the parent component handles navigation back to a screen that has BottomNav. */}
     </div>
   );
 };
