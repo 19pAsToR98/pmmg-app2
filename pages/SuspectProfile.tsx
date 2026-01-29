@@ -3,7 +3,6 @@ import { Screen, Suspect } from '../types';
 import BottomNav from '../components/BottomNav';
 import GoogleMapWrapper from '../components/GoogleMapWrapper';
 import { MarkerF } from '@react-google-maps/api';
-import { ICON_PATHS } from '../utils/iconPaths';
 
 interface SuspectProfileProps {
   suspect: Suspect;
@@ -57,15 +56,11 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
 
     const color = isApproach ? '#002147' : (suspect.status === 'Foragido' ? '#e31c1c' : '#ffcc00');
     const iconName = isApproach ? 'pin_drop' : (suspect.status === 'Foragido' ? 'priority_high' : 'warning');
-    const textColor = isApproach ? '#ffcc00' : '#ffffff';
     
-    const pathData = ICON_PATHS[iconName] || ICON_PATHS['warning'];
-    
-    // Aplicando REGRA DE OURO 2: translate(6 6) scale(0.75)
     const svg = `
       <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
         <circle cx="16" cy="16" r="14" fill="${color}" stroke="#ffffff" stroke-width="2"/>
-        <path d="${pathData}" fill="${textColor}" transform="translate(6 6) scale(0.75)"/>
+        <text x="16" y="22" font-family="Material Symbols Outlined" font-size="16" fill="${isApproach ? '#ffcc00' : '#ffffff'}" text-anchor="middle">${iconName}</text>
       </svg>
     `;
     
@@ -339,7 +334,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
           {/* Photo Gallery */}
           <div className="pmmg-card p-4">
             <h3 className="text-[10px] font-bold text-pmmg-navy/60 uppercase tracking-widest mb-3 flex items-center gap-2">
-              <span className="material-symbols-outlined">photo_library</span>
+              <span className="material-symbols-outlined text-sm">photo_library</span>
               Galeria de Identificação ({photos.length})
             </h3>
             <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">

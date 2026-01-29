@@ -3,7 +3,6 @@ import { Screen, UserRank, UserAvatar } from '../types';
 import RankBadge from '../components/RankBadge';
 import GoogleMapWrapper from '../components/GoogleMapWrapper';
 import { MarkerF } from '@react-google-maps/api';
-import { ICON_PATHS } from '../utils/iconPaths';
 
 interface OnboardingSetupProps {
   onComplete: (name: string, rank: UserRank, city: string, avatar: UserAvatar) => void;
@@ -32,7 +31,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
   const [name, setName] = useState('');
   const [rank, setRank] = useState<UserRank>('Soldado'); // Padrão: Soldado
   const [city, setCity] = useState('');
-  const [citySearchTerm, setSearchTerm] = useState('');
+  const [citySearchTerm, setCitySearchTerm] = useState('');
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number, lng: number, name: string } | null>(MOCK_CITIES[0]); // Default to BH
   const [citySuggestions, setCitySuggestions] = useState<typeof MOCK_CITIES>([]);
   
@@ -108,13 +107,10 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
   const getCityMarkerIcon = () => {
     if (typeof window === 'undefined' || !window.google || !window.google.maps) return undefined; // Safety check
 
-    const pathData = ICON_PATHS['location_on'];
-    
-    // Aplicando REGRA DE OURO 2: translate(6 6) scale(0.75)
     const svg = `
       <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
         <circle cx="16" cy="16" r="14" fill="#002147" stroke="#ffcc00" stroke-width="2"/>
-        <path d="${pathData}" fill="#ffcc00" transform="translate(6 6) scale(0.75)"/>
+        <text x="16" y="22" font-family="Material Symbols Outlined" font-size="16" fill="#ffcc00" text-anchor="middle">location_on</text>
       </svg>
     `;
     
