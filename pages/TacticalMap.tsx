@@ -18,6 +18,7 @@ interface TacticalMapProps {
 
 type MapFilter = 'Todos' | 'Foragido' | 'Suspeito' | 'Preso' | 'CPF Cancelado';
 type LocationFilter = 'residence' | 'approach';
+type MapType = 'roadmap' | 'satellite' | 'hybrid'; // Tipos de mapa do Google
 
 const ZOOM_THRESHOLD = 15; // Nível de zoom para alternar para fotos
 
@@ -170,6 +171,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   const [userPos, setUserPos] = useState<{ lat: number, lng: number } | null>(null);
   const [activeFilter, setActiveFilter] = useState<MapFilter>('Todos');
   const [locationFilter, setLocationFilter] = useState<LocationFilter>('residence');
+  const [mapType, setMapType] = useState<MapType>('roadmap'); // NOVO ESTADO: Tipo de mapa
   const [isAddingMarker, setIsAddingMarker] = useState(false);
   const [newMarkerData, setNewMarkerData] = useState<Omit<CustomMarker, 'id'> | null>(null);
   const [editingMarker, setEditingMarker] = useState<CustomMarker | null>(null);
@@ -347,7 +349,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           onLoad={handleMapLoad}
           onClick={handleMapClick}
           options={{
-            mapTypeId: 'roadmap',
+            mapTypeId: mapType, // USANDO O NOVO ESTADO mapType
           }}
         >
           {/* ✅ MARCADOR DO USUÁRIO COM HTML COMPLETO */}
@@ -676,20 +678,38 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                <span className="text-[9px] font-bold text-pmmg-navy uppercase">Ponto Tático</span>
             </div>
             
-            {/* --- Opções de Camadas (Simulação) --- */}
-            <div className="mt-4 pt-4 border-t border-pmmg-navy/5">
-              <p className="text-[8px] font-black text-pmmg-navy/40 uppercase tracking-widest mb-2">Gerenciamento de Camadas</p>
+            {activeFilter !== 'Todos' && (
               <button 
-                onClick={() => alert("Abrindo menu de Gerenciamento de Camadas (Simulação)")}
-                className="w-full text-left text-[10px] font-bold text-pmmg-navy/70 uppercase py-1.5 px-2 rounded hover:bg-pmmg-navy/5 transition-colors flex items-center gap-1"
+                onClick={() => setActiveFilter('Todos')}
+                className="mt-2 text-[8px] font-black text-pmmg-red uppercase border-t border-pmmg-navy/5 pt-2 text-left"
               >
-                <span className="material-symbols-outlined text-sm">layers</span> Gerenciar Camadas
+                Limpar Filtros ({activeFilter})
               </button>
+            )}
+
+            {/* --- Opções de Camadas (Implementado) --- */}
+            <div className="mt-4 pt-4 border-t border-pmmg-navy/5">
+              <p className="text-[8px] font-black text-pmmg-navy/40 uppercase tracking-widest mb-2">Visualização de Camadas</p>
+              
               <button 
-                onClick={() => alert("Alternando para Satélite (Simulação)")}
-                className="w-full text-left text-[10px] font-bold text-pmmg-navy/70 uppercase py-1.5 px-2 rounded hover:bg-pmmg-navy/5 transition-colors flex items-center gap-1"
+                onClick={() => setMapType('roadmap')}
+                className={`w-full text-left text-[10px] font-bold uppercase py-1.5 px-2 rounded transition-colors flex items-center gap-1 ${mapType === 'roadmap' ? 'bg-pmmg-navy text-white' : 'text-pmmg-navy/70 hover:bg-pmmg-navy/5'}`}
+              >
+                <span className="material-symbols-outlined text-sm">map</span> Visualização Padrão
+              </button>
+              
+              <button 
+                onClick={() => setMapType('satellite')}
+                className={`w-full text-left text-[10px] font-bold uppercase py-1.5 px-2 rounded transition-colors flex items-center gap-1 ${mapType === 'satellite' ? 'bg-pmmg-navy text-white' : 'text-pmmg-navy/70 hover:bg-pmmg-navy/5'}`}
               >
                 <span className="material-symbols-outlined text-sm">satellite</span> Visualização Satélite
+              </button>
+              
+              <button 
+                onClick={() => setMapType('hybrid')}
+                className={`w-full text-left text-[10px] font-bold uppercase py-1.5 px-2 rounded transition-colors flex items-center gap-1 ${mapType === 'hybrid' ? 'bg-pmmg-navy text-white' : 'text-pmmg-navy/70 hover:bg-pmmg-navy/5'}`}
+              >
+                <span className="material-symbols-outlined text-sm">layers</span> Visualização Híbrida
               </button>
             </div>
           </div>
