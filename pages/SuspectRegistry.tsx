@@ -4,6 +4,8 @@ import BottomNav from '../components/BottomNav';
 import GoogleMapWrapper from '../components/GoogleMapWrapper';
 import { MarkerF } from '@react-google-maps/api';
 import { ICON_PATHS } from '../utils/iconPaths';
+import { searchGoogleAddress } from '../utils/vehicleData'; // Importação removida, pois a função searchGoogleAddress está no topo do arquivo
+import VehicleVisuals from '../components/VehicleVisuals'; // NOVO
 
 interface SuspectRegistryProps {
   navigateTo: (screen: Screen) => void;
@@ -29,7 +31,7 @@ const searchGoogleAddress = async (address: string): Promise<GeocodedLocation[]>
   }
   
   // Usando components=country:br para focar no Brasil e language=pt-BR
-  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&components=country:br&language=pt-BR&key=${GOOGLE_MAPS_API_KEY}`;
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&components=country:br&language=pt-BR&key=${GOOGLE_MAPS_MAP_KEY}`;
   const response = await fetch(url);
   const data = await response.json();
 
@@ -740,9 +742,12 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
         <div className="pmmg-card p-4 space-y-3">
           {vehicles.map((v, idx) => (
             <div key={idx} className="flex items-center justify-between p-2 bg-pmmg-navy/5 rounded-lg border border-pmmg-navy/10">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-pmmg-navy truncate">{v.plate} - {v.model}</p>
-                <p className="text-[10px] text-slate-500">{v.color}</p>
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <VehicleVisuals vehicle={v} size="sm" /> {/* NOVO COMPONENTE */}
+                <div>
+                  <p className="text-sm font-bold text-pmmg-navy truncate">{v.plate}</p>
+                  <p className="text-[10px] text-slate-500">{v.model} ({v.color})</p>
+                </div>
               </div>
               <button onClick={() => handleRemoveVehicle(idx)} className="text-pmmg-red p-1 shrink-0">
                 <span className="material-symbols-outlined text-lg">delete</span>

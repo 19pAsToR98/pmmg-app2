@@ -1,6 +1,7 @@
 import React from 'react';
 import { Suspect } from '../types';
 import { useLongPress } from '../hooks/useLongPress';
+import VehicleVisuals from './VehicleVisuals'; // NOVO
 
 interface SuspectListItemProps {
   suspect: Suspect;
@@ -24,7 +25,7 @@ const SuspectListItem: React.FC<SuspectListItemProps> = ({
                         s.status === 'Suspeito' ? 'bg-pmmg-yellow text-pmmg-navy' :
                         s.status === 'Preso' ? 'bg-pmmg-blue' : 'bg-slate-700';
     
-  const primaryVehicle = s.vehicles && s.vehicles.length > 0 ? `${s.vehicles[0].plate} (${s.vehicles[0].model})` : null;
+  const primaryVehicle = s.vehicles && s.vehicles.length > 0 ? s.vehicles[0] : null;
 
   return (
     <div 
@@ -58,12 +59,14 @@ const SuspectListItem: React.FC<SuspectListItemProps> = ({
         </div>
         <div className="mt-1.5 flex flex-wrap gap-2">
            {primaryVehicle && (
-             <div className="flex items-center gap-1 text-[8px] bg-white px-2 py-0.5 rounded border border-pmmg-navy/5 text-slate-600 font-bold">
-                <span className="material-symbols-outlined text-[10px]">directions_car</span>
-                {primaryVehicle}
+             <div className="flex items-center gap-2 bg-white px-2 py-1 rounded-lg border border-pmmg-navy/5 text-slate-600 font-bold">
+                <VehicleVisuals vehicle={primaryVehicle} size="sm" />
+                <div className="text-[8px] font-bold uppercase">
+                  {primaryVehicle.plate} ({primaryVehicle.model})
+                </div>
              </div>
            )}
-           <div className="flex items-center gap-1 text-[8px] bg-white px-2 py-0.5 rounded border border-pmmg-navy/5 text-slate-600 font-bold">
+           <div className="flex items-center gap-1 text-[8px] bg-white px-2 py-1 rounded-lg border border-pmmg-navy/5 text-slate-600 font-bold">
               <span className="material-symbols-outlined text-[10px]">location_on</span>
               {s.lastSeen}
            </div>
