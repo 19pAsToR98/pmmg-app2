@@ -4,7 +4,6 @@ import BottomNav from '../components/BottomNav';
 import GoogleMapWrapper from '../components/GoogleMapWrapper';
 import { MarkerF } from '@react-google-maps/api';
 import { ICON_PATHS } from '../utils/iconPaths';
-import VehicleVisuals from '../components/VehicleVisuals'; // NOVO
 
 interface SuspectProfileProps {
   suspect: Suspect;
@@ -283,15 +282,12 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
             {expandedSection === 'vehicles' && (
               <div className="p-4 space-y-3 border-t border-pmmg-navy/5">
                 {suspect.vehicles && suspect.vehicles.length > 0 ? suspect.vehicles.map((vehicle, i) => (
-                  <div key={i} className="p-3 bg-pmmg-navy/5 rounded border border-pmmg-navy/10 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <VehicleVisuals vehicle={vehicle} size="md" /> {/* NOVO COMPONENTE */}
-                      <div>
-                        <p className="text-sm font-bold text-pmmg-navy">{vehicle.plate}</p>
-                        <p className="text-[11px] text-slate-700 mt-1">{vehicle.model}</p>
-                      </div>
+                  <div key={i} className="p-3 bg-pmmg-navy/5 rounded border border-pmmg-navy/10">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-bold text-pmmg-navy">{vehicle.plate}</p>
+                      <span className="text-[10px] font-semibold text-slate-500">{vehicle.color}</span>
                     </div>
-                    <span className="text-[10px] font-semibold text-slate-500">{vehicle.color}</span>
+                    <p className="text-[11px] text-slate-700 mt-1">{vehicle.model}</p>
                   </div>
                 )) : (
                   <p className="text-xs text-slate-400 italic">Nenhum veículo registrado.</p>

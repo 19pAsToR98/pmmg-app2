@@ -4,7 +4,6 @@ import BottomNav from '../components/BottomNav';
 import GoogleMapWrapper from '../components/GoogleMapWrapper';
 import { MarkerF } from '@react-google-maps/api';
 import { ICON_PATHS } from '../utils/iconPaths';
-import VehicleVisuals from '../components/VehicleVisuals'; // NOVO
 
 interface SuspectRegistryProps {
   navigateTo: (screen: Screen) => void;
@@ -741,12 +740,9 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
         <div className="pmmg-card p-4 space-y-3">
           {vehicles.map((v, idx) => (
             <div key={idx} className="flex items-center justify-between p-2 bg-pmmg-navy/5 rounded-lg border border-pmmg-navy/10">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <VehicleVisuals vehicle={v} size="sm" /> {/* NOVO COMPONENTE */}
-                <div>
-                  <p className="text-sm font-bold text-pmmg-navy truncate">{v.plate}</p>
-                  <p className="text-[10px] text-slate-500">{v.model} ({v.color})</p>
-                </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-pmmg-navy truncate">{v.plate} - {v.model}</p>
+                <p className="text-[10px] text-slate-500">{v.color}</p>
               </div>
               <button onClick={() => handleRemoveVehicle(idx)} className="text-pmmg-red p-1 shrink-0">
                 <span className="material-symbols-outlined text-lg">delete</span>
