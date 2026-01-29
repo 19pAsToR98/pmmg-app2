@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
+import L from 'leaflet';
 import { Screen, Suspect } from '../types';
 import BottomNav from '../components/BottomNav';
-import GoogleMapWrapper from '../components/GoogleMapWrapper';
-import { MarkerF } from '@react-google-maps/api';
 
 interface SuspectProfileProps {
   suspect: Suspect;
@@ -17,6 +16,14 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
   const [expandedSection, setExpandedSection] = useState<string | null>('data');
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   
+  // Refs para os dois mapas
+  const lastSeenMiniMapRef = useRef<HTMLDivElement>(null);
+  const approachMiniMapRef = useRef<HTMLDivElement>(null);
+  
+  // Instâncias Leaflet
+  const lastSeenMapInstance = useRef<L.Map | null>(null);
+  const approachMapInstance = useRef<L.Map | null>(null);
+
   const photos = suspect.photoUrls && suspect.photoUrls.length > 0 ? suspect.photoUrls : [suspect.photoUrl];
   const currentPhotoIndex = fullscreenImage ? photos.indexOf(fullscreenImage) : -1;
 
@@ -40,37 +47,83 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
     }
   };
 
-  const handleOpenMap = (lat?: number, lng?: number) => {
-    if (lat && lng) {
-      navigateTo('map', [lat, lng]);
-    } else if (suspect.lat && suspect.lng) {
+  // Efeito para o Mapa de Última Localização (Last Seen)
+  useEffect(() => {
+    if (lastSeenMiniMapRef.current && suspect.lat && suspect.lng && !lastSeenMapInstance.current) {
+      lastSeenMapInstance.current = L.map(lastSeenMiniMapRef.current, {
+        center: [suspect.lat, suspect.lng],
+        zoom: 15,
+        zoomControl: false,
+        dragging: false,
+        touchZoom: false,
+        scrollWheelZoom: false,
+        doubleClickZoom: false,
+        boxZoom: false
+      });
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(lastSeenMapInstance.current);
+
+      const color = suspect.status === 'Foragido' ? 'bg-pmmg-red' : 'bg-pmmg-yellow';
+      const suspectIcon = L.divIcon({
+        className: 'custom-suspect-icon',
+        html: `<div class="w-8 h-8 ${color} rounded-lg border-2 border-pmmg-navy flex items-center justify-center shadow-lg transform rotate-45"><span class="material-symbols-outlined text-pmmg-navy text-[16px] transform -rotate-45">priority_high</span></div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
+      });
+
+      L.marker([suspect.lat, suspect.lng], { icon: suspectIcon }).addTo(lastSeenMapInstance.current);
+    }
+
+    return () => {
+      if (lastSeenMapInstance.current) {
+        lastSeenMapInstance.current.remove();
+        lastSeenMapInstance.current = null;
+      }
+    };
+  }, [suspect]);
+  
+  // Efeito para o Mapa de Endereço da Abordagem (Approach Address)
+  useEffect(() => {
+    if (approachMiniMapRef.current && suspect.approachLat && suspect.approachLng && !approachMapInstance.current) {
+      approachMapInstance.current = L.map(approachMiniMapRef.current, {
+        center: [suspect.approachLat, suspect.approachLng],
+        zoom: 15,
+        zoomControl: false,
+        dragging: false,
+        touchZoom: false,
+        scrollWheelZoom: false,
+        doubleClickZoom: false,
+        boxZoom: false
+      });
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(approachMapInstance.current);
+
+      const approachIcon = L.divIcon({
+        className: 'custom-approach-icon',
+        html: `<div class="w-8 h-8 bg-pmmg-navy rounded-full border-2 border-pmmg-yellow flex items-center justify-center shadow-lg"><span class="material-symbols-outlined text-pmmg-yellow text-[16px] fill-icon">pin_drop</span></div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
+      });
+
+      L.marker([suspect.approachLat, suspect.approachLng], { icon: approachIcon }).addTo(approachMapInstance.current);
+    }
+
+    return () => {
+      if (approachMapInstance.current) {
+        approachMapInstance.current.remove();
+        approachMapInstance.current = null;
+      }
+    };
+  }, [suspect.approachLat, suspect.approachLng]);
+
+
+  const handleOpenMap = () => {
+    if (suspect.lat && suspect.lng) {
       navigateTo('map', [suspect.lat, suspect.lng]);
     } else {
       navigateTo('map');
     }
   };
-  
-  // Helper function to generate marker icon for mini-maps
-  const getMiniMapIcon = (isApproach: boolean) => {
-    if (typeof window === 'undefined' || !window.google || !window.google.maps) return undefined; // Safety check
-
-    const color = isApproach ? '#002147' : (suspect.status === 'Foragido' ? '#e31c1c' : '#ffcc00');
-    const iconName = isApproach ? 'pin_drop' : (suspect.status === 'Foragido' ? 'priority_high' : 'warning');
-    
-    const svg = `
-      <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="16" cy="16" r="14" fill="${color}" stroke="#ffffff" stroke-width="2"/>
-        <text x="16" y="22" font-family="Material Symbols Outlined" font-size="16" fill="${isApproach ? '#ffcc00' : '#ffffff'}" text-anchor="middle">${iconName}</text>
-      </svg>
-    `;
-    
-    return {
-      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-      scaledSize: new window.google.maps.Size(32, 32),
-      anchor: new window.google.maps.Point(16, 16),
-    };
-  };
-
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
@@ -153,7 +206,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
         {/* Header Section with Photo and Text side-by-side */}
         <section className="p-4 bg-gradient-to-b from-pmmg-navy to-pmmg-navy/80 pb-12 rounded-b-[2rem] shadow-xl">
           
-          <div className="flex gap-4 relative items-start">
+          <div className="flex gap-4 relative items-start"> {/* Adicionado items-start aqui */}
             {/* Bloco da Foto (Esquerda) */}
             <div className="shrink-0">
               <div 
@@ -172,7 +225,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
             </div>
             
             {/* Bloco de Texto (Direita) */}
-            <div className="flex-1 flex flex-col justify-start">
+            <div className="flex-1 flex flex-col justify-start"> {/* Alterado justify-between para justify-start */}
               <div className="flex justify-end mb-2">
                 <span className={`text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg border border-white/20 uppercase tracking-widest ${
                   suspect.status === 'Foragido' ? 'bg-pmmg-red animate-pulse' : 
@@ -352,42 +405,24 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
           </div>
 
           {/* Última Localização (Ocorrência/Residência) */}
-          {suspect.lat && suspect.lng && (
-            <div className="pmmg-card overflow-hidden">
-              <div className="p-4 flex items-center justify-between text-pmmg-navy bg-white/40">
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined">location_on</span>
-                  <span className="text-sm font-bold uppercase">Última Localização (Ocorrência/Residência)</span>
-                </div>
-                <span className="text-[9px] font-bold uppercase opacity-50">{suspect.lastSeen}</span>
+          <div className="pmmg-card overflow-hidden">
+            <div className="p-4 flex items-center justify-between text-pmmg-navy bg-white/40">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined">location_on</span>
+                <span className="text-sm font-bold uppercase">Última Localização (Ocorrência/Residência)</span>
               </div>
-              <div className="relative group cursor-pointer" onClick={() => handleOpenMap(suspect.lat, suspect.lng)}>
-                <GoogleMapWrapper
-                  center={{ lat: suspect.lat, lng: suspect.lng }}
-                  zoom={15}
-                  mapContainerClassName="h-48 w-full z-0 pointer-events-none"
-                  options={{
-                    disableDefaultUI: true,
-                    draggable: false,
-                    scrollwheel: false,
-                    zoomControl: false,
-                    mapTypeId: 'roadmap'
-                  }}
-                >
-                  <MarkerF
-                    position={{ lat: suspect.lat, lng: suspect.lng }}
-                    icon={getMiniMapIcon(false)}
-                  />
-                </GoogleMapWrapper>
-                <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors flex items-center justify-center">
-                  <div className="bg-pmmg-navy/80 text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-xl backdrop-blur-sm transform scale-90 group-hover:scale-100 transition-transform">
-                    <span className="material-symbols-outlined text-sm">open_in_full</span>
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Abrir Mapa Geral</span>
-                  </div>
+              <span className="text-[9px] font-bold uppercase opacity-50">{suspect.lastSeen}</span>
+            </div>
+            <div className="relative group cursor-pointer" onClick={handleOpenMap}>
+              <div ref={lastSeenMiniMapRef} className="h-48 w-full bg-slate-200 z-0 pointer-events-none"></div>
+              <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors flex items-center justify-center">
+                <div className="bg-pmmg-navy/80 text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-xl backdrop-blur-sm transform scale-90 group-hover:scale-100 transition-transform">
+                  <span className="material-symbols-outlined text-sm">open_in_full</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest">Abrir Mapa Geral</span>
                 </div>
               </div>
             </div>
-          )}
+          </div>
           
           {/* Endereço da Abordagem (NOVO MAPA) */}
           {suspect.approachAddress && suspect.approachLat && suspect.approachLng && (
@@ -399,24 +434,8 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                 </div>
                 <span className="text-[9px] font-bold uppercase opacity-50">{suspect.approachAddress}</span>
               </div>
-              <div className="relative group cursor-pointer" onClick={() => handleOpenMap(suspect.approachLat!, suspect.approachLng!)}>
-                <GoogleMapWrapper
-                  center={{ lat: suspect.approachLat, lng: suspect.approachLng }}
-                  zoom={15}
-                  mapContainerClassName="h-48 w-full z-0 pointer-events-none"
-                  options={{
-                    disableDefaultUI: true,
-                    draggable: false,
-                    scrollwheel: false,
-                    zoomControl: false,
-                    mapTypeId: 'roadmap'
-                  }}
-                >
-                  <MarkerF
-                    position={{ lat: suspect.approachLat, lng: suspect.approachLng }}
-                    icon={getMiniMapIcon(true)}
-                  />
-                </GoogleMapWrapper>
+              <div className="relative group cursor-pointer" onClick={() => navigateTo('map', [suspect.approachLat!, suspect.approachLng!])}>
+                <div ref={approachMiniMapRef} className="h-48 w-full bg-slate-200 z-0 pointer-events-none"></div>
                 <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors flex items-center justify-center">
                   <div className="bg-pmmg-navy/80 text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-xl backdrop-blur-sm transform scale-90 group-hover:scale-100 transition-transform">
                     <span className="material-symbols-outlined text-sm">open_in_full</span>
