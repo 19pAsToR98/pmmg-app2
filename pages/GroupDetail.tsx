@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Screen, Group, Officer, Suspect, GroupPost } from '../types';
+import GroupTimelineFilters from '../components/GroupTimelineFilters';
 
 interface GroupDetailProps {
   navigateTo: (screen: Screen) => void;
@@ -12,15 +13,13 @@ interface GroupDetailProps {
 
 type PostFilterStatus = Suspect['status'] | 'Todos';
 
-const STATUS_OPTIONS: PostFilterStatus[] = ['Todos', 'Foragido', 'Suspeito', 'Preso', 'CPF Cancelado'];
-
 const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allOfficers, allSuspects, onOpenProfile, onShareSuspect }) => {
   const [isSharing, setIsSharing] = useState(false);
   const [shareSuspectId, setShareSuspectId] = useState<string | null>(null);
   const [shareObservation, setShareObservation] = useState('');
   const [suspectSearchTerm, setSuspectSearchTerm] = useState('');
   
-  // Filtros da Linha do Tempo
+  // Filtros da Linha do Tempo (Movidos para o estado local)
   const [timelineSearchTerm, setTimelineSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<PostFilterStatus>('Todos');
   const [authorFilterId, setAuthorFilterId] = useState<string>('Todos'); // 'Todos' ou Officer ID
@@ -107,7 +106,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allOfficer
   };
 
   return (
-    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
+    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden relative">
       <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-3 flex items-center gap-3 shadow-lg">
         <button onClick={() => navigateTo('groupsList')} className="text-white">
           <span className="material-symbols-outlined">arrow_back_ios</span>
@@ -126,80 +125,19 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allOfficer
         </button>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar">
+      <main className="flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar pb-24">
         
-        {/* Botão de Compartilhamento */}
-        <div className="flex justify-center">
-          <button 
-            onClick={() => setIsSharing(true)}
-            className="bg-pmmg-red text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg uppercase tracking-widest flex items-center gap-2 active:scale-95 transition-transform"
-          >
-            <span className="material-symbols-outlined text-lg">share</span>
-            Compartilhar Ficha
-          </button>
-        </div>
-        
-        {/* --- Filtros e Pesquisa da Linha do Tempo --- */}
-        <section className="pmmg-card p-4 space-y-3">
-          <h3 className="text-[11px] font-bold text-pmmg-navy/60 uppercase tracking-wider">Filtros da Linha do Tempo</h3>
-          
-          {/* Pesquisa */}
-          <div className="relative">
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-              <span className="material-symbols-outlined text-pmmg-navy/50 text-xl">search</span>
-            </div>
-            <input 
-              value={timelineSearchTerm}
-              onChange={(e) => setTimelineSearchTerm(e.target.value)}
-              className="block w-full pl-10 pr-3 py-3 bg-white/60 border border-pmmg-navy/10 focus:border-pmmg-navy focus:ring-0 rounded-2xl text-sm placeholder-pmmg-navy/40" 
-              placeholder="Buscar por nome, CPF ou observação..." 
-              type="text" 
-            />
-          </div>
-
-          {/* Filtro de Status */}
-          <div>
-            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Status do Indivíduo</label>
-            <div className="flex overflow-x-auto gap-2 pb-1 no-scrollbar">
-              {STATUS_OPTIONS.map(opt => (
-                <button
-                  key={opt}
-                  onClick={() => setStatusFilter(opt)}
-                  className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all border shrink-0 ${
-                    statusFilter === opt 
-                    ? 'bg-pmmg-navy text-white border-pmmg-navy shadow-md' 
-                    : 'bg-slate-50 text-pmmg-navy/60 border-slate-200'
-                  }`}
-                >
-                  {opt}
-                </button>
-              ))}
-            </div>
-          </div>
-          
-          {/* Filtro de Autor */}
-          <div>
-            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Autor do Post</label>
-            <select
-              value={authorFilterId}
-              onChange={(e) => setAuthorFilterId(e.target.value)}
-              className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm"
-            >
-              <option value="Todos">Todos os Oficiais</option>
-              {groupMembers.map(officer => (
-                <option key={officer.id} value={officer.id}>
-                  {officer.rank}. {officer.name} ({officer.unit})
-                </option>
-              ))}
-            </select>
-          </div>
-          
-          <div className="text-center pt-2">
-            <span className="text-[10px] font-black text-pmmg-red uppercase tracking-widest italic">
-              {filteredPosts.length} posts encontrados
-            </span>
-          </div>
-        </section>
+        {/* --- Filtros e Pesquisa da Linha do Tempo (Componente Discreto) --- */}
+        <GroupTimelineFilters
+          timelineSearchTerm={timelineSearchTerm}
+          setTimelineSearchTerm={setTimelineSearchTerm}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          authorFilterId={authorFilterId}
+          setAuthorFilterId={setAuthorFilterId}
+          groupMembers={groupMembers}
+          filteredPostsCount={filteredPosts.length}
+        />
 
         {/* Linha do Tempo de Posts */}
         <section className="space-y-6">
@@ -262,6 +200,17 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allOfficer
           )}
         </section>
       </main>
+      
+      {/* Floating Action Button (FAB) for Sharing */}
+      <footer className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 border-t border-pmmg-navy/10 backdrop-blur-lg max-w-md mx-auto z-50">
+        <button 
+          onClick={() => setIsSharing(true)}
+          className="w-full bg-pmmg-red text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-3 uppercase tracking-widest active:scale-[0.98] transition-transform"
+        >
+          <span className="material-symbols-outlined text-lg">add_box</span>
+          Novo Post Tático (Compartilhar Ficha)
+        </button>
+      </footer>
 
       {/* Modal de Compartilhamento (Mantido) */}
       {isSharing && (
