@@ -25,7 +25,7 @@ const ZOOM_THRESHOLD = 15; // Nível de zoom para alternar para fotos
 const DEFAULT_CENTER = { lat: -19.9167, lng: -43.9345 };
 
 const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenProfile, initialCenter, customMarkers, addCustomMarker, updateCustomMarker, deleteCustomMarker }) => {
-  const mapRef = useRef<google.maps.Map | null>(null);
+  const mapRef = useRef<google.maps.Map | null>(mapRef);
   
   const [userPos, setUserPos] = useState<{ lat: number, lng: number } | null>(null);
   const [activeFilter, setActiveFilter] = useState<MapFilter>('Todos');
@@ -146,47 +146,74 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   const getSuspectIcon = (suspect: Suspect) => {
     if (typeof window === 'undefined' || !window.google || !window.google.maps) return undefined; // Safety check
 
+    let colorHex: string;
+    let iconName: string;
+    let textColor: string;
+
+    switch (suspect.status) {
+      case 'Foragido':
+        colorHex = '#e31c1c'; // pmmg-red
+        iconName = 'priority_high';
+        textColor = '#ffffff';
+        break;
+      case 'Suspeito':
+        colorHex = '#ffcc00'; // pmmg-yellow
+        iconName = 'warning';
+        textColor = '#002147'; // pmmg-navy (para contraste no amarelo)
+        break;
+      case 'Preso':
+        colorHex = '#0047ab'; // pmmg-blue
+        iconName = 'lock';
+        textColor = '#ffffff';
+        break;
+      case 'CPF Cancelado':
+        colorHex = '#475569'; // slate-600
+        iconName = 'cancel';
+        textColor = '#ffffff';
+        break;
+      default:
+        colorHex = '#002147'; // pmmg-navy
+        iconName = 'person';
+        textColor = '#ffffff';
+    }
+
     if (usePhotoMarker) {
-      // Photo Marker (Zoomed In)
+      // Photo Marker (Zoomed In) - Adicionando borda colorida via SVG
+      const size = 40;
+      const borderSize = 3;
+      const innerSize = size - 2 * borderSize;
+      
+      const svg = `
+        <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+          <!-- Borda colorida (Status) -->
+          <circle cx="${size / 2}" cy="${size / 2}" r="${size / 2 - 1}" fill="none" stroke="${colorHex}" stroke-width="${borderSize}"/>
+          <!-- Imagem do Suspeito (Clip Path) -->
+          <defs>
+            <clipPath id="circleClip">
+              <circle cx="${size / 2}" cy="${size / 2}" r="${innerSize / 2}"/>
+            </clipPath>
+          </defs>
+          <image 
+            href="${suspect.photoUrl}" 
+            x="${borderSize}" 
+            y="${borderSize}" 
+            width="${innerSize}" 
+            height="${innerSize}" 
+            clip-path="url(#circleClip)"
+            preserveAspectRatio="xMidYMid slice"
+          />
+        </svg>
+      `;
+
       return {
-        url: suspect.photoUrl,
-        scaledSize: new window.google.maps.Size(40, 40),
+        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+        scaledSize: new window.google.maps.Size(size, size),
         origin: new window.google.maps.Point(0, 0),
-        anchor: new window.google.maps.Point(20, 20),
-        labelOrigin: new window.google.maps.Point(20, 45),
+        anchor: new window.google.maps.Point(size / 2, size / 2),
+        labelOrigin: new window.google.maps.Point(size / 2, size + 5),
       };
     } else {
       // Simple Icon Marker (Zoomed Out)
-      let colorClass: string;
-      let iconName: string;
-      let textColor: string;
-
-      switch (suspect.status) {
-        case 'Foragido':
-          colorClass = '#e31c1c'; // pmmg-red
-          iconName = 'priority_high';
-          textColor = '#ffffff';
-          break;
-        case 'Suspeito':
-          colorClass = '#ffcc00'; // pmmg-yellow
-          iconName = 'warning';
-          textColor = '#002147'; // pmmg-navy (para contraste no amarelo)
-          break;
-        case 'Preso':
-          colorClass = '#0047ab'; // pmmg-blue
-          iconName = 'lock';
-          textColor = '#ffffff';
-          break;
-        case 'CPF Cancelado':
-          colorClass = '#475569'; // slate-600
-          iconName = 'cancel';
-          textColor = '#ffffff';
-          break;
-        default:
-          colorClass = '#002147'; // pmmg-navy
-          iconName = 'person';
-          textColor = '#ffffff';
-      }
       
       // Se o filtro de localização for 'approach', usamos 'pin_drop'
       if (locationFilter === 'approach') {
@@ -198,7 +225,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       // Usando SVG Path (24x24) - REGRA DE OURO 1
       const svg = `
         <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="12" r="10" fill="${colorClass}" stroke="#ffffff" stroke-width="2"/>
+          <circle cx="12" cy="12" r="10" fill="${colorHex}" stroke="#ffffff" stroke-width="2"/>
           <path d="${pathData}" fill="${textColor}" transform="translate(4 4) scale(0.7)"/>
         </svg>
       `;
@@ -320,7 +347,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               locationType = 'Última Localização';
             } else if (locationFilter === 'approach' && suspect.approachLat && suspect.approachLng) {
               lat = suspect.approachLat;
-              lng = suspect.lng;
+              lng = suspect.approachLng;
               locationName = suspect.approachAddress;
               locationType = 'Endereço de Abordagem';
             }
