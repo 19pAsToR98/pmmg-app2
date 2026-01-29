@@ -57,7 +57,7 @@ const SuspectPhotoMarker = memo<{
     <OverlayViewF
       position={position}
       mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-      getPixelPositionOffset={() => ({ x: 0, y: 0 })}
+      getPixelPositionOffset={() => ({ x: -20, y: -20 })} // Ajuste para centralizar o marcador de 40x40
     >
       <div 
         onClick={handleClick}
@@ -65,7 +65,7 @@ const SuspectPhotoMarker = memo<{
         className="relative group"
       >
         {usePhotoMarker ? (
-          // ✅ FOTO COM BORDA COLORIDA (como no Leaflet)
+          // ✅ FOTO COM BORDA COLORIDA (40x40)
           <div 
             className={`w-10 h-10 bg-white shadow-xl ${getBorderColorClass()} border-4 overflow-hidden ring-2 ring-white/50 rounded-lg`}
             title={suspect.name}
@@ -77,7 +77,7 @@ const SuspectPhotoMarker = memo<{
             />
           </div>
         ) : (
-          // ✅ ÍCONE SIMPLES (como no Leaflet)
+          // ✅ ÍCONE SIMPLES (24x24)
           <div 
             className={`w-6 h-6 rounded-full border-2 border-white flex items-center justify-center shadow-md ${
               suspect.status === 'Foragido' ? 'bg-pmmg-red' :
@@ -111,7 +111,7 @@ const CustomMarkerComponent = memo<{
     <OverlayViewF
       position={position}
       mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-      getPixelPositionOffset={() => ({ x: 0, y: 0 })}
+      getPixelPositionOffset={() => ({ x: -16, y: -16 })} // Ajuste para centralizar o marcador de 32x32
     >
       <div 
         onClick={handleClick}
@@ -146,7 +146,7 @@ const UserMarkerComponent = memo<{
     <OverlayViewF
       position={position}
       mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-      getPixelPositionOffset={() => ({ x: 0, y: 0 })}
+      getPixelPositionOffset={() => ({ x: -16, y: -16 })} // Ajuste para centralizar o marcador de 32x32
     >
       <div 
         onClick={handleClick}
@@ -174,17 +174,28 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   const [newMarkerData, setNewMarkerData] = useState<Omit<CustomMarker, 'id'> | null>(null);
   const [editingMarker, setEditingMarker] = useState<CustomMarker | null>(null);
   const [currentZoom, setCurrentZoom] = useState(initialCenter ? 17 : 14);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // ALTERADO: Começa como false
-  const [activeInfoWindow, setActiveInfoWindow] = useState<string | null>(null); // ID do marcador com InfoWindow aberta
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); 
+  const [activeInfoWindow, setActiveInfoWindow] = useState<string | null>(null); 
 
   // Center state managed by initialCenter prop or user position
   const center = initialCenter ? { lat: initialCenter[0], lng: initialCenter[1] } : userPos || DEFAULT_CENTER;
 
   // Filtragem dos suspeitos
-  const filteredSuspects = suspects.filter(s => 
-    (s.showOnMap === undefined || s.showOnMap === true) && 
-    (activeFilter === 'Todos' || s.status === activeFilter)
-  );
+  const filteredSuspects = suspects.filter(s => {
+    // 1. Filtro de visibilidade e status
+    const matchesStatus = (s.showOnMap === undefined || s.showOnMap === true) && 
+                          (activeFilter === 'Todos' || s.status === activeFilter);
+    if (!matchesStatus) return false;
+    
+    // 2. Filtro de localização (garante que a coordenada exista para o filtro selecionado)
+    if (locationFilter === 'residence') {
+      return s.lat !== undefined && s.lng !== undefined;
+    }
+    if (locationFilter === 'approach') {
+      return s.approachLat !== undefined && s.approachLng !== undefined;
+    }
+    return false; // Deve ser inalcançável se locationFilter for 'residence' ou 'approach'
+  });
 
   const usePhotoMarker = currentZoom >= ZOOM_THRESHOLD;
 
@@ -288,6 +299,14 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
 
   const activeMarkerData = newMarkerData || editingMarker;
   const isEditing = !!editingMarker;
+  
+  // Lista de status para o filtro da sidebar
+  const STATUS_FILTERS: { id: MapFilter, label: string, color: string, icon: string }[] = [
+    { id: 'Foragido', label: 'Foragido', color: 'bg-pmmg-red', icon: 'priority_high' },
+    { id: 'Suspeito', label: 'Suspeito', color: 'bg-pmmg-yellow', icon: 'warning' },
+    { id: 'Preso', label: 'Preso', color: 'bg-pmmg-blue', icon: 'lock' },
+    { id: 'CPF Cancelado', label: 'CPF Cancelado', color: 'bg-slate-700', icon: 'cancel' },
+  ];
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
@@ -357,12 +376,12 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             let locationName: string | undefined;
             let locationType: 'Última Localização' | 'Endereço de Abordagem';
             
-            if (locationFilter === 'residence' && suspect.lat && suspect.lng) {
+            if (locationFilter === 'residence') {
               lat = suspect.lat;
               lng = suspect.lng;
               locationName = suspect.lastSeen;
               locationType = 'Última Localização';
-            } else if (locationFilter === 'approach' && suspect.approachLat && suspect.approachLng) {
+            } else if (locationFilter === 'approach') {
               lat = suspect.approachLat;
               lng = suspect.approachLng;
               locationName = suspect.approachAddress;
@@ -619,40 +638,31 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               </div>
             </div>
             
-            {/* --- Filtro de Status (Mantido) --- */}
+            {/* --- Filtro de Status --- */}
             <p className="text-[8px] font-black text-pmmg-navy/40 uppercase tracking-widest border-b border-pmmg-navy/5 pb-1 mb-1 pt-2">Filtro por Status</p>
 
-            {/* Foragido (Photo style) */}
-            <div className="flex items-center gap-2">
-               <div className={`w-4 h-4 ${usePhotoMarker ? 'rounded-md border-2 bg-slate-300' : 'rounded-full bg-pmmg-red flex items-center justify-center'} border-pmmg-red shadow-sm`}>
-                 {!usePhotoMarker && <span className="material-symbols-outlined text-white text-[10px] fill-icon">priority_high</span>}
+            <button 
+              onClick={() => setActiveFilter('Todos')}
+              className={`flex items-center gap-2 w-full text-left p-1 rounded transition-colors ${activeFilter === 'Todos' ? 'bg-pmmg-navy/10' : 'hover:bg-slate-50'}`}
+            >
+               <div className={`w-4 h-4 rounded-full bg-pmmg-navy flex items-center justify-center shadow-sm`}>
+                 <span className="material-symbols-outlined text-white text-[10px] fill-icon">done_all</span>
                </div>
-               <span className="text-[9px] font-bold text-pmmg-navy uppercase">Foragido</span>
-            </div>
-            
-            {/* Suspeito (Photo style) */}
-            <div className="flex items-center gap-2">
-               <div className={`w-4 h-4 ${usePhotoMarker ? 'rounded-md border-2 bg-slate-300' : 'rounded-full bg-pmmg-yellow flex items-center justify-center'} border-pmmg-yellow shadow-sm`}>
-                 {!usePhotoMarker && <span className="material-symbols-outlined text-pmmg-navy text-[10px] fill-icon">warning</span>}
-               </div>
-               <span className="text-[9px] font-bold text-pmmg-navy uppercase">Suspeito</span>
-            </div>
-            
-            {/* Preso */}
-            <div className="flex items-center gap-2">
-               <div className={`w-4 h-4 rounded-full bg-pmmg-blue flex items-center justify-center border-pmmg-blue shadow-sm`}>
-                 <span className="material-symbols-outlined text-white text-[10px] fill-icon">lock</span>
-               </div>
-               <span className="text-[9px] font-bold text-pmmg-navy uppercase">Preso</span>
-            </div>
+               <span className="text-[9px] font-bold text-pmmg-navy uppercase">Todos os Suspeitos ({suspects.length})</span>
+            </button>
 
-            {/* CPF Cancelado */}
-            <div className="flex items-center gap-2">
-               <div className={`w-4 h-4 rounded-full bg-slate-700 flex items-center justify-center border-slate-700 shadow-sm`}>
-                 <span className="material-symbols-outlined text-white text-[10px] fill-icon">cancel</span>
-               </div>
-               <span className="text-[9px] font-bold text-pmmg-navy uppercase">CPF Cancelado</span>
-            </div>
+            {STATUS_FILTERS.map(filter => (
+              <button 
+                key={filter.id}
+                onClick={() => setActiveFilter(filter.id)}
+                className={`flex items-center gap-2 w-full text-left p-1 rounded transition-colors ${activeFilter === filter.id ? 'bg-pmmg-navy/10' : 'hover:bg-slate-50'}`}
+              >
+                <div className={`w-4 h-4 ${usePhotoMarker ? 'rounded-md border-2 bg-slate-300' : 'rounded-full flex items-center justify-center'} ${filter.color} border-white shadow-sm`}>
+                  {!usePhotoMarker && <span className={`material-symbols-outlined text-[10px] fill-icon ${filter.id === 'Suspeito' ? 'text-pmmg-navy' : 'text-white'}`}>{filter.icon}</span>}
+                </div>
+                <span className="text-[9px] font-bold text-pmmg-navy uppercase">{filter.label}</span>
+              </button>
+            ))}
             
             {/* Oficial */}
             <div className="flex items-center gap-2 pt-2 border-t border-pmmg-navy/5">
@@ -666,20 +676,20 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                <span className="text-[9px] font-bold text-pmmg-navy uppercase">Ponto Tático</span>
             </div>
             
-            {activeFilter !== 'Todos' && (
-              <button 
-                onClick={() => setActiveFilter('Todos')}
-                className="mt-2 text-[8px] font-black text-pmmg-red uppercase border-t border-pmmg-navy/5 pt-2 text-left"
-              >
-                Limpar Filtros ({activeFilter})
-              </button>
-            )}
-
-            {/* Espaço para futuras opções */}
+            {/* --- Opções de Camadas (Simulação) --- */}
             <div className="mt-4 pt-4 border-t border-pmmg-navy/5">
-              <p className="text-[8px] font-black text-pmmg-navy/40 uppercase tracking-widest mb-2">Opções Futuras</p>
-              <button className="w-full text-left text-[10px] font-bold text-pmmg-navy/70 uppercase py-1.5 px-2 rounded hover:bg-pmmg-navy/5 transition-colors">
-                <span className="material-symbols-outlined text-sm mr-1">layers</span> Gerenciar Camadas
+              <p className="text-[8px] font-black text-pmmg-navy/40 uppercase tracking-widest mb-2">Gerenciamento de Camadas</p>
+              <button 
+                onClick={() => alert("Abrindo menu de Gerenciamento de Camadas (Simulação)")}
+                className="w-full text-left text-[10px] font-bold text-pmmg-navy/70 uppercase py-1.5 px-2 rounded hover:bg-pmmg-navy/5 transition-colors flex items-center gap-1"
+              >
+                <span className="material-symbols-outlined text-sm">layers</span> Gerenciar Camadas
+              </button>
+              <button 
+                onClick={() => alert("Alternando para Satélite (Simulação)")}
+                className="w-full text-left text-[10px] font-bold text-pmmg-navy/70 uppercase py-1.5 px-2 rounded hover:bg-pmmg-navy/5 transition-colors flex items-center gap-1"
+              >
+                <span className="material-symbols-outlined text-sm">satellite</span> Visualização Satélite
               </button>
             </div>
           </div>
