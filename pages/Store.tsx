@@ -2,18 +2,18 @@ import React from 'react';
 import { Screen } from '../types';
 import BottomNav from '../components/BottomNav';
 
-interface TacticalShopProps {
+interface StoreProps {
   navigateTo: (screen: Screen) => void;
 }
 
-const TacticalShop: React.FC<TacticalShopProps> = ({ navigateTo }) => {
+const Store: React.FC<StoreProps> = ({ navigateTo }) => {
   const militarySupplies = [
-    { name: 'Fardamento Tático Completo', description: 'Conjunto completo de fardamento padrão PMMG.', link: 'https://www.exemplo.com/fardamento', icon: 'military_uniform' },
-    { name: 'Colete Balístico Nível III-A', description: 'Proteção balística de alta performance.', link: 'https://www.exemplo.com/colete', icon: 'shield_with_heart' },
+    { name: 'Fardamento Tático Completo', description: 'Conjunto completo de fardamento padrão PMMG.', link: 'https://www.exemplo.com/fardamento', icon: 'apparel' },
+    { name: 'Colete Balístico Nível III-A', description: 'Proteção balística de alta performance.', link: 'https://www.exemplo.com/colete', icon: 'shield' },
     { name: 'Lanterna Tática de Alta Potência', description: 'Iluminação robusta para operações noturnas.', link: 'https://www.exemplo.com/lanterna', icon: 'flashlight_on' },
     { name: 'Botas Táticas Impermeáveis', description: 'Conforto e durabilidade em qualquer terreno.', link: 'https://www.exemplo.com/botas', icon: 'hiking' },
     { name: 'Mochila de Assalto 30L', description: 'Compacta e resistente para missões rápidas.', link: 'https://www.exemplo.com/mochila', icon: 'backpack' },
-    { name: 'Luvas Táticas Antiderrapantes', description: 'Aderência e proteção para manuseio de equipamentos.', link: 'https://www.exemplo.com/luvas', icon: 'hand_bones' },
+    { name: 'Luvas Táticas Antiderrapantes', description: 'Aderência e proteção para manuseio de equipamentos.', link: 'https://www.exemplo.com/luvas', icon: 'gloves' },
   ];
 
   return (
@@ -74,9 +74,9 @@ const TacticalShop: React.FC<TacticalShopProps> = ({ navigateTo }) => {
         </div>
       </main>
 
-      <BottomNav activeScreen="tacticalShop" navigateTo={navigateTo} />
+      <BottomNav activeScreen="store" navigateTo={navigateTo} />
     </div>
   );
 };
 
-export default TacticalShop;
+export default Store;
