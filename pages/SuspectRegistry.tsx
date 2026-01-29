@@ -587,9 +587,9 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
         </div>
         <div className="space-y-4">
           
-          {/* 3.1. Endereço de Última Ocorrência/Residência */}
+          {/* 3.1. Endereço Principal */}
           <div className="relative">
-            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Endereço de Última Ocorrência/Residência</label>
+            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Endereço Principal</label>
             <div className="flex gap-2">
               <input 
                 value={lastSeenAddress}
@@ -636,7 +636,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
           {selectedLastSeenLocation && (
             <div className="pmmg-card overflow-hidden">
               <div className="p-3 bg-pmmg-navy/5 flex items-center justify-between">
-                <p className="text-[10px] font-bold text-pmmg-navy uppercase tracking-wider">Localização Confirmada (Ocorrência/Residência)</p>
+                <p className="text-[10px] font-bold text-pmmg-navy uppercase tracking-wider">Localização Confirmada (Endereço Principal)</p>
                 <span className="text-[9px] text-green-600 font-bold uppercase">GPS OK</span>
               </div>
               <GoogleMapWrapper

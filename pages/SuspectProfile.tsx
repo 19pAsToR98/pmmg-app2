@@ -356,13 +356,13 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
             <p className="text-[8px] text-slate-400 mt-2 uppercase text-center font-bold italic tracking-wider">Clique para expandir (Cores Reais)</p>
           </div>
 
-          {/* Última Localização (Ocorrência/Residência) */}
+          {/* Endereço Principal */}
           {suspect.lat && suspect.lng && (
             <div className="pmmg-card overflow-hidden">
               <div className="p-4 text-pmmg-navy bg-white/40">
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined">location_on</span>
-                  <span className="text-sm font-bold uppercase">Última Localização (Ocorrência/Residência)</span>
+                  <span className="text-sm font-bold uppercase">Endereço Principal</span>
                 </div>
                 {/* Endereço movido para baixo do título */}
                 <p className="text-[10px] font-bold uppercase opacity-70 mt-1 ml-8">{suspect.lastSeen}</p>
