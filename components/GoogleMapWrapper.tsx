@@ -14,34 +14,42 @@ interface GoogleMapWrapperProps {
   onClick?: (e: google.maps.MapMouseEvent) => void;
 }
 
-// Estilos de mapa tático/militar para remover POIs e rótulos
 const MAP_STYLES: google.maps.MapTypeStyle[] = [
+  // Oculta todos os Pontos de Interesse (POIs)
   {
-    featureType: 'poi',
-    stylers: [{ visibility: 'off' }],
+    featureType: "poi",
+    stylers: [{ visibility: "off" }]
   },
+  // Oculta ícones de transporte público
   {
-    featureType: 'transit',
-    stylers: [{ visibility: 'off' }],
+    featureType: "transit",
+    elementType: "labels.icon",
+    stylers: [{ visibility: "off" }]
   },
+  // Opcional: Simplifica a geometria das estradas para um visual mais limpo
   {
-    featureType: 'road',
-    elementType: 'labels',
-    stylers: [{ visibility: 'off' }],
+    featureType: "road",
+    elementType: "geometry",
+    stylers: [{ lightness: 100 }, { visibility: "simplified" }]
   },
+  // Opcional: Simplifica rótulos de estradas
   {
-    featureType: 'administrative',
-    elementType: 'labels',
-    stylers: [{ visibility: 'off' }],
+    featureType: "road",
+    elementType: "labels.text",
+    stylers: [{ visibility: "off" }]
   },
+  // Opcional: Simplifica rótulos de áreas
   {
-    featureType: 'landscape',
-    stylers: [{ saturation: -100 }, { lightness: 10 }],
+    featureType: "administrative",
+    elementType: "labels.text",
+    stylers: [{ visibility: "off" }]
   },
+  // Opcional: Mantém rótulos de cidades/países
   {
-    featureType: 'water',
-    stylers: [{ color: '#c9d6df' }],
-  },
+    featureType: "administrative.locality",
+    elementType: "labels.text",
+    stylers: [{ visibility: "on" }]
+  }
 ];
 
 const GoogleMapWrapper: React.FC<GoogleMapWrapperProps> = ({ 
@@ -85,8 +93,7 @@ const GoogleMapWrapper: React.FC<GoogleMapWrapperProps> = ({
         streetViewControl: false,
         mapTypeControl: false,
         fullscreenControl: false,
-        clickableIcons: false, // Desativa ícones clicáveis
-        styles: MAP_STYLES, // Aplicando os estilos táticos
+        styles: MAP_STYLES, // Aplicando os novos estilos limpos
         ...options,
       }}
       onLoad={onLoad}
