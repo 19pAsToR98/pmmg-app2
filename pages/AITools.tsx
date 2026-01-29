@@ -82,7 +82,7 @@ const AITools: React.FC<AIToolsProps> = ({ navigateTo, userRank, aiAvatar }) => 
         </div>
       </main>
 
-      <BottomNav activeScreen="profileSettings" navigateTo={navigateTo} />
+      <BottomNav activeScreen="aiTools" navigateTo={navigateTo} />
     </div>
   );
 };
