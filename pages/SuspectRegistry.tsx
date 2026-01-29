@@ -109,8 +109,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
   
   // Default center for map wrapper if no location is selected
   const defaultMapCenter = { lat: -19.9167, lng: -43.9345 }; 
-  const mapCenter = selectedLastSeenLocation || defaultMapCenter;
-
+  
   // --- Address Search Logic (Google Geocoding) ---
   
   // Last Seen Handlers
@@ -326,11 +325,11 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
   };
   
   // Helper function to generate marker icon for mini-maps
-  const getMiniMapIcon = () => {
+  const getMiniMapIcon = (isApproach: boolean) => {
     if (typeof window === 'undefined' || !window.google || !window.google.maps) return undefined; // Safety check
 
-    const color = '#002147';
-    const iconName = 'location_on';
+    const color = isApproach ? '#002147' : '#002147';
+    const iconName = isApproach ? 'pin_drop' : 'location_on';
     
     const pathData = ICON_PATHS[iconName];
     
@@ -469,132 +468,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
           </button>
         </div>
 
-        {/* --- Endereço Section (Updated) --- */}
-        <div className="flex items-center gap-2 mb-4 mt-8">
-          <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
-          <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Endereço e Localização</h3>
-        </div>
-        <div className="space-y-4">
-          
-          {/* 1. Endereço de Última Ocorrência/Residência */}
-          <div className="relative">
-            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Endereço de Última Ocorrência/Residência</label>
-            <div className="flex gap-2">
-              <input 
-                value={lastSeenAddress}
-                onChange={handleLastSeenAddressChange}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleLastSeenAddressSearch();
-                  }
-                }}
-                className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
-                placeholder="Pesquisar endereço..." 
-                type="text" 
-              />
-              <button 
-                onClick={handleLastSeenAddressSearch}
-                disabled={isLastSeenSearching}
-                className="bg-pmmg-navy text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50"
-              >
-                <span className="material-symbols-outlined text-xl animate-spin" style={{ display: isLastSeenSearching ? 'block' : 'none' }}>progress_activity</span>
-                <span className="material-symbols-outlined text-xl" style={{ display: isLastSeenSearching ? 'none' : 'block' }}>search</span>
-              </button>
-            </div>
-            
-            {lastSeenAddressSuggestions.length > 0 && (
-              <div className="absolute z-10 w-full bg-white border border-pmmg-navy/20 rounded-lg mt-1 shadow-lg max-h-40 overflow-y-auto">
-                {lastSeenAddressSuggestions.map((loc, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleSelectLastSeenLocation(loc)}
-                    className="w-full text-left px-4 py-2 text-sm text-pmmg-navy hover:bg-pmmg-khaki/50 transition-colors border-b border-pmmg-navy/5 last:border-b-0"
-                  >
-                    {loc.name}
-                  </button>
-                ))}
-              </div>
-            )}
-            {lastSeenAddressSuggestions.length === 0 && !isLastSeenSearching && lastSeenAddress.length > 2 && (
-              <p className="text-[10px] text-pmmg-red italic text-center mt-2">Nenhum resultado encontrado.</p>
-            )}
-          </div>
-          
-          {/* 2. Endereço da Abordagem (NEW) */}
-          <div className="relative">
-            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Endereço da Abordagem (Opcional)</label>
-            <div className="flex gap-2">
-              <input 
-                value={approachAddress}
-                onChange={handleApproachAddressChange}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleApproachAddressSearch();
-                  }
-                }}
-                className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
-                placeholder="Pesquisar endereço da abordagem..." 
-                type="text" 
-              />
-              <button 
-                onClick={handleApproachAddressSearch}
-                disabled={isApproachSearching}
-                className="bg-pmmg-navy text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50"
-              >
-                <span className="material-symbols-outlined text-xl animate-spin" style={{ display: isApproachSearching ? 'block' : 'none' }}>progress_activity</span>
-                <span className="material-symbols-outlined text-xl" style={{ display: isApproachSearching ? 'none' : 'block' }}>search</span>
-              </button>
-            </div>
-            
-            {approachAddressSuggestions.length > 0 && (
-              <div className="absolute z-10 w-full bg-white border border-pmmg-navy/20 rounded-lg mt-1 shadow-lg max-h-40 overflow-y-auto">
-                {approachAddressSuggestions.map((loc, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleSelectApproachLocation(loc)}
-                    className="w-full text-left px-4 py-2 text-sm text-pmmg-navy hover:bg-pmmg-khaki/50 transition-colors border-b border-pmmg-navy/5 last:border-b-0"
-                  >
-                    {loc.name}
-                  </button>
-                ))}
-              </div>
-            )}
-            {approachAddressSuggestions.length === 0 && !isApproachSearching && approachAddress.length > 2 && (
-              <p className="text-[10px] text-pmmg-red italic text-center mt-2">Nenhum resultado encontrado.</p>
-            )}
-          </div>
-          
-          {/* Minimap (Only shows Last Seen Location) - Google Maps */}
-          {selectedLastSeenLocation && (
-            <div className="pmmg-card overflow-hidden">
-              <div className="p-3 bg-pmmg-navy/5 flex items-center justify-between">
-                <p className="text-[10px] font-bold text-pmmg-navy uppercase tracking-wider">Localização Confirmada (Ocorrência/Residência)</p>
-                <span className="text-[9px] text-green-600 font-bold uppercase">GPS OK</span>
-              </div>
-              <GoogleMapWrapper
-                center={mapCenter}
-                zoom={15}
-                mapContainerClassName="h-40 w-full z-0"
-                options={{
-                  disableDefaultUI: true,
-                  draggable: false,
-                  scrollwheel: false,
-                  zoomControl: false,
-                  mapTypeId: 'roadmap'
-                }}
-              >
-                <MarkerF
-                  position={mapCenter}
-                  icon={getMiniMapIcon()}
-                />
-              </GoogleMapWrapper>
-            </div>
-          )}
-        </div>
-
-        {/* --- Dados Pessoais (Existing) --- */}
+        {/* 1. --- DADOS PESSOAIS --- */}
         <div className="flex items-center gap-2 mb-4 mt-8">
           <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
           <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Dados Pessoais</h3>
@@ -676,7 +550,189 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
           </div>
         </div>
 
-        {/* --- Veículos Section (Existing) --- */}
+        {/* 2. --- ARTIGOS CRIMINAIS --- */}
+        <div className="flex items-center gap-2 mb-4 mt-8">
+          <div className="h-4 w-1 bg-pmmg-red rounded-full"></div>
+          <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Artigos Criminais</h3>
+        </div>
+
+        <div className="flex flex-wrap gap-2 mb-4">
+          {articles.map((art, idx) => (
+            <span key={idx} className="px-3 py-1.5 bg-pmmg-red/10 border border-pmmg-red/20 text-pmmg-red text-[10px] font-bold rounded-full flex items-center gap-1">
+              {art} <span onClick={() => handleRemoveArticle(idx)} className="material-symbols-outlined text-[14px] cursor-pointer">close</span>
+            </span>
+          ))}
+        </div>
+
+        <div className="flex gap-2">
+          <input 
+            value={currentArticle}
+            onChange={(e) => setCurrentArticle(e.target.value)}
+            className="flex-1 px-4 py-2 bg-white border border-pmmg-navy/20 rounded-lg text-xs" 
+            placeholder="Ex: Art. 157" 
+            type="text" 
+          />
+          <button 
+            onClick={handleAddArticle}
+            className="px-4 py-2 bg-pmmg-navy text-white text-[10px] font-bold rounded-lg uppercase"
+          >
+            Adicionar
+          </button>
+        </div>
+
+        {/* 3. --- Endereço e Localização --- */}
+        <div className="flex items-center gap-2 mb-4 mt-8">
+          <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
+          <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Endereço e Localização</h3>
+        </div>
+        <div className="space-y-4">
+          
+          {/* 3.1. Endereço de Última Ocorrência/Residência */}
+          <div className="relative">
+            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Endereço de Última Ocorrência/Residência</label>
+            <div className="flex gap-2">
+              <input 
+                value={lastSeenAddress}
+                onChange={handleLastSeenAddressChange}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleLastSeenAddressSearch();
+                  }
+                }}
+                className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+                placeholder="Pesquisar endereço..." 
+                type="text" 
+              />
+              <button 
+                onClick={handleLastSeenAddressSearch}
+                disabled={isLastSeenSearching}
+                className="bg-pmmg-navy text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50"
+              >
+                <span className="material-symbols-outlined text-xl animate-spin" style={{ display: isLastSeenSearching ? 'block' : 'none' }}>progress_activity</span>
+                <span className="material-symbols-outlined text-xl" style={{ display: isLastSeenSearching ? 'none' : 'block' }}>search</span>
+              </button>
+            </div>
+            
+            {lastSeenAddressSuggestions.length > 0 && (
+              <div className="absolute z-10 w-full bg-white border border-pmmg-navy/20 rounded-lg mt-1 shadow-lg max-h-40 overflow-y-auto">
+                {lastSeenAddressSuggestions.map((loc, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleSelectLastSeenLocation(loc)}
+                    className="w-full text-left px-4 py-2 text-sm text-pmmg-navy hover:bg-pmmg-khaki/50 transition-colors border-b border-pmmg-navy/5 last:border-b-0"
+                  >
+                    {loc.name}
+                  </button>
+                ))}
+              </div>
+            )}
+            {lastSeenAddressSuggestions.length === 0 && !isLastSeenSearching && lastSeenAddress.length > 2 && (
+              <p className="text-[10px] text-pmmg-red italic text-center mt-2">Nenhum resultado encontrado.</p>
+            )}
+          </div>
+          
+          {/* Minimap (Last Seen Location) */}
+          {selectedLastSeenLocation && (
+            <div className="pmmg-card overflow-hidden">
+              <div className="p-3 bg-pmmg-navy/5 flex items-center justify-between">
+                <p className="text-[10px] font-bold text-pmmg-navy uppercase tracking-wider">Localização Confirmada (Ocorrência/Residência)</p>
+                <span className="text-[9px] text-green-600 font-bold uppercase">GPS OK</span>
+              </div>
+              <GoogleMapWrapper
+                center={selectedLastSeenLocation}
+                zoom={15}
+                mapContainerClassName="h-40 w-full z-0"
+                options={{
+                  disableDefaultUI: true,
+                  draggable: false,
+                  scrollwheel: false,
+                  zoomControl: false,
+                  mapTypeId: 'roadmap'
+                }}
+              >
+                <MarkerF
+                  position={selectedLastSeenLocation}
+                  icon={getMiniMapIcon(false)}
+                />
+              </GoogleMapWrapper>
+            </div>
+          )}
+          
+          {/* 3.2. Endereço da Abordagem (NEW) */}
+          <div className="relative">
+            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Endereço da Abordagem (Opcional)</label>
+            <div className="flex gap-2">
+              <input 
+                value={approachAddress}
+                onChange={handleApproachAddressChange}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleApproachAddressSearch();
+                  }
+                }}
+                className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+                placeholder="Pesquisar endereço da abordagem..." 
+                type="text" 
+              />
+              <button 
+                onClick={handleApproachAddressSearch}
+                disabled={isApproachSearching}
+                className="bg-pmmg-navy text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50"
+              >
+                <span className="material-symbols-outlined text-xl animate-spin" style={{ display: isApproachSearching ? 'block' : 'none' }}>progress_activity</span>
+                <span className="material-symbols-outlined text-xl" style={{ display: isApproachSearching ? 'none' : 'block' }}>search</span>
+              </button>
+            </div>
+            
+            {approachAddressSuggestions.length > 0 && (
+              <div className="absolute z-10 w-full bg-white border border-pmmg-navy/20 rounded-lg mt-1 shadow-lg max-h-40 overflow-y-auto">
+                {approachAddressSuggestions.map((loc, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleSelectApproachLocation(loc)}
+                    className="w-full text-left px-4 py-2 text-sm text-pmmg-navy hover:bg-pmmg-khaki/50 transition-colors border-b border-pmmg-navy/5 last:border-b-0"
+                  >
+                    {loc.name}
+                  </button>
+                ))}
+              </div>
+            )}
+            {approachAddressSuggestions.length === 0 && !isApproachSearching && approachAddress.length > 2 && (
+              <p className="text-[10px] text-pmmg-red italic text-center mt-2">Nenhum resultado encontrado.</p>
+            )}
+          </div>
+          
+          {/* Minimap (Approach Location) */}
+          {selectedApproachLocation && (
+            <div className="pmmg-card overflow-hidden">
+              <div className="p-3 bg-pmmg-navy/5 flex items-center justify-between">
+                <p className="text-[10px] font-bold text-pmmg-navy uppercase tracking-wider">Localização Confirmada (Abordagem)</p>
+                <span className="text-[9px] text-green-600 font-bold uppercase">GPS OK</span>
+              </div>
+              <GoogleMapWrapper
+                center={selectedApproachLocation}
+                zoom={15}
+                mapContainerClassName="h-40 w-full z-0"
+                options={{
+                  disableDefaultUI: true,
+                  draggable: false,
+                  scrollwheel: false,
+                  zoomControl: false,
+                  mapTypeId: 'roadmap'
+                }}
+              >
+                <MarkerF
+                  position={selectedApproachLocation}
+                  icon={getMiniMapIcon(true)}
+                />
+              </GoogleMapWrapper>
+            </div>
+          )}
+        </div>
+
+        {/* 4. --- Veículos Section (Existing) --- */}
         <div className="flex items-center gap-2 mb-4 mt-8">
           <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
           <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Veículos Cadastrados ({vehicles.length})</h3>
@@ -729,7 +785,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
           </div>
         </div>
 
-        {/* --- Ligações Section (Existing) --- */}
+        {/* 5. --- Ligações Section (Existing) --- */}
         <div className="flex items-center gap-2 mb-4 mt-8">
           <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
           <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Ligações e Associações ({associations.length})</h3>
@@ -801,36 +857,6 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
                 <p className="text-[10px] text-pmmg-red italic text-center">Defina o tipo de ligação antes de vincular.</p>
             )}
           </div>
-        </div>
-
-        {/* --- Artigos Criminais (Existing) --- */}
-        <div className="flex items-center gap-2 mb-4 mt-8">
-          <div className="h-4 w-1 bg-pmmg-red rounded-full"></div>
-          <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Artigos Criminais</h3>
-        </div>
-
-        <div className="flex flex-wrap gap-2 mb-4">
-          {articles.map((art, idx) => (
-            <span key={idx} className="px-3 py-1.5 bg-pmmg-red/10 border border-pmmg-red/20 text-pmmg-red text-[10px] font-bold rounded-full flex items-center gap-1">
-              {art} <span onClick={() => handleRemoveArticle(idx)} className="material-symbols-outlined text-[14px] cursor-pointer">close</span>
-            </span>
-          ))}
-        </div>
-
-        <div className="flex gap-2">
-          <input 
-            value={currentArticle}
-            onChange={(e) => setCurrentArticle(e.target.value)}
-            className="flex-1 px-4 py-2 bg-white border border-pmmg-navy/20 rounded-lg text-xs" 
-            placeholder="Ex: Art. 157" 
-            type="text" 
-          />
-          <button 
-            onClick={handleAddArticle}
-            className="px-4 py-2 bg-pmmg-navy text-white text-[10px] font-bold rounded-lg uppercase"
-          >
-            Adicionar
-          </button>
         </div>
 
         <div className="mt-10 mb-8">
