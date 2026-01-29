@@ -359,12 +359,13 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
           {/* Última Localização (Ocorrência/Residência) */}
           {suspect.lat && suspect.lng && (
             <div className="pmmg-card overflow-hidden">
-              <div className="p-4 flex items-center justify-between text-pmmg-navy bg-white/40">
+              <div className="p-4 text-pmmg-navy bg-white/40">
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined">location_on</span>
                   <span className="text-sm font-bold uppercase">Última Localização (Ocorrência/Residência)</span>
                 </div>
-                <span className="text-[9px] font-bold uppercase opacity-50">{suspect.lastSeen}</span>
+                {/* Endereço movido para baixo do título */}
+                <p className="text-[10px] font-bold uppercase opacity-70 mt-1 ml-8">{suspect.lastSeen}</p>
               </div>
               <div className="relative group cursor-pointer" onClick={() => handleOpenMap(suspect.lat, suspect.lng)}>
                 <GoogleMapWrapper
@@ -397,12 +398,13 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
           {/* Endereço da Abordagem (NOVO MAPA) */}
           {suspect.approachAddress && suspect.approachLat && suspect.approachLng && (
             <div className="pmmg-card overflow-hidden">
-              <div className="p-4 flex items-center justify-between text-pmmg-navy bg-white/40">
+              <div className="p-4 text-pmmg-navy bg-white/40">
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined">pin_drop</span>
                   <span className="text-sm font-bold uppercase">Endereço da Abordagem</span>
                 </div>
-                <span className="text-[9px] font-bold uppercase opacity-50">{suspect.approachAddress}</span>
+                {/* Endereço movido para baixo do título */}
+                <p className="text-[10px] font-bold uppercase opacity-70 mt-1 ml-8">{suspect.approachAddress}</p>
               </div>
               <div className="relative group cursor-pointer" onClick={() => handleOpenMap(suspect.approachLat!, suspect.approachLng!)}>
                 <GoogleMapWrapper
