@@ -4,7 +4,6 @@ import BottomNav from '../components/BottomNav';
 import GoogleMapWrapper from '../components/GoogleMapWrapper';
 import { MarkerF } from '@react-google-maps/api';
 import { ICON_PATHS } from '../utils/iconPaths';
-import { searchGoogleAddress } from '../utils/vehicleData'; // Importação removida, pois a função searchGoogleAddress está no topo do arquivo
 import VehicleVisuals from '../components/VehicleVisuals'; // NOVO
 
 interface SuspectRegistryProps {
@@ -31,7 +30,7 @@ const searchGoogleAddress = async (address: string): Promise<GeocodedLocation[]>
   }
   
   // Usando components=country:br para focar no Brasil e language=pt-BR
-  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&components=country:br&language=pt-BR&key=${GOOGLE_MAPS_MAP_KEY}`;
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&components=country:br&language=pt-BR&key=${GOOGLE_MAPS_API_KEY}`;
   const response = await fetch(url);
   const data = await response.json();
 
