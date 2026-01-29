@@ -174,7 +174,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   const [newMarkerData, setNewMarkerData] = useState<Omit<CustomMarker, 'id'> | null>(null);
   const [editingMarker, setEditingMarker] = useState<CustomMarker | null>(null);
   const [currentZoom, setCurrentZoom] = useState(initialCenter ? 17 : 14);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // ALTERADO: Começa como false
   const [activeInfoWindow, setActiveInfoWindow] = useState<string | null>(null); // ID do marcador com InfoWindow aberta
 
   // Center state managed by initialCenter prop or user position
