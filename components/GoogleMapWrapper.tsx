@@ -14,58 +14,34 @@ interface GoogleMapWrapperProps {
   onClick?: (e: google.maps.MapMouseEvent) => void;
 }
 
+// Estilos de mapa tático/militar para remover POIs e rótulos
 const MAP_STYLES: google.maps.MapTypeStyle[] = [
-  // Oculta todos os Pontos de Interesse (POIs) e seus rótulos
   {
-    featureType: "poi",
-    stylers: [{ visibility: "off" }]
+    featureType: 'poi',
+    stylers: [{ visibility: 'off' }],
   },
-  // Oculta edifícios e seus rótulos
   {
-    featureType: "landscape.man_made",
-    stylers: [{ visibility: "off" }]
+    featureType: 'transit',
+    stylers: [{ visibility: 'off' }],
   },
-  // Oculta parques e áreas verdes (que são POIs de paisagem)
   {
-    featureType: "landscape.natural.landcover",
-    elementType: "labels",
-    stylers: [{ visibility: "off" }]
+    featureType: 'road',
+    elementType: 'labels',
+    stylers: [{ visibility: 'off' }],
   },
-  // Oculta ícones de transporte público
   {
-    featureType: "transit",
-    stylers: [{ visibility: "off" }]
+    featureType: 'administrative',
+    elementType: 'labels',
+    stylers: [{ visibility: 'off' }],
   },
-  // Simplifica estradas e remove rótulos
   {
-    featureType: "road",
-    elementType: "labels",
-    stylers: [{ visibility: "off" }]
+    featureType: 'landscape',
+    stylers: [{ saturation: -100 }, { lightness: 10 }],
   },
-  // Simplifica a geometria das estradas
   {
-    featureType: "road",
-    elementType: "geometry",
-    stylers: [{ lightness: 100 }, { visibility: "simplified" }]
+    featureType: 'water',
+    stylers: [{ color: '#c9d6df' }],
   },
-  // Oculta rótulos administrativos (como bairros)
-  {
-    featureType: "administrative",
-    elementType: "labels.text",
-    stylers: [{ visibility: "off" }]
-  },
-  // Mantém apenas rótulos de cidades/países (localidades maiores)
-  {
-    featureType: "administrative.locality",
-    elementType: "labels.text",
-    stylers: [{ visibility: "on" }]
-  },
-  // Oculta rótulos de água
-  {
-    featureType: "water",
-    elementType: "labels",
-    stylers: [{ visibility: "off" }]
-  }
 ];
 
 const GoogleMapWrapper: React.FC<GoogleMapWrapperProps> = ({ 
@@ -109,7 +85,8 @@ const GoogleMapWrapper: React.FC<GoogleMapWrapperProps> = ({
         streetViewControl: false,
         mapTypeControl: false,
         fullscreenControl: false,
-        styles: MAP_STYLES, // Aplicando os novos estilos limpos
+        clickableIcons: false, // Desativa ícones clicáveis
+        styles: MAP_STYLES, // Aplicando os estilos táticos
         ...options,
       }}
       onLoad={onLoad}
