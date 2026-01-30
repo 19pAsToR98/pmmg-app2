@@ -450,6 +450,8 @@ const App: React.FC = () => {
     };
   }, [activeGroup, officers, suspects, userName, userRank, userCity, userAvatar.url]);
 
+  const pendingRequestsCount = contacts.filter(c => c.status === 'Pending' && !c.isRequester).length;
+
 
   return (
     <div className="flex flex-col h-screen max-w-md mx-auto relative overflow-hidden bg-pmmg-khaki">
@@ -497,7 +499,7 @@ const App: React.FC = () => {
           officers={officers} 
           allSuspects={suspects}
           openGroup={openGroup}
-          pendingRequestsCount={contacts.filter(c => c.status === 'Pending' && !c.isRequester).length}
+          pendingRequestsCount={pendingRequestsCount}
         />
       )}
       
