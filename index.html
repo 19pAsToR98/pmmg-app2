@@ -59,8 +59,10 @@
         }
 
         body {
-          /* Aplica as variáveis CSS para o fundo e texto base */
-          @apply bg-[var(--color-background)] text-[var(--color-text-base)] font-sans antialiased;
+          /* Aplica o fundo e texto dinâmico via CSS puro para evitar problemas de parsing do JIT */
+          @apply font-sans antialiased;
+          background-color: var(--color-background);
+          color: var(--color-text-base);
           min-height: 100dvh;
         }
       }
