@@ -38,7 +38,9 @@ const AVATAR_OPTIONS: { gender: 'Masculino' | 'Feminino', avatar: UserAvatar }[]
 
 const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
   const [step, setStep] = useState(1);
-  const [institution, setInstitution] = useState<Institution>('PMMG'); // NEW STATE
+  const [currentInstitutionIndex, setCurrentInstitutionIndex] = useState(0); // NEW STATE for slider index
+  const institution = INSTITUTION_OPTIONS[currentInstitutionIndex].id; // Derive institution from index
+  
   const [name, setName] = useState('');
   const [rank, setRank] = useState<UserRank>('Soldado'); // Padrão: Soldado
   const [city, setCity] = useState('');
@@ -114,6 +116,18 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
       }
     });
   };
+  
+  // NEW: Slider navigation for Institution
+  const handleInstitutionChange = (direction: 'next' | 'prev') => {
+    setCurrentInstitutionIndex(prev => {
+      const total = INSTITUTION_OPTIONS.length;
+      if (direction === 'next') {
+        return (prev + 1) % total;
+      } else {
+        return (prev - 1 + total) % total;
+      }
+    });
+  };
 
   const getCityMarkerIcon = () => {
     if (typeof window === 'undefined' || !window.google || !window.google.maps) return undefined; // Safety check
@@ -137,37 +151,61 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
 
   const renderStepContent = () => {
     switch (step) {
-      case 1: // NEW STEP: Institution Selection
-        const currentInstitution = INSTITUTION_OPTIONS.find(i => i.id === institution);
+      case 1: // NEW STEP: Institution Selection (Slider Refactored)
+        const currentInstitution = INSTITUTION_OPTIONS[currentInstitutionIndex];
         return (
-          <div className="space-y-6">
+          <div className="space-y-6 text-center">
             <h2 className="text-xl font-bold text-pmmg-navy uppercase tracking-tight">Instituição Militar</h2>
             <p className="text-sm text-slate-600">Selecione a corporação à qual você pertence.</p>
             
-            <div className="flex overflow-x-auto gap-6 pb-4 no-scrollbar justify-start">
-              {INSTITUTION_OPTIONS.map((inst) => (
-                <button
-                  key={inst.id}
-                  onClick={() => setInstitution(inst.id)}
-                  className={`flex flex-col items-center gap-3 shrink-0 transition-all p-4 rounded-xl border-4 w-40 ${
-                    institution === inst.id 
-                      ? 'bg-white border-pmmg-navy shadow-xl scale-105' 
-                      : 'bg-white/50 border-transparent opacity-70'
-                  }`}
-                >
-                  <div className="w-24 h-24 rounded-full overflow-hidden bg-slate-100 flex items-center justify-center p-2">
-                    <img src={inst.logo} alt={inst.name} className="w-full h-full object-contain" />
-                  </div>
-                  <span className={`text-[10px] font-black uppercase text-center leading-tight ${institution === inst.id ? 'text-pmmg-navy' : 'text-slate-500'}`}>
-                    {inst.id}
-                  </span>
-                </button>
+            {/* Slider Container */}
+            <div className="relative flex items-center justify-center pt-4 pb-4">
+              
+              {/* Previous Button */}
+              <button
+                onClick={() => handleInstitutionChange('prev')}
+                className="absolute left-0 z-10 p-2 rounded-full bg-pmmg-navy/10 text-pmmg-navy shadow-md active:scale-95 transition-transform ml-2"
+              >
+                <span className="material-symbols-outlined">arrow_back_ios</span>
+              </button>
+
+              {/* Institution Display (Centralized) */}
+              <div className="flex flex-col items-center transition-all duration-300 ease-in-out p-4">
+                <div className="w-48 h-48 mb-6 p-4 bg-white rounded-full border-4 border-pmmg-navy/10 shadow-xl flex items-center justify-center">
+                  <img 
+                    src={currentInstitution.logo} 
+                    alt={currentInstitution.name} 
+                    className="w-full h-full object-contain" 
+                  />
+                </div>
+                
+                <div className="bg-pmmg-navy text-white px-6 py-2 rounded-full shadow-lg">
+                  <p className="text-lg font-black uppercase tracking-widest">{currentInstitution.id}</p>
+                </div>
+              </div>
+
+              {/* Next Button */}
+              <button
+                onClick={() => handleInstitutionChange('next')}
+                className="absolute right-0 z-10 p-2 rounded-full bg-pmmg-navy/10 text-pmmg-navy shadow-md active:scale-95 transition-transform mr-2"
+              >
+                <span className="material-symbols-outlined">arrow_forward_ios</span>
+              </button>
+            </div>
+            
+            {/* Dots Indicator */}
+            <div className="flex justify-center gap-2 pt-2">
+              {INSTITUTION_OPTIONS.map((_, index) => (
+                <div 
+                  key={index}
+                  className={`w-2 h-2 rounded-full transition-all ${currentInstitutionIndex === index ? 'bg-pmmg-navy w-4' : 'bg-slate-300'}`}
+                ></div>
               ))}
             </div>
             
             <div className="text-center pt-2">
               <p className="text-pmmg-navy font-bold uppercase text-sm">Instituição Selecionada:</p>
-              <p className="text-pmmg-red font-black text-lg mt-1">{currentInstitution?.name}</p>
+              <p className="text-pmmg-red font-black text-lg mt-1">{currentInstitution.name}</p>
             </div>
           </div>
         );
