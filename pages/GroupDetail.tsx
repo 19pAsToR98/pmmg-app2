@@ -47,16 +47,10 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
 
   // Estados para filtros da Timeline
   const [postSearchQuery, setPostSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<PostFilterStatus>('Todos'); // NOVO: Filtro de status
-  const [postAuthorFilter, setPostAuthorFilter] = useState<string>('Todos'); // 'Todos' or authorId
+  const [statusFilter, setStatusFilter] = useState<PostFilterStatus>('Todos');
+  const [selectedMemberFilterId, setSelectedMemberFilterId] = useState<string | null>(null); // NOVO ESTADO
   const [showTimelineFilters, setShowTimelineFilters] = useState(false);
   const timelineFilterRef = useRef<HTMLDivElement>(null);
-
-  // Extrair autores únicos que postaram no grupo (para o dropdown de filtro)
-  const uniqueAuthors = useMemo(() => {
-    const authorIds = Array.from(new Set(group.posts.map(p => p.authorId)));
-    return group.members.filter(m => authorIds.includes(m.id));
-  }, [group.posts, group.members]);
 
   // Fechar menu de filtro ao clicar fora
   useEffect(() => {
@@ -92,17 +86,17 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
       
       if (!matchesSearch) return false;
 
-      // 2. Filtro de Autor
-      const matchesAuthor = postAuthorFilter === 'Todos' || post.authorId === postAuthorFilter;
+      // 2. Filtro de Membro (NOVO)
+      const matchesAuthor = !selectedMemberFilterId || post.authorId === selectedMemberFilterId;
       if (!matchesAuthor) return false;
       
-      // 3. Filtro de Status (Precisa buscar o status do suspeito original)
+      // 3. Filtro de Status
       const suspect = allSuspects.find(s => s.id === post.suspectId);
       const matchesStatus = statusFilter === 'Todos' || (suspect && suspect.status === statusFilter);
       
       return matchesStatus;
     });
-  }, [group.posts, postSearchQuery, postAuthorFilter, statusFilter, allSuspects]);
+  }, [group.posts, postSearchQuery, selectedMemberFilterId, statusFilter, allSuspects]);
 
 
   const handleShare = () => {
@@ -120,11 +114,17 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
   const handleClearFilters = () => {
     setPostSearchQuery('');
     setStatusFilter('Todos');
-    setPostAuthorFilter('Todos');
+    setSelectedMemberFilterId(null); // Limpa o filtro de membro
     setShowTimelineFilters(false);
   };
   
-  const isFilterActive = postSearchQuery || statusFilter !== 'Todos' || postAuthorFilter !== 'Todos';
+  const handleFilterByMember = (memberId: string) => {
+    setSelectedMemberFilterId(memberId);
+    setActiveTab('timeline');
+  };
+  
+  const isFilterActive = postSearchQuery || statusFilter !== 'Todos' || selectedMemberFilterId !== null;
+  const activeMemberFilter = group.members.find(m => m.id === selectedMemberFilterId);
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden relative">
@@ -180,7 +180,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
                 <input 
                   value={postSearchQuery}
                   onChange={(e) => setPostSearchQuery(e.target.value)}
-                  placeholder="BUSCAR NO GRUPO..."
+                  placeholder="BUSCAR NOME, CPF OU OBSERVAÇÃO..."
                   className="w-full pl-9 pr-4 py-3 bg-white/60 border-none rounded-2xl text-[10px] font-black uppercase placeholder:text-slate-400 focus:ring-2 focus:ring-pmmg-navy/10 transition-all shadow-inner"
                 />
               </div>
@@ -245,28 +245,6 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
                         ))}
                       </div>
                     </div>
-
-                    {/* Filtro por Autor */}
-                    <div>
-                      <label className="block text-[8px] font-black uppercase text-pmmg-navy/40 mb-2 tracking-wider">Filtrar por Integrante</label>
-                      <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto no-scrollbar p-1">
-                        <button 
-                          onClick={() => setPostAuthorFilter('Todos')}
-                          className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase border transition-all shrink-0 ${postAuthorFilter === 'Todos' ? 'bg-pmmg-navy text-white border-pmmg-navy' : 'bg-slate-50 text-pmmg-navy/40 border-slate-200'}`}
-                        >
-                          Todos
-                        </button>
-                        {uniqueAuthors.map(officer => (
-                          <button 
-                            key={officer.id}
-                            onClick={() => setPostAuthorFilter(officer.id)}
-                            className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase border transition-all shrink-0 ${postAuthorFilter === officer.id ? 'bg-pmmg-navy text-white border-pmmg-navy' : 'bg-slate-50 text-pmmg-navy/40 border-slate-200'}`}
-                          >
-                            {officer.rank.split(' ')[0]}. {officer.name.split(' ')[0]}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
                   </div>
 
                   <button 
@@ -294,10 +272,10 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
                     <button onClick={() => setStatusFilter('Todos')} className="material-symbols-outlined text-xs">close</button>
                   </div>
                 )}
-                {postAuthorFilter !== 'Todos' && (
+                {selectedMemberFilterId && activeMemberFilter && (
                   <div className="bg-pmmg-navy/10 text-pmmg-navy px-3 py-1 rounded-full text-[8px] font-black uppercase flex items-center gap-1 border border-pmmg-navy/10">
-                    Autor: {group.members.find(m => m.id === postAuthorFilter)?.name.split(' ')[0] || 'Desconhecido'}
-                    <button onClick={() => setPostAuthorFilter('Todos')} className="material-symbols-outlined text-xs">close</button>
+                    Autor: {activeMemberFilter.name.split(' ')[0]}
+                    <button onClick={() => setSelectedMemberFilterId(null)} className="material-symbols-outlined text-xs">close</button>
                   </div>
                 )}
               </div>
@@ -409,7 +387,11 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
             </div>
 
             {group.members.map(member => (
-              <div key={member.id} className="pmmg-card p-3 flex items-center justify-between shadow-sm border-l-4 border-l-pmmg-navy">
+              <div 
+                key={member.id} 
+                onClick={() => handleFilterByMember(member.id)} // NOVO: Clique para filtrar
+                className="pmmg-card p-3 flex items-center justify-between shadow-sm border-l-4 border-l-pmmg-navy cursor-pointer active:scale-[0.99] transition-transform"
+              >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-300 shrink-0">
                     <img src={member.photoUrl} alt={member.name} className="w-full h-full object-cover" />
@@ -421,11 +403,17 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
                     </span>
                   </div>
                 </div>
-                {member.role !== 'admin' && (
-                  <button className="text-pmmg-red/40 hover:text-pmmg-red active:scale-90 transition-transform">
-                    <span className="material-symbols-outlined text-xl">person_remove</span>
-                  </button>
-                )}
+                <div className="flex items-center gap-2">
+                    {member.role !== 'admin' && (
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); alert(`Removendo ${member.name}`); }}
+                        className="text-pmmg-red/40 hover:text-pmmg-red active:scale-90 transition-transform p-1"
+                      >
+                        <span className="material-symbols-outlined text-xl">person_remove</span>
+                      </button>
+                    )}
+                    <span className="material-symbols-outlined text-pmmg-navy/40 text-lg shrink-0">arrow_forward_ios</span>
+                </div>
               </div>
             ))}
           </div>
