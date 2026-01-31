@@ -117,8 +117,8 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
   };
 
   return (
-    <div className="flex flex-col h-full bg-theme-khaki overflow-hidden">
-      <header className={`sticky top-0 z-[100] px-4 pt-6 pb-4 shadow-xl shrink-0 transition-colors ${isSelectionMode ? 'bg-theme-red' : 'bg-theme-navy'}`}>
+    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
+      <header className={`sticky top-0 z-[100] px-4 pt-6 pb-4 shadow-xl shrink-0 transition-colors ${isSelectionMode ? 'bg-pmmg-red' : 'bg-pmmg-navy'}`}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <button onClick={isSelectionMode ? handleExitSelectionMode : () => navigateTo('dashboard')} className="text-white active:scale-90 transition-transform">
@@ -128,7 +128,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
               <h1 className="font-bold text-sm leading-none text-white uppercase tracking-tight">
                 {isSelectionMode ? `${selectedSuspectIds.length} Selecionado(s)` : 'Banco de Dados'}
               </h1>
-              <p className="text-[10px] font-medium text-theme-yellow tracking-wider uppercase mt-1">
+              <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">
                 {isSelectionMode ? 'Modo de Seleção Ativo' : 'Consulta Unificada SISP'}
               </p>
             </div>
@@ -139,7 +139,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
               {/* Novo Registro Button */}
               <button 
                 onClick={() => navigateTo('registry')}
-                className="bg-theme-red/20 p-2 rounded-lg text-theme-red border border-theme-red/50 active:bg-theme-red/30 transition-all"
+                className="bg-pmmg-red/20 p-2 rounded-lg text-pmmg-red border border-pmmg-red/50 active:bg-pmmg-red/30 transition-all"
                 title="Novo Registro de Indivíduo"
               >
                 <span className="material-symbols-outlined text-lg fill-icon">person_add</span>
@@ -157,7 +157,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
               {/* Toggle Filter Menu */}
               <button 
                 onClick={() => setShowFilterMenu(!showFilterMenu)}
-                className={`p-2 rounded-lg flex items-center justify-center transition-all ${showFilterMenu || statusFilter !== 'Todos' || dateFilter ? 'bg-theme-yellow text-theme-navy shadow-md' : 'text-white hover:bg-white/10'}`}
+                className={`p-2 rounded-lg flex items-center justify-center transition-all ${showFilterMenu || statusFilter !== 'Todos' || dateFilter ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white hover:bg-white/10'}`}
               >
                 <span className={`material-symbols-outlined text-xl ${showFilterMenu ? 'fill-icon' : ''}`}>tune</span>
               </button>
@@ -169,19 +169,19 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
         {!isSelectionMode && (
           <div className="relative group mb-2">
             <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-              <span className="material-symbols-outlined text-theme-navy text-xl group-focus-within:text-theme-yellow transition-colors">manage_search</span>
+              <span className="material-symbols-outlined text-pmmg-navy text-xl group-focus-within:text-pmmg-yellow transition-colors">manage_search</span>
             </div>
             <input 
               value={globalSearch}
               onChange={(e) => setGlobalSearch(e.target.value)}
               placeholder="NOME, VULGO, PLACA, ENDEREÇO..."
-              className="w-full pl-12 pr-24 py-4 bg-white rounded-2xl border-none focus:ring-4 focus:ring-theme-yellow/20 text-xs font-black uppercase shadow-inner placeholder:text-slate-400"
+              className="w-full pl-12 pr-24 py-4 bg-white rounded-2xl border-none focus:ring-4 focus:ring-pmmg-yellow/20 text-xs font-black uppercase shadow-inner placeholder:text-slate-400"
             />
             <div className="absolute inset-y-0 right-2 flex items-center gap-1">
               {globalSearch && (
                 <button 
                   onClick={() => setGlobalSearch('')}
-                  className="p-1 text-slate-400 hover:text-theme-navy transition-colors"
+                  className="p-1 text-slate-400 hover:text-pmmg-navy transition-colors"
                 >
                   <span className="material-symbols-outlined text-lg">close</span>
                 </button>
@@ -192,13 +192,13 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
             {showFilterMenu && (
               <div 
                 ref={filterMenuRef}
-                className="absolute top-full right-0 mt-3 w-72 bg-white rounded-3xl shadow-2xl border border-theme-navy/10 z-[200] p-5 animate-in fade-in slide-in-from-top-2 duration-200"
+                className="absolute top-full right-0 mt-3 w-72 bg-white rounded-3xl shadow-2xl border border-pmmg-navy/10 z-[200] p-5 animate-in fade-in slide-in-from-top-2 duration-200"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-[10px] font-black uppercase tracking-widest text-theme-navy/60">Filtros Avançados</h4>
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-pmmg-navy/60">Filtros Avançados</h4>
                   <button 
                     onClick={handleClearFilters}
-                    className="text-[9px] font-black text-theme-red uppercase"
+                    className="text-[9px] font-black text-pmmg-red uppercase"
                   >
                     Limpar Tudo
                   </button>
@@ -206,7 +206,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
 
                 {/* Status Section */}
                 <div className="mb-5">
-                  <label className="block text-[9px] font-black uppercase text-theme-navy/40 mb-2 tracking-wider">Status Operacional</label>
+                  <label className="block text-[9px] font-black uppercase text-pmmg-navy/40 mb-2 tracking-wider">Status Operacional</label>
                   <div className="flex flex-wrap gap-2">
                     {STATUS_OPTIONS.map(opt => (
                       <button
@@ -214,8 +214,8 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
                         onClick={() => setStatusFilter(opt)}
                         className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all border ${
                           statusFilter === opt 
-                          ? 'bg-theme-navy text-white border-theme-navy shadow-md' 
-                          : 'bg-slate-50 text-theme-navy/60 border-slate-200'
+                          ? 'bg-pmmg-navy text-white border-pmmg-navy shadow-md' 
+                          : 'bg-slate-50 text-pmmg-navy/60 border-slate-200'
                         }`}
                       >
                         {opt}
@@ -226,14 +226,14 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
 
                 {/* Date Section (Mocked) */}
                 <div>
-                  <label className="block text-[9px] font-black uppercase text-theme-navy/40 mb-2 tracking-wider">Data de Registro (Mock)</label>
+                  <label className="block text-[9px] font-black uppercase text-pmmg-navy/40 mb-2 tracking-wider">Data de Registro (Mock)</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-sm text-theme-navy/30">calendar_today</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-sm text-pmmg-navy/30">calendar_today</span>
                     <input 
                       type="text" // Changed to text since we don't have registryDate field
                       value={dateFilter}
                       onChange={(e) => setDateFilter(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-xs font-bold text-theme-navy focus:ring-2 focus:ring-theme-navy/10 transition-all"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-xs font-bold text-pmmg-navy focus:ring-2 focus:ring-pmmg-navy/10 transition-all"
                       placeholder="DD/MM/AAAA"
                     />
                   </div>
@@ -241,7 +241,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
 
                 <button 
                   onClick={() => setShowFilterMenu(false)}
-                  className="w-full mt-6 bg-theme-navy text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg active:scale-95 transition-all"
+                  className="w-full mt-6 bg-pmmg-navy text-white py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg active:scale-95 transition-all"
                 >
                   Aplicar Filtros
                 </button>
@@ -253,12 +253,12 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
 
       <main className="flex-1 overflow-y-auto pb-40 px-4 pt-4 no-scrollbar">
         <div className="flex items-center justify-between mb-4 px-1">
-          <span className="text-[10px] font-black text-theme-navy/50 uppercase tracking-widest italic">
+          <span className="text-[10px] font-black text-pmmg-navy/50 uppercase tracking-widest italic">
             Exibindo {filteredSuspects.length} resultados táticos
           </span>
-          <div className="flex items-center gap-1.5 bg-theme-navy/5 px-2 py-1 rounded-full border border-theme-navy/5">
+          <div className="flex items-center gap-1.5 bg-pmmg-navy/5 px-2 py-1 rounded-full border border-pmmg-navy/5">
              <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-             <span className="text-[8px] font-bold text-theme-navy uppercase tracking-tighter">Sincronizado</span>
+             <span className="text-[8px] font-bold text-pmmg-navy uppercase tracking-tighter">Sincronizado</span>
           </div>
         </div>
 
@@ -304,12 +304,12 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
       {/* Floating Action Bar for Deletion */}
       {isSelectionMode && (
         <div className="fixed bottom-[80px] left-0 right-0 z-50 max-w-md mx-auto px-4 animate-in slide-in-from-bottom-4 duration-300">
-          <div className="bg-theme-red text-white p-3 rounded-xl shadow-2xl flex items-center justify-between border-2 border-white">
+          <div className="bg-pmmg-red text-white p-3 rounded-xl shadow-2xl flex items-center justify-between border-2 border-white">
             <span className="text-sm font-bold uppercase">{selectedSuspectIds.length} Selecionado(s)</span>
             <button 
               onClick={handleDeleteSelected}
               disabled={selectedSuspectIds.length === 0}
-              className="bg-white text-theme-red font-bold px-4 py-2 rounded-lg text-xs uppercase flex items-center gap-2 active:scale-95 transition-transform disabled:opacity-50"
+              className="bg-white text-pmmg-red font-bold px-4 py-2 rounded-lg text-xs uppercase flex items-center gap-2 active:scale-95 transition-transform disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-lg">delete</span>
               Excluir

@@ -15,15 +15,15 @@ const Store: React.FC<StoreProps> = ({ navigateTo }) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-theme-khaki overflow-hidden">
-      <header className="sticky top-0 z-50 bg-theme-navy px-4 py-4 flex items-center justify-between shadow-xl">
+    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
+      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-xl">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 shrink-0 bg-white rounded-full flex items-center justify-center p-1 border-2 border-theme-yellow shadow-inner">
-            <span className="material-symbols-outlined text-theme-navy text-2xl">storefront</span>
+          <div className="w-10 h-10 shrink-0 bg-white rounded-full flex items-center justify-center p-1 border-2 border-pmmg-yellow shadow-inner">
+            <span className="material-symbols-outlined text-pmmg-navy text-2xl">storefront</span>
           </div>
           <div>
             <h1 className="font-bold text-sm leading-none text-white uppercase tracking-tight">Materiais Táticos</h1>
-            <p className="text-[10px] font-medium text-theme-yellow tracking-wider uppercase mt-1">Equipamentos e Suprimentos</p>
+            <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">Equipamentos e Suprimentos</p>
           </div>
         </div>
         <button 
@@ -35,7 +35,7 @@ const Store: React.FC<StoreProps> = ({ navigateTo }) => {
       </header>
 
       <main className="flex-1 overflow-y-auto pb-32 no-scrollbar px-4 pt-6">
-        <p className="text-[10px] font-bold uppercase text-theme-navy/70 mb-4 text-center tracking-wider">
+        <p className="text-[10px] font-bold uppercase text-pmmg-navy/70 mb-4 text-center tracking-wider">
           Links para fornecedores parceiros e materiais recomendados.
         </p>
 
@@ -45,20 +45,20 @@ const Store: React.FC<StoreProps> = ({ navigateTo }) => {
               {/* Category Header (Clickable) */}
               <button
                 onClick={() => handleCategoryClick(category.id)}
-                className="w-full flex items-center p-3 gap-3 border-l-4 border-theme-navy/50 active:bg-slate-50 transition-colors"
+                className="w-full flex items-center p-3 gap-3 border-l-4 border-pmmg-navy/50 active:bg-slate-50 transition-colors"
               >
-                <div className="w-14 h-14 flex items-center justify-center rounded-xl shrink-0 bg-theme-navy text-theme-yellow">
+                <div className="w-14 h-14 flex items-center justify-center rounded-xl shrink-0 bg-pmmg-navy text-pmmg-yellow">
                   <span className="material-symbols-outlined text-3xl fill-icon">
                     {category.icon}
                   </span>
                 </div>
                 <div className="flex-1 min-w-0 text-left">
-                  <h3 className="font-bold text-sm truncate uppercase tracking-tight text-theme-navy">{category.name}</h3>
+                  <h3 className="font-bold text-sm truncate uppercase tracking-tight text-pmmg-navy">{category.name}</h3>
                   <p className="text-xs text-slate-600 truncate leading-tight mt-0.5">
                     {category.products.length} itens disponíveis
                   </p>
                 </div>
-                <span className="material-symbols-outlined text-theme-navy/40 text-lg shrink-0 transition-transform duration-300">
+                <span className="material-symbols-outlined text-pmmg-navy/40 text-lg shrink-0 transition-transform duration-300">
                   chevron_right
                 </span>
               </button>
@@ -67,8 +67,8 @@ const Store: React.FC<StoreProps> = ({ navigateTo }) => {
         </div>
 
         <div className="mt-8 text-center opacity-50">
-          <span className="material-symbols-outlined text-4xl text-theme-navy/20">info</span>
-          <p className="text-[9px] font-bold uppercase tracking-widest text-theme-navy/40 mt-2">
+          <span className="material-symbols-outlined text-4xl text-pmmg-navy/20">info</span>
+          <p className="text-[9px] font-bold uppercase tracking-widest text-pmmg-navy/40 mt-2">
             Os links são externos e a PMMG não se responsabiliza pelas compras.
           </p>
         </div>
