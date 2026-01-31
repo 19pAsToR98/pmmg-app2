@@ -474,9 +474,11 @@ const App: React.FC = () => {
 
   const pendingRequestsCount = contacts.filter(c => c.status === 'Pending' && !c.isRequester).length;
 
+  // Determina a classe de tema
+  const themeClass = userInstitution === 'PMMG' ? 'theme-pmmg' : 'theme-pmesp';
 
   return (
-    <div className="flex flex-col h-screen max-w-md mx-auto relative overflow-hidden bg-pmmg-khaki">
+    <div className={`flex flex-col h-screen max-w-md mx-auto relative overflow-hidden ${themeClass}`}>
       {currentScreen === 'welcomeScreen' && <WelcomeScreen onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />}
       
       {currentScreen === 'requestAccess' && <RequestAccess onBack={() => navigateTo('welcomeScreen')} onSuccess={() => { setIsRegistered(true); navigateTo('onboardingSetup'); }} />}
@@ -513,7 +515,6 @@ const App: React.FC = () => {
         />
       )}
       
-      {/* Grupos List */}
       {currentScreen === 'groupsList' && (
         <GroupsList 
           navigateTo={navigateTo} 
@@ -525,7 +526,6 @@ const App: React.FC = () => {
         />
       )}
       
-      {/* Criação de Grupo */}
       {currentScreen === 'groupCreation' && (
         <GroupCreation
           navigateTo={navigateTo}
@@ -534,7 +534,6 @@ const App: React.FC = () => {
         />
       )}
       
-      {/* Detalhe do Grupo */}
       {currentScreen === 'groupDetail' && enrichedActiveGroup && (
         <GroupDetail
           navigateTo={navigateTo}
