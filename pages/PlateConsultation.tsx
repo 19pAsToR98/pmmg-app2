@@ -35,18 +35,18 @@ const PlateConsultation: React.FC<PlateConsultationProps> = ({ navigateTo, userR
   };
 
   return (
-    <div className="flex flex-col h-full bg-theme-background overflow-hidden">
-      <header className="sticky top-0 z-50 bg-theme-primary px-4 py-4 flex items-center justify-between shadow-xl">
+    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
+      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-xl">
         <div className="flex items-center gap-3">
           <button onClick={() => navigateTo('aiTools')} className="text-white active:scale-90 transition-transform">
             <span className="material-symbols-outlined">arrow_back_ios</span>
           </button>
           <div>
             <h1 className="font-bold text-sm leading-none text-white uppercase tracking-tight">Consultar Placa</h1>
-            <p className="text-[10px] font-medium text-theme-accent tracking-wider uppercase mt-1">Leitura de Placa IA</p>
+            <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">Leitura de Placa IA</p>
           </div>
         </div>
-        <span className="material-symbols-outlined text-theme-accent fill-icon">photo_camera</span>
+        <span className="material-symbols-outlined text-pmmg-yellow fill-icon">photo_camera</span>
       </header>
 
       <main className="flex-1 overflow-y-auto pb-4 no-scrollbar px-4 pt-6">
@@ -62,9 +62,9 @@ const PlateConsultation: React.FC<PlateConsultationProps> = ({ navigateTo, userR
               />
             </div>
           </div>
-          <div className="relative bg-white rounded-[1.5rem] p-4 px-6 shadow-lg mb-8 text-center border-2 border-theme-primary/5 after:content-[''] after:absolute after:top-0 after:left-1/2 after:w-0 after:h-0 after:border-[20px] after:border-transparent after:border-b-white after:mt-[-20px] after:ml-[-20px] after:border-t-0">
-            <p className="text-theme-primary font-semibold text-sm">
-              <span className="font-bold text-theme-critical">{rankLabel}</span>, insira a placa manualmente ou utilize a câmera para leitura automática.
+          <div className="relative bg-white rounded-[1.5rem] p-4 px-6 shadow-lg mb-8 text-center border-2 border-pmmg-navy/5 after:content-[''] after:absolute after:top-0 after:left-1/2 after:w-0 after:h-0 after:border-[20px] after:border-transparent after:border-b-white after:mt-[-20px] after:ml-[-20px] after:border-t-0">
+            <p className="text-pmmg-navy font-semibold text-sm">
+              <span className="font-bold text-pmmg-red">{rankLabel}</span>, insira a placa manualmente ou utilize a câmera para leitura automática.
             </p>
           </div>
         </div>
@@ -72,14 +72,14 @@ const PlateConsultation: React.FC<PlateConsultationProps> = ({ navigateTo, userR
         {/* Input Section (Simplified) */}
         <section className="mt-4 space-y-4">
           <div className="pmmg-card p-4 space-y-3">
-            <h3 className="text-[11px] font-bold text-theme-primary/60 uppercase tracking-wider">Consulta de Veículo</h3>
+            <h3 className="text-[11px] font-bold text-pmmg-navy/60 uppercase tracking-wider">Consulta de Veículo</h3>
             <div className="flex gap-2">
               <input 
                 value={plate}
                 onChange={(e) => setPlate(e.target.value.toUpperCase())}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 // Adicionando min-w-0 para garantir que o input possa se comprimir
-                className="flex-1 min-w-0 px-4 py-3 bg-white border border-theme-primary/20 focus:border-theme-primary focus:ring-1 focus:ring-theme-primary rounded-lg text-sm font-bold uppercase tracking-widest" 
+                className="flex-1 min-w-0 px-4 py-3 bg-white border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm font-bold uppercase tracking-widest" 
                 placeholder="Ex: ABC1234 ou ABC-1234" 
                 type="text" 
                 maxLength={8}
@@ -98,7 +98,7 @@ const PlateConsultation: React.FC<PlateConsultationProps> = ({ navigateTo, userR
               {/* Camera Button - shrink-0 */}
               <button 
                 onClick={triggerFileInput}
-                className="bg-theme-critical text-white p-3 rounded-lg active:scale-95 transition-transform shrink-0"
+                className="bg-pmmg-red text-white p-3 rounded-lg active:scale-95 transition-transform shrink-0"
                 title="Abrir Câmera para OCR"
               >
                 <span className="material-symbols-outlined text-xl">photo_camera</span>
@@ -108,7 +108,7 @@ const PlateConsultation: React.FC<PlateConsultationProps> = ({ navigateTo, userR
               <button 
                 onClick={handleSearch}
                 disabled={plate.length < 7}
-                className="bg-theme-primary text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50 shrink-0"
+                className="bg-pmmg-navy text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50 shrink-0"
                 title="Pesquisar Placa"
               >
                 <span className="material-symbols-outlined text-xl">search</span>

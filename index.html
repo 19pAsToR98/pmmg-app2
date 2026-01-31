@@ -18,20 +18,14 @@
         theme: {
           extend: {
             colors: {
-              // Mapeamento de cores genéricas para variáveis CSS
-              "theme-primary": "var(--color-primary)",
-              "theme-background": "var(--color-background)",
-              "theme-accent": "var(--color-accent)",
-              "theme-critical": "var(--color-critical)",
-              "theme-secondary": "var(--color-secondary)",
-              "theme-info": "var(--color-info)",
-              
-              // Mantendo as classes antigas para compatibilidade, mas apontando para as variáveis
-              "pmmg-navy": "var(--color-primary)",
-              "pmmg-khaki": "var(--color-background)",
-              "pmmg-yellow": "var(--color-accent)",
-              "pmmg-red": "var(--color-critical)",
-              "pmmg-gold": "var(--color-secondary)",
+              "pmmg-navy": "#002147",
+              "pmmg-navy-dark": "#001530",
+              "pmmg-khaki": "#c5b39a",
+              "pmmg-khaki-light": "#dcd1c1",
+              "pmmg-yellow": "#ffcc00",
+              "pmmg-red": "#e31c1c",
+              "pmmg-gold": "#d4af37",
+              "pmmg-blue": "#0047ab",
             },
             fontFamily: {
               sans: ["Inter", "system-ui", "sans-serif"],
@@ -42,39 +36,13 @@
     </script>
     <style type="text/tailwindcss">
       @layer base {
-        :root {
-          /* PMMG Default Theme */
-          --color-primary: #002147;
-          --color-primary-dark: #001530;
-          --color-background: #c5b39a;
-          --color-background-light: #dcd1c1;
-          --color-accent: #ffcc00;
-          --color-critical: #e31c1c;
-          --color-secondary: #d4af37; /* Gold */
-          --color-info: #0047ab; /* Blue */
-        }
-        
-        .theme-pmesp {
-          /* PMESP Theme Overrides */
-          --color-primary: #050505; /* Black/Dark Gray */
-          --color-primary-dark: #000000;
-          --color-background: #424243; /* Medium Dark Gray */
-          --color-background-light: #5a5a5b;
-          --color-accent: #ffcc00;
-          --color-critical: #e31c1c;
-          --color-secondary: #ffcc00; /* Using accent for secondary */
-          --color-info: #0047ab;
-        }
-        
         body {
-          /* Aplicando o fundo do tema e garantindo que o texto padrão seja legível */
-          @apply bg-theme-background font-sans antialiased;
+          @apply bg-pmmg-khaki text-slate-900 font-sans antialiased;
           min-height: 100dvh;
         }
       }
       .pmmg-card {
-        /* Mantendo a transparência e borda baseada no tema */
-        @apply bg-white/70 border border-theme-primary/10 rounded-xl shadow-sm backdrop-blur-md overflow-hidden;
+        @apply bg-white/70 border border-pmmg-navy/10 rounded-xl shadow-sm backdrop-blur-md overflow-hidden;
       }
       .material-symbols-outlined {
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;

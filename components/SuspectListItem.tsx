@@ -20,9 +20,9 @@ const SuspectListItem: React.FC<SuspectListItemProps> = ({
   // Hook call is now safely at the top level of this component
   const longPressProps = useLongPress(() => handleLongPress(s.id));
 
-  const statusColor = s.status === 'Foragido' ? 'bg-theme-critical' : 
-                        s.status === 'Suspeito' ? 'bg-theme-accent text-theme-primary' :
-                        s.status === 'Preso' ? 'bg-theme-info' : 'bg-slate-700';
+  const statusColor = s.status === 'Foragido' ? 'bg-pmmg-red' : 
+                        s.status === 'Suspeito' ? 'bg-pmmg-yellow text-pmmg-navy' :
+                        s.status === 'Preso' ? 'bg-pmmg-blue' : 'bg-slate-700';
     
   const primaryVehicle = s.vehicles && s.vehicles.length > 0 ? `${s.vehicles[0].plate} (${s.vehicles[0].model})` : null;
 
@@ -30,13 +30,13 @@ const SuspectListItem: React.FC<SuspectListItemProps> = ({
     <div 
       onClick={() => handleCardClick(s.id)}
       {...longPressProps}
-      className={`pmmg-card flex p-3 gap-4 items-center transition-all shadow-sm border-l-4 border-l-theme-primary relative ${
-        isSelectionMode ? (isSelected ? 'bg-theme-critical/10 border-l-theme-critical ring-1 ring-theme-critical' : 'opacity-70') : 'active:scale-[0.98]'
+      className={`pmmg-card flex p-3 gap-4 items-center transition-all shadow-sm border-l-4 border-l-pmmg-navy relative ${
+        isSelectionMode ? (isSelected ? 'bg-pmmg-red/10 border-l-pmmg-red ring-1 ring-pmmg-red' : 'opacity-70') : 'active:scale-[0.98]'
       }`}
     >
       {isSelectionMode && (
         <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all shrink-0 ${
-          isSelected ? 'bg-theme-critical border-white shadow-lg' : 'bg-white/70 border-theme-primary/30'
+          isSelected ? 'bg-pmmg-red border-white shadow-lg' : 'bg-white/70 border-pmmg-navy/30'
         }`}>
           {isSelected && <span className="material-symbols-outlined text-white text-sm fill-icon">check</span>}
         </div>
@@ -47,29 +47,29 @@ const SuspectListItem: React.FC<SuspectListItemProps> = ({
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-0.5">
-           <h3 className="text-[11px] font-black text-theme-primary uppercase truncate pr-2">{s.name}</h3>
+           <h3 className="text-[11px] font-black text-pmmg-navy uppercase truncate pr-2">{s.name}</h3>
            <span className={`text-[7px] font-black px-1.5 py-0.5 rounded shadow-sm uppercase ${statusColor}`}>
               {s.status}
            </span>
         </div>
         <div className="flex items-center gap-2 mb-1">
           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{s.cpf}</p>
-          {s.nickname && <span className="text-[9px] font-black text-theme-critical italic">"{s.nickname}"</span>}
+          {s.nickname && <span className="text-[9px] font-black text-pmmg-red italic">"{s.nickname}"</span>}
         </div>
         <div className="mt-1.5 flex flex-wrap gap-2">
            {primaryVehicle && (
-             <div className="flex items-center gap-1 text-[8px] bg-white px-2 py-0.5 rounded border border-theme-primary/5 text-slate-600 font-bold">
+             <div className="flex items-center gap-1 text-[8px] bg-white px-2 py-0.5 rounded border border-pmmg-navy/5 text-slate-600 font-bold">
                 <span className="material-symbols-outlined text-[10px]">directions_car</span>
                 {primaryVehicle}
              </div>
            )}
-           <div className="flex items-center gap-1 text-[8px] bg-white px-2 py-0.5 rounded border border-theme-primary/5 text-slate-600 font-bold">
+           <div className="flex items-center gap-1 text-[8px] bg-white px-2 py-0.5 rounded border border-pmmg-navy/5 text-slate-600 font-bold">
               <span className="material-symbols-outlined text-[10px]">location_on</span>
               {s.lastSeen}
            </div>
         </div>
       </div>
-      <span className="material-symbols-outlined text-theme-primary/20 shrink-0">chevron_right</span>
+      <span className="material-symbols-outlined text-pmmg-navy/20 shrink-0">chevron_right</span>
     </div>
   );
 };

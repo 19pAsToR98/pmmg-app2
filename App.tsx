@@ -152,7 +152,7 @@ const INITIAL_CUSTOM_MARKERS: CustomMarker[] = [
     title: 'Ponto de Observação',
     description: 'Vigilância 24h. Área de alto risco.',
     icon: 'visibility',
-    color: 'bg-theme-secondary'
+    color: 'bg-pmmg-gold'
   }
 ];
 
@@ -385,7 +385,7 @@ const App: React.FC = () => {
   };
 
   const deleteCustomMarker = (id: string) => {
-    deleteCustomMarker(id);
+    setCustomMarkers(prev => prev.filter(m => m.id !== id));
   };
 
   const openProfile = (id: string) => {
@@ -474,16 +474,9 @@ const App: React.FC = () => {
 
   const pendingRequestsCount = contacts.filter(c => c.status === 'Pending' && !c.isRequester).length;
 
-  // Determina a classe do tema
-  const themeClass = userInstitution === 'PMESP' ? 'theme-pmesp' : '';
-  
-  // Determina a cor do texto principal para o contêiner
-  // Se for PMESP (fundo escuro), o texto padrão deve ser branco. Caso contrário, preto (slate-900).
-  const textColorClass = userInstitution === 'PMESP' ? 'text-white' : 'text-slate-900';
-
 
   return (
-    <div className={`flex flex-col h-screen max-w-md mx-auto relative overflow-hidden bg-theme-background ${themeClass} ${textColorClass}`}>
+    <div className="flex flex-col h-screen max-w-md mx-auto relative overflow-hidden bg-pmmg-khaki">
       {currentScreen === 'welcomeScreen' && <WelcomeScreen onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />}
       
       {currentScreen === 'requestAccess' && <RequestAccess onBack={() => navigateTo('welcomeScreen')} onSuccess={() => { setIsRegistered(true); navigateTo('onboardingSetup'); }} />}

@@ -7,9 +7,9 @@ interface SuspectGridCardProps {
 }
 
 const SuspectGridCard: React.FC<SuspectGridCardProps> = ({ suspect }) => {
-  const statusColor = suspect.status === 'Foragido' ? 'bg-theme-critical' : 
-                        suspect.status === 'Suspeito' ? 'bg-theme-accent text-theme-primary' :
-                        suspect.status === 'Preso' ? 'bg-theme-info' : 'bg-slate-700';
+  const statusColor = suspect.status === 'Foragido' ? 'bg-pmmg-red' : 
+                        suspect.status === 'Suspeito' ? 'bg-pmmg-yellow text-pmmg-navy' :
+                        suspect.status === 'Preso' ? 'bg-pmmg-blue' : 'bg-slate-700';
   
   return (
     <div 
@@ -24,13 +24,13 @@ const SuspectGridCard: React.FC<SuspectGridCardProps> = ({ suspect }) => {
       </div>
       <div className="flex-1 p-3 flex flex-col justify-between">
         <div>
-          <h4 className="font-bold text-xs text-theme-primary uppercase leading-tight truncate">{suspect.name}</h4>
+          <h4 className="font-bold text-xs text-pmmg-navy uppercase leading-tight truncate">{suspect.name}</h4>
           <p className="text-[9px] font-semibold text-slate-500 mt-1">CPF: {suspect.cpf}</p>
         </div>
         <div className="mt-2">
           <button 
             // O botão interno não deve ter ação se o clique for gerenciado pelo pai
-            className="w-full bg-theme-primary text-white text-[8px] font-bold py-1.5 rounded-lg uppercase tracking-wide"
+            className="w-full bg-pmmg-navy text-white text-[8px] font-bold py-1.5 rounded-lg uppercase tracking-wide"
           >
             Ver Ficha
           </button>
