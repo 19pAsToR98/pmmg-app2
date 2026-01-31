@@ -483,7 +483,12 @@ const App: React.FC = () => {
       
       {currentScreen === 'requestAccess' && <RequestAccess onBack={() => navigateTo('welcomeScreen')} onSuccess={() => { setIsRegistered(true); navigateTo('onboardingSetup'); }} />}
       
-      {currentScreen === 'onboardingSetup' && isRegistered && <OnboardingSetup onComplete={handleOnboardingComplete} />}
+      {currentScreen === 'onboardingSetup' && isRegistered && (
+        <OnboardingSetup 
+          onComplete={handleOnboardingComplete} 
+          onInstitutionChange={setUserInstitution} // Passando o setter para atualização dinâmica
+        />
+      )}
       
       {currentScreen === 'dashboard' && <Dashboard navigateTo={navigateTo} navigateToSuspectsManagement={navigateToSuspectsManagement} onOpenProfile={openProfile} suspects={suspects} />}
       {currentScreen === 'registry' && (

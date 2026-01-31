@@ -7,6 +7,7 @@ import { ICON_PATHS } from '../utils/iconPaths';
 
 interface OnboardingSetupProps {
   onComplete: (name: string, rank: UserRank, city: string, avatar: UserAvatar, institution: Institution) => void;
+  onInstitutionChange: (institution: Institution) => void; // NOVO
 }
 
 const RANKS: UserRank[] = ['Soldado', 'Cabo', '3º Sargento', '2º Sargento', '1º Sargento', 'Subtenente'];
@@ -36,7 +37,7 @@ const AVATAR_OPTIONS: { gender: 'Masculino' | 'Feminino', avatar: UserAvatar }[]
 ];
 
 
-const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
+const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitutionChange }) => {
   const [step, setStep] = useState(1);
   const [currentInstitutionIndex, setCurrentInstitutionIndex] = useState(0); // NEW STATE for slider index
   const institution = INSTITUTION_OPTIONS[currentInstitutionIndex].id; // Derive institution from index
@@ -51,6 +52,11 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
   // NEW State for Avatar selection index
   const [selectedAvatarIndex, setSelectedAvatarIndex] = useState(0);
   const selectedAvatar = AVATAR_OPTIONS[selectedAvatarIndex].avatar;
+
+  // Efeito para notificar o App.tsx sobre a mudança de instituição
+  useEffect(() => {
+    onInstitutionChange(institution);
+  }, [institution, onInstitutionChange]); // Garante que o tema mude dinamicamente
 
   // --- Map/City Logic ---
   
@@ -121,11 +127,13 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
   const handleInstitutionChange = (direction: 'next' | 'prev') => {
     setCurrentInstitutionIndex(prev => {
       const total = INSTITUTION_OPTIONS.length;
+      let newIndex;
       if (direction === 'next') {
-        return (prev + 1) % total;
+        newIndex = (prev + 1) % total;
       } else {
-        return (prev - 1 + total) % total;
+        newIndex = (prev - 1 + total) % total;
       }
+      return newIndex;
     });
   };
 
