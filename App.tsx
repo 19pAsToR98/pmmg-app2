@@ -13,6 +13,7 @@ import SuspectsManagement from './pages/SuspectsManagement'; // Novo componente
 import PlateConsultation from './pages/PlateConsultation'; // NOVO
 import VoiceReport from './pages/VoiceReport'; // NOVO
 import Store from './pages/Store'; // NOVO: Loja
+import ProductList from './pages/ProductList'; // NOVO: Lista de Produtos da Loja
 import ProfileSettings from './pages/ProfileSettings';
 import GroupsList from './pages/GroupsList'; // NOVO: Lista de Grupos
 import GroupCreation from './pages/GroupCreation'; // NOVO: Criação de Grupo
@@ -230,6 +231,9 @@ const App: React.FC = () => {
   const [editingSuspectId, setEditingSuspectId] = useState<string | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
   
+  // NEW: State for Store navigation
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>(undefined);
+  
   // User Profile States
   const [userRank, setUserRank] = useState<UserRank>('Soldado');
   const [userName, setUserName] = useState('Rodrigo Alves');
@@ -251,9 +255,16 @@ const App: React.FC = () => {
   const [groups, setGroups] = useState<Group[]>(MOCK_GROUPS);
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
 
-  const navigateTo = (screen: Screen, center?: [number, number]) => {
-    if (center) setMapCenter(center);
-    else if (screen !== 'map') setMapCenter(null);
+  const navigateTo = (screen: Screen, param?: string | [number, number]) => {
+    if (Array.isArray(param)) {
+      setMapCenter(param);
+    } else if (screen === 'productList' && typeof param === 'string') {
+      setSelectedCategoryId(param);
+    } else {
+      setMapCenter(null);
+      setSelectedCategoryId(undefined);
+    }
+    
     setCurrentScreen(screen);
     
     if (screen !== 'registry') {
@@ -553,6 +564,13 @@ const App: React.FC = () => {
       {currentScreen === 'store' && (
         <Store 
           navigateTo={navigateTo} 
+        />
+      )}
+      
+      {currentScreen === 'productList' && selectedCategoryId && (
+        <ProductList
+          navigateTo={navigateTo}
+          categoryId={selectedCategoryId}
         />
       )}
       
