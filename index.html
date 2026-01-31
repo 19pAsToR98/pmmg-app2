@@ -18,14 +18,15 @@
         theme: {
           extend: {
             colors: {
-              "pmmg-navy": "#002147",
-              "pmmg-navy-dark": "#001530",
-              "pmmg-khaki": "#c5b39a",
-              "pmmg-khaki-light": "#dcd1c1",
-              "pmmg-yellow": "#ffcc00",
-              "pmmg-red": "#e31c1c",
-              "pmmg-gold": "#d4af37",
-              "pmmg-blue": "#0047ab",
+              // Mapeamento de cores PMMG para variáveis CSS dinâmicas
+              "pmmg-navy": "var(--color-primary)",
+              "pmmg-navy-dark": "var(--color-primary-dark)",
+              "pmmg-khaki": "var(--color-secondary)",
+              "pmmg-khaki-light": "var(--color-secondary-light)",
+              "pmmg-yellow": "var(--color-accent)",
+              "pmmg-red": "var(--color-danger)",
+              "pmmg-gold": "var(--color-gold)",
+              "pmmg-blue": "var(--color-info)",
             },
             fontFamily: {
               sans: ["Inter", "system-ui", "sans-serif"],
@@ -36,13 +37,27 @@
     </script>
     <style type="text/tailwindcss">
       @layer base {
+        :root {
+          /* Variáveis CSS para Temas Dinâmicos (Padrão: PMMG) */
+          --color-primary: #002147;
+          --color-primary-dark: #001530;
+          --color-secondary: #c5b39a;
+          --color-secondary-light: #dcd1c1;
+          --color-accent: #ffcc00;
+          --color-danger: #e31c1c;
+          --color-gold: #d4af37;
+          --color-info: #0047ab;
+        }
+        
         body {
-          @apply bg-pmmg-khaki text-slate-900 font-sans antialiased;
+          /* Aplica a cor de fundo principal via variável CSS */
+          @apply bg-[var(--color-secondary)] text-slate-900 font-sans antialiased;
           min-height: 100dvh;
         }
       }
       .pmmg-card {
-        @apply bg-white/70 border border-pmmg-navy/10 rounded-xl shadow-sm backdrop-blur-md overflow-hidden;
+        /* Ajustando a cor de fundo do card para usar a variável primária */
+        @apply bg-white/70 border border-[var(--color-primary)]/10 rounded-xl shadow-sm backdrop-blur-md overflow-hidden;
       }
       .material-symbols-outlined {
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
