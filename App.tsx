@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Screen, Suspect, UserRank, CustomMarker, Officer, Contact, ContactStatus, UserAvatar, Group, GroupPost, GroupParticipant, Institution } from './types';
 import WelcomeScreen from './pages/WelcomeScreen'; // Renomeado
 import Dashboard from './pages/Dashboard';
@@ -18,7 +18,6 @@ import ProfileSettings from './pages/ProfileSettings';
 import GroupsList from './pages/GroupsList'; // NOVO: Lista de Grupos
 import GroupCreation from './pages/GroupCreation'; // NOVO: Criação de Grupo
 import GroupDetail from './pages/GroupDetail'; // NOVO: Detalhe do Grupo
-import { applyTheme } from './utils/theme'; // Import theme utility
 
 const INITIAL_SUSPECTS: Suspect[] = [
   {
@@ -256,12 +255,6 @@ const App: React.FC = () => {
   // Group States
   const [groups, setGroups] = useState<Group[]>(MOCK_GROUPS);
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
-
-  // --- Theme Application Effect ---
-  useEffect(() => {
-    applyTheme(userInstitution);
-  }, [userInstitution]);
-  // -------------------------------
 
   const navigateTo = (screen: Screen, param?: string | [number, number]) => {
     if (Array.isArray(param)) {

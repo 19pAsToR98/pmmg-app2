@@ -12,21 +12,20 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-    
+    <!-- Leaflet CSS REMOVIDO -->
     <script>
       tailwind.config = {
         theme: {
           extend: {
             colors: {
-              // Mapeamento de cores PMMG para variáveis CSS dinâmicas
-              "pmmg-navy": "var(--color-primary)",
-              "pmmg-navy-dark": "var(--color-primary-dark)",
-              "pmmg-khaki": "var(--color-secondary)",
-              "pmmg-khaki-light": "var(--color-secondary-light)",
-              "pmmg-yellow": "var(--color-accent)",
-              "pmmg-red": "var(--color-danger)",
-              "pmmg-gold": "var(--color-gold)",
-              "pmmg-blue": "var(--color-info)",
+              "pmmg-navy": "#002147",
+              "pmmg-navy-dark": "#001530",
+              "pmmg-khaki": "#c5b39a",
+              "pmmg-khaki-light": "#dcd1c1",
+              "pmmg-yellow": "#ffcc00",
+              "pmmg-red": "#e31c1c",
+              "pmmg-gold": "#d4af37",
+              "pmmg-blue": "#0047ab",
             },
             fontFamily: {
               sans: ["Inter", "system-ui", "sans-serif"],
@@ -35,36 +34,15 @@
         },
       };
     </script>
-    <style>
-      /* Variáveis CSS para Temas Dinâmicos (Padrão: PMMG) */
-      :root {
-        --color-primary: #002147;
-        --color-primary-dark: #001530;
-        --color-secondary: #c5b39a;
-        --color-secondary-light: #dcd1c1;
-        --color-accent: #ffcc00;
-        --color-danger: #e31c1c;
-        --color-gold: #d4af37;
-        --color-info: #0047ab;
+    <style type="text/tailwindcss">
+      @layer base {
+        body {
+          @apply bg-pmmg-khaki text-slate-900 font-sans antialiased;
+          min-height: 100dvh;
+        }
       }
-      
-      body {
-        /* Aplica a cor de fundo principal via variável CSS */
-        background-color: var(--color-secondary);
-        color: #1e293b; /* slate-800 */
-        font-family: "Inter", "system-ui", "sans-serif";
-        -webkit-font-smoothing: antialiased;
-        min-height: 100dvh;
-      }
-      
-      /* Estilos globais que dependem do Tailwind */
       .pmmg-card {
-        background-color: rgba(255, 255, 255, 0.7);
-        border: 1px solid rgba(var(--color-primary-rgb), 0.1);
-        border-radius: 0.75rem; /* rounded-xl */
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); /* shadow-sm */
-        backdrop-filter: blur(8px);
-        overflow: hidden;
+        @apply bg-white/70 border border-pmmg-navy/10 rounded-xl shadow-sm backdrop-blur-md overflow-hidden;
       }
       .material-symbols-outlined {
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
@@ -79,6 +57,7 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
       }
+      /* Custom Leaflet overrides REMOVIDO */
     </style>
   <script type="importmap">
 {
