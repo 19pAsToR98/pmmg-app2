@@ -476,10 +476,13 @@ const App: React.FC = () => {
 
   // Determina a classe do tema
   const themeClass = userInstitution === 'PMESP' ? 'theme-pmesp' : '';
+  
+  // Determina a cor do texto principal para o contêiner
+  const textColorClass = userInstitution === 'PMESP' ? 'text-white' : 'text-slate-900';
 
 
   return (
-    <div className={`flex flex-col h-screen max-w-md mx-auto relative overflow-hidden bg-theme-background ${themeClass}`}>
+    <div className={`flex flex-col h-screen max-w-md mx-auto relative overflow-hidden bg-theme-background ${themeClass} ${textColorClass}`}>
       {currentScreen === 'welcomeScreen' && <WelcomeScreen onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />}
       
       {currentScreen === 'requestAccess' && <RequestAccess onBack={() => navigateTo('welcomeScreen')} onSuccess={() => { setIsRegistered(true); navigateTo('onboardingSetup'); }} />}
