@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Screen } from '../types';
 import BottomNav from '../components/BottomNav';
 
@@ -6,8 +6,22 @@ interface StoreProps {
   navigateTo: (screen: Screen) => void;
 }
 
-// Novo Mock Data para Categorias e Produtos
-const TACTICAL_CATEGORIES = [
+interface Product {
+  id: string;
+  title: string;
+  price: number;
+  imageUrl: string;
+  link: string;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  icon: string;
+  products: Product[];
+}
+
+const TACTICAL_CATEGORIES: Category[] = [
   {
     id: 'fardamento',
     name: 'Fardamento e Vestuário',
@@ -44,82 +58,120 @@ const formatPrice = (price: number) => {
 };
 
 const Store: React.FC<StoreProps> = ({ navigateTo }) => {
-  return (
-    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
-      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-xl">
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+
+  const handleBack = () => {
+    if (selectedCategory) {
+      setSelectedCategory(null);
+    } else {
+      navigateTo('dashboard');
+    }
+  };
+
+  const renderHeader = () => (
+    <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-xl">
+      <div className="flex items-center gap-3">
+        <button onClick={handleBack} className="text-white active:scale-90 transition-transform">
+          <span className="material-symbols-outlined">{selectedCategory ? 'arrow_back_ios' : 'arrow_back_ios'}</span>
+        </button>
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 shrink-0 bg-white rounded-full flex items-center justify-center p-1 border-2 border-pmmg-yellow shadow-inner">
             <span className="material-symbols-outlined text-pmmg-navy text-2xl">storefront</span>
           </div>
           <div>
-            <h1 className="font-bold text-sm leading-none text-white uppercase tracking-tight">Materiais Táticos</h1>
-            <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">Equipamentos e Suprimentos</p>
+            <h1 className="font-bold text-sm leading-none text-white uppercase tracking-tight">
+              {selectedCategory ? selectedCategory.name : 'Materiais Táticos'}
+            </h1>
+            <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">
+              {selectedCategory ? 'Produtos e Equipamentos' : 'Categorias de Suprimentos'}
+            </p>
           </div>
         </div>
-        <button 
-          onClick={() => alert('Abrindo carrinho de compras...')}
-          className="bg-white/10 p-1.5 rounded-full border border-white/20 text-white"
-        >
-          <span className="material-symbols-outlined text-xl">shopping_cart</span>
-        </button>
-      </header>
+      </div>
+      <button 
+        onClick={() => alert('Abrindo carrinho de compras...')}
+        className="bg-white/10 p-1.5 rounded-full border border-white/20 text-white"
+      >
+        <span className="material-symbols-outlined text-xl">shopping_cart</span>
+      </button>
+    </header>
+  );
+
+  const renderCategoryGrid = () => (
+    <div className="space-y-8">
+      <p className="text-[10px] font-bold uppercase text-pmmg-navy/70 mb-6 text-center tracking-wider">
+        Selecione uma categoria para visualizar os produtos.
+      </p>
+      
+      <div className="grid grid-cols-2 gap-4">
+        {TACTICAL_CATEGORIES.map((category) => (
+          <button
+            key={category.id}
+            onClick={() => setSelectedCategory(category)}
+            className="pmmg-card p-4 flex flex-col items-center justify-center gap-3 active:scale-[0.98] transition-transform shadow-lg border-b-4 border-pmmg-navy/20"
+          >
+            <div className="w-12 h-12 flex items-center justify-center rounded-full bg-pmmg-navy text-pmmg-yellow shrink-0 shadow-md">
+              <span className="material-symbols-outlined text-3xl fill-icon">{category.icon}</span>
+            </div>
+            <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-widest text-center">{category.name}</h3>
+            <span className="text-[9px] text-slate-500 font-bold">{category.products.length} produtos</span>
+          </button>
+        ))}
+      </div>
+      
+      <div className="mt-12 text-center opacity-50">
+        <span className="material-symbols-outlined text-4xl text-pmmg-navy/20">info</span>
+        <p className="text-[9px] font-bold uppercase tracking-widest text-pmmg-navy/40 mt-2">
+          Os links são externos e a PMMG não se responsabiliza pelas compras.
+        </p>
+      </div>
+    </div>
+  );
+
+  const renderProductGrid = (category: Category) => (
+    <div className="space-y-6">
+      <p className="text-[10px] font-bold uppercase text-pmmg-navy/70 mb-4 text-center tracking-wider">
+        {category.products.length} itens disponíveis em {category.name}.
+      </p>
+      
+      <div className="grid grid-cols-2 gap-4">
+        {category.products.map((product) => (
+          <a 
+            key={product.id}
+            href={product.link} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="pmmg-card overflow-hidden flex flex-col active:scale-[0.98] transition-transform shadow-lg"
+          >
+            {/* Imagem */}
+            <div className="w-full aspect-[3/4] relative bg-slate-200 shrink-0">
+              <img 
+                alt={product.title} 
+                className="w-full h-full object-cover" 
+                src={product.imageUrl} 
+              />
+            </div>
+            
+            {/* Detalhes */}
+            <div className="p-3 flex flex-col justify-between flex-1">
+              <h4 className="font-bold text-[10px] text-pmmg-navy uppercase leading-tight line-clamp-2 mb-1">{product.title}</h4>
+              <p className="text-sm font-black text-pmmg-red mt-1">{formatPrice(product.price)}</p>
+              <button className="w-full mt-2 bg-pmmg-navy text-white text-[8px] font-bold py-1.5 rounded-lg uppercase tracking-wide">
+                Ver Detalhes
+              </button>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
+      {renderHeader()}
 
       <main className="flex-1 overflow-y-auto pb-32 no-scrollbar px-4 pt-6">
-        <p className="text-[10px] font-bold uppercase text-pmmg-navy/70 mb-6 text-center tracking-wider">
-          Links para fornecedores parceiros e materiais recomendados.
-        </p>
-
-        <div className="space-y-8">
-          {TACTICAL_CATEGORIES.map((category) => (
-            <section key={category.id}>
-              {/* Título da Categoria */}
-              <div className="flex items-center gap-3 mb-4 px-1">
-                <div className="w-6 h-6 flex items-center justify-center rounded-full bg-pmmg-navy text-pmmg-yellow shrink-0">
-                  <span className="material-symbols-outlined text-sm fill-icon">{category.icon}</span>
-                </div>
-                <h3 className="font-bold text-sm text-pmmg-navy uppercase tracking-widest">{category.name}</h3>
-              </div>
-
-              {/* Grid de Produtos */}
-              <div className="grid grid-cols-2 gap-4">
-                {category.products.map((product) => (
-                  <a 
-                    key={product.id}
-                    href={product.link} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="pmmg-card overflow-hidden flex flex-col active:scale-[0.98] transition-transform shadow-lg"
-                  >
-                    {/* Imagem */}
-                    <div className="w-full aspect-[3/4] relative bg-slate-200 shrink-0">
-                      <img 
-                        alt={product.title} 
-                        className="w-full h-full object-cover" 
-                        src={product.imageUrl} 
-                      />
-                    </div>
-                    
-                    {/* Detalhes */}
-                    <div className="p-3 flex flex-col justify-between flex-1">
-                      <h4 className="font-bold text-[10px] text-pmmg-navy uppercase leading-tight line-clamp-2 mb-1">{product.title}</h4>
-                      <p className="text-sm font-black text-pmmg-red mt-1">{formatPrice(product.price)}</p>
-                      <button className="w-full mt-2 bg-pmmg-navy text-white text-[8px] font-bold py-1.5 rounded-lg uppercase tracking-wide">
-                        Ver Detalhes
-                      </button>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-
-        <div className="mt-12 text-center opacity-50">
-          <span className="material-symbols-outlined text-4xl text-pmmg-navy/20">info</span>
-          <p className="text-[9px] font-bold uppercase tracking-widest text-pmmg-navy/40 mt-2">
-            Os links são externos e a PMMG não se responsabiliza pelas compras.
-          </p>
-        </div>
+        {selectedCategory ? renderProductGrid(selectedCategory) : renderCategoryGrid()}
       </main>
 
       <BottomNav activeScreen="store" navigateTo={navigateTo} />
