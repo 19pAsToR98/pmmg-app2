@@ -18,13 +18,14 @@
         theme: {
           extend: {
             colors: {
-              // Mapeando cores PMMG para variáveis CSS
-              "pmmg-navy": "var(--color-primary-dark)",
-              "pmmg-khaki": "var(--color-background-light)",
-              "pmmg-yellow": "var(--color-accent-main)",
-              "pmmg-red": "var(--color-danger)",
-              "pmmg-gold": "var(--color-gold)",
-              "pmmg-blue": "var(--color-info)",
+              "pmmg-navy": "#002147",
+              "pmmg-navy-dark": "#001530",
+              "pmmg-khaki": "#c5b39a",
+              "pmmg-khaki-light": "#dcd1c1",
+              "pmmg-yellow": "#ffcc00",
+              "pmmg-red": "#e31c1c",
+              "pmmg-gold": "#d4af37",
+              "pmmg-blue": "#0047ab",
             },
             fontFamily: {
               sans: ["Inter", "system-ui", "sans-serif"],
@@ -35,35 +36,12 @@
     </script>
     <style type="text/tailwindcss">
       @layer base {
-        /* PMMG Theme (Default) */
-        :root {
-          --color-primary-dark: #002147; /* PMMG Navy */
-          --color-background-light: #c5b39a; /* PMMG Khaki */
-          --color-accent-main: #ffcc00; /* PMMG Yellow */
-          --color-danger: #e31c1c; /* PMMG Red */
-          --color-gold: #d4af37; /* PMMG Gold */
-          --color-info: #0047ab; /* PMMG Blue */
-        }
-        
-        /* PMESP Theme */
-        .theme-pmesp {
-          --color-primary-dark: #1a1a1a; /* PMESP Dark Gray/Black */
-          --color-background-light: #f0f0f0; /* PMESP Light Gray */
-          --color-accent-main: #d4af37; /* PMESP Gold */
-          --color-danger: #a30000; /* PMESP Deep Red */
-          --color-gold: #d4af37; /* PMESP Gold */
-          --color-info: #0047ab; /* Keep standard blue for info */
-        }
-
         body {
-          /* Aplicando a cor de fundo diretamente com a variável CSS */
-          background-color: var(--color-background-light);
-          @apply text-slate-900 font-sans antialiased;
+          @apply bg-pmmg-khaki text-slate-900 font-sans antialiased;
           min-height: 100dvh;
         }
       }
       .pmmg-card {
-        /* Mantendo a transparência e borda, que agora usam as variáveis */
         @apply bg-white/70 border border-pmmg-navy/10 rounded-xl shadow-sm backdrop-blur-md overflow-hidden;
       }
       .material-symbols-outlined {
