@@ -64,14 +64,14 @@ const GoogleMapWrapper: React.FC<GoogleMapWrapperProps> = ({
   });
 
   if (loadError) {
-    return <div className="p-4 text-center text-pmmg-red">Erro ao carregar o Google Maps. Verifique a chave API.</div>;
+    return <div className="p-4 text-center text-theme-critical">Erro ao carregar o Google Maps. Verifique a chave API.</div>;
   }
 
   if (!isLoaded) {
     return (
       <div className={`flex items-center justify-center ${mapContainerClassName} bg-slate-200`}>
-        <span className="material-symbols-outlined text-pmmg-navy animate-spin text-4xl">progress_activity</span>
-        <p className="text-pmmg-navy/70 text-sm ml-3">Carregando Mapa Tático...</p>
+        <span className="material-symbols-outlined text-theme-primary animate-spin text-4xl">progress_activity</span>
+        <p className="text-theme-primary/70 text-sm ml-3">Carregando Mapa Tático...</p>
       </div>
     );
   }

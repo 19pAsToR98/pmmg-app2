@@ -14,19 +14,19 @@ const AITools: React.FC<AIToolsProps> = ({ navigateTo, userRank, aiAvatar }) => 
                    userRank;
 
   return (
-    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
-      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-xl">
+    <div className="flex flex-col h-full bg-theme-background overflow-hidden">
+      <header className="sticky top-0 z-50 bg-theme-primary px-4 py-4 flex items-center justify-between shadow-xl">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 shrink-0 bg-white rounded-full flex items-center justify-center p-1 border-2 border-pmmg-red">
-            <span className="material-symbols-outlined text-pmmg-navy text-2xl">shield</span>
+          <div className="w-10 h-10 shrink-0 bg-white rounded-full flex items-center justify-center p-1 border-2 border-theme-critical">
+            <span className="material-symbols-outlined text-theme-primary text-2xl">shield</span>
           </div>
           <div>
             <h1 className="font-bold text-sm leading-none text-white uppercase tracking-tight">Central de Inteligência</h1>
-            <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">PMMG Tactical AI Tools</p>
+            <p className="text-[10px] font-medium text-theme-accent tracking-wider uppercase mt-1">PMMG Tactical AI Tools</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-pmmg-yellow animate-pulse">psychology</span>
+          <span className="material-symbols-outlined text-theme-accent animate-pulse">psychology</span>
           <span className="text-[10px] font-bold text-white uppercase">IA Ativa</span>
         </div>
       </header>
@@ -34,18 +34,18 @@ const AITools: React.FC<AIToolsProps> = ({ navigateTo, userRank, aiAvatar }) => 
       <main className="flex-1 overflow-y-auto pb-32 no-scrollbar">
         <div className="flex flex-col items-center pt-8 px-6">
           <div className="relative w-64 h-64 mb-6">
-            <div className="w-full h-full rounded-full overflow-hidden relative shadow-2xl border-4 border-pmmg-navy/10">
+            <div className="w-full h-full rounded-full overflow-hidden relative shadow-2xl border-4 border-theme-primary/10">
                <img 
                 alt={aiAvatar.name} 
                 className="w-full h-full object-contain rounded-full" 
                 src={aiAvatar.url} 
               />
             </div>
-            <div className="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-4 border-pmmg-khaki"></div>
+            <div className="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-4 border-theme-background"></div>
           </div>
-          <div className="relative bg-white rounded-[1.5rem] p-4 px-6 shadow-lg mb-8 text-center border-2 border-pmmg-navy/5 after:content-[''] after:absolute after:top-0 after:left-1/2 after:w-0 after:h-0 after:border-[20px] after:border-transparent after:border-b-white after:mt-[-20px] after:ml-[-20px] after:border-t-0">
-            <p className="text-pmmg-navy font-semibold text-sm">
-              Como posso apoiar sua guarnição hoje, <span className="font-bold text-pmmg-red">{rankLabel}?</span>
+          <div className="relative bg-white rounded-[1.5rem] p-4 px-6 shadow-lg mb-8 text-center border-2 border-theme-primary/5 after:content-[''] after:absolute after:top-0 after:left-1/2 after:w-0 after:h-0 after:border-[20px] after:border-transparent after:border-b-white after:mt-[-20px] after:ml-[-20px] after:border-t-0">
+            <p className="text-theme-primary font-semibold text-sm">
+              Como posso apoiar sua guarnição hoje, <span className="font-bold text-theme-critical">{rankLabel}?</span>
             </p>
           </div>
         </div>
@@ -59,10 +59,10 @@ const AITools: React.FC<AIToolsProps> = ({ navigateTo, userRank, aiAvatar }) => 
               <button 
                 key={tool.label}
                 onClick={() => navigateTo(tool.screen as Screen)}
-                className="relative overflow-hidden bg-pmmg-navy text-white p-4 rounded-xl flex flex-col items-center justify-center gap-3 active:scale-95 transition-transform border-b-4 border-black/30 shadow-lg"
+                className="relative overflow-hidden bg-theme-primary text-white p-4 rounded-xl flex flex-col items-center justify-center gap-3 active:scale-95 transition-transform border-b-4 border-black/30 shadow-lg"
               >
                 <div className="bg-white/10 p-3 rounded-lg mb-1">
-                  <span className="material-symbols-outlined text-pmmg-yellow text-3xl">{tool.icon}</span>
+                  <span className="material-symbols-outlined text-theme-accent text-3xl">{tool.icon}</span>
                 </div>
                 <span className="text-[11px] font-black uppercase text-center leading-tight tracking-wide">{tool.label}</span>
               </button>
@@ -70,12 +70,12 @@ const AITools: React.FC<AIToolsProps> = ({ navigateTo, userRank, aiAvatar }) => 
           </div>
         </div>
 
-        <div className="mx-6 mt-4 pmg-card bg-pmmg-navy/5 border border-pmmg-navy/20 rounded-xl p-3 flex items-center justify-between">
+        <div className="mx-6 mt-4 pmg-card bg-theme-primary/5 border border-theme-primary/20 rounded-xl p-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-pmmg-navy fill-icon">memory</span>
+            <span className="material-symbols-outlined text-theme-primary fill-icon">memory</span>
             <div>
-              <div className="text-[10px] font-bold text-pmmg-navy uppercase">Rede Neural Operacional</div>
-              <div className="text-[9px] text-pmmg-navy/60">Sessão Segura: {aiAvatar.name}</div>
+              <div className="text-[10px] font-bold text-theme-primary uppercase">Rede Neural Operacional</div>
+              <div className="text-[9px] text-theme-primary/60">Sessão Segura: {aiAvatar.name}</div>
             </div>
           </div>
           <span className="text-[10px] font-bold text-green-700 bg-green-100 px-2 py-1 rounded">ESTÁVEL</span>

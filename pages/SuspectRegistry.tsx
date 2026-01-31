@@ -396,7 +396,11 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
   const getMiniMapIcon = (isApproach: boolean) => {
     if (typeof window === 'undefined' || !window.google || !window.google.maps) return undefined; // Safety check
 
-    const color = isApproach ? '#002147' : '#002147';
+    // Usando variáveis CSS para cor
+    const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim();
+    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim();
+    
+    const color = isApproach ? primaryColor : primaryColor;
     const iconName = isApproach ? 'pin_drop' : 'location_on';
     
     const pathData = ICON_PATHS[iconName];
@@ -404,8 +408,8 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
     // Aplicando REGRA DE OURO 2: translate(6 6) scale(0.75)
     const svg = `
       <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="16" cy="16" r="14" fill="${color}" stroke="#ffcc00" stroke-width="2"/>
-        <path d="${pathData}" fill="#ffcc00" transform="translate(6 6) scale(0.75)"/>
+        <circle cx="16" cy="16" r="14" fill="${color}" stroke="${accentColor}" stroke-width="2"/>
+        <path d="${pathData}" fill="${accentColor}" transform="translate(6 6) scale(0.75)"/>
       </svg>
     `;
     
@@ -418,8 +422,8 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
 
 
   return (
-    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
-      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-lg">
+    <div className="flex flex-col h-full bg-theme-background overflow-hidden">
+      <header className="sticky top-0 z-50 bg-theme-primary px-4 py-4 flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-3">
           <button onClick={() => navigateTo(isEditing ? 'profile' : 'dashboard')} className="text-white active:scale-90 transition-transform">
             <span className="material-symbols-outlined">arrow_back_ios</span>
@@ -428,12 +432,12 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
             <h1 className="font-bold text-sm leading-none text-white uppercase tracking-tight">
               {isEditing ? 'Editar Ficha' : 'Cadastro de Indivíduo'}
             </h1>
-            <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">SISTEMA OPERACIONAL</p>
+            <p className="text-[10px] font-medium text-theme-accent tracking-wider uppercase mt-1">SISTEMA OPERACIONAL</p>
           </div>
         </div>
         <button 
           onClick={triggerFileInput}
-          className="bg-pmmg-navy border border-pmmg-yellow/30 p-1.5 rounded-md text-pmmg-yellow active:scale-95 transition-transform"
+          className="bg-theme-primary border border-theme-accent/30 p-1.5 rounded-md text-theme-accent active:scale-95 transition-transform"
         >
           <span className="material-symbols-outlined text-xl">add_a_photo</span>
         </button>
@@ -456,63 +460,63 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
             <>
               {photos.map((src, idx) => (
                 <div key={idx} className="relative shrink-0">
-                  <div className="w-32 h-44 bg-white rounded-xl overflow-hidden border-2 border-pmmg-navy shadow-lg">
+                  <div className="w-32 h-44 bg-white rounded-xl overflow-hidden border-2 border-theme-primary shadow-lg">
                     <img src={src} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
                     {/* Botão de exclusão movido para dentro do contêiner da imagem, posicionado no canto superior direito */}
                     <button 
                       onClick={() => removePhoto(idx)}
-                      className="absolute top-1 right-1 bg-pmmg-red text-white w-5 h-5 rounded-full flex items-center justify-center shadow-md border border-white"
+                      className="absolute top-1 right-1 bg-theme-critical text-white w-5 h-5 rounded-full flex items-center justify-center shadow-md border border-white"
                     >
                       <span className="material-symbols-outlined text-xs">close</span>
                     </button>
                     {idx === 0 && (
-                      <div className="absolute bottom-2 left-2 bg-pmmg-navy text-white text-[8px] font-bold px-2 py-0.5 rounded uppercase tracking-widest border border-white/20">Principal</div>
+                      <div className="absolute bottom-2 left-2 bg-theme-primary text-white text-[8px] font-bold px-2 py-0.5 rounded uppercase tracking-widest border border-white/20">Principal</div>
                     )}
                   </div>
                 </div>
               ))}
               <button 
                 onClick={triggerFileInput}
-                className="w-32 h-44 bg-white/30 border-2 border-dashed border-pmmg-navy/30 rounded-xl flex flex-col items-center justify-center shrink-0 active:bg-white/50 transition-colors"
+                className="w-32 h-44 bg-white/30 border-2 border-dashed border-theme-primary/30 rounded-xl flex flex-col items-center justify-center shrink-0 active:bg-white/50 transition-colors"
               >
-                <span className="material-symbols-outlined text-pmmg-navy/40 text-3xl">add</span>
-                <span className="text-[9px] font-bold text-pmmg-navy/60 uppercase mt-1">Mais Fotos</span>
+                <span className="material-symbols-outlined text-theme-primary/40 text-3xl">add</span>
+                <span className="text-[9px] font-bold text-theme-primary/60 uppercase mt-1">Mais Fotos</span>
               </button>
             </>
           ) : (
             <div 
               onClick={triggerFileInput}
-              className="w-full h-52 bg-white/50 border-2 border-dashed border-pmmg-navy/30 rounded-2xl flex flex-col items-center justify-center relative overflow-hidden group cursor-pointer hover:border-pmmg-navy/50 transition-colors shadow-inner"
+              className="w-full h-52 bg-white/50 border-2 border-dashed border-theme-primary/30 rounded-2xl flex flex-col items-center justify-center relative overflow-hidden group cursor-pointer hover:border-theme-primary/50 transition-colors shadow-inner"
             >
-              <div className="w-16 h-16 rounded-full bg-pmmg-navy/5 flex items-center justify-center mb-2">
-                <span className="material-symbols-outlined text-pmmg-navy/40 text-4xl">add_a_photo</span>
+              <div className="w-16 h-16 rounded-full bg-theme-primary/5 flex items-center justify-center mb-2">
+                <span className="material-symbols-outlined text-theme-primary/40 text-4xl">add_a_photo</span>
               </div>
-              <span className="text-[10px] font-bold text-pmmg-navy/60 uppercase tracking-widest">Adicionar Fotos</span>
-              <p className="text-[8px] text-pmmg-navy/40 mt-1 uppercase">Suporta múltiplos arquivos</p>
+              <span className="text-[10px] font-bold text-theme-primary/60 uppercase tracking-widest">Adicionar Fotos</span>
+              <p className="text-[8px] text-theme-primary/40 mt-1 uppercase">Suporta múltiplos arquivos</p>
             </div>
           )}
         </div>
 
         {/* Status Section (Existing) */}
-        <p className="text-[10px] font-bold uppercase text-pmmg-navy/70 mb-3 mt-4 text-center tracking-wider">Status de Monitoramento</p>
+        <p className="text-[10px] font-bold uppercase text-theme-primary/70 mb-3 mt-4 text-center tracking-wider">Status de Monitoramento</p>
         <div className="grid grid-cols-4 gap-2">
           {[
-            { id: 'Foragido', icon: 'warning', color: 'text-pmmg-red', border: 'border-pmmg-red/30' },
-            { id: 'Suspeito', icon: 'visibility', color: 'text-pmmg-yellow', border: 'border-pmmg-yellow/50' },
+            { id: 'Foragido', icon: 'warning', color: 'text-theme-critical', border: 'border-theme-critical/30' },
+            { id: 'Suspeito', icon: 'visibility', color: 'text-theme-accent', border: 'border-theme-accent/50' },
             { id: 'CPF Cancelado', icon: 'person_off', color: 'text-slate-600', border: 'border-slate-400/30' },
-            { id: 'Preso', icon: 'lock', color: 'text-pmmg-navy', border: 'border-pmmg-navy/30' },
+            { id: 'Preso', icon: 'lock', color: 'text-theme-primary', border: 'border-theme-primary/30' },
           ].map((s) => (
             <button
               key={s.id}
               onClick={() => setStatus(s.id as any)}
               className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl border transition-all ${
-                status === s.id ? 'bg-white border-pmmg-navy shadow-md ring-1 ring-pmmg-navy' : 'bg-white/40 ' + s.border
+                status === s.id ? 'bg-white border-theme-primary shadow-md ring-1 ring-theme-primary' : 'bg-white/40 ' + s.border
               }`}
             >
               <span className={`material-symbols-outlined ${s.color} ${status === s.id ? 'fill-icon' : ''}`}>
                 {s.icon}
               </span>
-              <span className="text-[9px] font-bold text-pmmg-navy text-center leading-tight">
+              <span className="text-[9px] font-bold text-theme-primary text-center leading-tight">
                 {s.id.split(' ').map((word, i) => <React.Fragment key={i}>{word}{i === 0 && s.id.includes(' ') && <br />}</React.Fragment>)}
               </span>
             </button>
@@ -524,13 +528,13 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
           <div className="flex items-center gap-3">
             <span className="material-symbols-outlined">map</span>
             <div>
-              <p className="text-sm font-bold text-pmmg-navy uppercase leading-none">Exibir no Mapa Tático</p>
+              <p className="text-sm font-bold text-theme-primary uppercase leading-none">Exibir no Mapa Tático</p>
               <p className="text-[10px] text-slate-500 mt-1">Marcar a última localização conhecida no mapa.</p>
             </div>
           </div>
           <button 
             onClick={() => setShowOnMap(!showOnMap)}
-            className={`relative w-12 h-6 rounded-full transition-colors shrink-0 ${showOnMap ? 'bg-pmmg-navy' : 'bg-slate-300'}`}
+            className={`relative w-12 h-6 rounded-full transition-colors shrink-0 ${showOnMap ? 'bg-theme-primary' : 'bg-slate-300'}`}
           >
             <span className={`absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform shadow-md ${showOnMap ? 'translate-x-6' : 'translate-x-0'}`}></span>
           </button>
@@ -538,37 +542,37 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
 
         {/* 1. --- DADOS PESSOAIS --- */}
         <div className="flex items-center gap-2 mb-4 mt-8">
-          <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
-          <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Dados Pessoais</h3>
+          <div className="h-4 w-1 bg-theme-primary rounded-full"></div>
+          <h3 className="font-bold text-xs text-theme-primary uppercase tracking-wider">Dados Pessoais</h3>
         </div>
         <div className="space-y-4">
           <div>
-            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Nome Completo</label>
+            <label className="block text-[10px] font-bold uppercase text-theme-primary/70 mb-1 ml-1 tracking-wider">Nome Completo</label>
             <input 
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+              className="block w-full px-4 py-3 bg-white/80 border border-theme-primary/20 focus:border-theme-primary focus:ring-1 focus:ring-theme-primary rounded-lg text-sm" 
               placeholder="Ex: João da Silva" 
               type="text" 
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">CPF</label>
+              <label className="block text-[10px] font-bold uppercase text-theme-primary/70 mb-1 ml-1 tracking-wider">CPF</label>
               <input 
                 value={cpf}
                 onChange={(e) => setCpf(e.target.value)}
-                className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+                className="block w-full px-4 py-3 bg-white/80 border border-theme-primary/20 focus:border-theme-primary focus:ring-1 focus:ring-theme-primary rounded-lg text-sm" 
                 placeholder="000.000.000-00" 
                 type="text" 
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">RG (Registro Geral)</label>
+              <label className="block text-[10px] font-bold uppercase text-theme-primary/70 mb-1 ml-1 tracking-wider">RG (Registro Geral)</label>
               <input 
                 value={rg}
                 onChange={(e) => setRg(e.target.value)}
-                className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+                className="block w-full px-4 py-3 bg-white/80 border border-theme-primary/20 focus:border-theme-primary focus:ring-1 focus:ring-theme-primary rounded-lg text-sm" 
                 placeholder="0.000.000" 
                 type="text" 
               />
@@ -576,42 +580,42 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Alcunha / Vulgo</label>
+              <label className="block text-[10px] font-bold uppercase text-theme-primary/70 mb-1 ml-1 tracking-wider">Alcunha / Vulgo</label>
               <input 
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
-                className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+                className="block w-full px-4 py-3 bg-white/80 border border-theme-primary/20 focus:border-theme-primary focus:ring-1 focus:ring-theme-primary rounded-lg text-sm" 
                 placeholder="Ex: Baiano" 
                 type="text" 
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Data de Nascimento</label>
+              <label className="block text-[10px] font-bold uppercase text-theme-primary/70 mb-1 ml-1 tracking-wider">Data de Nascimento</label>
               <input 
                 value={birthDate}
                 onChange={(e) => setBirthDate(e.target.value)}
-                className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+                className="block w-full px-4 py-3 bg-white/80 border border-theme-primary/20 focus:border-theme-primary focus:ring-1 focus:ring-theme-primary rounded-lg text-sm" 
                 placeholder="DD/MM/AAAA" 
                 type="text" 
               />
             </div>
           </div>
           <div>
-            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Descrição / Sinais Particulares</label>
+            <label className="block text-[10px] font-bold uppercase text-theme-primary/70 mb-1 ml-1 tracking-wider">Descrição / Sinais Particulares</label>
             <textarea 
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
-              className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+              className="block w-full px-4 py-3 bg-white/80 border border-theme-primary/20 focus:border-theme-primary focus:ring-1 focus:ring-theme-primary rounded-lg text-sm" 
               placeholder="Cicatriz no braço, tatuagem no pescoço, etc." 
             />
           </div>
           <div>
-            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Nome da Mãe</label>
+            <label className="block text-[10px] font-bold uppercase text-theme-primary/70 mb-1 ml-1 tracking-wider">Nome da Mãe</label>
             <input 
               value={motherName}
               onChange={(e) => setMotherName(e.target.value)}
-              className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+              className="block w-full px-4 py-3 bg-white/80 border border-theme-primary/20 focus:border-theme-primary focus:ring-1 focus:ring-theme-primary rounded-lg text-sm" 
               placeholder="Nome completo da genitora" 
               type="text" 
             />
@@ -620,13 +624,13 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
 
         {/* 2. --- ARTIGOS CRIMINAIS --- */}
         <div className="flex items-center gap-2 mb-4 mt-8">
-          <div className="h-4 w-1 bg-pmmg-red rounded-full"></div>
-          <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Artigos Criminais</h3>
+          <div className="h-4 w-1 bg-theme-critical rounded-full"></div>
+          <h3 className="font-bold text-xs text-theme-primary uppercase tracking-wider">Artigos Criminais</h3>
         </div>
 
         <div className="flex flex-wrap gap-2 mb-4">
           {articles.map((art, idx) => (
-            <span key={idx} className="px-3 py-1.5 bg-pmmg-red/10 border border-pmmg-red/20 text-pmmg-red text-[10px] font-bold rounded-full flex items-center gap-1">
+            <span key={idx} className="px-3 py-1.5 bg-theme-critical/10 border border-theme-critical/20 text-theme-critical text-[10px] font-bold rounded-full flex items-center gap-1">
               {art} <span onClick={() => handleRemoveArticle(idx)} className="material-symbols-outlined text-[14px] cursor-pointer">close</span>
             </span>
           ))}
@@ -636,13 +640,13 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
           <input 
             value={currentArticle}
             onChange={(e) => setCurrentArticle(e.target.value)}
-            className="flex-1 px-4 py-2 bg-white border border-pmmg-navy/20 rounded-lg text-xs" 
+            className="flex-1 px-4 py-2 bg-white border border-theme-primary/20 rounded-lg text-xs" 
             placeholder="Ex: Art. 157" 
             type="text" 
           />
           <button 
             onClick={handleAddArticle}
-            className="px-4 py-2 bg-pmmg-navy text-white text-[10px] font-bold rounded-lg uppercase"
+            className="px-4 py-2 bg-theme-primary text-white text-[10px] font-bold rounded-lg uppercase"
           >
             Adicionar
           </button>
@@ -650,14 +654,14 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
 
         {/* 3. --- Endereço e Localização --- */}
         <div className="flex items-center gap-2 mb-4 mt-8">
-          <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
-          <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Endereço e Localização</h3>
+          <div className="h-4 w-1 bg-theme-primary rounded-full"></div>
+          <h3 className="font-bold text-xs text-theme-primary uppercase tracking-wider">Endereço e Localização</h3>
         </div>
         <div className="space-y-4">
           
           {/* 3.1. Endereço Principal */}
           <div className="relative">
-            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Endereço Principal</label>
+            <label className="block text-[10px] font-bold uppercase text-theme-primary/70 mb-1 ml-1 tracking-wider">Endereço Principal</label>
             <div className="flex gap-2">
               <input 
                 value={lastSeenAddress}
@@ -668,14 +672,14 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
                     handleLastSeenAddressSearch();
                   }
                 }}
-                className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+                className="block w-full px-4 py-3 bg-white/80 border border-theme-primary/20 focus:border-theme-primary focus:ring-1 focus:ring-theme-primary rounded-lg text-sm" 
                 placeholder="Pesquisar endereço..." 
                 type="text" 
               />
               <button 
                 onClick={() => handleGetCurrentLocation(handleSelectLastSeenLocation, setIsLastSeenLocating)}
                 disabled={isLastSeenLocating}
-                className="bg-pmmg-blue text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50 shrink-0"
+                className="bg-theme-info text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50 shrink-0"
                 title="Obter Localização Atual"
               >
                 <span className="material-symbols-outlined text-xl animate-spin" style={{ display: isLastSeenLocating ? 'block' : 'none' }}>progress_activity</span>
@@ -684,7 +688,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
               <button 
                 onClick={handleLastSeenAddressSearch}
                 disabled={isLastSeenSearching}
-                className="bg-pmmg-navy text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50 shrink-0"
+                className="bg-theme-primary text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50 shrink-0"
                 title="Buscar Endereço"
               >
                 <span className="material-symbols-outlined text-xl animate-spin" style={{ display: isLastSeenSearching ? 'block' : 'none' }}>progress_activity</span>
@@ -693,12 +697,12 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
             </div>
             
             {lastSeenAddressSuggestions.length > 0 && (
-              <div className="absolute z-10 w-full bg-white border border-pmmg-navy/20 rounded-lg mt-1 shadow-lg max-h-40 overflow-y-auto">
+              <div className="absolute z-10 w-full bg-white border border-theme-primary/20 rounded-lg mt-1 shadow-lg max-h-40 overflow-y-auto">
                 {lastSeenAddressSuggestions.map((loc, index) => (
                   <button
                     key={index}
                     onClick={() => handleSelectLastSeenLocation(loc)}
-                    className="w-full text-left px-4 py-2 text-sm text-pmmg-navy hover:bg-pmmg-khaki/50 transition-colors border-b border-pmmg-navy/5 last:border-b-0"
+                    className="w-full text-left px-4 py-2 text-sm text-theme-primary hover:bg-theme-background/50 transition-colors border-b border-theme-primary/5 last:border-b-0"
                   >
                     {loc.name}
                   </button>
@@ -706,15 +710,15 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
               </div>
             )}
             {lastSeenAddressSuggestions.length === 0 && !isLastSeenSearching && lastSeenAddress.length > 2 && (
-              <p className="text-[10px] text-pmmg-red italic text-center mt-2">Nenhum resultado encontrado.</p>
+              <p className="text-[10px] text-theme-critical italic text-center mt-2">Nenhum resultado encontrado.</p>
             )}
           </div>
           
           {/* Minimap (Last Seen Location) */}
           {selectedLastSeenLocation && (
             <div className="pmmg-card overflow-hidden">
-              <div className="p-3 bg-pmmg-navy/5 flex items-center justify-between">
-                <p className="text-[10px] font-bold text-pmmg-navy uppercase tracking-wider">Localização Confirmada (Endereço Principal)</p>
+              <div className="p-3 bg-theme-primary/5 flex items-center justify-between">
+                <p className="text-[10px] font-bold text-theme-primary uppercase tracking-wider">Localização Confirmada (Endereço Principal)</p>
                 <span className="text-[9px] text-green-600 font-bold uppercase">GPS OK</span>
               </div>
               <GoogleMapWrapper
@@ -739,7 +743,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
           
           {/* 3.2. Endereço da Abordagem (NEW) */}
           <div className="relative">
-            <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Endereço da Abordagem (Opcional)</label>
+            <label className="block text-[10px] font-bold uppercase text-theme-primary/70 mb-1 ml-1 tracking-wider">Endereço da Abordagem (Opcional)</label>
             <div className="flex gap-2">
               <input 
                 value={approachAddress}
@@ -750,14 +754,14 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
                     handleApproachAddressSearch();
                   }
                 }}
-                className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+                className="block w-full px-4 py-3 bg-white/80 border border-theme-primary/20 focus:border-theme-primary focus:ring-1 focus:ring-theme-primary rounded-lg text-sm" 
                 placeholder="Pesquisar endereço da abordagem..." 
                 type="text" 
               />
               <button 
                 onClick={() => handleGetCurrentLocation(handleSelectApproachLocation, setIsApproachLocating)}
                 disabled={isApproachLocating}
-                className="bg-pmmg-blue text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50 shrink-0"
+                className="bg-theme-info text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50 shrink-0"
                 title="Obter Localização Atual"
               >
                 <span className="material-symbols-outlined text-xl animate-spin" style={{ display: isApproachLocating ? 'block' : 'none' }}>progress_activity</span>
@@ -766,7 +770,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
               <button 
                 onClick={handleApproachAddressSearch}
                 disabled={isApproachSearching}
-                className="bg-pmmg-navy text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50 shrink-0"
+                className="bg-theme-primary text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50 shrink-0"
                 title="Buscar Endereço"
               >
                 <span className="material-symbols-outlined text-xl animate-spin" style={{ display: isApproachSearching ? 'block' : 'none' }}>progress_activity</span>
@@ -775,12 +779,12 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
             </div>
             
             {approachAddressSuggestions.length > 0 && (
-              <div className="absolute z-10 w-full bg-white border border-pmmg-navy/20 rounded-lg mt-1 shadow-lg max-h-40 overflow-y-auto">
+              <div className="absolute z-10 w-full bg-white border border-theme-primary/20 rounded-lg mt-1 shadow-lg max-h-40 overflow-y-auto">
                 {approachAddressSuggestions.map((loc, index) => (
                   <button
                     key={index}
                     onClick={() => handleSelectApproachLocation(loc)}
-                    className="w-full text-left px-4 py-2 text-sm text-pmmg-navy hover:bg-pmmg-khaki/50 transition-colors border-b border-pmmg-navy/5 last:border-b-0"
+                    className="w-full text-left px-4 py-2 text-sm text-theme-primary hover:bg-theme-background/50 transition-colors border-b border-theme-primary/5 last:border-b-0"
                   >
                     {loc.name}
                   </button>
@@ -788,15 +792,15 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
               </div>
             )}
             {approachAddressSuggestions.length === 0 && !isApproachSearching && approachAddress.length > 2 && (
-              <p className="text-[10px] text-pmmg-red italic text-center mt-2">Nenhum resultado encontrado.</p>
+              <p className="text-[10px] text-theme-critical italic text-center mt-2">Nenhum resultado encontrado.</p>
             )}
           </div>
           
           {/* Minimap (Approach Location) */}
           {selectedApproachLocation && (
             <div className="pmmg-card overflow-hidden">
-              <div className="p-3 bg-pmmg-navy/5 flex items-center justify-between">
-                <p className="text-[10px] font-bold text-pmmg-navy uppercase tracking-wider">Localização Confirmada (Abordagem)</p>
+              <div className="p-3 bg-theme-primary/5 flex items-center justify-between">
+                <p className="text-[10px] font-bold text-theme-primary uppercase tracking-wider">Localização Confirmada (Abordagem)</p>
                 <span className="text-[9px] text-green-600 font-bold uppercase">GPS OK</span>
               </div>
               <GoogleMapWrapper
@@ -822,34 +826,34 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
 
         {/* 4. --- Veículos Section (Existing) --- */}
         <div className="flex items-center gap-2 mb-4 mt-8">
-          <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
-          <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Veículos Cadastrados ({vehicles.length})</h3>
+          <div className="h-4 w-1 bg-theme-primary rounded-full"></div>
+          <h3 className="font-bold text-xs text-theme-primary uppercase tracking-wider">Veículos Cadastrados ({vehicles.length})</h3>
         </div>
         <div className="pmmg-card p-4 space-y-3">
           {vehicles.map((v, idx) => (
-            <div key={idx} className="flex items-center justify-between p-2 bg-pmmg-navy/5 rounded-lg border border-pmmg-navy/10">
+            <div key={idx} className="flex items-center justify-between p-2 bg-theme-primary/5 rounded-lg border border-theme-primary/10">
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-pmmg-navy truncate">{v.plate} - {v.model}</p>
+                <p className="text-sm font-bold text-theme-primary truncate">{v.plate} - {v.model}</p>
                 <p className="text-[10px] text-slate-500">{v.color}</p>
               </div>
-              <button onClick={() => handleRemoveVehicle(idx)} className="text-pmmg-red p-1 shrink-0">
+              <button onClick={() => handleRemoveVehicle(idx)} className="text-theme-critical p-1 shrink-0">
                 <span className="material-symbols-outlined text-lg">delete</span>
               </button>
             </div>
           ))}
-          <div className="pt-2 space-y-2 border-t border-pmmg-navy/10">
+          <div className="pt-2 space-y-2 border-t border-theme-primary/10">
             <div className="grid grid-cols-2 gap-3">
               <input 
                 value={newVehiclePlate}
                 onChange={(e) => setNewVehiclePlate(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-pmmg-navy/20 rounded-lg text-xs" 
+                className="w-full px-3 py-2 bg-white border border-theme-primary/20 rounded-lg text-xs" 
                 placeholder="Placa (Ex: ABC1234)" 
                 type="text" 
               />
               <input 
                 value={newVehicleModel}
                 onChange={(e) => setNewVehicleModel(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-pmmg-navy/20 rounded-lg text-xs" 
+                className="w-full px-3 py-2 bg-white border border-theme-primary/20 rounded-lg text-xs" 
                 placeholder="Modelo (Ex: Fiat Uno)" 
                 type="text" 
               />
@@ -858,14 +862,14 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
               <input 
                 value={newVehicleColor}
                 onChange={(e) => setNewVehicleColor(e.target.value)}
-                className="flex-1 px-3 py-2 bg-white border border-pmmg-navy/20 rounded-lg text-xs" 
+                className="flex-1 px-3 py-2 bg-white border border-theme-primary/20 rounded-lg text-xs" 
                 placeholder="Cor (Opcional)" 
                 type="text" 
               />
               <button 
                 onClick={handleAddVehicle}
                 disabled={!newVehiclePlate.trim() || !newVehicleModel.trim()}
-                className="px-4 py-2 bg-pmmg-navy text-white text-[10px] font-bold rounded-lg uppercase disabled:opacity-50"
+                className="px-4 py-2 bg-theme-primary text-white text-[10px] font-bold rounded-lg uppercase disabled:opacity-50"
               >
                 Adicionar
               </button>
@@ -875,65 +879,65 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
 
         {/* 5. --- Ligações Section (Existing) --- */}
         <div className="flex items-center gap-2 mb-4 mt-8">
-          <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
-          <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-wider">Ligações e Associações ({associations.length})</h3>
+          <div className="h-4 w-1 bg-theme-primary rounded-full"></div>
+          <h3 className="font-bold text-xs text-theme-primary uppercase tracking-wider">Ligações e Associações ({associations.length})</h3>
         </div>
         <div className="pmmg-card p-4 space-y-3">
           {associations.map((a, idx) => {
             const associatedSuspect = allSuspects.find(s => s.id === a.suspectId);
             if (!associatedSuspect) return null;
             return (
-              <div key={idx} className="flex items-center justify-between p-2 bg-pmmg-navy/5 rounded-lg border border-pmmg-navy/10">
+              <div key={idx} className="flex items-center justify-between p-2 bg-theme-primary/5 rounded-lg border border-theme-primary/10">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-300 shrink-0">
                     <img src={associatedSuspect.photoUrl} alt={associatedSuspect.name} className="w-full h-full object-cover" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase truncate">{a.relationship}</p>
-                    <p className="text-sm font-bold text-pmmg-navy truncate">{associatedSuspect.name}</p>
+                    <p className="text-[10px] text-theme-primary/50 font-bold uppercase truncate">{a.relationship}</p>
+                    <p className="text-sm font-bold text-theme-primary truncate">{associatedSuspect.name}</p>
                   </div>
                 </div>
-                <button onClick={() => handleRemoveAssociation(idx)} className="text-pmmg-red p-1 shrink-0">
+                <button onClick={() => handleRemoveAssociation(idx)} className="text-theme-critical p-1 shrink-0">
                   <span className="material-symbols-outlined text-lg">delete</span>
                 </button>
               </div>
             );
             
           })}
-          <div className="pt-2 space-y-2 border-t border-pmmg-navy/10">
+          <div className="pt-2 space-y-2 border-t border-theme-primary/10">
             <input 
               value={associationRelationship}
               onChange={(e) => setAssociationRelationship(e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-pmmg-navy/20 rounded-lg text-xs" 
+              className="w-full px-3 py-2 bg-white border border-theme-primary/20 rounded-lg text-xs" 
               placeholder="Tipo de Ligação (Ex: Cúmplice, Familiar)" 
               type="text" 
             />
             <input 
               value={associationSearchTerm}
               onChange={(e) => setAssociationSearchTerm(e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-pmmg-navy/20 rounded-lg text-xs" 
+              className="w-full px-3 py-2 bg-white border border-theme-primary/20 rounded-lg text-xs" 
               placeholder="Buscar indivíduo existente (Nome/CPF)" 
               type="text" 
             />
             {filteredSuspects.length > 0 && associationRelationship.trim() && (
-              <div className="bg-white border border-pmmg-navy/20 rounded-lg shadow-md max-h-40 overflow-y-auto">
+              <div className="bg-white border border-theme-primary/20 rounded-lg shadow-md max-h-40 overflow-y-auto">
                 {filteredSuspects.slice(0, 5).map((s) => (
                   <div 
                     key={s.id} 
-                    className="flex items-center justify-between p-2 hover:bg-pmmg-khaki/50 transition-colors border-b border-pmmg-navy/5"
+                    className="flex items-center justify-between p-2 hover:bg-theme-background/50 transition-colors border-b border-theme-primary/5"
                   >
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-300 shrink-0">
                         <img src={s.photoUrl} alt={s.name} className="w-full h-full object-cover" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-bold text-pmmg-navy truncate">{s.name}</p>
+                        <p className="text-sm font-bold text-theme-primary truncate">{s.name}</p>
                         <p className="text-[10px] text-slate-500">{s.cpf}</p>
                       </div>
                     </div>
                     <button 
                       onClick={() => handleAddAssociation(s.id)}
-                      className="bg-pmmg-navy text-white text-[9px] font-bold px-3 py-1 rounded uppercase shrink-0"
+                      className="bg-theme-primary text-white text-[9px] font-bold px-3 py-1 rounded uppercase shrink-0"
                     >
                       Vincular
                     </button>
@@ -942,7 +946,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
               </div>
             )}
             {filteredSuspects.length > 0 && !associationRelationship.trim() && (
-                <p className="text-[10px] text-pmmg-red italic text-center">Defina o tipo de ligação antes de vincular.</p>
+                <p className="text-[10px] text-theme-critical italic text-center">Defina o tipo de ligação antes de vincular.</p>
             )}
           </div>
         </div>
@@ -950,7 +954,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
         <div className="mt-10 mb-8">
           <button 
             onClick={handleSave}
-            className="w-full bg-pmmg-navy text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-3 uppercase tracking-widest active:scale-[0.98] transition-transform"
+            className="w-full bg-theme-primary text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-3 uppercase tracking-widest active:scale-[0.98] transition-transform"
           >
             <span className="material-symbols-outlined">{isEditing ? 'save' : 'person_add'}</span>
             {isEditing ? 'Salvar Alterações' : 'Salvar Registro'}

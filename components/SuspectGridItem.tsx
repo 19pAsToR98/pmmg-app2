@@ -31,7 +31,7 @@ const SuspectGridItem: React.FC<SuspectGridItemProps> = ({
       
       {isSelectionMode && (
         <div className={`absolute top-2 right-2 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-          isSelected ? 'bg-pmmg-red border-white shadow-lg' : 'bg-white/70 border-pmmg-navy/30'
+          isSelected ? 'bg-theme-critical border-white shadow-lg' : 'bg-white/70 border-theme-primary/30'
         }`}>
           {isSelected && <span className="material-symbols-outlined text-white text-sm fill-icon">check</span>}
         </div>

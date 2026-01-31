@@ -152,7 +152,7 @@ const INITIAL_CUSTOM_MARKERS: CustomMarker[] = [
     title: 'Ponto de Observação',
     description: 'Vigilância 24h. Área de alto risco.',
     icon: 'visibility',
-    color: 'bg-pmmg-gold'
+    color: 'bg-theme-secondary'
   }
 ];
 
@@ -385,7 +385,7 @@ const App: React.FC = () => {
   };
 
   const deleteCustomMarker = (id: string) => {
-    setCustomMarkers(prev => prev.filter(m => m.id !== id));
+    deleteCustomMarker(id);
   };
 
   const openProfile = (id: string) => {
@@ -474,9 +474,12 @@ const App: React.FC = () => {
 
   const pendingRequestsCount = contacts.filter(c => c.status === 'Pending' && !c.isRequester).length;
 
+  // Determina a classe do tema
+  const themeClass = userInstitution === 'PMESP' ? 'theme-pmesp' : '';
+
 
   return (
-    <div className="flex flex-col h-screen max-w-md mx-auto relative overflow-hidden bg-pmmg-khaki">
+    <div className={`flex flex-col h-screen max-w-md mx-auto relative overflow-hidden bg-theme-background ${themeClass}`}>
       {currentScreen === 'welcomeScreen' && <WelcomeScreen onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />}
       
       {currentScreen === 'requestAccess' && <RequestAccess onBack={() => navigateTo('welcomeScreen')} onSuccess={() => { setIsRegistered(true); navigateTo('onboardingSetup'); }} />}

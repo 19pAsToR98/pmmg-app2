@@ -37,9 +37,9 @@ const SuspectPhotoMarker = memo<{
   // Determinar cor da borda baseado no status
   const getBorderColorClass = () => {
     switch (suspect.status) {
-      case 'Foragido': return 'border-pmmg-red';
-      case 'Suspeito': return 'border-pmmg-yellow';
-      default: return 'border-pmmg-navy';
+      case 'Foragido': return 'border-theme-critical';
+      case 'Suspeito': return 'border-theme-accent';
+      default: return 'border-theme-primary';
     }
   };
 
@@ -81,12 +81,12 @@ const SuspectPhotoMarker = memo<{
           // ✅ ÍCONE SIMPLES (24x24)
           <div 
             className={`w-6 h-6 rounded-full border-2 border-white flex items-center justify-center shadow-md ${
-              suspect.status === 'Foragido' ? 'bg-pmmg-red' :
-              suspect.status === 'Suspeito' ? 'bg-pmmg-yellow' : 'bg-pmmg-navy'
+              suspect.status === 'Foragido' ? 'bg-theme-critical' :
+              suspect.status === 'Suspeito' ? 'bg-theme-accent' : 'bg-theme-primary'
             }`}
             title={suspect.name}
           >
-            <span className="material-symbols-outlined text-white text-[14px] fill-icon">
+            <span className={`material-symbols-outlined text-white text-[14px] fill-icon ${suspect.status === 'Suspeito' ? 'text-theme-primary' : 'text-white'}`}>
               {getIconName()}
             </span>
           </div>
@@ -155,7 +155,7 @@ const UserMarkerComponent = memo<{
         className="relative group"
       >
         <div 
-          className="w-8 h-8 bg-pmmg-blue rounded-full border-4 border-white flex items-center justify-center shadow-lg ring-2 ring-pmmg-blue/50"
+          className="w-8 h-8 bg-theme-info rounded-full border-4 border-white flex items-center justify-center shadow-lg ring-2 ring-theme-info/50"
           title="Você (Oficial)"
         >
           <span className="material-symbols-outlined text-white text-[18px]">person</span>
@@ -237,7 +237,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         title: 'Novo Ponto Tático',
         description: 'Detalhes do ponto de interesse.',
         icon: 'flag',
-        color: 'bg-pmmg-gold'
+        color: 'bg-theme-secondary'
       });
       setIsAddingMarker(false);
     }
@@ -327,23 +327,23 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   
   // Lista de status para o filtro da sidebar
   const STATUS_FILTERS: { id: MapFilter, label: string, color: string, icon: string }[] = [
-    { id: 'Foragido', label: 'Foragido', color: 'bg-pmmg-red', icon: 'priority_high' },
-    { id: 'Suspeito', label: 'Suspeito', color: 'bg-pmmg-yellow', icon: 'warning' },
-    { id: 'Preso', label: 'Preso', color: 'bg-pmmg-blue', icon: 'lock' },
+    { id: 'Foragido', label: 'Foragido', color: 'bg-theme-critical', icon: 'priority_high' },
+    { id: 'Suspeito', label: 'Suspeito', color: 'bg-theme-accent', icon: 'warning' },
+    { id: 'Preso', label: 'Preso', color: 'bg-theme-info', icon: 'lock' },
     { id: 'CPF Cancelado', label: 'CPF Cancelado', color: 'bg-slate-700', icon: 'cancel' },
   ];
 
   return (
-    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
-      <header className="sticky top-0 z-[1000] bg-pmmg-navy px-4 py-4 shadow-xl">
+    <div className="flex flex-col h-full bg-theme-background overflow-hidden">
+      <header className="sticky top-0 z-[1000] bg-theme-primary px-4 py-4 shadow-xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 shrink-0 bg-white rounded-full flex items-center justify-center p-1 border-2 border-pmmg-red">
-              <span className="material-symbols-outlined text-pmmg-navy text-xl">map</span>
+            <div className="w-9 h-9 shrink-0 bg-white rounded-full flex items-center justify-center p-1 border-2 border-theme-critical">
+              <span className="material-symbols-outlined text-theme-primary text-xl">map</span>
             </div>
             <div>
               <h1 className="font-bold text-xs leading-none text-white uppercase tracking-tight">Mapa Tático</h1>
-              <p className="text-[9px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">Inteligência Territorial</p>
+              <p className="text-[9px] font-medium text-theme-accent tracking-wider uppercase mt-1">Inteligência Territorial</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -353,7 +353,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                 setNewMarkerData(null); 
                 setEditingMarker(null);
               }}
-              className={`p-2 rounded-full border transition-all ${isAddingMarker ? 'bg-pmmg-red text-white border-pmmg-red shadow-lg' : 'bg-white/10 text-white border-white/20'}`}
+              className={`p-2 rounded-full border transition-all ${isAddingMarker ? 'bg-theme-critical text-white border-theme-critical shadow-lg' : 'bg-white/10 text-white border-white/20'}`}
             >
               <span className="material-symbols-outlined text-lg">add_location_alt</span>
             </button>
@@ -386,7 +386,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               {activeInfoWindow === 'user-pos' && (
                 <InfoWindowF position={userPos} onCloseClick={() => setActiveInfoWindow(null)}>
                   <div className="p-2">
-                    <p className="font-bold text-pmmg-navy text-sm">Você (Oficial)</p>
+                    <p className="font-bold text-theme-primary text-sm">Você (Oficial)</p>
                     <p className="text-[10px] text-slate-500">Localização Atual</p>
                   </div>
                 </InfoWindowF>
@@ -436,23 +436,23 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                             <img src={suspect.photoUrl} className="w-full h-full object-cover" alt={suspect.name} />
                           </div>
                           <div>
-                            <p className="font-bold text-[10px] text-pmmg-navy uppercase leading-tight">{suspect.name}</p>
-                            <p className="text-[9px] text-pmmg-blue font-bold uppercase">{locationType}</p>
+                            <p className="font-bold text-[10px] text-theme-primary uppercase leading-tight">{suspect.name}</p>
+                            <p className="text-[9px] text-theme-info font-bold uppercase">{locationType}</p>
                             <p className="text-[9px] text-slate-500 mt-1">{locationName || 'Local não especificado'}</p>
                           </div>
                         </div>
                         <div className="flex gap-2 mt-3">
                           <button 
                             onClick={() => onOpenProfile(suspect.id)} 
-                            className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider"
+                            className="flex-1 bg-theme-primary text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider"
                           >
                             Ver Ficha
                           </button>
                           <button 
                             onClick={() => handleShareLocation(lat, lng, `${locationType} de ${suspect.name}`)} 
-                            className="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center"
+                            className="px-3 border-2 border-theme-primary/20 rounded-lg flex items-center justify-center"
                           >
-                            <span className="material-symbols-outlined text-pmmg-navy text-lg">share</span>
+                            <span className="material-symbols-outlined text-theme-primary text-lg">share</span>
                           </button>
                         </div>
                       </div>
@@ -480,24 +480,24 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                 {activeInfoWindow === markerId && (
                   <InfoWindowF position={position} onCloseClick={() => setActiveInfoWindow(null)}>
                     <div className="p-2 min-w-[150px]">
-                      <p className="font-bold text-[11px] text-pmmg-navy uppercase leading-tight">{markerData.title}</p>
+                      <p className="font-bold text-[11px] text-theme-primary uppercase leading-tight">{markerData.title}</p>
                       <p className="text-[10px] text-slate-600 mt-1">{markerData.description}</p>
                       <div className="flex gap-2 mt-3">
                         <button 
                           onClick={() => { setEditingMarker(markerData); setActiveInfoWindow(null); }}
-                          className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center"
+                          className="flex-1 bg-theme-primary text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center"
                         >
                           <span className="material-symbols-outlined text-sm">edit</span>
                         </button>
                         <button 
                           onClick={() => handleShareLocation(markerData.lat, markerData.lng, markerData.title)}
-                          className="flex-1 bg-pmmg-blue text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center"
+                          className="flex-1 bg-theme-info text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center"
                         >
                           <span className="material-symbols-outlined text-sm">share</span>
                         </button>
                         <button 
                           onClick={() => handleDeleteMarker(markerData.id)}
-                          className="px-3 bg-pmmg-red text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center"
+                          className="px-3 bg-theme-critical text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center"
                         >
                           <span className="material-symbols-outlined text-sm">delete</span>
                         </button>
@@ -532,13 +532,13 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         {activeMarkerData && (
           <div className="absolute inset-0 z-[1002] bg-black/50 flex items-center justify-center p-4">
             <div className="bg-white p-5 rounded-xl shadow-2xl w-full max-w-sm">
-              <h3 className="text-lg font-bold text-pmmg-navy uppercase mb-4 border-b pb-2">
+              <h3 className="text-lg font-bold text-theme-primary uppercase mb-4 border-b pb-2">
                 {isEditing ? 'Editar Marcador Tático' : 'Configurar Novo Marcador'}
               </h3>
               
               <div className="space-y-3">
                 <div>
-                  <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1">Título</label>
+                  <label className="block text-[10px] font-bold uppercase text-theme-primary/70 mb-1">Título</label>
                   <input 
                     value={activeMarkerData.title}
                     onChange={(e) => {
@@ -553,7 +553,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1">Descrição</label>
+                  <label className="block text-[10px] font-bold uppercase text-theme-primary/70 mb-1">Descrição</label>
                   <textarea 
                     value={activeMarkerData.description}
                     onChange={(e) => {
@@ -569,7 +569,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1">Ícone ({activeMarkerData.icon})</label>
+                  <label className="block text-[10px] font-bold uppercase text-theme-primary/70 mb-1">Ícone ({activeMarkerData.icon})</label>
                   <div className="flex gap-2 overflow-x-auto pb-2">
                     {['flag', 'warning', 'shield', 'camera', 'bolt', 'visibility'].map(icon => (
                       <button 
@@ -581,7 +581,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                             setNewMarkerData(prev => prev ? {...prev, icon} : null);
                           }
                         }}
-                        className={`p-2 rounded-lg border transition-all ${activeMarkerData.icon === icon ? 'bg-pmmg-navy text-pmmg-yellow border-pmmg-yellow' : 'bg-slate-100 text-pmmg-navy/50'}`}
+                        className={`p-2 rounded-lg border transition-all ${activeMarkerData.icon === icon ? 'bg-theme-primary text-theme-accent border-theme-accent' : 'bg-slate-100 text-theme-primary/50'}`}
                       >
                         <span className="material-symbols-outlined text-xl">{icon}</span>
                       </button>
@@ -589,9 +589,9 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1">Cor</label>
+                  <label className="block text-[10px] font-bold uppercase text-theme-primary/70 mb-1">Cor</label>
                   <div className="flex gap-2">
-                    {[{c: 'bg-pmmg-gold', v: 'pmmg-gold'}, {c: 'bg-pmmg-red', v: 'pmmg-red'}, {c: 'bg-pmmg-blue', v: 'pmmg-blue'}, {c: 'bg-green-500', v: 'green-500'}].map(color => (
+                    {[{c: 'bg-theme-secondary', v: 'theme-secondary'}, {c: 'bg-theme-critical', v: 'theme-critical'}, {c: 'bg-theme-info', v: 'theme-info'}, {c: 'bg-green-500', v: 'green-500'}].map(color => (
                       <button 
                         key={color.v}
                         onClick={() => {
@@ -602,7 +602,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                             setNewMarkerData(prev => prev ? {...prev, color: newColor} : null);
                           }
                         }}
-                        className={`w-8 h-8 rounded-full border-2 transition-all ${color.c} ${activeMarkerData.color === `bg-${color.v}` ? 'ring-4 ring-offset-2 ring-pmmg-navy' : 'border-white'}`}
+                        className={`w-8 h-8 rounded-full border-2 transition-all ${color.c} ${activeMarkerData.color === `bg-${color.v}` ? 'ring-4 ring-offset-2 ring-theme-primary' : 'border-white'}`}
                       ></button>
                     ))}
                   </div>
@@ -612,13 +612,13 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               <div className="flex gap-3 mt-6">
                 <button 
                   onClick={handleCancelNewMarker}
-                  className="flex-1 bg-slate-200 text-pmmg-navy font-bold py-3 rounded-xl text-xs uppercase"
+                  className="flex-1 bg-slate-200 text-theme-primary font-bold py-3 rounded-xl text-xs uppercase"
                 >
                   Cancelar
                 </button>
                 <button 
                   onClick={isEditing ? handleSaveEditMarker : handleSaveNewMarker}
-                  className="flex-1 bg-pmmg-navy text-white font-bold py-3 rounded-xl text-xs uppercase"
+                  className="flex-1 bg-theme-primary text-white font-bold py-3 rounded-xl text-xs uppercase"
                 >
                   {isEditing ? 'Salvar Edição' : 'Salvar Ponto'}
                 </button>
@@ -633,7 +633,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           {/* Botão de Toggle (Centralizado Verticalmente) */}
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="absolute left-0 top-1/2 transform -translate-x-full -translate-y-1/2 bg-pmmg-navy p-1.5 rounded-l-xl shadow-xl text-pmmg-yellow"
+            className="absolute left-0 top-1/2 transform -translate-x-full -translate-y-1/2 bg-theme-primary p-1.5 rounded-l-xl shadow-xl text-theme-accent"
           >
             <span className="material-symbols-outlined text-lg">
               {isSidebarOpen ? 'arrow_forward_ios' : 'arrow_back_ios'}
@@ -641,22 +641,22 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           </button>
 
           {/* Conteúdo do Painel */}
-          <div className="bg-white/95 backdrop-blur-md p-3 rounded-l-2xl shadow-2xl border border-pmmg-navy/10 flex flex-col gap-2.5 h-full overflow-y-auto w-64">
-            <p className="text-[8px] font-black text-pmmg-navy/40 uppercase tracking-widest border-b border-pmmg-navy/5 pb-1 mb-1">Legenda Tática</p>
+          <div className="bg-white/95 backdrop-blur-md p-3 rounded-l-2xl shadow-2xl border border-theme-primary/10 flex flex-col gap-2.5 h-full overflow-y-auto w-64">
+            <p className="text-[8px] font-black text-theme-primary/40 uppercase tracking-widest border-b border-theme-primary/5 pb-1 mb-1">Legenda Tática</p>
             
             {/* --- Filtro de Localização --- */}
-            <div className="pt-2 pb-3 border-b border-pmmg-navy/5">
-              <p className="text-[9px] font-black text-pmmg-navy/60 uppercase tracking-wider mb-2">Tipo de Localização</p>
+            <div className="pt-2 pb-3 border-b border-theme-primary/5">
+              <p className="text-[9px] font-black text-theme-primary/60 uppercase tracking-wider mb-2">Tipo de Localização</p>
               <div className="flex gap-2">
                 <button 
                   onClick={() => setLocationFilter('residence')}
-                  className={`flex-1 text-[9px] font-bold uppercase py-1.5 rounded-lg transition-all ${locationFilter === 'residence' ? 'bg-pmmg-navy text-white shadow-md' : 'bg-slate-100 text-pmmg-navy/70'}`}
+                  className={`flex-1 text-[9px] font-bold uppercase py-1.5 rounded-lg transition-all ${locationFilter === 'residence' ? 'bg-theme-primary text-white shadow-md' : 'bg-slate-100 text-theme-primary/70'}`}
                 >
                   <span className="material-symbols-outlined text-sm mr-1">location_on</span> Residência
                 </button>
                 <button 
                   onClick={() => setLocationFilter('approach')}
-                  className={`flex-1 text-[9px] font-bold uppercase py-1.5 rounded-lg transition-all ${locationFilter === 'approach' ? 'bg-pmmg-navy text-white shadow-md' : 'bg-slate-100 text-pmmg-navy/70'}`}
+                  className={`flex-1 text-[9px] font-bold uppercase py-1.5 rounded-lg transition-all ${locationFilter === 'approach' ? 'bg-theme-primary text-white shadow-md' : 'bg-slate-100 text-theme-primary/70'}`}
                 >
                   <span className="material-symbols-outlined text-sm mr-1">pin_drop</span> Abordagem
                 </button>
@@ -664,73 +664,73 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             </div>
             
             {/* --- Filtro de Status --- */}
-            <p className="text-[8px] font-black text-pmmg-navy/40 uppercase tracking-widest border-b border-pmmg-navy/5 pb-1 mb-1 pt-2">Filtro por Status</p>
+            <p className="text-[8px] font-black text-theme-primary/40 uppercase tracking-widest border-b border-theme-primary/5 pb-1 mb-1 pt-2">Filtro por Status</p>
 
             <button 
               onClick={() => setActiveFilter('Todos')}
-              className={`flex items-center gap-2 w-full text-left p-1 rounded transition-colors ${activeFilter === 'Todos' ? 'bg-pmmg-navy/10' : 'hover:bg-slate-50'}`}
+              className={`flex items-center gap-2 w-full text-left p-1 rounded transition-colors ${activeFilter === 'Todos' ? 'bg-theme-primary/10' : 'hover:bg-slate-50'}`}
             >
-               <div className={`w-4 h-4 rounded-full bg-pmmg-navy flex items-center justify-center shadow-sm`}>
+               <div className={`w-4 h-4 rounded-full bg-theme-primary flex items-center justify-center shadow-sm`}>
                  <span className="material-symbols-outlined text-white text-[10px] fill-icon">done_all</span>
                </div>
-               <span className="text-[9px] font-bold text-pmmg-navy uppercase">Todos os Suspeitos ({suspects.length})</span>
+               <span className="text-[9px] font-bold text-theme-primary uppercase">Todos os Suspeitos ({suspects.length})</span>
             </button>
 
             {STATUS_FILTERS.map(filter => (
               <button 
                 key={filter.id}
                 onClick={() => setActiveFilter(filter.id)}
-                className={`flex items-center gap-2 w-full text-left p-1 rounded transition-colors ${activeFilter === filter.id ? 'bg-pmmg-navy/10' : 'hover:bg-slate-50'}`}
+                className={`flex items-center gap-2 w-full text-left p-1 rounded transition-colors ${activeFilter === filter.id ? 'bg-theme-primary/10' : 'hover:bg-slate-50'}`}
               >
                 <div className={`w-4 h-4 ${usePhotoMarker ? 'rounded-md border-2 bg-slate-300' : 'rounded-full flex items-center justify-center'} ${filter.color} border-white shadow-sm`}>
-                  {!usePhotoMarker && <span className={`material-symbols-outlined text-[10px] fill-icon ${filter.id === 'Suspeito' ? 'text-pmmg-navy' : 'text-white'}`}>{filter.icon}</span>}
+                  {!usePhotoMarker && <span className={`material-symbols-outlined text-[10px] fill-icon ${filter.id === 'Suspeito' ? 'text-theme-primary' : 'text-white'}`}>{filter.icon}</span>}
                 </div>
-                <span className="text-[9px] font-bold text-pmmg-navy uppercase">{filter.label}</span>
+                <span className="text-[9px] font-bold text-theme-primary uppercase">{filter.label}</span>
               </button>
             ))}
             
             {/* Oficial */}
-            <div className="flex items-center gap-2 pt-2 border-t border-pmmg-navy/5">
-               <div className="w-3.5 h-3.5 bg-pmmg-blue rounded-full border-2 border-white shadow-sm ring-1 ring-pmmg-blue/50"></div>
-               <span className="text-[9px] font-bold text-pmmg-navy uppercase">Oficial (Você)</span>
+            <div className="flex items-center gap-2 pt-2 border-t border-theme-primary/5">
+               <div className="w-3.5 h-3.5 bg-theme-info rounded-full border-2 border-white shadow-sm ring-1 ring-theme-info/50"></div>
+               <span className="text-[9px] font-bold text-theme-primary uppercase">Oficial (Você)</span>
             </div>
             
             {/* Ponto Tático */}
             <div className="flex items-center gap-2">
-               <div className="w-3.5 h-3.5 bg-pmmg-gold rounded-full border-2 border-white shadow-sm ring-1 ring-pmmg-gold/30"></div>
-               <span className="text-[9px] font-bold text-pmmg-navy uppercase">Ponto Tático</span>
+               <div className="w-3.5 h-3.5 bg-theme-secondary rounded-full border-2 border-white shadow-sm ring-1 ring-theme-secondary/30"></div>
+               <span className="text-[9px] font-bold text-theme-primary uppercase">Ponto Tático</span>
             </div>
             
             {activeFilter !== 'Todos' && (
               <button 
                 onClick={() => setActiveFilter('Todos')}
-                className="mt-2 text-[8px] font-black text-pmmg-red uppercase border-t border-pmmg-navy/5 pt-2 text-left"
+                className="mt-2 text-[8px] font-black text-theme-critical uppercase border-t border-theme-primary/5 pt-2 text-left"
               >
                 Limpar Filtros ({activeFilter})
               </button>
             )}
 
             {/* --- Opções de Camadas (Implementado) --- */}
-            <div className="mt-4 pt-4 border-t border-pmmg-navy/5">
-              <p className="text-[8px] font-black text-pmmg-navy/40 uppercase tracking-widest mb-2">Visualização de Camadas</p>
+            <div className="mt-4 pt-4 border-t border-theme-primary/5">
+              <p className="text-[8px] font-black text-theme-primary/40 uppercase tracking-widest mb-2">Visualização de Camadas</p>
               
               <button 
                 onClick={() => setMapType('roadmap')}
-                className={`w-full text-left text-[10px] font-bold uppercase py-1.5 px-2 rounded transition-colors flex items-center gap-1 ${mapType === 'roadmap' ? 'bg-pmmg-navy text-white' : 'text-pmmg-navy/70 hover:bg-pmmg-navy/5'}`}
+                className={`w-full text-left text-[10px] font-bold uppercase py-1.5 px-2 rounded transition-colors flex items-center gap-1 ${mapType === 'roadmap' ? 'bg-theme-primary text-white' : 'text-theme-primary/70 hover:bg-theme-primary/5'}`}
               >
                 <span className="material-symbols-outlined text-sm">map</span> Visualização Padrão
               </button>
               
               <button 
                 onClick={() => setMapType('satellite')}
-                className={`w-full text-left text-[10px] font-bold uppercase py-1.5 px-2 rounded transition-colors flex items-center gap-1 ${mapType === 'satellite' ? 'bg-pmmg-navy text-white' : 'text-pmmg-navy/70 hover:bg-pmmg-navy/5'}`}
+                className={`w-full text-left text-[10px] font-bold uppercase py-1.5 px-2 rounded transition-colors flex items-center gap-1 ${mapType === 'satellite' ? 'bg-theme-primary text-white' : 'text-theme-primary/70 hover:bg-theme-primary/5'}`}
               >
                 <span className="material-symbols-outlined text-sm">satellite</span> Visualização Satélite
               </button>
               
               <button 
                 onClick={() => setMapType('hybrid')}
-                className={`w-full text-left text-[10px] font-bold uppercase py-1.5 px-2 rounded transition-colors flex items-center gap-1 ${mapType === 'hybrid' ? 'bg-pmmg-navy text-white' : 'text-pmmg-navy/70 hover:bg-pmmg-navy/5'}`}
+                className={`w-full text-left text-[10px] font-bold uppercase py-1.5 px-2 rounded transition-colors flex items-center gap-1 ${mapType === 'hybrid' ? 'bg-theme-primary text-white' : 'text-theme-primary/70 hover:bg-theme-primary/5'}`}
               >
                 <span className="material-symbols-outlined text-sm">layers</span> Visualização Híbrida
               </button>

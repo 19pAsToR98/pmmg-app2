@@ -38,16 +38,16 @@ const GroupsList: React.FC<GroupsListProps> = ({ navigateTo, userGroups, officer
   };
 
   return (
-    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
-      <header className="sticky top-0 z-50 bg-pmmg-navy text-white shadow-xl px-4 py-4 shrink-0">
+    <div className="flex flex-col h-full bg-theme-background overflow-hidden">
+      <header className="sticky top-0 z-50 bg-theme-primary text-white shadow-xl px-4 py-4 shrink-0">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 shrink-0 bg-white rounded-full flex items-center justify-center p-1.5 border-2 border-pmmg-red shadow-inner">
-              <span className="material-symbols-outlined text-pmmg-navy text-xl">folder_shared</span>
+            <div className="w-10 h-10 shrink-0 bg-white rounded-full flex items-center justify-center p-1.5 border-2 border-theme-critical shadow-inner">
+              <span className="material-symbols-outlined text-theme-primary text-xl">folder_shared</span>
             </div>
             <div>
               <h1 className="font-bold text-sm leading-none uppercase tracking-widest">Inteligência</h1>
-              <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">Grupos de Monitoramento</p>
+              <p className="text-[10px] font-medium text-theme-accent tracking-wider uppercase mt-1">Grupos de Monitoramento</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -59,7 +59,7 @@ const GroupsList: React.FC<GroupsListProps> = ({ navigateTo, userGroups, officer
             >
               <span className="material-symbols-outlined text-2xl">person_add</span>
               {pendingRequestsCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-pmmg-red text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-pmmg-navy">
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-theme-critical text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-theme-primary">
                   {pendingRequestsCount}
                 </span>
               )}
@@ -67,7 +67,7 @@ const GroupsList: React.FC<GroupsListProps> = ({ navigateTo, userGroups, officer
             {/* Botão para Criar Grupo */}
             <button 
               onClick={() => navigateTo('groupCreation')}
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-pmmg-yellow text-pmmg-navy shadow-lg active:scale-95 transition-transform"
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-theme-accent text-theme-primary shadow-lg active:scale-95 transition-transform"
               title="Criar Novo Grupo"
             >
               <span className="material-symbols-outlined text-2xl font-bold">add</span>
@@ -82,12 +82,12 @@ const GroupsList: React.FC<GroupsListProps> = ({ navigateTo, userGroups, officer
                value={inviteCode}
                onChange={(e) => setInviteCode(e.target.value)}
                placeholder="CÓDIGO DE CONVITE"
-               className="w-full bg-white/5 border-none rounded-xl py-2 pl-9 pr-3 text-[10px] font-black text-white placeholder:text-white/20 focus:ring-1 focus:ring-pmmg-yellow"
+               className="w-full bg-white/5 border-none rounded-xl py-2 pl-9 pr-3 text-[10px] font-black text-white placeholder:text-white/20 focus:ring-1 focus:ring-theme-accent"
              />
            </div>
            <button 
              onClick={() => alert(`Tentando entrar no grupo com código: ${inviteCode}`)}
-             className="bg-pmmg-yellow text-pmmg-navy px-4 py-2 rounded-xl text-[9px] font-black uppercase shadow-md active:scale-95 transition-transform"
+             className="bg-theme-accent text-theme-primary px-4 py-2 rounded-xl text-[9px] font-black uppercase shadow-md active:scale-95 transition-transform"
            >
              Entrar
            </button>
@@ -96,8 +96,8 @@ const GroupsList: React.FC<GroupsListProps> = ({ navigateTo, userGroups, officer
 
       <main className="flex-1 overflow-y-auto pb-40 no-scrollbar px-4 pt-4">
         <div className="flex items-center gap-2 mb-4 px-1">
-          <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
-          <h3 className="text-[10px] font-black text-pmmg-navy/60 uppercase tracking-widest">Meus Grupos de Operação</h3>
+          <div className="h-4 w-1 bg-theme-primary rounded-full"></div>
+          <h3 className="text-[10px] font-black text-theme-primary/60 uppercase tracking-widest">Meus Grupos de Operação</h3>
         </div>
 
         <div className="space-y-4">
@@ -107,16 +107,16 @@ const GroupsList: React.FC<GroupsListProps> = ({ navigateTo, userGroups, officer
               <div 
                 key={group.id}
                 onClick={() => openGroup(group.id)}
-                className="pmmg-card p-4 flex flex-col gap-3 active:scale-[0.98] transition-all shadow-md border-l-4 border-l-pmmg-navy"
+                className="pmmg-card p-4 flex flex-col gap-3 active:scale-[0.98] transition-all shadow-md border-l-4 border-l-theme-primary"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-pmmg-navy/5 flex items-center justify-center text-pmmg-navy">
+                    <div className="w-12 h-12 rounded-xl bg-theme-primary/5 flex items-center justify-center text-theme-primary">
                       <span className="material-symbols-outlined text-3xl">folder_shared</span>
                     </div>
                     <div>
-                      <h4 className="text-sm font-black text-pmmg-navy uppercase leading-none">{group.name}</h4>
-                      <p className="text-[9px] text-pmmg-navy/40 font-bold uppercase mt-1 tracking-wider">{members.length} membros ativos</p>
+                      <h4 className="text-sm font-black text-theme-primary uppercase leading-none">{group.name}</h4>
+                      <p className="text-[9px] text-theme-primary/40 font-bold uppercase mt-1 tracking-wider">{members.length} membros ativos</p>
                     </div>
                   </div>
                   <span className="material-symbols-outlined text-slate-300">chevron_right</span>
@@ -129,7 +129,7 @@ const GroupsList: React.FC<GroupsListProps> = ({ navigateTo, userGroups, officer
                 <div className="flex items-center justify-between pt-2 border-t border-slate-100">
                   <div className="flex -space-x-2">
                     {members.slice(0, 3).map((m, i) => (
-                      <div key={i} className="w-7 h-7 rounded-full bg-pmmg-navy text-pmmg-yellow text-[8px] font-black flex items-center justify-center border-2 border-white shadow-sm ring-1 ring-black/5 uppercase">
+                      <div key={i} className="w-7 h-7 rounded-full bg-theme-primary text-theme-accent text-[8px] font-black flex items-center justify-center border-2 border-white shadow-sm ring-1 ring-black/5 uppercase">
                         {m.name.charAt(0)}
                       </div>
                     ))}
@@ -139,7 +139,7 @@ const GroupsList: React.FC<GroupsListProps> = ({ navigateTo, userGroups, officer
                       </div>
                     )}
                   </div>
-                  <div className="bg-pmmg-navy/5 px-2 py-1 rounded text-[8px] font-black text-pmmg-navy/60 uppercase tracking-widest border border-pmmg-navy/5">
+                  <div className="bg-theme-primary/5 px-2 py-1 rounded text-[8px] font-black text-theme-primary/60 uppercase tracking-widest border border-theme-primary/5">
                     {group.posts.length} FICHAS COMPARTILHADAS
                   </div>
                 </div>
