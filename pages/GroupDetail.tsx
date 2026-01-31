@@ -31,13 +31,19 @@ interface GroupDetailProps {
   allSuspects: Suspect[]; 
   onOpenProfile: (id: string) => void;
   onShareSuspect: (groupId: string, suspectId: string, observation: string) => void;
+  // Novas props para gerenciamento (simuladas no App.tsx)
+  onUpdateGroup: (updatedGroup: Group) => void;
+  onDeleteGroup: (groupId: string) => void;
 }
 
 type PostFilterStatus = Suspect['status'] | 'Todos';
 const STATUS_OPTIONS: PostFilterStatus[] = ['Todos', 'Foragido', 'Suspeito', 'Preso', 'CPF Cancelado'];
 
+// Mock User ID (assuming 'EU' is the current user)
+const CURRENT_USER_ID = 'EU';
 
-const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspects, onOpenProfile, onShareSuspect }) => {
+
+const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspects, onOpenProfile, onShareSuspect, onUpdateGroup, onDeleteGroup }) => {
   const [activeTab, setActiveTab] = useState<'timeline' | 'members'>('timeline');
   const [viewMode, setViewMode] = useState<'list' | 'gallery'>('list');
   const [showShareModal, setShowShareModal] = useState(false);
@@ -45,21 +51,32 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
   const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null);
   const [observation, setObservation] = useState('');
   
-  // NOVO ESTADO: Pesquisa de Membros
+  // Gerenciamento de Grupo
+  const [showMenu, setShowMenu] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [editName, setEditName] = useState(group.name);
+  const [editDescription, setEditDescription] = useState(group.description);
+  
+  // Estados para filtros
   const [memberSearchQuery, setMemberSearchQuery] = useState('');
-
-  // Estados para filtros da Timeline
   const [postSearchQuery, setPostSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<PostFilterStatus>('Todos');
   const [selectedMemberFilterId, setSelectedMemberFilterId] = useState<string | null>(null); 
   const [showTimelineFilters, setShowTimelineFilters] = useState(false);
   const timelineFilterRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
-  // Fechar menu de filtro ao clicar fora
+  const isCurrentUserAdmin = group.adminIds.includes(CURRENT_USER_ID);
+
+  // Fechar menus ao clicar fora
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (timelineFilterRef.current && !timelineFilterRef.current.contains(event.target as Node)) {
         setShowTimelineFilters(false);
+      }
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMenu(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -140,6 +157,84 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
   
   const isFilterActive = postSearchQuery || statusFilter !== 'Todos' || selectedMemberFilterId !== null;
   const activeMemberFilter = group.members.find(m => m.id === selectedMemberFilterId);
+  
+  // --- Gerenciamento de Grupo Handlers ---
+  
+  const handleSaveGroupEdit = () => {
+    if (!editName.trim() || !editDescription.trim()) {
+      alert("Nome e descrição são obrigatórios.");
+      return;
+    }
+    
+    const updatedGroup: Group = {
+      ...group,
+      name: editName.trim(),
+      description: editDescription.trim(),
+      // Mantemos posts, members, etc., pois a edição é apenas de metadados
+    };
+    
+    onUpdateGroup(updatedGroup);
+    setShowEditModal(false);
+    alert("Grupo atualizado com sucesso!");
+  };
+  
+  const handleDeleteGroup = () => {
+    onDeleteGroup(group.id);
+    setShowDeleteConfirm(false);
+    navigateTo('groupsList');
+    alert(`Grupo ${group.name} excluído.`);
+  };
+  
+  const handlePromoteMember = (memberId: string, memberName: string) => {
+    if (!isCurrentUserAdmin) return;
+    
+    if (window.confirm(`Tem certeza que deseja promover ${memberName} a Administrador?`)) {
+      const updatedGroup: Group = {
+        ...group,
+        adminIds: [...new Set([...group.adminIds, memberId])], // Adiciona o ID se ainda não estiver lá
+      };
+      onUpdateGroup(updatedGroup);
+      alert(`${memberName} promovido a administrador.`);
+    }
+  };
+  
+  const handleDemoteMember = (memberId: string, memberName: string) => {
+    if (!isCurrentUserAdmin) return;
+    
+    if (group.adminIds.length === 1) {
+      alert("Não é possível remover o único administrador do grupo.");
+      return;
+    }
+    
+    if (window.confirm(`Tem certeza que deseja rebaixar ${memberName} para Membro?`)) {
+      const updatedGroup: Group = {
+        ...group,
+        adminIds: group.adminIds.filter(id => id !== memberId),
+      };
+      onUpdateGroup(updatedGroup);
+      alert(`${memberName} rebaixado para membro.`);
+    }
+  };
+  
+  const handleRemoveMember = (memberId: string, memberName: string) => {
+    if (!isCurrentUserAdmin) return;
+    
+    if (memberId === CURRENT_USER_ID) {
+      alert("Você não pode se remover desta tela. Use a opção 'Sair do Grupo'.");
+      return;
+    }
+    
+    if (window.confirm(`Tem certeza que deseja remover ${memberName} do grupo?`)) {
+      const updatedGroup: Group = {
+        ...group,
+        memberIds: group.memberIds.filter(id => id !== memberId),
+        adminIds: group.adminIds.filter(id => id !== memberId), // Remove de admin também
+      };
+      onUpdateGroup(updatedGroup);
+      alert(`${memberName} removido do grupo.`);
+    }
+  };
+
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden relative">
@@ -152,17 +247,60 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
             <h1 className="font-black text-sm text-white leading-tight uppercase tracking-tight truncate">{group.name}</h1>
             <p className="text-[10px] font-bold text-pmmg-yellow tracking-wider uppercase mt-0.5">Código: {group.inviteCode}</p>
           </div>
-          <button 
-            onClick={() => {
-              setSelectedSuspectId(null); // Reset selection
-              setObservation('');
-              setShowShareModal(true);
-            }}
-            className="bg-pmmg-yellow text-pmmg-navy px-3 py-2 rounded-xl text-[9px] font-black uppercase shadow-lg flex items-center gap-2 active:scale-95 transition-transform shrink-0"
-          >
-            <span className="material-symbols-outlined text-sm font-bold">share</span>
-            Postar
-          </button>
+          
+          <div className="flex items-center gap-2">
+            {/* Botão de Postar */}
+            <button 
+              onClick={() => {
+                setSelectedSuspectId(null); // Reset selection
+                setObservation('');
+                setShowShareModal(true);
+              }}
+              className="bg-pmmg-yellow text-pmmg-navy px-3 py-2 rounded-xl text-[9px] font-black uppercase shadow-lg flex items-center gap-2 active:scale-95 transition-transform shrink-0"
+            >
+              <span className="material-symbols-outlined text-sm font-bold">share</span>
+              Postar
+            </button>
+            
+            {/* Menu de Opções (Apenas para Admins) */}
+            {isCurrentUserAdmin && (
+              <div className="relative shrink-0">
+                <button 
+                  onClick={() => setShowMenu(prev => !prev)}
+                  className="w-10 h-10 bg-white/10 text-white rounded-xl flex items-center justify-center active:scale-95 transition-transform"
+                >
+                  <span className="material-symbols-outlined text-xl">more_vert</span>
+                </button>
+                
+                {showMenu && (
+                  <div 
+                    ref={menuRef}
+                    className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-pmmg-navy/10 z-[100] p-2 animate-in fade-in slide-in-from-top-2 duration-200"
+                  >
+                    <button 
+                      onClick={() => { setShowEditModal(true); setShowMenu(false); }}
+                      className="flex items-center gap-2 w-full p-2 text-sm text-pmmg-navy hover:bg-slate-100 rounded-lg"
+                    >
+                      <span className="material-symbols-outlined text-lg">edit</span> Editar Grupo
+                    </button>
+                    <button 
+                      onClick={() => { setShowDeleteConfirm(true); setShowMenu(false); }}
+                      className="flex items-center gap-2 w-full p-2 text-sm text-pmmg-red hover:bg-red-50 rounded-lg"
+                    >
+                      <span className="material-symbols-outlined text-lg">delete</span> Excluir Grupo
+                    </button>
+                    <div className="h-px bg-slate-100 my-1"></div>
+                    <button 
+                      onClick={() => { alert('Saindo do grupo...'); navigateTo('groupsList'); }}
+                      className="flex items-center gap-2 w-full p-2 text-sm text-slate-500 hover:bg-slate-100 rounded-lg"
+                    >
+                      <span className="material-symbols-outlined text-lg">logout</span> Sair do Grupo
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex gap-2 p-1 bg-black/20 rounded-2xl">
@@ -401,7 +539,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
               </button>
             </div>
             
-            {/* NOVO: Campo de Pesquisa de Membros */}
+            {/* Campo de Pesquisa de Membros */}
             <div className="relative mb-4">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-pmmg-navy/30 text-lg">search</span>
               <input 
@@ -415,10 +553,12 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
             {filteredMembers.length > 0 ? filteredMembers.map(member => (
               <div 
                 key={member.id} 
-                onClick={() => handleFilterByMember(member.id)} // NOVO: Clique para filtrar
-                className="pmmg-card p-3 flex items-center justify-between shadow-sm border-l-4 border-l-pmmg-navy cursor-pointer active:scale-[0.99] transition-transform"
+                className="pmmg-card p-3 flex items-center justify-between shadow-sm border-l-4 border-l-pmmg-navy"
               >
-                <div className="flex items-center gap-3">
+                <div 
+                  onClick={() => handleFilterByMember(member.id)}
+                  className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer active:scale-[0.99] transition-transform"
+                >
                   <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-300 shrink-0">
                     <img src={member.photoUrl} alt={member.name} className="w-full h-full object-cover" />
                   </div>
@@ -429,17 +569,41 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    {member.role !== 'admin' && (
+                
+                {/* Ações de Gerenciamento (Apenas para Admins) */}
+                {isCurrentUserAdmin && member.id !== CURRENT_USER_ID && (
+                  <div className="flex items-center gap-2 shrink-0">
+                    {member.isAdmin ? (
                       <button 
-                        onClick={(e) => { e.stopPropagation(); alert(`Removendo ${member.name}`); }}
-                        className="text-pmmg-red/40 hover:text-pmmg-red active:scale-90 transition-transform p-1"
+                        onClick={() => handleDemoteMember(member.id, member.name)}
+                        className="text-pmmg-yellow/80 hover:text-pmmg-yellow active:scale-90 transition-transform p-1"
+                        title="Rebaixar para Membro"
                       >
-                        <span className="material-symbols-outlined text-xl">person_remove</span>
+                        <span className="material-symbols-outlined text-xl fill-icon">star_half</span>
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={() => handlePromoteMember(member.id, member.name)}
+                        className="text-green-600/80 hover:text-green-600 active:scale-90 transition-transform p-1"
+                        title="Promover a Admin"
+                      >
+                        <span className="material-symbols-outlined text-xl">star</span>
                       </button>
                     )}
+                    <button 
+                      onClick={() => handleRemoveMember(member.id, member.name)}
+                      className="text-pmmg-red/40 hover:text-pmmg-red active:scale-90 transition-transform p-1"
+                      title="Remover do Grupo"
+                    >
+                      <span className="material-symbols-outlined text-xl">person_remove</span>
+                    </button>
+                  </div>
+                )}
+                
+                {/* Ícone de navegação (se não for admin ou se for o próprio usuário) */}
+                {(!isCurrentUserAdmin || member.id === CURRENT_USER_ID) && (
                     <span className="material-symbols-outlined text-pmmg-navy/40 text-lg shrink-0">arrow_forward_ios</span>
-                </div>
+                )}
               </div>
             )) : (
               <div className="text-center py-10 opacity-40">
@@ -451,7 +615,78 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
         )}
       </main>
 
-      {/* Share Suspect Modal */}
+      {/* MODAL: Editar Grupo */}
+      {showEditModal && (
+        <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4 bg-pmmg-navy/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6">
+            <h3 className="text-lg font-black text-pmmg-navy uppercase mb-4 border-b pb-2">Editar Grupo</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Nome do Grupo</label>
+                <input 
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+                  type="text" 
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Descrição Tática</label>
+                <textarea 
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  rows={3}
+                  className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button 
+                onClick={() => setShowEditModal(false)}
+                className="flex-1 bg-slate-200 text-pmmg-navy font-bold py-3 rounded-xl text-xs uppercase"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={handleSaveGroupEdit}
+                className="flex-1 bg-pmmg-navy text-white font-bold py-3 rounded-xl text-xs uppercase"
+              >
+                Salvar Alterações
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* MODAL: Confirmação de Exclusão */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4 bg-pmmg-navy/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 text-center">
+            <span className="material-symbols-outlined text-pmmg-red text-5xl mb-4 fill-icon">warning</span>
+            <h3 className="text-lg font-black text-pmmg-navy uppercase mb-2">Excluir Grupo?</h3>
+            <p className="text-sm text-slate-600 mb-6">Esta ação é irreversível e removerá todos os dados e posts do grupo "{group.name}".</p>
+            
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 bg-slate-200 text-pmmg-navy font-bold py-3 rounded-xl text-xs uppercase"
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={handleDeleteGroup}
+                className="flex-1 bg-pmmg-red text-white font-bold py-3 rounded-xl text-xs uppercase"
+              >
+                Confirmar Exclusão
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Share Suspect Modal (Mantido) */}
       {showShareModal && (
         <div className="fixed inset-0 z-[1000] flex items-end justify-center p-4 bg-pmmg-navy/80 backdrop-blur-md animate-in fade-in slide-in-from-bottom-10 duration-300">
           <div className="bg-white w-full max-w-sm rounded-[3rem] shadow-2xl p-6 flex flex-col max-h-[90vh]">

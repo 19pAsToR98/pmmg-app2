@@ -282,6 +282,15 @@ const App: React.FC = () => {
     alert(`Grupo ${newGroup.name} criado com sucesso! Convites enviados.`);
   };
   
+  const handleUpdateGroup = (updatedGroup: Group) => {
+    setGroups(prev => prev.map(g => g.id === updatedGroup.id ? updatedGroup : g));
+  };
+  
+  const handleDeleteGroup = (groupId: string) => {
+    setGroups(prev => prev.filter(g => g.id !== groupId));
+    setActiveGroupId(null);
+  };
+  
   const handleShareSuspect = (groupId: string, suspectId: string, observation: string) => {
     const newPost: GroupPost = {
       id: `p${Date.now()}`,
@@ -521,6 +530,8 @@ const App: React.FC = () => {
           allSuspects={suspects}
           onOpenProfile={openProfile}
           onShareSuspect={handleShareSuspect}
+          onUpdateGroup={handleUpdateGroup}
+          onDeleteGroup={handleDeleteGroup}
         />
       )}
       
