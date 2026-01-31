@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Screen, UserRank, UserAvatar } from '../types';
+import { Screen, UserRank, UserAvatar, Institution } from '../types';
 import RankBadge from '../components/RankBadge';
 import GoogleMapWrapper from '../components/GoogleMapWrapper';
 import { MarkerF } from '@react-google-maps/api';
 import { ICON_PATHS } from '../utils/iconPaths';
 
 interface OnboardingSetupProps {
-  onComplete: (name: string, rank: UserRank, city: string, avatar: UserAvatar) => void;
+  onComplete: (name: string, rank: UserRank, city: string, avatar: UserAvatar, institution: Institution) => void;
 }
 
 const RANKS: UserRank[] = ['Soldado', 'Cabo', '3º Sargento', '2º Sargento', '1º Sargento', 'Subtenente'];
@@ -18,6 +18,15 @@ const MOCK_CITIES = [
   { name: 'Uberlândia', lat: -18.9183, lng: -48.2750 },
   { name: 'Juiz de Fora', lat: -21.7639, lng: -43.3400 },
   { name: 'Montes Claros', lat: -16.7342, lng: -43.8611 },
+  // Adicionando cidades de SP para PMESP
+  { name: 'São Paulo', lat: -23.5505, lng: -46.6333 },
+  { name: 'Campinas', lat: -22.9056, lng: -47.0608 },
+];
+
+// NEW: Institution options
+const INSTITUTION_OPTIONS: { id: Institution, name: string, logo: string }[] = [
+  { id: 'PMMG', name: 'Polícia Militar de Minas Gerais', logo: 'brasoes/pmmg.png' },
+  { id: 'PMESP', name: 'Polícia Militar do Estado de São Paulo', logo: 'brasoes/pmesp.png' },
 ];
 
 // NEW: Avatar options (Masculino agora é o primeiro)
@@ -29,6 +38,7 @@ const AVATAR_OPTIONS: { gender: 'Masculino' | 'Feminino', avatar: UserAvatar }[]
 
 const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
   const [step, setStep] = useState(1);
+  const [institution, setInstitution] = useState<Institution>('PMMG'); // NEW STATE
   const [name, setName] = useState('');
   const [rank, setRank] = useState<UserRank>('Soldado'); // Padrão: Soldado
   const [city, setCity] = useState('');
@@ -51,7 +61,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
 
 
   const handleCitySearchChange = (term: string) => {
-    setCitySearchTerm(term);
+    setSearchTerm(term);
     if (term.length > 1) {
       const filtered = MOCK_CITIES.filter(c => 
         c.name.toLowerCase().includes(term.toLowerCase())
@@ -65,27 +75,27 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
   const handleSelectCity = (location: { lat: number, lng: number, name: string }) => {
     setSelectedLocation(location);
     setCity(location.name);
-    setCitySearchTerm('');
+    setSearchTerm('');
     setCitySuggestions([]);
   };
 
   // --- Navigation Logic ---
 
   const handleNext = () => {
-    if (step === 1 && !name.trim()) {
+    if (step === 2 && !name.trim()) { // Step 2 is now Name
       alert("Por favor, insira seu nome completo.");
       return;
     }
-    if (step === 3 && !city.trim()) {
+    if (step === 4 && !city.trim()) { // Step 4 is now City
       alert("Por favor, selecione sua cidade padrão.");
       return;
     }
     
-    if (step < 4) { 
+    if (step < 5) { // 5 steps total
       setStep(step + 1);
     } else {
       // Final Step
-      onComplete(name.trim(), rank, city.trim(), selectedAvatar); 
+      onComplete(name.trim(), rank, city.trim(), selectedAvatar, institution); // Pass institution
     }
   };
 
@@ -127,7 +137,41 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
 
   const renderStepContent = () => {
     switch (step) {
-      case 1:
+      case 1: // NEW STEP: Institution Selection
+        const currentInstitution = INSTITUTION_OPTIONS.find(i => i.id === institution);
+        return (
+          <div className="space-y-6">
+            <h2 className="text-xl font-bold text-pmmg-navy uppercase tracking-tight">Instituição Militar</h2>
+            <p className="text-sm text-slate-600">Selecione a corporação à qual você pertence.</p>
+            
+            <div className="flex overflow-x-auto gap-6 pb-4 no-scrollbar justify-start">
+              {INSTITUTION_OPTIONS.map((inst) => (
+                <button
+                  key={inst.id}
+                  onClick={() => setInstitution(inst.id)}
+                  className={`flex flex-col items-center gap-3 shrink-0 transition-all p-4 rounded-xl border-4 w-40 ${
+                    institution === inst.id 
+                      ? 'bg-white border-pmmg-navy shadow-xl scale-105' 
+                      : 'bg-white/50 border-transparent opacity-70'
+                  }`}
+                >
+                  <div className="w-24 h-24 rounded-full overflow-hidden bg-slate-100 flex items-center justify-center p-2">
+                    <img src={inst.logo} alt={inst.name} className="w-full h-full object-contain" />
+                  </div>
+                  <span className={`text-[10px] font-black uppercase text-center leading-tight ${institution === inst.id ? 'text-pmmg-navy' : 'text-slate-500'}`}>
+                    {inst.id}
+                  </span>
+                </button>
+              ))}
+            </div>
+            
+            <div className="text-center pt-2">
+              <p className="text-pmmg-navy font-bold uppercase text-sm">Instituição Selecionada:</p>
+              <p className="text-pmmg-red font-black text-lg mt-1">{currentInstitution?.name}</p>
+            </div>
+          </div>
+        );
+      case 2: // Old Step 1: Name
         return (
           <div className="space-y-6">
             <h2 className="text-xl font-bold text-pmmg-navy uppercase tracking-tight">Identificação Pessoal</h2>
@@ -144,7 +188,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
             </div>
           </div>
         );
-      case 2:
+      case 3: // Old Step 2: Rank
         return (
           <div className="space-y-6">
             <h2 className="text-xl font-bold text-pmmg-navy uppercase tracking-tight">Graduação Militar</h2>
@@ -174,19 +218,19 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
             </div>
           </div>
         );
-      case 3:
+      case 4: // Old Step 3: City
         return (
           <div className="space-y-4">
             <h2 className="text-xl font-bold text-pmmg-navy uppercase tracking-tight">Cidade Padrão</h2>
             <p className="text-sm text-slate-600">Defina sua cidade de atuação principal para otimizar alertas e mapas.</p>
             
             <div className="relative">
-              <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Buscar Cidade em MG</label>
+              <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Buscar Cidade em MG/SP</label>
               <input 
                 value={citySearchTerm}
                 onChange={(e) => handleCitySearchChange(e.target.value)}
                 className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
-                placeholder="Ex: Belo Horizonte" 
+                placeholder="Ex: Belo Horizonte ou São Paulo" 
                 type="text" 
               />
               
@@ -237,7 +281,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
             )}
           </div>
         );
-      case 4: // NEW STEP: Avatar Selection (Slider)
+      case 5: // Old Step 4: Avatar Selection (Slider)
         const currentOption = AVATAR_OPTIONS[selectedAvatarIndex];
         
         return (
@@ -307,14 +351,14 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
           </div>
           <div>
             <h1 className="font-bold text-sm leading-none text-white uppercase tracking-tight">Configuração Inicial</h1>
-            <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">Passo {step} de 4</p>
+            <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">Passo {step} de 5</p>
           </div>
         </div>
       </header>
 
       <main className="flex-1 overflow-y-auto pb-24 no-scrollbar px-4 pt-6">
         {/* Aplicando fundo branco sólido ao container principal do passo 4 */}
-        <div className={`rounded-xl shadow-md p-6 ${step === 4 ? 'bg-white' : 'pmmg-card'}`}>
+        <div className={`rounded-xl shadow-md p-6 ${step === 5 ? 'bg-white' : 'pmmg-card'}`}>
           {renderStepContent()}
         </div>
       </main>
@@ -332,7 +376,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
             onClick={handleNext}
             className="flex-[3] bg-pmmg-navy text-white font-bold py-3 rounded-xl text-xs uppercase flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
           >
-            {step === 4 ? (
+            {step === 5 ? (
               <>
                 <span className="material-symbols-outlined text-pmmg-yellow">check_circle</span>
                 Concluir Configuração

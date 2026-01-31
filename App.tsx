@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Screen, Suspect, UserRank, CustomMarker, Officer, Contact, ContactStatus, UserAvatar, Group, GroupPost, GroupParticipant } from './types';
+import { Screen, Suspect, UserRank, CustomMarker, Officer, Contact, ContactStatus, UserAvatar, Group, GroupPost, GroupParticipant, Institution } from './types';
 import WelcomeScreen from './pages/WelcomeScreen'; // Renomeado
 import Dashboard from './pages/Dashboard';
 import SuspectRegistry from './pages/SuspectRegistry';
@@ -240,6 +240,7 @@ const App: React.FC = () => {
   const [userCity, setUserCity] = useState('Belo Horizonte');
   const [isRegistered, setIsRegistered] = useState(false);
   const [userAvatar, setUserAvatar] = useState<UserAvatar>(DEFAULT_USER_AVATAR);
+  const [userInstitution, setUserInstitution] = useState<Institution>('PMMG'); // NEW STATE
   
   // AI Avatar State (Selected during onboarding)
   const [aiAvatar, setAiAvatar] = useState<UserAvatar>(DEFAULT_AI_AVATAR);
@@ -397,11 +398,12 @@ const App: React.FC = () => {
     navigateTo('registry');
   };
   
-  const handleOnboardingComplete = (name: string, rank: UserRank, city: string, avatar: UserAvatar) => {
+  const handleOnboardingComplete = (name: string, rank: UserRank, city: string, avatar: UserAvatar, institution: Institution) => {
     setUserName(name);
     setUserRank(rank);
     setUserCity(city);
     setAiAvatar(avatar);
+    setUserInstitution(institution);
     navigateTo('dashboard');
   };
 
