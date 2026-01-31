@@ -18,15 +18,15 @@
         theme: {
           extend: {
             colors: {
-              // Mapeamento para variáveis CSS
-              "pmmg-navy": "var(--color-primary)",
-              "pmmg-navy-dark": "#001530", // Mantido estático
-              "pmmg-khaki": "var(--color-background)",
-              "pmmg-khaki-light": "#dcd1c1", // Mantido estático
-              "pmmg-yellow": "var(--color-secondary)",
-              "pmmg-red": "var(--color-accent)",
-              "pmmg-gold": "var(--color-gold)",
-              "pmmg-blue": "var(--color-blue)",
+              // Cores PMMG estáticas (padrão)
+              "pmmg-navy": "#002147",
+              "pmmg-navy-dark": "#001530",
+              "pmmg-khaki": "#c5b39a",
+              "pmmg-khaki-light": "#dcd1c1",
+              "pmmg-yellow": "#ffcc00",
+              "pmmg-red": "#e31c1c",
+              "pmmg-gold": "#d4af37",
+              "pmmg-blue": "#0047ab",
             },
             fontFamily: {
               sans: ["Inter", "system-ui", "sans-serif"],
@@ -37,37 +37,56 @@
     </script>
     <style type="text/tailwindcss">
       @layer base {
-        /* Definição das variáveis CSS para os temas */
-        :root, .theme-pmmg {
-          --color-primary: #002147; /* pmmg-navy */
-          --color-secondary: #ffcc00; /* pmmg-yellow */
-          --color-accent: #e31c1c; /* pmmg-red */
-          --color-background: #c5b39a; /* pmmg-khaki */
-          --color-gold: #d4af37; /* pmmg-gold */
-          --color-blue: #0047ab; /* pmmg-blue */
-          --color-text-base: #1f2937; /* slate-800 equivalent */
-        }
-
-        .theme-pmesp {
-          --color-primary: #1a237e; /* PMESP Dark Indigo */
-          --color-secondary: #ff5252; /* PMESP Coral Red */
-          --color-accent: #c62828; /* PMESP Deep Red */
-          --color-background: #e0e0e0; /* PMESP Light Gray */
-          --color-gold: #bdbdbd; /* PMESP Silver/Gray */
-          --color-blue: #0d47a1; /* PMESP Darker Blue */
-          --color-text-base: #212121; /* Darker Gray */
-        }
-
+        /* Base styling uses PMMG defaults */
         body {
-          /* Aplica o fundo e texto dinâmico via CSS puro para evitar problemas de parsing do JIT */
-          @apply font-sans antialiased;
-          background-color: var(--color-background);
-          color: var(--color-text-base);
+          @apply font-sans antialiased bg-pmmg-khaki text-slate-800;
           min-height: 100dvh;
         }
       }
+      
+      /* --- PMESP Theme Overrides --- */
+      /* Cores PMESP: Primary: #1a237e, Secondary: #ff5252, Accent: #c62828, Background: #e0e0e0, Gold: #bdbdbd, Blue: #0d47a1 */
+      
+      /* Sobrescreve o fundo e texto do container principal */
+      .theme-pmesp {
+        background-color: #e0e0e0 !important; /* PMESP Light Gray */
+        color: #212121 !important; /* PMESP Darker Gray */
+      }
+
+      /* Sobrescreve classes utilitárias */
+      
+      /* pmmg-navy -> PMESP Dark Indigo */
+      .theme-pmesp .bg-pmmg-navy { background-color: #1a237e !important; }
+      .theme-pmesp .text-pmmg-navy { color: #1a237e !important; }
+      .theme-pmesp .border-pmmg-navy { border-color: #1a237e !important; }
+      
+      /* pmmg-khaki -> PMESP Light Gray */
+      .theme-pmesp .bg-pmmg-khaki { background-color: #e0e0e0 !important; }
+      .theme-pmesp .text-pmmg-khaki { color: #212121 !important; }
+      .theme-pmesp .border-pmmg-khaki { border-color: #e0e0e0 !important; }
+
+      /* pmmg-yellow -> PMESP Coral Red */
+      .theme-pmesp .bg-pmmg-yellow { background-color: #ff5252 !important; }
+      .theme-pmesp .text-pmmg-yellow { color: #ff5252 !important; }
+      .theme-pmesp .border-pmmg-yellow { border-color: #ff5252 !important; }
+
+      /* pmmg-red -> PMESP Deep Red */
+      .theme-pmesp .bg-pmmg-red { background-color: #c62828 !important; }
+      .theme-pmesp .text-pmmg-red { color: #c62828 !important; }
+      .theme-pmesp .border-pmmg-red { border-color: #c62828 !important; }
+
+      /* pmmg-gold -> PMESP Silver/Gray */
+      .theme-pmesp .bg-pmmg-gold { background-color: #bdbdbd !important; }
+      .theme-pmesp .text-pmmg-gold { color: #bdbdbd !important; }
+      .theme-pmesp .border-pmmg-gold { border-color: #bdbdbd !important; }
+
+      /* pmmg-blue -> PMESP Darker Blue */
+      .theme-pmesp .bg-pmmg-blue { background-color: #0d47a1 !important; }
+      .theme-pmesp .text-pmmg-blue { color: #0d47a1 !important; }
+      .theme-pmesp .border-pmmg-blue { border-color: #0d47a1 !important; }
+      
+      /* Re-add pmmg-card definition */
       .pmmg-card {
-        /* Usando white/70 para manter a transparência, mas o fundo do body é dinâmico */
         @apply bg-white/70 border border-pmmg-navy/10 rounded-xl shadow-sm backdrop-blur-md overflow-hidden;
       }
       .material-symbols-outlined {
@@ -83,7 +102,6 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
       }
-      /* Custom Leaflet overrides REMOVIDO */
     </style>
   <script type="importmap">
 {
