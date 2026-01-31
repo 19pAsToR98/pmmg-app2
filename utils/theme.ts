@@ -9,6 +9,7 @@ export interface ThemeColors {
   '--color-danger': string;
   '--color-gold': string;
   '--color-info': string;
+  '--color-primary-rgb': string; // NEW: RGB value for opacity in pmmg-card
 }
 
 export const THEMES: Record<Institution, ThemeColors> = {
@@ -21,6 +22,7 @@ export const THEMES: Record<Institution, ThemeColors> = {
     '--color-danger': '#e31c1c', // Red
     '--color-gold': '#d4af37', // Gold
     '--color-info': '#0047ab', // Blue
+    '--color-primary-rgb': '0, 33, 71', // RGB for #002147
   },
   PMESP: {
     '--color-primary': '#050505', // Black/Dark Navy
@@ -31,6 +33,7 @@ export const THEMES: Record<Institution, ThemeColors> = {
     '--color-danger': '#e31c1c', // Red
     '--color-gold': '#d4af37', // Gold
     '--color-info': '#0047ab', // Blue (Neutral Info)
+    '--color-primary-rgb': '5, 5, 5', // RGB for #050505
   },
 };
 
