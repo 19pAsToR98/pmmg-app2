@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Screen, Suspect, UserRank, CustomMarker, Officer, Contact, ContactStatus, UserAvatar, Group, GroupPost, GroupParticipant, InstitutionId, INSTITUTIONS } from './types';
+import { Screen, Suspect, UserRank, CustomMarker, Officer, Contact, ContactStatus, UserAvatar, Group, GroupPost, GroupParticipant } from './types';
 import WelcomeScreen from './pages/WelcomeScreen'; // Renomeado
 import Dashboard from './pages/Dashboard';
 import SuspectRegistry from './pages/SuspectRegistry';
@@ -235,7 +235,6 @@ const App: React.FC = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>(undefined);
   
   // User Profile States
-  const [institutionId, setInstitutionId] = useState<InstitutionId>('PMMG'); // NEW: Institution State
   const [userRank, setUserRank] = useState<UserRank>('Soldado');
   const [userName, setUserName] = useState('Rodrigo Alves');
   const [userCity, setUserCity] = useState('Belo Horizonte');
@@ -255,8 +254,6 @@ const App: React.FC = () => {
   // Group States
   const [groups, setGroups] = useState<Group[]>(MOCK_GROUPS);
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
-
-  const currentInstitution = INSTITUTIONS.find(i => i.id === institutionId)!;
 
   const navigateTo = (screen: Screen, param?: string | [number, number]) => {
     if (Array.isArray(param)) {
@@ -400,8 +397,7 @@ const App: React.FC = () => {
     navigateTo('registry');
   };
   
-  const handleOnboardingComplete = (institutionId: InstitutionId, name: string, rank: UserRank, city: string, avatar: UserAvatar) => {
-    setInstitutionId(institutionId);
+  const handleOnboardingComplete = (name: string, rank: UserRank, city: string, avatar: UserAvatar) => {
     setUserName(name);
     setUserRank(rank);
     setUserCity(city);
@@ -476,27 +472,14 @@ const App: React.FC = () => {
 
   const pendingRequestsCount = contacts.filter(c => c.status === 'Pending' && !c.isRequester).length;
 
-  // CSS variables for dynamic theming
-  const themeStyles = {
-    '--primary-color': currentInstitution.primaryColor,
-    '--background-color': currentInstitution.backgroundColor,
-  };
 
   return (
-    <div 
-      className="flex flex-col h-screen max-w-md mx-auto relative overflow-hidden"
-      style={themeStyles as React.CSSProperties} // Apply dynamic colors here
-    >
+    <div className="flex flex-col h-screen max-w-md mx-auto relative overflow-hidden bg-pmmg-khaki">
       {currentScreen === 'welcomeScreen' && <WelcomeScreen onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />}
       
       {currentScreen === 'requestAccess' && <RequestAccess onBack={() => navigateTo('welcomeScreen')} onSuccess={() => { setIsRegistered(true); navigateTo('onboardingSetup'); }} />}
       
-      {currentScreen === 'onboardingSetup' && isRegistered && (
-        <OnboardingSetup 
-          onComplete={handleOnboardingComplete} 
-          initialInstitutionId={institutionId}
-        />
-      )}
+      {currentScreen === 'onboardingSetup' && isRegistered && <OnboardingSetup onComplete={handleOnboardingComplete} />}
       
       {currentScreen === 'dashboard' && <Dashboard navigateTo={navigateTo} navigateToSuspectsManagement={navigateToSuspectsManagement} onOpenProfile={openProfile} suspects={suspects} />}
       {currentScreen === 'registry' && (
