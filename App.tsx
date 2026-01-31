@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Screen, Suspect, UserRank, CustomMarker, Officer, Contact, ContactStatus, UserAvatar, Group, GroupPost, GroupParticipant, InstitutionId } from './types';
+import { Screen, Suspect, UserRank, CustomMarker, Officer, Contact, ContactStatus, UserAvatar, Group, GroupPost, GroupParticipant } from './types';
 import WelcomeScreen from './pages/WelcomeScreen'; // Renomeado
 import Dashboard from './pages/Dashboard';
 import SuspectRegistry from './pages/SuspectRegistry';
@@ -18,7 +18,6 @@ import ProfileSettings from './pages/ProfileSettings';
 import GroupsList from './pages/GroupsList'; // NOVO: Lista de Grupos
 import GroupCreation from './pages/GroupCreation'; // NOVO: Criação de Grupo
 import GroupDetail from './pages/GroupDetail'; // NOVO: Detalhe do Grupo
-import { findInstitutionById } from './utils/institutionData'; // Importando utilitário
 
 const INITIAL_SUSPECTS: Suspect[] = [
   {
@@ -232,10 +231,6 @@ const App: React.FC = () => {
   const [editingSuspectId, setEditingSuspectId] = useState<string | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
   
-  // NEW: State for Institution selection
-  const [currentInstitutionId, setCurrentInstitutionId] = useState<InstitutionId>('PMMG');
-  const currentInstitution = useMemo(() => findInstitutionById(currentInstitutionId), [currentInstitutionId]);
-  
   // NEW: State for Store navigation
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>(undefined);
   
@@ -402,12 +397,11 @@ const App: React.FC = () => {
     navigateTo('registry');
   };
   
-  const handleOnboardingComplete = (name: string, rank: UserRank, city: string, avatar: UserAvatar, institutionId: InstitutionId) => {
+  const handleOnboardingComplete = (name: string, rank: UserRank, city: string, avatar: UserAvatar) => {
     setUserName(name);
     setUserRank(rank);
     setUserCity(city);
     setAiAvatar(avatar);
-    setCurrentInstitutionId(institutionId); // Set the selected institution
     navigateTo('dashboard');
   };
 
@@ -478,34 +472,14 @@ const App: React.FC = () => {
 
   const pendingRequestsCount = contacts.filter(c => c.status === 'Pending' && !c.isRequester).length;
 
-  // Determine the background class based on the selected institution
-  const appBgClass = currentInstitution?.colors.khaki || 'bg-pmmg-khaki';
 
   return (
-    <div className={`flex flex-col h-screen max-w-md mx-auto relative overflow-hidden ${appBgClass}`}>
-      {currentScreen === 'welcomeScreen' && (
-        <WelcomeScreen 
-          onEnter={() => navigateTo('dashboard')} 
-          onRequest={() => navigateTo('requestAccess')} 
-          institutionId={currentInstitutionId}
-        />
-      )}
+    <div className="flex flex-col h-screen max-w-md mx-auto relative overflow-hidden bg-pmmg-khaki">
+      {currentScreen === 'welcomeScreen' && <WelcomeScreen onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />}
       
-      {currentScreen === 'requestAccess' && (
-        <RequestAccess 
-          onBack={() => navigateTo('welcomeScreen')} 
-          onSuccess={() => { setIsRegistered(true); navigateTo('onboardingSetup'); }} 
-          institutionId={currentInstitutionId}
-        />
-      )}
+      {currentScreen === 'requestAccess' && <RequestAccess onBack={() => navigateTo('welcomeScreen')} onSuccess={() => { setIsRegistered(true); navigateTo('onboardingSetup'); }} />}
       
-      {currentScreen === 'onboardingSetup' && isRegistered && (
-        <OnboardingSetup 
-          onComplete={handleOnboardingComplete} 
-          currentInstitutionId={currentInstitutionId}
-          setCurrentInstitutionId={setCurrentInstitutionId}
-        />
-      )}
+      {currentScreen === 'onboardingSetup' && isRegistered && <OnboardingSetup onComplete={handleOnboardingComplete} />}
       
       {currentScreen === 'dashboard' && <Dashboard navigateTo={navigateTo} navigateToSuspectsManagement={navigateToSuspectsManagement} onOpenProfile={openProfile} suspects={suspects} />}
       {currentScreen === 'registry' && (
@@ -537,6 +511,7 @@ const App: React.FC = () => {
         />
       )}
       
+      {/* Grupos List */}
       {currentScreen === 'groupsList' && (
         <GroupsList 
           navigateTo={navigateTo} 
@@ -548,6 +523,7 @@ const App: React.FC = () => {
         />
       )}
       
+      {/* Criação de Grupo */}
       {currentScreen === 'groupCreation' && (
         <GroupCreation
           navigateTo={navigateTo}
@@ -556,6 +532,7 @@ const App: React.FC = () => {
         />
       )}
       
+      {/* Detalhe do Grupo */}
       {currentScreen === 'groupDetail' && enrichedActiveGroup && (
         <GroupDetail
           navigateTo={navigateTo}

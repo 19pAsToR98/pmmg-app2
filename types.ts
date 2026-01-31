@@ -94,19 +94,3 @@ export interface GroupParticipant extends Officer {
   isAdmin: boolean;
   role: 'admin' | 'member'; // ADDED role for easier rendering in GroupDetail
 }
-
-// NEW TYPES FOR INSTITUTION SELECTION
-export type InstitutionId = 'PMMG' | 'PMESP';
-
-export interface Institution {
-  id: InstitutionId;
-  name: string;
-  logoPath: string;
-  // Tailwind color classes to use for this institution
-  colors: {
-    navy: string; // Primary/Header color class
-    khaki: string; // Background color class
-    yellow: string; // Accent color class (kept constant for now)
-    red: string; // Critical color class (kept constant for now)
-  };
-}
