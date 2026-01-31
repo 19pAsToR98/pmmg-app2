@@ -2,6 +2,19 @@ export type Screen = 'welcomeScreen' | 'dashboard' | 'registry' | 'profile' | 'g
 
 export type UserRank = 'Soldado' | 'Cabo' | '3º Sargento' | '2º Sargento' | '1º Sargento' | 'Subtenente';
 
+export type Institution = 'PMMG' | 'PMESP';
+
+export interface ColorPalette {
+  primary: string; // Headers, Nav, Highlight (pmmg-navy equivalent)
+  primaryDark: string; // Darker shade of primary (pmmg-navy-dark equivalent)
+  background: string; // Main App Background (pmmg-khaki equivalent)
+  backgroundLight: string; // Lighter shade of background (pmmg-khaki-light equivalent)
+  accent: string; // Secondary Alert/Highlight (pmmg-yellow equivalent)
+  critical: string; // High Priority Alert (pmmg-red equivalent)
+  secondary: string; // Secondary color (pmmg-blue equivalent)
+  gold: string; // Gold/Badge color (pmmg-gold equivalent)
+}
+
 export interface UserAvatar {
   name: string;
   url: string;

@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Screen, Suspect, UserRank, CustomMarker, Officer, Contact, ContactStatus, UserAvatar, Group, GroupPost, GroupParticipant } from './types';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Screen, Suspect, UserRank, CustomMarker, Officer, Contact, ContactStatus, UserAvatar, Group, GroupPost, GroupParticipant, Institution, ColorPalette } from './types';
 import WelcomeScreen from './pages/WelcomeScreen'; // Renomeado
 import Dashboard from './pages/Dashboard';
 import SuspectRegistry from './pages/SuspectRegistry';
@@ -209,6 +209,30 @@ const DEFAULT_AI_AVATAR: UserAvatar = {
   url: 'https://regularmei.com.br/wp-content/uploads/2026/01/ai_mascot.gif'
 };
 
+// --- Paletas de Cores ---
+const PALETTES: Record<Institution, ColorPalette> = {
+  PMMG: {
+    primary: '#002147', // Navy
+    primaryDark: '#001530',
+    background: '#c5b39a', // Khaki
+    backgroundLight: '#dcd1c1',
+    accent: '#ffcc00', // Yellow
+    critical: '#e31c1c', // Red
+    secondary: '#0047ab', // Blue
+    gold: '#d4af37', // Gold
+  },
+  PMESP: {
+    primary: '#050505', // Black
+    primaryDark: '#000000',
+    background: '#f5f5f5', // Light Gray (to contrast with red/black uniform theme)
+    backgroundLight: '#ffffff',
+    accent: '#ffcc00', // Yellow/Gold
+    critical: '#e31c1c', // Red (High Priority)
+    secondary: '#FF0E18', // Crimson Red (Uniform color, used as secondary highlight)
+    gold: '#d4af37', // Gold
+  }
+};
+
 // Define enriched types for GroupDetail consumption
 interface EnrichedGroupPost extends GroupPost {
   authorName: string;
@@ -230,6 +254,9 @@ const App: React.FC = () => {
   const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null);
   const [editingSuspectId, setEditingSuspectId] = useState<string | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
+  
+  // NEW: State for Institution
+  const [institution, setInstitution] = useState<Institution>('PMMG');
   
   // NEW: State for Store navigation
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>(undefined);
@@ -254,6 +281,25 @@ const App: React.FC = () => {
   // Group States
   const [groups, setGroups] = useState<Group[]>(MOCK_GROUPS);
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
+
+  // --- Efeito para aplicar a paleta de cores ---
+  useEffect(() => {
+    const palette = PALETTES[institution];
+    const root = document.documentElement;
+    
+    root.style.setProperty('--color-primary', palette.primary);
+    root.style.setProperty('--color-primary-dark', palette.primaryDark);
+    root.style.setProperty('--color-background', palette.background);
+    root.style.setProperty('--color-background-light', palette.backgroundLight);
+    root.style.setProperty('--color-accent', palette.accent);
+    root.style.setProperty('--color-critical', palette.critical);
+    root.style.setProperty('--color-secondary', palette.secondary);
+    root.style.setProperty('--color-gold', palette.gold);
+    
+    // Forçar re-renderização de componentes que dependem de cores globais se necessário
+    // (Tailwind classes should handle this automatically via CSS variables)
+  }, [institution]);
+
 
   const navigateTo = (screen: Screen, param?: string | [number, number]) => {
     if (Array.isArray(param)) {
@@ -286,8 +332,8 @@ const App: React.FC = () => {
     const newGroup: Group = {
       ...newGroupData,
       id: `g${Date.now()}`,
-      posts: [],
       inviteCode: `G${Math.floor(Math.random() * 9000) + 1000}-${newGroupData.name.slice(0, 2).toUpperCase()}`, // Generate mock invite code
+      posts: [],
     };
     setGroups(prev => [...prev, newGroup]);
     alert(`Grupo ${newGroup.name} criado com sucesso! Convites enviados.`);
@@ -397,11 +443,12 @@ const App: React.FC = () => {
     navigateTo('registry');
   };
   
-  const handleOnboardingComplete = (name: string, rank: UserRank, city: string, avatar: UserAvatar) => {
+  const handleOnboardingComplete = (name: string, rank: UserRank, city: string, avatar: UserAvatar, selectedInstitution: Institution) => {
     setUserName(name);
     setUserRank(rank);
     setUserCity(city);
     setAiAvatar(avatar);
+    setInstitution(selectedInstitution); // Set institution on completion
     navigateTo('dashboard');
   };
 
@@ -479,7 +526,13 @@ const App: React.FC = () => {
       
       {currentScreen === 'requestAccess' && <RequestAccess onBack={() => navigateTo('welcomeScreen')} onSuccess={() => { setIsRegistered(true); navigateTo('onboardingSetup'); }} />}
       
-      {currentScreen === 'onboardingSetup' && isRegistered && <OnboardingSetup onComplete={handleOnboardingComplete} />}
+      {currentScreen === 'onboardingSetup' && isRegistered && (
+        <OnboardingSetup 
+          onComplete={handleOnboardingComplete} 
+          currentInstitution={institution}
+          onInstitutionChange={setInstitution}
+        />
+      )}
       
       {currentScreen === 'dashboard' && <Dashboard navigateTo={navigateTo} navigateToSuspectsManagement={navigateToSuspectsManagement} onOpenProfile={openProfile} suspects={suspects} />}
       {currentScreen === 'registry' && (
