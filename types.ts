@@ -2,6 +2,33 @@ export type Screen = 'welcomeScreen' | 'dashboard' | 'registry' | 'profile' | 'g
 
 export type UserRank = 'Soldado' | 'Cabo' | '3º Sargento' | '2º Sargento' | '1º Sargento' | 'Subtenente';
 
+export type InstitutionId = 'PMMG' | 'PMESP';
+
+export interface Institution {
+  id: InstitutionId;
+  name: string;
+  primaryColor: string; // Cor principal (Navy/Black)
+  backgroundColor: string; // Cor de fundo (Khaki/Red)
+  logoUrl: string;
+}
+
+export const INSTITUTIONS: Institution[] = [
+  {
+    id: 'PMMG',
+    name: 'Polícia Militar de Minas Gerais',
+    primaryColor: '#002147', // pmmg-navy
+    backgroundColor: '#c5b39a', // pmmg-khaki
+    logoUrl: 'brasoes/pmmg.png',
+  },
+  {
+    id: 'PMESP',
+    name: 'Polícia Militar do Estado de São Paulo',
+    primaryColor: '#050505', // Black
+    backgroundColor: '#FF0E18', // Red (Uniform)
+    logoUrl: 'brasoes/pmesp.png',
+  }
+];
+
 export interface UserAvatar {
   name: string;
   url: string;

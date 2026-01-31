@@ -18,9 +18,12 @@
         theme: {
           extend: {
             colors: {
-              "pmmg-navy": "#002147",
+              // Mapeamento para variáveis CSS dinâmicas
+              "pmmg-navy": "var(--primary-color)",
+              "pmmg-khaki": "var(--background-color)",
+              
+              // Cores estáticas
               "pmmg-navy-dark": "#001530",
-              "pmmg-khaki": "#c5b39a",
               "pmmg-khaki-light": "#dcd1c1",
               "pmmg-yellow": "#ffcc00",
               "pmmg-red": "#e31c1c",
@@ -37,11 +40,13 @@
     <style type="text/tailwindcss">
       @layer base {
         body {
-          @apply bg-pmmg-khaki text-slate-900 font-sans antialiased;
+          /* Usando variável CSS para o fundo */
+          @apply bg-[var(--background-color)] text-slate-900 font-sans antialiased;
           min-height: 100dvh;
         }
       }
       .pmmg-card {
+        /* Mantendo o fundo branco/transparente para contraste */
         @apply bg-white/70 border border-pmmg-navy/10 rounded-xl shadow-sm backdrop-blur-md overflow-hidden;
       }
       .material-symbols-outlined {

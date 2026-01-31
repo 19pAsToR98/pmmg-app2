@@ -1,12 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Screen, UserRank, UserAvatar } from '../types';
+import { Screen, UserRank, UserAvatar, InstitutionId, INSTITUTIONS } from '../types';
 import RankBadge from '../components/RankBadge';
 import GoogleMapWrapper from '../components/GoogleMapWrapper';
 import { MarkerF } from '@react-google-maps/api';
 import { ICON_PATHS } from '../utils/iconPaths';
 
 interface OnboardingSetupProps {
-  onComplete: (name: string, rank: UserRank, city: string, avatar: UserAvatar) => void;
+  onComplete: (institutionId: InstitutionId, name: string, rank: UserRank, city: string, avatar: UserAvatar) => void;
+  initialInstitutionId: InstitutionId;
 }
 
 const RANKS: UserRank[] = ['Soldado', 'Cabo', '3º Sargento', '2º Sargento', '1º Sargento', 'Subtenente'];
@@ -27,8 +28,9 @@ const AVATAR_OPTIONS: { gender: 'Masculino' | 'Feminino', avatar: UserAvatar }[]
 ];
 
 
-const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
+const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, initialInstitutionId }) => {
   const [step, setStep] = useState(1);
+  const [institutionId, setInstitutionId] = useState<InstitutionId>(initialInstitutionId); // NEW State
   const [name, setName] = useState('');
   const [rank, setRank] = useState<UserRank>('Soldado'); // Padrão: Soldado
   const [city, setCity] = useState('');
@@ -51,7 +53,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
 
 
   const handleCitySearchChange = (term: string) => {
-    setCitySearchTerm(term);
+    setSearchTerm(term);
     if (term.length > 1) {
       const filtered = MOCK_CITIES.filter(c => 
         c.name.toLowerCase().includes(term.toLowerCase())
@@ -65,27 +67,31 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
   const handleSelectCity = (location: { lat: number, lng: number, name: string }) => {
     setSelectedLocation(location);
     setCity(location.name);
-    setCitySearchTerm('');
+    setSearchTerm('');
     setCitySuggestions([]);
   };
 
   // --- Navigation Logic ---
 
   const handleNext = () => {
-    if (step === 1 && !name.trim()) {
+    if (step === 1 && !institutionId) {
+      alert("Por favor, selecione sua instituição.");
+      return;
+    }
+    if (step === 2 && !name.trim()) {
       alert("Por favor, insira seu nome completo.");
       return;
     }
-    if (step === 3 && !city.trim()) {
+    if (step === 4 && !city.trim()) {
       alert("Por favor, selecione sua cidade padrão.");
       return;
     }
     
-    if (step < 4) { 
+    if (step < 5) { // Total 5 steps now
       setStep(step + 1);
     } else {
       // Final Step
-      onComplete(name.trim(), rank, city.trim(), selectedAvatar); 
+      onComplete(institutionId, name.trim(), rank, city.trim(), selectedAvatar); 
     }
   };
 
@@ -130,6 +136,38 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
       case 1:
         return (
           <div className="space-y-6">
+            <h2 className="text-xl font-bold text-pmmg-navy uppercase tracking-tight">Instituição Militar</h2>
+            <p className="text-sm text-slate-600">Selecione a corporação à qual você pertence. Isso define o tema visual do aplicativo.</p>
+            
+            <div className="flex justify-center gap-6 overflow-x-auto pb-4 no-scrollbar">
+              {INSTITUTIONS.map((inst) => (
+                <button
+                  key={inst.id}
+                  onClick={() => setInstitutionId(inst.id)}
+                  className={`flex flex-col items-center gap-3 shrink-0 transition-all p-4 rounded-xl border-4 ${
+                    institutionId === inst.id 
+                      ? 'bg-white border-pmmg-navy shadow-xl scale-105' 
+                      : 'bg-white/50 border-transparent opacity-70'
+                  }`}
+                >
+                  <div className="w-24 h-24 flex items-center justify-center">
+                    <img src={inst.logoUrl} alt={inst.name} className="w-full h-full object-contain" />
+                  </div>
+                  <span className={`text-[10px] font-black uppercase text-center leading-tight ${institutionId === inst.id ? 'text-pmmg-navy' : 'text-slate-500'}`}>
+                    {inst.id}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <div className="text-center pt-2">
+              <p className="text-pmmg-navy font-bold uppercase text-sm">Instituição Selecionada:</p>
+              <p className="text-pmmg-red font-black text-lg mt-1">{INSTITUTIONS.find(i => i.id === institutionId)?.name}</p>
+            </div>
+          </div>
+        );
+      case 2:
+        return (
+          <div className="space-y-6">
             <h2 className="text-xl font-bold text-pmmg-navy uppercase tracking-tight">Identificação Pessoal</h2>
             <p className="text-sm text-slate-600">Insira seu nome completo para identificação no sistema.</p>
             <div>
@@ -144,7 +182,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
             </div>
           </div>
         );
-      case 2:
+      case 3:
         return (
           <div className="space-y-6">
             <h2 className="text-xl font-bold text-pmmg-navy uppercase tracking-tight">Graduação Militar</h2>
@@ -174,7 +212,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
             </div>
           </div>
         );
-      case 3:
+      case 4:
         return (
           <div className="space-y-4">
             <h2 className="text-xl font-bold text-pmmg-navy uppercase tracking-tight">Cidade Padrão</h2>
@@ -208,7 +246,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
               )}
             </div>
             
-            {/* Exibe o mapa se uma cidade foi selecionada ou se estamos no passo 3 (usando fallback) */}
+            {/* Exibe o mapa se uma cidade foi selecionada ou se estamos no passo 4 (usando fallback) */}
             {selectedLocation && (
               <div className="pmmg-card overflow-hidden">
                 <div className="p-3 bg-pmmg-navy/5 flex items-center justify-between">
@@ -237,7 +275,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
             )}
           </div>
         );
-      case 4: // NEW STEP: Avatar Selection (Slider)
+      case 5: // NEW STEP: Avatar Selection (Slider)
         const currentOption = AVATAR_OPTIONS[selectedAvatarIndex];
         
         return (
@@ -307,14 +345,14 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
           </div>
           <div>
             <h1 className="font-bold text-sm leading-none text-white uppercase tracking-tight">Configuração Inicial</h1>
-            <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">Passo {step} de 4</p>
+            <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">Passo {step} de 5</p>
           </div>
         </div>
       </header>
 
       <main className="flex-1 overflow-y-auto pb-24 no-scrollbar px-4 pt-6">
-        {/* Aplicando fundo branco sólido ao container principal do passo 4 */}
-        <div className={`rounded-xl shadow-md p-6 ${step === 4 ? 'bg-white' : 'pmmg-card'}`}>
+        {/* Aplicando fundo branco sólido ao container principal do passo 5 */}
+        <div className={`rounded-xl shadow-md p-6 ${step === 5 ? 'bg-white' : 'pmmg-card'}`}>
           {renderStepContent()}
         </div>
       </main>
@@ -332,7 +370,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
             onClick={handleNext}
             className="flex-[3] bg-pmmg-navy text-white font-bold py-3 rounded-xl text-xs uppercase flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
           >
-            {step === 4 ? (
+            {step === 5 ? (
               <>
                 <span className="material-symbols-outlined text-pmmg-yellow">check_circle</span>
                 Concluir Configuração
