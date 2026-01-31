@@ -403,7 +403,7 @@ const App: React.FC = () => {
     setUserRank(rank);
     setUserCity(city);
     setAiAvatar(avatar);
-    setUserInstitution(institution); // Set the institution
+    setUserInstitution(institution);
     navigateTo('dashboard');
   };
 
@@ -474,11 +474,9 @@ const App: React.FC = () => {
 
   const pendingRequestsCount = contacts.filter(c => c.status === 'Pending' && !c.isRequester).length;
 
-  // Determine the theme class based on the user's institution
-  const themeClass = userInstitution === 'PMESP' ? 'theme-pmesp' : ''; // PMMG is the default root theme
 
   return (
-    <div className={`flex flex-col h-screen max-w-md mx-auto relative overflow-hidden bg-pmmg-khaki ${themeClass}`}>
+    <div className="flex flex-col h-screen max-w-md mx-auto relative overflow-hidden bg-pmmg-khaki">
       {currentScreen === 'welcomeScreen' && <WelcomeScreen onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />}
       
       {currentScreen === 'requestAccess' && <RequestAccess onBack={() => navigateTo('welcomeScreen')} onSuccess={() => { setIsRegistered(true); navigateTo('onboardingSetup'); }} />}
