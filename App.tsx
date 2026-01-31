@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Screen, Suspect, UserRank, CustomMarker, Officer, Contact, ContactStatus, UserAvatar, Group, GroupPost, GroupParticipant } from './types';
+import { Screen, Suspect, UserRank, CustomMarker, Officer, Contact, ContactStatus, UserAvatar, Group, GroupPost, GroupParticipant, InstitutionId } from './types';
 import WelcomeScreen from './pages/WelcomeScreen'; // Renomeado
 import Dashboard from './pages/Dashboard';
 import SuspectRegistry from './pages/SuspectRegistry';
@@ -18,6 +18,7 @@ import ProfileSettings from './pages/ProfileSettings';
 import GroupsList from './pages/GroupsList'; // NOVO: Lista de Grupos
 import GroupCreation from './pages/GroupCreation'; // NOVO: Criação de Grupo
 import GroupDetail from './pages/GroupDetail'; // NOVO: Detalhe do Grupo
+import { INSTITUTIONS, DEFAULT_INSTITUTION, getInstitutionById } from './utils/institutionData'; // NOVO
 
 const INITIAL_SUSPECTS: Suspect[] = [
   {
@@ -244,6 +245,9 @@ const App: React.FC = () => {
   // AI Avatar State (Selected during onboarding)
   const [aiAvatar, setAiAvatar] = useState<UserAvatar>(DEFAULT_AI_AVATAR);
   
+  // NEW: Institution State
+  const [activeInstitutionId, setActiveInstitutionId] = useState<InstitutionId>(DEFAULT_INSTITUTION.id);
+  
   // Suspect Management Filter State
   const [initialSuspectFilter, setInitialSuspectFilter] = useState<Suspect['status'] | 'Todos'>('Todos');
   
@@ -384,7 +388,7 @@ const App: React.FC = () => {
   };
 
   const deleteCustomMarker = (id: string) => {
-    setCustomMarkers(prev => prev.filter(m => m.id !== id));
+    deleteCustomMarker(id);
   };
 
   const openProfile = (id: string) => {
@@ -397,11 +401,12 @@ const App: React.FC = () => {
     navigateTo('registry');
   };
   
-  const handleOnboardingComplete = (name: string, rank: UserRank, city: string, avatar: UserAvatar) => {
+  const handleOnboardingComplete = (name: string, rank: UserRank, city: string, avatar: UserAvatar, institutionId: InstitutionId) => {
     setUserName(name);
     setUserRank(rank);
     setUserCity(city);
     setAiAvatar(avatar);
+    setActiveInstitutionId(institutionId); // Set the active institution
     navigateTo('dashboard');
   };
 
@@ -471,10 +476,12 @@ const App: React.FC = () => {
   }, [activeGroup, officers, suspects, userName, userRank, userCity, userAvatar.url]);
 
   const pendingRequestsCount = contacts.filter(c => c.status === 'Pending' && !c.isRequester).length;
+  
+  const institutionClass = `institution-${activeInstitutionId}`;
 
 
   return (
-    <div className="flex flex-col h-screen max-w-md mx-auto relative overflow-hidden bg-pmmg-khaki">
+    <div className={`flex flex-col h-screen max-w-md mx-auto relative overflow-hidden ${institutionClass}`}>
       {currentScreen === 'welcomeScreen' && <WelcomeScreen onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />}
       
       {currentScreen === 'requestAccess' && <RequestAccess onBack={() => navigateTo('welcomeScreen')} onSuccess={() => { setIsRegistered(true); navigateTo('onboardingSetup'); }} />}

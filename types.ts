@@ -1,5 +1,7 @@
 export type Screen = 'welcomeScreen' | 'dashboard' | 'registry' | 'profile' | 'groupsList' | 'aiTools' | 'requestAccess' | 'store' | 'map' | 'contacts' | 'groupCreation' | 'groupDetail' | 'onboardingSetup' | 'suspectsManagement' | 'plateConsultation' | 'voiceReport' | 'productList';
 
+export type InstitutionId = 'PMMG' | 'PMESP'; // NOVO: Identificador da Instituição
+
 export type UserRank = 'Soldado' | 'Cabo' | '3º Sargento' | '2º Sargento' | '1º Sargento' | 'Subtenente';
 
 export interface UserAvatar {

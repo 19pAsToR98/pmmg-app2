@@ -18,14 +18,15 @@
         theme: {
           extend: {
             colors: {
-              "pmmg-navy": "#002147",
-              "pmmg-navy-dark": "#001530",
-              "pmmg-khaki": "#c5b39a",
-              "pmmg-khaki-light": "#dcd1c1",
-              "pmmg-yellow": "#ffcc00",
-              "pmmg-red": "#e31c1c",
-              "pmmg-gold": "#d4af37",
-              "pmmg-blue": "#0047ab",
+              // Cores dinâmicas baseadas em variáveis CSS
+              "pmmg-navy": "var(--color-primary)",
+              "pmmg-navy-dark": "#001530", // Mantido estático
+              "pmmg-khaki": "var(--color-background)",
+              "pmmg-khaki-light": "#dcd1c1", // Mantido estático
+              "pmmg-yellow": "var(--color-accent)",
+              "pmmg-red": "var(--color-critical)",
+              "pmmg-gold": "var(--color-gold)",
+              "pmmg-blue": "var(--color-blue)",
             },
             fontFamily: {
               sans: ["Inter", "system-ui", "sans-serif"],
@@ -36,13 +37,34 @@
     </script>
     <style type="text/tailwindcss">
       @layer base {
+        :root {
+          /* Default PMMG Colors */
+          --color-primary: #002147; /* pmmg-navy */
+          --color-background: #c5b39a; /* pmmg-khaki */
+          --color-accent: #ffcc00; /* pmmg-yellow */
+          --color-critical: #e31c1c; /* pmmg-red */
+          --color-gold: #d4af37; /* pmmg-gold */
+          --color-blue: #0047ab; /* pmmg-blue */
+        }
+        
+        /* PMESP Color Scheme Override */
+        .institution-PMESP {
+          --color-primary: #050505;
+          --color-background: #FF0E18; /* Red, as requested by hex code */
+          --color-accent: #ffcc00;
+          --color-critical: #e31c1c;
+          --color-gold: #ffcc00; /* Using accent color */
+          --color-blue: #0047ab; /* Keeping PMMG blue for compatibility */
+        }
+        
         body {
-          @apply bg-pmmg-khaki text-slate-900 font-sans antialiased;
+          @apply bg-[color:var(--color-background)] text-slate-900 font-sans antialiased;
           min-height: 100dvh;
         }
       }
       .pmmg-card {
-        @apply bg-white/70 border border-pmmg-navy/10 rounded-xl shadow-sm backdrop-blur-md overflow-hidden;
+        /* Usando a variável para a cor primária na borda */
+        @apply bg-white/70 border border-[color:var(--color-primary)]/10 rounded-xl shadow-sm backdrop-blur-md overflow-hidden;
       }
       .material-symbols-outlined {
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
