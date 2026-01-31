@@ -171,8 +171,8 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete }) => {
 
               {/* Institution Display (Centralized) */}
               <div className="flex flex-col items-center transition-all duration-300 ease-in-out p-4">
-                {/* AUMENTADO PARA W-64 H-64 E REMOVIDO O FUNDO CIRCULAR BRANCO */}
-                <div className="w-64 h-64 mb-6 p-4 border-4 border-pmmg-navy/10 shadow-xl flex items-center justify-center">
+                {/* REMOVIDA A MOLDURA QUADRADA */}
+                <div className="w-64 h-64 mb-6 p-4 flex items-center justify-center">
                   <img 
                     src={currentInstitution.logo} 
                     alt={currentInstitution.name} 
