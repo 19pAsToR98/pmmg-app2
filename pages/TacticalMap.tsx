@@ -166,7 +166,7 @@ const UserMarkerComponent = memo<{
 });
 
 const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenProfile, initialCenter, customMarkers, addCustomMarker, updateCustomMarker, deleteCustomMarker }) => {
-  const mapRef = useRef<google.maps.Map | null>(null);
+  const mapRef = useRef<google.maps.Map | null>(mapRef);
   
   const [userPos, setUserPos] = useState<{ lat: number, lng: number } | null>(null);
   const [activeFilter, setActiveFilter] = useState<MapFilter>('Todos');
@@ -296,26 +296,30 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
     }
   }, []);
 
-  // User Geolocation
-  useEffect(() => {
+  // --- FIX: Recenter function now actively requests geolocation ---
+  const recenter = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserPos({ lat: position.coords.latitude, lng: position.coords.longitude });
+          const newPos = { lat: position.coords.latitude, lng: position.coords.longitude };
+          setUserPos(newPos); // Update user position state
+          
+          if (mapRef.current) {
+            mapRef.current.setCenter(newPos);
+            mapRef.current.setZoom(16);
+          }
         },
         (error) => {
           console.error('Erro ao obter localização:', error);
-        }
+          alert('Não foi possível obter sua localização atual. Verifique as permissões do dispositivo.');
+        },
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
       );
-    }
-  }, []);
-
-  const recenter = () => {
-    if (userPos && mapRef.current) {
-      mapRef.current.setCenter(userPos);
-      mapRef.current.setZoom(16);
+    } else {
+      alert('Geolocalização não suportada pelo seu dispositivo.');
     }
   };
+  // --- END FIX ---
 
   const activeMarkerData = newMarkerData || editingMarker;
   const isEditing = !!editingMarker;
