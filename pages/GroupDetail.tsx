@@ -44,11 +44,14 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
   const [searchSuspect, setSearchSuspect] = useState('');
   const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null);
   const [observation, setObservation] = useState('');
+  
+  // NOVO ESTADO: Pesquisa de Membros
+  const [memberSearchQuery, setMemberSearchQuery] = useState('');
 
   // Estados para filtros da Timeline
   const [postSearchQuery, setPostSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<PostFilterStatus>('Todos');
-  const [selectedMemberFilterId, setSelectedMemberFilterId] = useState<string | null>(null); // NOVO ESTADO
+  const [selectedMemberFilterId, setSelectedMemberFilterId] = useState<string | null>(null); 
   const [showTimelineFilters, setShowTimelineFilters] = useState(false);
   const timelineFilterRef = useRef<HTMLDivElement>(null);
 
@@ -86,7 +89,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
       
       if (!matchesSearch) return false;
 
-      // 2. Filtro de Membro (NOVO)
+      // 2. Filtro de Membro
       const matchesAuthor = !selectedMemberFilterId || post.authorId === selectedMemberFilterId;
       if (!matchesAuthor) return false;
       
@@ -97,6 +100,18 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
       return matchesStatus;
     });
   }, [group.posts, postSearchQuery, selectedMemberFilterId, statusFilter, allSuspects]);
+  
+  // Lógica de filtragem de Membros
+  const filteredMembers = useMemo(() => {
+    const query = memberSearchQuery.toLowerCase();
+    if (!query) return group.members;
+    
+    return group.members.filter(member => 
+      member.name.toLowerCase().includes(query) ||
+      member.unit.toLowerCase().includes(query) ||
+      member.rank.toLowerCase().includes(query)
+    );
+  }, [memberSearchQuery, group.members]);
 
 
   const handleShare = () => {
@@ -385,8 +400,19 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
                 <span className="material-symbols-outlined text-lg">content_copy</span>
               </button>
             </div>
+            
+            {/* NOVO: Campo de Pesquisa de Membros */}
+            <div className="relative mb-4">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-pmmg-navy/30 text-lg">search</span>
+              <input 
+                value={memberSearchQuery}
+                onChange={(e) => setMemberSearchQuery(e.target.value)}
+                placeholder="BUSCAR MEMBRO (NOME, UNIDADE, POSTO)..."
+                className="w-full pl-10 pr-4 py-3 bg-white/60 border-none rounded-2xl text-[10px] font-black uppercase placeholder:text-slate-400 focus:ring-2 focus:ring-pmmg-navy/10 transition-all shadow-inner"
+              />
+            </div>
 
-            {group.members.map(member => (
+            {filteredMembers.length > 0 ? filteredMembers.map(member => (
               <div 
                 key={member.id} 
                 onClick={() => handleFilterByMember(member.id)} // NOVO: Clique para filtrar
@@ -415,7 +441,12 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
                     <span className="material-symbols-outlined text-pmmg-navy/40 text-lg shrink-0">arrow_forward_ios</span>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="text-center py-10 opacity-40">
+                <span className="material-symbols-outlined text-5xl">person_search</span>
+                <p className="text-xs font-bold uppercase mt-2">Nenhum membro encontrado</p>
+              </div>
+            )}
           </div>
         )}
       </main>
