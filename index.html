@@ -45,50 +45,56 @@
       }
       
       /* --- PMESP Theme Overrides --- */
-      /* Cores PMESP: Primary: #1a237e, Secondary: #ff5252, Accent: #c62828, Background: #e0e0e0, Gold: #bdbdbd, Blue: #0d47a1 */
+      /* Novas Cores PMESP: Primary: #050505, Background: #424243, Secondary/Gold: #ffcc00, Accent/Red: #e31c1c */
       
       /* Sobrescreve o fundo e texto do container principal */
       .theme-pmesp {
-        background-color: #e0e0e0 !important; /* PMESP Light Gray */
-        color: #212121 !important; /* PMESP Darker Gray */
+        background-color: #424243 !important; /* PMESP Background */
+        color: #f3f4f6 !important; /* Texto claro para fundo escuro */
       }
 
       /* Sobrescreve classes utilitárias */
       
-      /* pmmg-navy -> PMESP Dark Indigo */
-      .theme-pmesp .bg-pmmg-navy { background-color: #1a237e !important; }
-      .theme-pmesp .text-pmmg-navy { color: #1a237e !important; }
-      .theme-pmesp .border-pmmg-navy { border-color: #1a237e !important; }
+      /* pmmg-navy -> PMESP Primary Dark (#050505) */
+      .theme-pmesp .bg-pmmg-navy { background-color: #050505 !important; }
+      .theme-pmesp .text-pmmg-navy { color: #050505 !important; }
+      .theme-pmesp .border-pmmg-navy { border-color: #050505 !important; }
       
-      /* pmmg-khaki -> PMESP Light Gray */
-      .theme-pmesp .bg-pmmg-khaki { background-color: #e0e0e0 !important; }
-      .theme-pmesp .text-pmmg-khaki { color: #212121 !important; }
-      .theme-pmesp .border-pmmg-khaki { border-color: #e0e0e0 !important; }
+      /* pmmg-khaki -> PMESP Background (#424243) */
+      .theme-pmesp .bg-pmmg-khaki { background-color: #424243 !important; }
+      .theme-pmesp .text-pmmg-khaki { color: #f3f4f6 !important; } /* Texto claro */
+      .theme-pmesp .border-pmmg-khaki { border-color: #424243 !important; }
 
-      /* pmmg-yellow -> PMESP Coral Red */
-      .theme-pmesp .bg-pmmg-yellow { background-color: #ff5252 !important; }
-      .theme-pmesp .text-pmmg-yellow { color: #ff5252 !important; }
-      .theme-pmesp .border-pmmg-yellow { border-color: #ff5252 !important; }
+      /* pmmg-yellow -> PMESP Secondary/Accent (#ffcc00) */
+      .theme-pmesp .bg-pmmg-yellow { background-color: #ffcc00 !important; }
+      .theme-pmesp .text-pmmg-yellow { color: #ffcc00 !important; }
+      .theme-pmesp .border-pmmg-yellow { border-color: #ffcc00 !important; }
 
-      /* pmmg-red -> PMESP Deep Red */
-      .theme-pmesp .bg-pmmg-red { background-color: #c62828 !important; }
-      .theme-pmesp .text-pmmg-red { color: #c62828 !important; }
-      .theme-pmesp .border-pmmg-red { border-color: #c62828 !important; }
+      /* pmmg-red -> PMESP Critical Accent (#e31c1c) */
+      .theme-pmesp .bg-pmmg-red { background-color: #e31c1c !important; }
+      .theme-pmesp .text-pmmg-red { color: #e31c1c !important; }
+      .theme-pmesp .border-pmmg-red { border-color: #e31c1c !important; }
 
-      /* pmmg-gold -> PMESP Silver/Gray */
-      .theme-pmesp .bg-pmmg-gold { background-color: #bdbdbd !important; }
-      .theme-pmesp .text-pmmg-gold { color: #bdbdbd !important; }
-      .theme-pmesp .border-pmmg-gold { border-color: #bdbdbd !important; }
+      /* pmmg-gold -> PMESP Gold/Accent (#ffcc00) */
+      .theme-pmesp .bg-pmmg-gold { background-color: #ffcc00 !important; }
+      .theme-pmesp .text-pmmg-gold { color: #ffcc00 !important; }
+      .theme-pmesp .border-pmmg-gold { border-color: #ffcc00 !important; }
 
-      /* pmmg-blue -> PMESP Darker Blue */
-      .theme-pmesp .bg-pmmg-blue { background-color: #0d47a1 !important; }
-      .theme-pmesp .text-pmmg-blue { color: #0d47a1 !important; }
-      .theme-pmesp .border-pmmg-blue { border-color: #0d47a1 !important; }
+      /* pmmg-blue -> PMESP Primary Dark (#050505) */
+      .theme-pmesp .bg-pmmg-blue { background-color: #050505 !important; }
+      .theme-pmesp .text-pmmg-blue { color: #050505 !important; }
+      .theme-pmesp .border-pmmg-blue { border-color: #050505 !important; }
       
-      /* Re-add pmmg-card definition */
-      .pmmg-card {
-        @apply bg-white/70 border border-pmmg-navy/10 rounded-xl shadow-sm backdrop-blur-md overflow-hidden;
+      /* Ajuste para garantir que o texto dentro de pmmg-card seja legível no tema PMESP */
+      .theme-pmesp .pmmg-card {
+        @apply bg-white/90 border-white/20; /* Fundo mais opaco para contraste */
       }
+      .theme-pmesp .pmmg-card .text-slate-800,
+      .theme-pmesp .pmmg-card .text-slate-600,
+      .theme-pmesp .pmmg-card .text-pmmg-navy {
+        color: #050505 !important; /* Garante que o texto dentro do card seja escuro */
+      }
+      
       .material-symbols-outlined {
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
       }
