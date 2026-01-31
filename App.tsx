@@ -478,7 +478,7 @@ const App: React.FC = () => {
   const themeClass = userInstitution === 'PMESP' ? 'theme-pmesp' : ''; // PMMG is the default root theme
 
   return (
-    <div className={`flex flex-col h-screen max-w-md mx-auto relative overflow-hidden bg-pmmg-khaki ${themeClass}`}>
+    <div className={`flex flex-col h-screen max-w-md mx-auto relative overflow-hidden ${themeClass}`}>
       {currentScreen === 'welcomeScreen' && <WelcomeScreen onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />}
       
       {currentScreen === 'requestAccess' && <RequestAccess onBack={() => navigateTo('welcomeScreen')} onSuccess={() => { setIsRegistered(true); navigateTo('onboardingSetup'); }} />}
