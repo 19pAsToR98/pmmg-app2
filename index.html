@@ -58,12 +58,14 @@
         }
         
         body {
-          @apply bg-[color:var(--color-background)] text-slate-900 font-sans antialiased;
+          /* Usando a cor de fundo diretamente da variável */
+          background-color: var(--color-background);
+          @apply text-slate-900 font-sans antialiased;
           min-height: 100dvh;
         }
       }
       .pmmg-card {
-        /* Usando a variável para a cor primária na borda */
+        /* Usando a cor primária diretamente da variável */
         @apply bg-white/70 border border-[color:var(--color-primary)]/10 rounded-xl shadow-sm backdrop-blur-md overflow-hidden;
       }
       .material-symbols-outlined {
