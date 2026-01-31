@@ -478,6 +478,7 @@ const App: React.FC = () => {
   const themeClass = userInstitution === 'PMESP' ? 'theme-pmesp' : '';
   
   // Determina a cor do texto principal para o contêiner
+  // Se for PMESP (fundo escuro), o texto padrão deve ser branco. Caso contrário, preto (slate-900).
   const textColorClass = userInstitution === 'PMESP' ? 'text-white' : 'text-slate-900';
 
 

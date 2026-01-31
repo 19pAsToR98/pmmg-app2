@@ -18,23 +18,20 @@
         theme: {
           extend: {
             colors: {
-              // Cores PMMG (Default)
-              "pmmg-navy": "var(--color-primary)",
-              "pmmg-navy-dark": "var(--color-primary-dark)",
-              "pmmg-khaki": "var(--color-background)",
-              "pmmg-khaki-light": "var(--color-background-light)",
-              "pmmg-yellow": "var(--color-accent)",
-              "pmmg-red": "var(--color-critical)",
-              "pmmg-gold": "var(--color-secondary)",
-              "pmmg-blue": "var(--color-info)",
-              
-              // Cores genéricas para uso em componentes
+              // Mapeamento de cores genéricas para variáveis CSS
               "theme-primary": "var(--color-primary)",
               "theme-background": "var(--color-background)",
               "theme-accent": "var(--color-accent)",
               "theme-critical": "var(--color-critical)",
               "theme-secondary": "var(--color-secondary)",
               "theme-info": "var(--color-info)",
+              
+              // Mantendo as classes antigas para compatibilidade, mas apontando para as variáveis
+              "pmmg-navy": "var(--color-primary)",
+              "pmmg-khaki": "var(--color-background)",
+              "pmmg-yellow": "var(--color-accent)",
+              "pmmg-red": "var(--color-critical)",
+              "pmmg-gold": "var(--color-secondary)",
             },
             fontFamily: {
               sans: ["Inter", "system-ui", "sans-serif"],
@@ -70,13 +67,13 @@
         }
         
         body {
-          /* Use generic background color variable. Removing default text color here. */
+          /* Aplicando o fundo do tema e garantindo que o texto padrão seja legível */
           @apply bg-theme-background font-sans antialiased;
           min-height: 100dvh;
         }
       }
       .pmmg-card {
-        /* Adjusting pmmg-card to use theme colors for border/shadow if needed, but keeping white/70 for transparency */
+        /* Mantendo a transparência e borda baseada no tema */
         @apply bg-white/70 border border-theme-primary/10 rounded-xl shadow-sm backdrop-blur-md overflow-hidden;
       }
       .material-symbols-outlined {
