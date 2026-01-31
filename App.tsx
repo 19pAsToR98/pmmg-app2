@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Screen, Suspect, UserRank, CustomMarker, Officer, Contact, ContactStatus, UserAvatar, Group, GroupPost, GroupParticipant, Institution } from './types';
 import WelcomeScreen from './pages/WelcomeScreen'; // Renomeado
 import Dashboard from './pages/Dashboard';
@@ -152,7 +152,7 @@ const INITIAL_CUSTOM_MARKERS: CustomMarker[] = [
     title: 'Ponto de Observação',
     description: 'Vigilância 24h. Área de alto risco.',
     icon: 'visibility',
-    color: 'bg-pmmg-gold'
+    color: 'bg-theme-gold'
   }
 ];
 
@@ -256,6 +256,18 @@ const App: React.FC = () => {
   const [groups, setGroups] = useState<Group[]>(MOCK_GROUPS);
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
 
+  // --- EFEITO PARA APLICAR O TEMA GLOBALMENTE ---
+  useEffect(() => {
+    const root = document.getElementById('root');
+    if (root) {
+      // Remove classes de tema antigas
+      root.classList.remove('theme-pmmg', 'theme-pmesp');
+      // Adiciona a nova classe de tema
+      root.classList.add(`theme-${userInstitution.toLowerCase()}`);
+    }
+  }, [userInstitution]);
+  // ----------------------------------------------
+
   const navigateTo = (screen: Screen, param?: string | [number, number]) => {
     if (Array.isArray(param)) {
       setMapCenter(param);
@@ -287,8 +299,8 @@ const App: React.FC = () => {
     const newGroup: Group = {
       ...newGroupData,
       id: `g${Date.now()}`,
-      posts: [],
       inviteCode: `G${Math.floor(Math.random() * 9000) + 1000}-${newGroupData.name.slice(0, 2).toUpperCase()}`, // Generate mock invite code
+      posts: [],
     };
     setGroups(prev => [...prev, newGroup]);
     alert(`Grupo ${newGroup.name} criado com sucesso! Convites enviados.`);
@@ -476,7 +488,7 @@ const App: React.FC = () => {
 
 
   return (
-    <div className="flex flex-col h-screen max-w-md mx-auto relative overflow-hidden bg-pmmg-khaki">
+    <div className="flex flex-col h-screen max-w-md mx-auto relative overflow-hidden bg-theme-khaki">
       {currentScreen === 'welcomeScreen' && <WelcomeScreen onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />}
       
       {currentScreen === 'requestAccess' && <RequestAccess onBack={() => navigateTo('welcomeScreen')} onSuccess={() => { setIsRegistered(true); navigateTo('onboardingSetup'); }} />}

@@ -55,16 +55,17 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
   const getMiniMapIcon = (isApproach: boolean) => {
     if (typeof window === 'undefined' || !window.google || !window.google.maps) return undefined; // Safety check
 
-    const color = isApproach ? '#002147' : (suspect.status === 'Foragido' ? '#e31c1c' : '#ffcc00');
+    // Usando variáveis CSS para cores
+    const color = isApproach ? 'var(--color-navy)' : 'var(--color-navy)';
     const iconName = isApproach ? 'pin_drop' : (suspect.status === 'Foragido' ? 'priority_high' : 'warning');
-    const textColor = isApproach ? '#ffcc00' : '#ffffff';
+    const textColor = 'var(--color-yellow)';
     
     const pathData = ICON_PATHS[iconName] || ICON_PATHS['warning'];
     
     // Aplicando REGRA DE OURO 2: translate(6 6) scale(0.75)
     const svg = `
       <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="16" cy="16" r="14" fill="${color}" stroke="#ffffff" stroke-width="2"/>
+        <circle cx="16" cy="16" r="14" fill="${color}" stroke="var(--color-yellow)" stroke-width="2"/>
         <path d="${pathData}" fill="${textColor}" transform="translate(6 6) scale(0.75)"/>
       </svg>
     `;
@@ -78,7 +79,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
 
 
   return (
-    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
+    <div className="flex flex-col h-full bg-theme-khaki overflow-hidden">
       {/* Fullscreen Photo Modal */}
       {fullscreenImage && (
         <div 
@@ -123,27 +124,27 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
 
           {/* Footer/Counter */}
           <div className="mt-6 px-8 text-center">
-            <p className="text-pmmg-yellow text-[11px] font-black uppercase tracking-[0.2em] bg-pmmg-navy/80 px-6 py-3 rounded-full border border-pmmg-yellow/40 shadow-xl">
+            <p className="text-theme-yellow text-[11px] font-black uppercase tracking-[0.2em] bg-theme-navy/80 px-6 py-3 rounded-full border border-theme-yellow/40 shadow-xl">
               {currentPhotoIndex + 1} / {photos.length} - VISUALIZAÇÃO DE IDENTIFICAÇÃO
             </p>
           </div>
         </div>
       )}
 
-      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-lg">
+      <header className="sticky top-0 z-50 bg-theme-navy px-4 py-4 flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-3">
           <button onClick={onBack} className="text-white active:scale-90 transition-transform">
             <span className="material-symbols-outlined">arrow_back_ios</span>
           </button>
           <div>
             <h1 className="font-bold text-sm leading-none text-white uppercase tracking-tight">Ficha Individual</h1>
-            <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">ID: #{suspect.id.slice(-6)}</p>
+            <p className="text-[10px] font-medium text-theme-yellow tracking-wider uppercase mt-1">ID: #{suspect.id.slice(-6)}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <button 
             onClick={() => onEdit(suspect.id)} 
-            className="bg-pmmg-yellow text-pmmg-navy p-1.5 rounded-full border border-pmmg-yellow/50 active:scale-95 transition-transform"
+            className="bg-theme-yellow text-theme-navy p-1.5 rounded-full border border-theme-yellow/50 active:scale-95 transition-transform"
             title="Editar Ficha"
           >
             <span className="material-symbols-outlined text-xl fill-icon">edit</span>
@@ -156,13 +157,13 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
 
       <main className="flex-1 overflow-y-auto pb-32 no-scrollbar">
         {/* Header Section with Photo and Text side-by-side */}
-        <section className="p-4 bg-gradient-to-b from-pmmg-navy to-pmmg-navy/80 pb-12 rounded-b-[2rem] shadow-xl">
+        <section className="p-4 bg-gradient-to-b from-theme-navy to-theme-navy/80 pb-12 rounded-b-[2rem] shadow-xl">
           
           <div className="flex gap-4 relative items-start">
             {/* Bloco da Foto (Esquerda) */}
             <div className="shrink-0">
               <div 
-                className="w-32 h-40 bg-slate-300 rounded-2xl border-2 border-pmmg-yellow/50 overflow-hidden shadow-2xl relative cursor-pointer active:scale-[0.98] transition-transform"
+                className="w-32 h-40 bg-slate-300 rounded-2xl border-2 border-theme-yellow/50 overflow-hidden shadow-2xl relative cursor-pointer active:scale-[0.98] transition-transform"
                 onClick={() => setFullscreenImage(suspect.photoUrl)}
               >
                 <img 
@@ -170,7 +171,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                   className="w-full h-full object-cover" 
                   src={suspect.photoUrl} 
                 />
-                <div className="absolute bottom-0 right-0 p-1.5 bg-pmmg-navy/60 rounded-tl-xl backdrop-blur-sm">
+                <div className="absolute bottom-0 right-0 p-1.5 bg-theme-navy/60 rounded-tl-xl backdrop-blur-sm">
                   <span className="material-symbols-outlined text-white text-sm">zoom_in</span>
                 </div>
               </div>
@@ -180,8 +181,8 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
             <div className="flex-1 flex flex-col justify-start">
               <div className="flex justify-end mb-2">
                 <span className={`text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg border border-white/20 uppercase tracking-widest ${
-                  suspect.status === 'Foragido' ? 'bg-pmmg-red animate-pulse' : 
-                  suspect.status === 'Suspeito' ? 'bg-pmmg-yellow text-pmmg-navy' : 'bg-pmmg-blue'
+                  suspect.status === 'Foragido' ? 'bg-theme-red animate-pulse' : 
+                  suspect.status === 'Suspeito' ? 'bg-theme-yellow text-theme-navy' : 'bg-theme-blue'
                 }`}>
                   {suspect.status}
                 </span>
@@ -189,7 +190,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
               
               <div className="mb-2">
                 <h2 className="text-xl font-bold text-white uppercase leading-tight">{suspect.name}</h2>
-                {suspect.nickname && <p className="text-pmmg-yellow text-xs font-semibold mt-1">Vulgo: "{suspect.nickname}"</p>}
+                {suspect.nickname && <p className="text-theme-yellow text-xs font-semibold mt-1">Vulgo: "{suspect.nickname}"</p>}
               </div>
               
               {/* Descrição Tática */}
@@ -210,34 +211,34 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
         <div className="px-4 -mt-6 space-y-3">
           <div className="pmmg-card">
             <div onClick={() => toggleSection('data')} className="flex items-center justify-between p-4 cursor-pointer">
-              <div className="flex items-center gap-3 text-pmmg-navy">
+              <div className="flex items-center gap-3 text-theme-navy">
                 <span className="material-symbols-outlined">person</span>
                 <span className="text-sm font-bold uppercase">Dados do Indivíduo</span>
               </div>
-              <span className="material-symbols-outlined text-pmmg-navy/40">
+              <span className="material-symbols-outlined text-theme-navy/40">
                 {expandedSection === 'data' ? 'expand_less' : 'expand_more'}
               </span>
             </div>
             {expandedSection === 'data' && (
-              <div className="p-4 space-y-4 border-t border-pmmg-navy/5">
+              <div className="p-4 space-y-4 border-t border-theme-navy/5">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase tracking-wider mb-0.5">CPF</p>
+                    <p className="text-[10px] text-theme-navy/50 font-bold uppercase tracking-wider mb-0.5">CPF</p>
                     <p className="text-sm font-bold text-slate-800">{suspect.cpf}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase tracking-wider mb-0.5">RG</p>
+                    <p className="text-[10px] text-theme-navy/50 font-bold uppercase tracking-wider mb-0.5">RG</p>
                     <p className="text-sm font-bold text-slate-800">{suspect.rg || 'N/D'}</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase tracking-wider mb-0.5">Nascimento</p>
+                    <p className="text-[10px] text-theme-navy/50 font-bold uppercase tracking-wider mb-0.5">Nascimento</p>
                     <p className="text-sm font-bold text-slate-800">{suspect.birthDate || 'N/D'}</p>
                   </div>
                 </div>
                 <div>
-                  <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase tracking-wider mb-0.5">Filiação (Genitora)</p>
+                  <p className="text-[10px] text-theme-navy/50 font-bold uppercase tracking-wider mb-0.5">Filiação (Genitora)</p>
                   <p className="text-sm font-bold text-slate-800">{suspect.motherName || 'Não Informado'}</p>
                 </div>
               </div>
@@ -246,19 +247,19 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
 
           <div className="pmmg-card">
              <div onClick={() => toggleSection('articles')} className="flex items-center justify-between p-4 cursor-pointer">
-              <div className="flex items-center gap-3 text-pmmg-navy">
+              <div className="flex items-center gap-3 text-theme-navy">
                 <span className="material-symbols-outlined">gavel</span>
                 <span className="text-sm font-bold uppercase">Artigos Criminais</span>
               </div>
-              <span className="material-symbols-outlined text-pmmg-navy/40">
+              <span className="material-symbols-outlined text-theme-navy/40">
                 {expandedSection === 'articles' ? 'expand_less' : 'expand_more'}
               </span>
             </div>
             {expandedSection === 'articles' && (
-              <div className="p-4 space-y-3 border-t border-pmmg-navy/5">
+              <div className="p-4 space-y-3 border-t border-theme-navy/5">
                 {suspect.articles && suspect.articles.length > 0 ? suspect.articles.map((art, i) => (
-                  <div key={i} className="flex items-start gap-3 p-2 bg-pmmg-navy/5 rounded border border-pmmg-navy/10">
-                    <span className="text-pmmg-navy font-bold text-sm">{art}</span>
+                  <div key={i} className="flex items-start gap-3 p-2 bg-theme-navy/5 rounded border border-theme-navy/10">
+                    <span className="text-theme-navy font-bold text-sm">{art}</span>
                     <p className="text-[10px] text-slate-500 italic mt-0.5">Enquadramento ativo no sistema.</p>
                   </div>
                 )) : (
@@ -271,20 +272,20 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
           {/* Vehicles Section */}
           <div className="pmmg-card">
             <div onClick={() => toggleSection('vehicles')} className="flex items-center justify-between p-4 cursor-pointer">
-              <div className="flex items-center gap-3 text-pmmg-navy">
+              <div className="flex items-center gap-3 text-theme-navy">
                 <span className="material-symbols-outlined">directions_car</span>
                 <span className="text-sm font-bold uppercase">Veículos Cadastrados</span>
               </div>
-              <span className="material-symbols-outlined text-pmmg-navy/40">
+              <span className="material-symbols-outlined text-theme-navy/40">
                 {expandedSection === 'vehicles' ? 'expand_less' : 'expand_more'}
               </span>
             </div>
             {expandedSection === 'vehicles' && (
-              <div className="p-4 space-y-3 border-t border-pmmg-navy/5">
+              <div className="p-4 space-y-3 border-t border-theme-navy/5">
                 {suspect.vehicles && suspect.vehicles.length > 0 ? suspect.vehicles.map((vehicle, i) => (
-                  <div key={i} className="p-3 bg-pmmg-navy/5 rounded border border-pmmg-navy/10">
+                  <div key={i} className="p-3 bg-theme-navy/5 rounded border border-theme-navy/10">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-bold text-pmmg-navy">{vehicle.plate}</p>
+                      <p className="text-sm font-bold text-theme-navy">{vehicle.plate}</p>
                       <span className="text-[10px] font-semibold text-slate-500">{vehicle.color}</span>
                     </div>
                     <p className="text-[11px] text-slate-700 mt-1">{vehicle.model}</p>
@@ -299,16 +300,16 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
           {/* Associations Section */}
           <div className="pmmg-card">
             <div onClick={() => toggleSection('associations')} className="flex items-center justify-between p-4 cursor-pointer">
-              <div className="flex items-center gap-3 text-pmmg-navy">
+              <div className="flex items-center gap-3 text-theme-navy">
                 <span className="material-symbols-outlined">link</span>
                 <span className="text-sm font-bold uppercase">Ligações e Contatos</span>
               </div>
-              <span className="material-symbols-outlined text-pmmg-navy/40">
+              <span className="material-symbols-outlined text-theme-navy/40">
                 {expandedSection === 'associations' ? 'expand_less' : 'expand_more'}
               </span>
             </div>
             {expandedSection === 'associations' && (
-              <div className="p-4 space-y-3 border-t border-pmmg-navy/5">
+              <div className="p-4 space-y-3 border-t border-theme-navy/5">
                 {suspect.associations && suspect.associations.length > 0 ? suspect.associations.map((association, i) => {
                   const associatedSuspect = findAssociatedSuspect(association.suspectId);
                   if (!associatedSuspect) return null;
@@ -316,17 +317,17 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                   return (
                     <div 
                       key={i} 
-                      className="flex items-center gap-3 p-3 bg-pmmg-navy/5 rounded border border-pmmg-navy/10 cursor-pointer active:bg-pmmg-navy/10 transition-colors"
+                      className="flex items-center gap-3 p-3 bg-theme-navy/5 rounded border border-theme-navy/10 cursor-pointer active:bg-theme-navy/10 transition-colors"
                       onClick={() => onOpenProfile(associatedSuspect.id)}
                     >
-                      <div className="w-10 h-10 shrink-0 rounded-full overflow-hidden bg-slate-300 border border-pmmg-navy/20">
+                      <div className="w-10 h-10 shrink-0 rounded-full overflow-hidden bg-slate-300 border border-theme-navy/20">
                         <img src={associatedSuspect.photoUrl} alt={associatedSuspect.name} className="w-full h-full object-cover" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase tracking-wider truncate">{association.relationship}</p>
-                        <h4 className="text-sm font-bold text-pmmg-navy truncate">{associatedSuspect.name}</h4>
+                        <p className="text-[10px] text-theme-navy/50 font-bold uppercase tracking-wider truncate">{association.relationship}</p>
+                        <h4 className="text-sm font-bold text-theme-navy truncate">{associatedSuspect.name}</h4>
                       </div>
-                      <span className="material-symbols-outlined text-pmmg-navy/40 text-lg shrink-0">arrow_forward_ios</span>
+                      <span className="material-symbols-outlined text-theme-navy/40 text-lg shrink-0">arrow_forward_ios</span>
                     </div>
                   );
                 }) : (
@@ -338,7 +339,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
 
           {/* Photo Gallery */}
           <div className="pmmg-card p-4">
-            <h3 className="text-[10px] font-bold text-pmmg-navy/60 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <h3 className="text-[10px] font-bold text-theme-navy/60 uppercase tracking-widest mb-3 flex items-center gap-2">
               <span className="material-symbols-outlined">photo_library</span>
               Galeria de Identificação ({photos.length})
             </h3>
@@ -347,7 +348,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                 <div 
                   key={i} 
                   onClick={() => setFullscreenImage(src)}
-                  className={`shrink-0 w-24 h-32 rounded-lg overflow-hidden border-2 transition-all active:scale-95 shadow-sm border-pmmg-navy/10`}
+                  className={`shrink-0 w-24 h-32 rounded-lg overflow-hidden border-2 transition-all active:scale-95 shadow-sm border-theme-navy/10`}
                 >
                   <img src={src} className="w-full h-full object-cover" alt="Thumbnail" />
                 </div>
@@ -359,7 +360,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
           {/* Endereço Principal */}
           {suspect.lat && suspect.lng && (
             <div className="pmmg-card overflow-hidden">
-              <div className="p-4 text-pmmg-navy bg-white/40">
+              <div className="p-4 text-theme-navy bg-white/40">
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined">location_on</span>
                   <span className="text-sm font-bold uppercase">Endereço Principal</span>
@@ -386,7 +387,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                   />
                 </GoogleMapWrapper>
                 <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors flex items-center justify-center">
-                  <div className="bg-pmmg-navy/80 text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-xl backdrop-blur-sm transform scale-90 group-hover:scale-100 transition-transform">
+                  <div className="bg-theme-navy/80 text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-xl backdrop-blur-sm transform scale-90 group-hover:scale-100 transition-transform">
                     <span className="material-symbols-outlined text-sm">open_in_full</span>
                     <span className="text-[10px] font-bold uppercase tracking-widest">Abrir Mapa Geral</span>
                   </div>
@@ -398,7 +399,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
           {/* Endereço da Abordagem (NOVO MAPA) */}
           {suspect.approachAddress && suspect.approachLat && suspect.approachLng && (
             <div className="pmmg-card overflow-hidden">
-              <div className="p-4 text-pmmg-navy bg-white/40">
+              <div className="p-4 text-theme-navy bg-white/40">
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined">pin_drop</span>
                   <span className="text-sm font-bold uppercase">Endereço da Abordagem</span>
@@ -425,7 +426,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                   />
                 </GoogleMapWrapper>
                 <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors flex items-center justify-center">
-                  <div className="bg-pmmg-navy/80 text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-xl backdrop-blur-sm transform scale-90 group-hover:scale-100 transition-transform">
+                  <div className="bg-theme-navy/80 text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-xl backdrop-blur-sm transform scale-90 group-hover:scale-100 transition-transform">
                     <span className="material-symbols-outlined text-sm">open_in_full</span>
                     <span className="text-[10px] font-bold uppercase tracking-widest">Abrir Mapa Geral</span>
                   </div>
