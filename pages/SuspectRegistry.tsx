@@ -49,6 +49,33 @@ const searchGoogleAddress = async (address: string): Promise<GeocodedLocation[]>
   return [];
 };
 
+// NOVO: Função auxiliar para Geocodificação Reversa (Coordenadas -> Endereço)
+const reverseGeocode = async (lat: number, lng: number): Promise<GeocodedLocation | null> => {
+  if (!GOOGLE_MAPS_API_KEY) {
+    console.error("GOOGLE_MAPS_API_KEY is missing.");
+    return null;
+  }
+  
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&language=pt-BR&key=${GOOGLE_MAPS_API_KEY}`;
+  const response = await fetch(url);
+  const data = await response.json();
+
+  if (data.status === 'OK' && data.results.length > 0) {
+    const result = data.results[0];
+    return {
+      name: result.formatted_address,
+      lat: lat,
+      lng: lng,
+    };
+  }
+  
+  if (data.status !== 'ZERO_RESULTS') {
+    console.error("Google Reverse Geocoding Error Status:", data.status, data.error_message);
+  }
+  
+  return null;
+};
+
 
 const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, onUpdate, currentSuspect, allSuspects }) => {
   const isEditing = !!currentSuspect;
@@ -82,6 +109,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
   );
   const [lastSeenAddressSuggestions, setLastSeenAddressSuggestions] = useState<GeocodedLocation[]>([]);
   const [isLastSeenSearching, setIsLastSeenSearching] = useState(false);
+  const [isLastSeenLocating, setIsLastSeenLocating] = useState(false); // NOVO: Estado para geolocalização
 
   // --- States for Approach Address (Abordagem) ---
   const initialApproachAddress = currentSuspect?.approachAddress || '';
@@ -94,6 +122,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
   );
   const [approachAddressSuggestions, setApproachAddressSuggestions] = useState<GeocodedLocation[]>([]);
   const [isApproachSearching, setIsApproachSearching] = useState(false);
+  const [isApproachLocating, setIsApproachLocating] = useState(false); // NOVO: Estado para geolocalização
 
   // Vehicle Input States
   const [newVehiclePlate, setNewVehiclePlate] = useState('');
@@ -110,6 +139,45 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
   // Default center for map wrapper if no location is selected
   const defaultMapCenter = { lat: -19.9167, lng: -43.9345 }; 
   
+  // --- Geolocation Logic ---
+  
+  const handleGetCurrentLocation = (setLocation: (loc: GeocodedLocation) => void, setIsLocating: (is: boolean) => void) => {
+    if (!navigator.geolocation) {
+      alert('Geolocalização não suportada pelo seu dispositivo.');
+      return;
+    }
+    
+    setIsLocating(true);
+    
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        try {
+          const location = await reverseGeocode(lat, lng);
+          if (location) {
+            setLocation(location);
+          } else {
+            alert(`Localização obtida, mas não foi possível encontrar o endereço. Coordenadas: ${lat.toFixed(5)}, ${lng.toFixed(5)}`);
+            setLocation({ name: `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`, lat, lng });
+          }
+        } catch (error) {
+          console.error("Erro na geocodificação reversa:", error);
+          alert("Erro ao buscar endereço a partir das coordenadas.");
+        } finally {
+          setIsLocating(false);
+        }
+      },
+      (error) => {
+        console.error('Erro ao obter localização:', error);
+        alert('Não foi possível obter sua localização atual. Verifique as permissões do dispositivo.');
+        setIsLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
+
   // --- Address Search Logic (Google Geocoding) ---
   
   // Last Seen Handlers
@@ -605,9 +673,19 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
                 type="text" 
               />
               <button 
+                onClick={() => handleGetCurrentLocation(handleSelectLastSeenLocation, setIsLastSeenLocating)}
+                disabled={isLastSeenLocating}
+                className="bg-pmmg-blue text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50 shrink-0"
+                title="Obter Localização Atual"
+              >
+                <span className="material-symbols-outlined text-xl animate-spin" style={{ display: isLastSeenLocating ? 'block' : 'none' }}>progress_activity</span>
+                <span className="material-symbols-outlined text-xl" style={{ display: isLastSeenLocating ? 'none' : 'block' }}>my_location</span>
+              </button>
+              <button 
                 onClick={handleLastSeenAddressSearch}
                 disabled={isLastSeenSearching}
-                className="bg-pmmg-navy text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50"
+                className="bg-pmmg-navy text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50 shrink-0"
+                title="Buscar Endereço"
               >
                 <span className="material-symbols-outlined text-xl animate-spin" style={{ display: isLastSeenSearching ? 'block' : 'none' }}>progress_activity</span>
                 <span className="material-symbols-outlined text-xl" style={{ display: isLastSeenSearching ? 'none' : 'block' }}>search</span>
@@ -677,9 +755,19 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
                 type="text" 
               />
               <button 
+                onClick={() => handleGetCurrentLocation(handleSelectApproachLocation, setIsApproachLocating)}
+                disabled={isApproachLocating}
+                className="bg-pmmg-blue text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50 shrink-0"
+                title="Obter Localização Atual"
+              >
+                <span className="material-symbols-outlined text-xl animate-spin" style={{ display: isApproachLocating ? 'block' : 'none' }}>progress_activity</span>
+                <span className="material-symbols-outlined text-xl" style={{ display: isApproachLocating ? 'none' : 'block' }}>my_location</span>
+              </button>
+              <button 
                 onClick={handleApproachAddressSearch}
                 disabled={isApproachSearching}
-                className="bg-pmmg-navy text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50"
+                className="bg-pmmg-navy text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50 shrink-0"
+                title="Buscar Endereço"
               >
                 <span className="material-symbols-outlined text-xl animate-spin" style={{ display: isApproachSearching ? 'block' : 'none' }}>progress_activity</span>
                 <span className="material-symbols-outlined text-xl" style={{ display: isApproachSearching ? 'none' : 'block' }}>search</span>
