@@ -90,6 +90,18 @@
         /* Ajustando para fundo branco/transparente no PMESP */
         @apply bg-white/70 border border-pmmg-navy/10 rounded-xl shadow-sm backdrop-blur-md overflow-hidden;
       }
+      
+      /* --- Gradiente do Cabeçalho do Perfil --- */
+      .profile-header-gradient {
+        /* Padrão PMMG */
+        background-image: linear-gradient(to bottom, #002147, rgba(0, 33, 71, 0.8));
+      }
+      
+      .theme-pmesp .profile-header-gradient {
+        /* Sobrescrita PMESP: Azul Primário PMESP (#234485) */
+        background-image: linear-gradient(to bottom, #234485, rgba(35, 68, 133, 0.8));
+      }
+      
       .material-symbols-outlined {
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
       }

@@ -156,7 +156,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
 
       <main className="flex-1 overflow-y-auto pb-32 no-scrollbar">
         {/* Header Section with Photo and Text side-by-side */}
-        <section className="p-4 bg-gradient-to-b from-pmmg-navy to-pmmg-navy/80 pb-12 rounded-b-[2rem] shadow-xl">
+        <section className="p-4 profile-header-gradient pb-12 rounded-b-[2rem] shadow-xl">
           
           <div className="flex gap-4 relative items-start">
             {/* Bloco da Foto (Esquerda) */}
