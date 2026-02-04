@@ -605,6 +605,9 @@ const App: React.FC = () => {
             navigateTo={navigateTo}
             group={activeGroup}
             allSuspects={suspects}
+            allOfficers={officers} // Passando todos os oficiais
+            userName={userName} // Passando nome do usuário
+            userRank={userRank} // Passando patente do usuário
             onOpenProfile={openProfile}
             addCustomMarker={(marker) => addGroupCustomMarker(activeGroup.id, marker)}
             updateCustomMarker={(marker) => updateGroupCustomMarker(activeGroup.id, marker)}

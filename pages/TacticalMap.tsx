@@ -5,12 +5,23 @@ import GoogleMapWrapper from '../components/GoogleMapWrapper';
 import { MarkerF, InfoWindowF, OverlayViewF, OverlayView } from '@react-google-maps/api';
 import { ICON_PATHS } from '../utils/iconPaths';
 
+// Definindo tipos enriquecidos para uso interno (se vierem do GroupTacticalMap)
+interface EnrichedSuspect extends Suspect {
+  authorName?: string;
+  authorRank?: string;
+}
+
+interface EnrichedCustomMarker extends CustomMarker {
+  authorName?: string;
+  authorRank?: string;
+}
+
 interface TacticalMapProps {
   navigateTo: (screen: Screen) => void;
-  suspects: Suspect[];
+  suspects: EnrichedSuspect[]; // Pode receber suspeitos enriquecidos
   onOpenProfile: (id: string) => void;
   initialCenter?: [number, number] | null;
-  customMarkers: CustomMarker[];
+  customMarkers: EnrichedCustomMarker[]; // Pode receber marcadores enriquecidos
   addCustomMarker: (marker: CustomMarker) => void;
   updateCustomMarker: (marker: CustomMarker) => void;
   deleteCustomMarker: (id: string) => void;
@@ -28,7 +39,7 @@ const DEFAULT_CENTER = { lat: -19.9167, lng: -43.9345 };
 
 // ✅ NOVO COMPONENTE: Marcador de Suspeito com Foto/Ícone
 const SuspectPhotoMarker = memo<{
-  suspect: Suspect;
+  suspect: EnrichedSuspect;
   position: { lat: number; lng: number };
   onClick: () => void;
   usePhotoMarker: boolean;
@@ -99,7 +110,7 @@ const SuspectPhotoMarker = memo<{
 
 // ✅ NOVO COMPONENTE: Marcador Customizado com HTML
 const CustomMarkerComponent = memo<{
-  markerData: CustomMarker;
+  markerData: EnrichedCustomMarker;
   position: { lat: number; lng: number };
   onClick: () => void;
 }>(({ markerData, position, onClick }) => {
@@ -449,6 +460,15 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                             <p className="text-[9px] text-slate-500 mt-1">{locationName || 'Local não especificado'}</p>
                           </div>
                         </div>
+                        
+                        {/* NOVO: Autor do Post (Apenas em contexto de grupo) */}
+                        {groupName && suspect.authorName && (
+                          <div className="mt-2 pt-2 border-t border-slate-100">
+                            <p className="text-[8px] font-bold text-pmmg-navy/50 uppercase">Compartilhado por:</p>
+                            <p className="text-[10px] font-black text-pmmg-red uppercase">{suspect.authorRank}. {suspect.authorName}</p>
+                          </div>
+                        )}
+                        
                         <div className="flex gap-2 mt-3">
                           <button 
                             onClick={() => onOpenProfile(suspect.id)} 
@@ -490,6 +510,15 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                     <div className="p-2 min-w-[150px]">
                       <p className="font-bold text-[11px] text-pmmg-navy uppercase leading-tight">{markerData.title}</p>
                       <p className="text-[10px] text-slate-600 mt-1">{markerData.description}</p>
+                      
+                      {/* NOVO: Autor do Ponto (Apenas em contexto de grupo) */}
+                      {groupName && markerData.authorName && (
+                        <div className="mt-2 pt-2 border-t border-slate-100">
+                          <p className="text-[8px] font-bold text-pmmg-navy/50 uppercase">Criado por:</p>
+                          <p className="text-[10px] font-black text-pmmg-red uppercase">{markerData.authorRank}. {markerData.authorName}</p>
+                        </div>
+                      )}
+                      
                       <div className="flex gap-2 mt-3">
                         <button 
                           onClick={() => { setEditingMarker(markerData); setActiveInfoWindow(null); }}
