@@ -45,20 +45,6 @@ const GroupTacticalMap: React.FC<GroupTacticalMapProps> = ({
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <header className="sticky top-0 z-[1000] bg-pmmg-navy px-4 py-4 shadow-xl">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button onClick={() => navigateTo('groupDetail')} className="text-white active:scale-90 transition-transform">
-              <span className="material-symbols-outlined">arrow_back_ios</span>
-            </button>
-            <div className="flex-1 min-w-0">
-              <h1 className="font-black text-sm text-white leading-tight uppercase tracking-tight truncate">Mapa Tático do Grupo</h1>
-              <p className="text-[9px] font-medium text-pmmg-yellow tracking-wider uppercase mt-0.5">Grupo: {group.name}</p>
-            </div>
-          </div>
-        </div>
-      </header>
-      
       {/* Render the main TacticalMap component with filtered data */}
       <div className="flex-1">
         <TacticalMap
@@ -67,9 +53,10 @@ const GroupTacticalMap: React.FC<GroupTacticalMapProps> = ({
           onOpenProfile={onOpenProfile}
           initialCenter={initialCenter}
           customMarkers={group.customMarkers} // Group-specific markers
-          addCustomMarker={addCustomMarker}
-          updateCustomMarker={updateCustomMarker}
-          deleteCustomMarker={deleteCustomMarker}
+          addCustomMarker={(marker) => addCustomMarker(group.id, marker)} // Pass group ID to App.tsx handler
+          updateCustomMarker={(marker) => updateCustomMarker(group.id, marker)} // Pass group ID to App.tsx handler
+          deleteCustomMarker={(markerId) => deleteCustomMarker(group.id, markerId)} // Pass group ID to App.tsx handler
+          groupName={group.name} // Pass the group name for header customization
         />
       </div>
     </div>

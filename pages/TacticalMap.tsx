@@ -14,6 +14,7 @@ interface TacticalMapProps {
   addCustomMarker: (marker: CustomMarker) => void;
   updateCustomMarker: (marker: CustomMarker) => void;
   deleteCustomMarker: (id: string) => void;
+  groupName?: string; // NOVO: Nome do grupo, se estiver no contexto de grupo
 }
 
 type MapFilter = 'Todos' | 'Foragido' | 'Suspeito' | 'Preso' | 'CPF Cancelado';
@@ -165,7 +166,7 @@ const UserMarkerComponent = memo<{
   );
 });
 
-const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenProfile, initialCenter, customMarkers, addCustomMarker, updateCustomMarker, deleteCustomMarker }) => {
+const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenProfile, initialCenter, customMarkers, addCustomMarker, updateCustomMarker, deleteCustomMarker, groupName }) => {
   // CORREÇÃO: Inicializando useRef com null
   const mapRef = useRef<google.maps.Map | null>(null);
   
@@ -338,12 +339,19 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       <header className="sticky top-0 z-[1000] bg-pmmg-navy px-4 py-4 shadow-xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
+            <button onClick={() => navigateTo(groupName ? 'groupDetail' : 'dashboard')} className="text-white active:scale-90 transition-transform">
+              <span className="material-symbols-outlined">arrow_back_ios</span>
+            </button>
             <div className="w-9 h-9 shrink-0 bg-white rounded-full flex items-center justify-center p-1 border-2 border-pmmg-red">
               <span className="material-symbols-outlined text-pmmg-navy text-xl">map</span>
             </div>
             <div>
-              <h1 className="font-bold text-xs leading-none text-white uppercase tracking-tight">Mapa Tático</h1>
-              <p className="text-[9px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">Inteligência Territorial</p>
+              <h1 className="font-bold text-xs leading-none text-white uppercase tracking-tight">
+                {groupName ? 'Mapa Tático do Grupo' : 'Mapa Tático'}
+              </h1>
+              <p className="text-[9px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">
+                {groupName || 'Inteligência Territorial'}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -739,7 +747,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         </div>
       </div>
 
-      <BottomNav activeScreen="map" navigateTo={navigateTo} />
+      <BottomNav activeScreen={groupName ? 'groupsList' : 'map'} navigateTo={navigateTo} />
     </div>
   );
 };
