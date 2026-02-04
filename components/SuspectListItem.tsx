@@ -20,9 +20,9 @@ const SuspectListItem: React.FC<SuspectListItemProps> = ({
   // Hook call is now safely at the top level of this component
   const longPressProps = useLongPress(() => handleLongPress(s.id));
 
-  const statusColor = s.status === 'Foragido' ? 'bg-pmmg-red' : 
+  const statusColor = s.status === 'Foragido' ? 'bg-pmmg-red text-white' : 
                         s.status === 'Suspeito' ? 'bg-pmmg-yellow text-primary-dark' :
-                        s.status === 'Preso' ? 'bg-pmmg-blue' : 'bg-slate-700';
+                        s.status === 'Preso' ? 'bg-pmmg-blue text-white' : 'bg-slate-700 text-white';
     
   const primaryVehicle = s.vehicles && s.vehicles.length > 0 ? `${s.vehicles[0].plate} (${s.vehicles[0].model})` : null;
 
