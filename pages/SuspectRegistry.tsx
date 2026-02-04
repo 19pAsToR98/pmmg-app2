@@ -4,6 +4,7 @@ import BottomNav from '../components/BottomNav';
 import GoogleMapWrapper from '../components/GoogleMapWrapper';
 import { MarkerF } from '@react-google-maps/api';
 import { ICON_PATHS } from '../utils/iconPaths';
+import { getCurrentLocation } from '../utils/geolocation'; // NEW IMPORT
 
 interface SuspectRegistryProps {
   navigateTo: (screen: Screen) => void;
@@ -141,18 +142,15 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
   
   // --- Geolocation Logic ---
   
-  const handleGetCurrentLocation = (setLocation: (loc: GeocodedLocation) => void, setIsLocating: (is: boolean) => void) => {
-    if (!navigator.geolocation) {
-      alert('Geolocalização não suportada pelo seu dispositivo.');
-      return;
-    }
-    
+  const handleGetCurrentLocation = async (setLocation: (loc: GeocodedLocation) => void, setIsLocating: (is: boolean) => void) => {
     setIsLocating(true);
     
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
+    try {
+      const position = await getCurrentLocation(true); // Use the new utility
+      
+      if (position) {
+        const lat = position.lat;
+        const lng = position.lng;
         
         try {
           const location = await reverseGeocode(lat, lng);
@@ -165,17 +163,16 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
         } catch (error) {
           console.error("Erro na geocodificação reversa:", error);
           alert("Erro ao buscar endereço a partir das coordenadas.");
-        } finally {
-          setIsLocating(false);
         }
-      },
-      (error) => {
-        console.error('Erro ao obter localização:', error);
-        alert('Não foi possível obter sua localização atual. Verifique as permissões do dispositivo.');
-        setIsLocating(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
+      } else {
+        alert('Não foi possível obter sua localização atual.');
+      }
+    } catch (error) {
+      console.error('Erro ao obter localização:', error);
+      alert(`Erro ao obter sua localização atual: ${error instanceof Error ? error.message : 'Verifique as permissões do dispositivo.'}`);
+    } finally {
+      setIsLocating(false);
+    }
   };
 
   // --- Address Search Logic (Google Geocoding) ---

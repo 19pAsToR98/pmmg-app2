@@ -4,6 +4,7 @@ import BottomNav from '../components/BottomNav';
 import GoogleMapWrapper from '../components/GoogleMapWrapper';
 import { MarkerF, InfoWindowF, OverlayViewF, OverlayView } from '@react-google-maps/api';
 import { ICON_PATHS } from '../utils/iconPaths';
+import { getCurrentLocation } from '../utils/geolocation'; // NEW IMPORT
 
 // Definindo tipos enriquecidos para uso interno (se vierem do GroupTacticalMap)
 interface EnrichedSuspect extends Suspect {
@@ -310,26 +311,24 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   }, []);
 
   // --- FIX: Recenter function now actively requests geolocation ---
-  const recenter = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const newPos = { lat: position.coords.latitude, lng: position.coords.longitude };
-          setUserPos(newPos); // Update user position state
-          
-          if (mapRef.current) {
-            mapRef.current.setCenter(newPos);
-            mapRef.current.setZoom(16);
-          }
-        },
-        (error) => {
-          console.error('Erro ao obter localização:', error);
-          alert('Não foi possível obter sua localização atual. Verifique as permissões do dispositivo.');
-        },
-        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-      );
-    } else {
-      alert('Geolocalização não suportada pelo seu dispositivo.');
+  const recenter = async () => {
+    try {
+      const position = await getCurrentLocation(true); // Request high accuracy
+      
+      if (position) {
+        const newPos = { lat: position.lat, lng: position.lng };
+        setUserPos(newPos); // Update user position state
+        
+        if (mapRef.current) {
+          mapRef.current.setCenter(newPos);
+          mapRef.current.setZoom(16);
+        }
+      } else {
+        alert('Não foi possível obter sua localização atual.');
+      }
+    } catch (error) {
+      console.error('Erro ao obter localização:', error);
+      alert('Não foi possível obter sua localização atual. Verifique as permissões do dispositivo.');
     }
   };
   // --- END FIX ---
