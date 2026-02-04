@@ -19,8 +19,6 @@ import GroupsList from './pages/GroupsList'; // NOVO: Lista de Grupos
 import GroupCreation from './pages/GroupCreation'; // NOVO: Criação de Grupo
 import GroupDetail from './pages/GroupDetail'; // NOVO: Detalhe do Grupo
 import GroupTacticalMap from './pages/GroupTacticalMap'; // NOVO: Mapa do Grupo
-import { GoogleMapsProvider } from './components/GoogleMapsProvider'; // NOVO: Provedor de Maps
-import ScreenContainer from './components/ScreenContainer'; // NOVO: Container para manter o estado
 
 const INITIAL_SUSPECTS: Suspect[] = [
   {
@@ -586,206 +584,159 @@ const App: React.FC = () => {
 
   // Determina a classe de tema
   const themeClass = userInstitution === 'PMMG' ? 'theme-pmmg' : 'theme-pmesp';
-  
-  // Lista de telas que usam o BottomNav e devem ser mantidas montadas
-  const mainScreens: Screen[] = ['dashboard', 'map', 'aiTools', 'groupsList', 'store'];
 
-  // Renderização de telas modais/secundárias
-  const renderModalScreen = () => {
-    switch (currentScreen) {
-      case 'welcomeScreen':
-        return <WelcomeScreen onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />;
-      case 'requestAccess':
-        return <RequestAccess onBack={() => navigateTo('welcomeScreen')} onSuccess={() => { setIsRegistered(true); navigateTo('onboardingSetup'); }} />;
-      case 'onboardingSetup':
-        return isRegistered && (
-          <OnboardingSetup 
-            onComplete={handleOnboardingComplete} 
-            onInstitutionChange={setUserInstitution}
-          />
-        );
-      case 'registry':
-        return (
-          <SuspectRegistry 
-            navigateTo={navigateTo} 
-            onSave={addSuspect} 
-            onUpdate={updateSuspect}
-            currentSuspect={suspectToEdit}
-            allSuspects={suspects} 
-          />
-        );
-      case 'profile':
-        return selectedSuspect && (
-          <SuspectProfile 
-            suspect={selectedSuspect} 
-            onBack={() => navigateTo('dashboard')} 
-            navigateTo={navigateTo} 
-            allSuspects={suspects} 
-            onOpenProfile={openProfile}
-            onEdit={handleEditProfile}
-          />
-        );
-      case 'suspectsManagement':
-        return (
-          <SuspectsManagement
-            navigateTo={navigateTo}
-            onOpenProfile={openProfile}
-            suspects={suspects}
-            initialStatusFilter={initialSuspectFilter}
-            deleteSuspects={deleteSuspects}
-          />
-        );
-      case 'groupCreation':
-        return (
-          <GroupCreation
-            navigateTo={navigateTo}
-            allOfficers={officers}
-            onCreateGroup={handleCreateGroup}
-          />
-        );
-      case 'groupDetail':
-        return enrichedActiveGroup && (
-          <GroupDetail
-            navigateTo={navigateTo}
-            group={enrichedActiveGroup}
-            allOfficers={officers}
-            allSuspects={suspects}
-            onOpenProfile={openProfile}
-            onShareSuspect={handleShareSuspect}
-            onUpdateGroup={handleUpdateGroup}
-            onDeleteGroup={handleDeleteGroup}
-            onJoinGroup={() => handleJoinGroup(enrichedActiveGroup.id, 'o2')}
-          />
-        );
-      case 'groupMap':
-        return activeGroup && (
-          <GroupTacticalMap
-              navigateTo={navigateTo}
-              group={activeGroup}
-              allSuspects={suspects}
-              allOfficers={officers}
-              userName={userName}
-              userRank={userRank}
-              onOpenProfile={openProfile}
-              addCustomMarker={(marker) => addGroupCustomMarker(activeGroup.id, marker)}
-              updateCustomMarker={(marker) => updateGroupCustomMarker(activeGroup.id, marker)}
-              deleteCustomMarker={(markerId) => deleteGroupCustomMarker(activeGroup.id, markerId)}
-          />
-        );
-      case 'plateConsultation':
-        return (
-          <PlateConsultation 
-            navigateTo={navigateTo} 
-            userRank={userRank} 
-          />
-        );
-      case 'voiceReport':
-        return (
-          <VoiceReport 
-            navigateTo={navigateTo} 
-            userRank={userRank} 
-          />
-        );
-      case 'productList':
-        return selectedCategoryId && (
-          <ProductList
-            navigateTo={navigateTo}
-            categoryId={selectedCategoryId}
-          />
-        );
-      case 'profileSettings':
-        return (
-          <ProfileSettings 
-            navigateTo={navigateTo} 
-            onBack={() => navigateTo('dashboard')} 
-            currentRank={userRank} 
-            onRankChange={setUserRank}
-            userAvatar={userAvatar}
-          />
-        );
-      case 'contacts':
-        return (
-          <TacticalContacts
-            navigateTo={navigateTo}
-            officers={officers}
-            contacts={contacts}
-            onSendRequest={onSendRequest}
-            onAcceptRequest={onAcceptRequest}
-            onRejectRequest={onRejectRequest}
-          />
-        );
-      default:
-        return null;
-    }
-  };
-
-  // Se a tela atual for uma das telas modais/secundárias, renderizamos apenas ela.
-  if (!mainScreens.includes(currentScreen)) {
-    return (
-      <div className={`flex flex-col h-screen max-w-md mx-auto relative overflow-hidden ${themeClass}`}>
-        <GoogleMapsProvider>
-          {renderModalScreen()}
-        </GoogleMapsProvider>
-      </div>
-    );
-  }
-
-  // Se a tela atual for uma das telas principais, renderizamos todas elas no ScreenContainer.
   return (
     <div className={`flex flex-col h-screen max-w-md mx-auto relative overflow-hidden ${themeClass}`}>
-      <GoogleMapsProvider>
-        {/* Container principal para as telas que usam BottomNav */}
-        <div className="relative w-full h-full">
-          
-          <ScreenContainer screenId="dashboard" activeScreen={currentScreen}>
-            <Dashboard 
-              navigateTo={navigateTo} 
-              navigateToSuspectsManagement={navigateToSuspectsManagement} 
-              onOpenProfile={openProfile} 
-              suspects={suspects} 
-            />
-          </ScreenContainer>
-          
-          <ScreenContainer screenId="map" activeScreen={currentScreen}>
-            <TacticalMap 
-              navigateTo={navigateTo} 
-              suspects={suspects} 
-              onOpenProfile={openProfile} 
-              initialCenter={mapCenter} 
-              customMarkers={customMarkers} 
-              addCustomMarker={addCustomMarker} 
-              updateCustomMarker={updateCustomMarker}
-              deleteCustomMarker={deleteCustomMarker}
-            />
-          </ScreenContainer>
-          
-          <ScreenContainer screenId="aiTools" activeScreen={currentScreen}>
-            <AITools 
-              navigateTo={navigateTo} 
-              userRank={userRank} 
-              aiAvatar={aiAvatar} 
-            />
-          </ScreenContainer>
-          
-          <ScreenContainer screenId="groupsList" activeScreen={currentScreen}>
-            <GroupsList 
-              navigateTo={navigateTo} 
-              userGroups={userGroups}
-              officers={officers} 
-              allSuspects={suspects}
-              openGroup={openGroup}
-              pendingRequestsCount={pendingRequestsCount}
-            />
-          </ScreenContainer>
-          
-          <ScreenContainer screenId="store" activeScreen={currentScreen}>
-            <Store 
-              navigateTo={navigateTo} 
-            />
-          </ScreenContainer>
-          
-        </div>
-      </GoogleMapsProvider>
+      {currentScreen === 'welcomeScreen' && <WelcomeScreen onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />}
+      
+      {currentScreen === 'requestAccess' && <RequestAccess onBack={() => navigateTo('welcomeScreen')} onSuccess={() => { setIsRegistered(true); navigateTo('onboardingSetup'); }} />}
+      
+      {currentScreen === 'onboardingSetup' && isRegistered && (
+        <OnboardingSetup 
+          onComplete={handleOnboardingComplete} 
+          onInstitutionChange={setUserInstitution} // Passando o setter para atualização dinâmica
+        />
+      )}
+      
+      {currentScreen === 'dashboard' && <Dashboard navigateTo={navigateTo} navigateToSuspectsManagement={navigateToSuspectsManagement} onOpenProfile={openProfile} suspects={suspects} />}
+      {currentScreen === 'registry' && (
+        <SuspectRegistry 
+          navigateTo={navigateTo} 
+          onSave={addSuspect} 
+          onUpdate={updateSuspect}
+          currentSuspect={suspectToEdit}
+          allSuspects={suspects} 
+        />
+      )}
+      {currentScreen === 'profile' && selectedSuspect && (
+        <SuspectProfile 
+          suspect={selectedSuspect} 
+          onBack={() => navigateTo('dashboard')} 
+          navigateTo={navigateTo} 
+          allSuspects={suspects} 
+          onOpenProfile={openProfile}
+          onEdit={handleEditProfile}
+        />
+      )}
+      {currentScreen === 'suspectsManagement' && (
+        <SuspectsManagement
+          navigateTo={navigateTo}
+          onOpenProfile={openProfile}
+          suspects={suspects}
+          initialStatusFilter={initialSuspectFilter}
+          deleteSuspects={deleteSuspects}
+        />
+      )}
+      
+      {currentScreen === 'groupsList' && (
+        <GroupsList 
+          navigateTo={navigateTo} 
+          userGroups={userGroups}
+          officers={officers} 
+          allSuspects={suspects}
+          openGroup={openGroup}
+          pendingRequestsCount={pendingRequestsCount}
+        />
+      )}
+      
+      {currentScreen === 'groupCreation' && (
+        <GroupCreation
+          navigateTo={navigateTo}
+          allOfficers={officers}
+          onCreateGroup={handleCreateGroup}
+        />
+      )}
+      
+      {currentScreen === 'groupDetail' && enrichedActiveGroup && (
+        <GroupDetail
+          navigateTo={navigateTo}
+          group={enrichedActiveGroup}
+          allOfficers={officers}
+          allSuspects={suspects}
+          onOpenProfile={openProfile}
+          onShareSuspect={handleShareSuspect}
+          onUpdateGroup={handleUpdateGroup}
+          onDeleteGroup={handleDeleteGroup}
+          // Adicionando função de teste para entrada de membro
+          onJoinGroup={() => handleJoinGroup(enrichedActiveGroup.id, 'o2')}
+        />
+      )}
+      
+      {currentScreen === 'groupMap' && activeGroup && (
+        <GroupTacticalMap
+            navigateTo={navigateTo}
+            group={activeGroup}
+            allSuspects={suspects}
+            allOfficers={officers} // Passando todos os oficiais
+            userName={userName} // Passando nome do usuário
+            userRank={userRank} // Passando patente do usuário
+            onOpenProfile={openProfile}
+            addCustomMarker={(marker) => addGroupCustomMarker(activeGroup.id, marker)}
+            updateCustomMarker={(marker) => updateGroupCustomMarker(activeGroup.id, marker)}
+            deleteCustomMarker={(markerId) => deleteGroupCustomMarker(activeGroup.id, markerId)}
+        />
+      )}
+      
+      {currentScreen === 'aiTools' && <AITools navigateTo={navigateTo} userRank={userRank} aiAvatar={aiAvatar} />}
+      
+      {currentScreen === 'plateConsultation' && (
+        <PlateConsultation 
+          navigateTo={navigateTo} 
+          userRank={userRank} 
+        />
+      )}
+      {currentScreen === 'voiceReport' && (
+        <VoiceReport 
+          navigateTo={navigateTo} 
+          userRank={userRank} 
+        />
+      )}
+      
+      {currentScreen === 'store' && (
+        <Store 
+          navigateTo={navigateTo} 
+        />
+      )}
+      
+      {currentScreen === 'productList' && selectedCategoryId && (
+        <ProductList
+          navigateTo={navigateTo}
+          categoryId={selectedCategoryId}
+        />
+      )}
+      
+      {currentScreen === 'profileSettings' && (
+        <ProfileSettings 
+          navigateTo={navigateTo} 
+          onBack={() => navigateTo('dashboard')} 
+          currentRank={userRank} 
+          onRankChange={setUserRank}
+          userAvatar={userAvatar}
+        />
+      )}
+      
+      {currentScreen === 'map' && (
+        <TacticalMap 
+          navigateTo={navigateTo} 
+          suspects={suspects} 
+          onOpenProfile={openProfile} 
+          initialCenter={mapCenter} 
+          customMarkers={customMarkers} 
+          addCustomMarker={addCustomMarker} 
+          updateCustomMarker={updateCustomMarker}
+          deleteCustomMarker={deleteCustomMarker}
+        />
+      )}
+      {currentScreen === 'contacts' && (
+        <TacticalContacts
+          navigateTo={navigateTo}
+          officers={officers}
+          contacts={contacts}
+          onSendRequest={onSendRequest}
+          onAcceptRequest={onAcceptRequest}
+          onRejectRequest={onRejectRequest}
+        />
+      )}
     </div>
   );
 };
