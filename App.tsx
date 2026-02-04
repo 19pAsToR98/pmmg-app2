@@ -18,6 +18,7 @@ import ProfileSettings from './pages/ProfileSettings';
 import GroupsList from './pages/GroupsList'; // NOVO: Lista de Grupos
 import GroupCreation from './pages/GroupCreation'; // NOVO: Criação de Grupo
 import GroupDetail from './pages/GroupDetail'; // NOVO: Detalhe do Grupo
+import GroupTacticalMap from './pages/GroupTacticalMap'; // NOVO: Mapa do Grupo
 
 const INITIAL_SUSPECTS: Suspect[] = [
   {
@@ -193,6 +194,17 @@ const MOCK_GROUPS: Group[] = [
         observation: 'Adicionando ficha de Patrícia. Possível rota de fuga para Contagem.',
         timestamp: new Date().toISOString(), // Now
       }
+    ],
+    customMarkers: [ // NOVO: Marcadores customizados do grupo
+      {
+        id: 'gm1',
+        lat: -19.9300,
+        lng: -43.9400,
+        title: 'Ponto de Encontro',
+        description: 'Local de reunião antes da operação.',
+        icon: 'flag',
+        color: 'bg-pmmg-blue'
+      }
     ]
   }
 ];
@@ -273,7 +285,7 @@ const App: React.FC = () => {
     }
     
     // Limpa IDs ativos ao sair das telas de detalhe
-    if (screen !== 'groupDetail') setActiveGroupId(null);
+    if (screen !== 'groupDetail' && screen !== 'groupMap') setActiveGroupId(null);
   };
   
   const navigateToSuspectsManagement = (statusFilter: Suspect['status'] | 'Todos' = 'Todos') => {
@@ -283,12 +295,13 @@ const App: React.FC = () => {
 
   // --- Lógica de Grupos ---
   
-  const handleCreateGroup = (newGroupData: Omit<Group, 'id' | 'posts' | 'inviteCode'>) => {
+  const handleCreateGroup = (newGroupData: Omit<Group, 'id' | 'posts' | 'inviteCode' | 'customMarkers'>) => {
     const newGroup: Group = {
       ...newGroupData,
       id: `g${Date.now()}`,
       posts: [],
       inviteCode: `G${Math.floor(Math.random() * 9000) + 1000}-${newGroupData.name.slice(0, 2).toUpperCase()}`, // Generate mock invite code
+      customMarkers: [], // Initialize empty markers array
     };
     setGroups(prev => [...prev, newGroup]);
     alert(`Grupo ${newGroup.name} criado com sucesso! Convites enviados.`);
@@ -325,6 +338,41 @@ const App: React.FC = () => {
   const openGroup = (groupId: string) => {
     setActiveGroupId(groupId);
     navigateTo('groupDetail');
+  };
+  
+  // --- Lógica de Marcadores de Grupo ---
+  
+  const addGroupCustomMarker = (groupId: string, marker: CustomMarker) => {
+    setGroups(prev => prev.map(group => {
+        if (group.id === groupId) {
+            return { ...group, customMarkers: [...group.customMarkers, marker] };
+        }
+        return group;
+    }));
+  };
+
+  const updateGroupCustomMarker = (groupId: string, updatedMarker: CustomMarker) => {
+    setGroups(prev => prev.map(group => {
+        if (group.id === groupId) {
+            return { 
+                ...group, 
+                customMarkers: group.customMarkers.map(m => m.id === updatedMarker.id ? updatedMarker : m) 
+            };
+        }
+        return group;
+    }));
+  };
+
+  const deleteGroupCustomMarker = (groupId: string, markerId: string) => {
+    setGroups(prev => prev.map(group => {
+        if (group.id === groupId) {
+            return { 
+                ...group, 
+                customMarkers: group.customMarkers.filter(m => m.id !== markerId) 
+            };
+        }
+        return group;
+    }));
   };
 
   // --- Lógica de Contatos (para convites de grupo) ---
@@ -549,6 +597,18 @@ const App: React.FC = () => {
           onShareSuspect={handleShareSuspect}
           onUpdateGroup={handleUpdateGroup}
           onDeleteGroup={handleDeleteGroup}
+        />
+      )}
+      
+      {currentScreen === 'groupMap' && activeGroup && (
+        <GroupTacticalMap
+            navigateTo={navigateTo}
+            group={activeGroup}
+            allSuspects={suspects}
+            onOpenProfile={openProfile}
+            addCustomMarker={(marker) => addGroupCustomMarker(activeGroup.id, marker)}
+            updateCustomMarker={(marker) => updateGroupCustomMarker(activeGroup.id, marker)}
+            deleteCustomMarker={(markerId) => deleteGroupCustomMarker(activeGroup.id, markerId)}
         />
       )}
       

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Screen, Suspect, Officer, UserRank, Group } from '../types';
+import GroupTimelineFilters from '../components/GroupTimelineFilters';
 
 // Define the expected enriched types based on App.tsx logic
 interface EnrichedGroupPost {
@@ -36,6 +37,7 @@ interface GroupDetailProps {
   onDeleteGroup: (groupId: string) => void;
 }
 
+type ActiveTab = 'timeline' | 'members'; // Revertido para 2 tabs
 type PostFilterStatus = Suspect['status'] | 'Todos';
 const STATUS_OPTIONS: PostFilterStatus[] = ['Todos', 'Foragido', 'Suspeito', 'Preso', 'CPF Cancelado'];
 
@@ -44,7 +46,7 @@ const CURRENT_USER_ID = 'EU';
 
 
 const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspects, onOpenProfile, onShareSuspect, onUpdateGroup, onDeleteGroup }) => {
-  const [activeTab, setActiveTab] = useState<'timeline' | 'members'>('timeline');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('timeline');
   const [viewMode, setViewMode] = useState<'list' | 'gallery'>('list');
   const [showShareModal, setShowShareModal] = useState(false);
   const [searchSuspect, setSearchSuspect] = useState('');
@@ -249,6 +251,15 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
           </div>
           
           <div className="flex items-center gap-2">
+            {/* NOVO: Botão de Mapa Tático */}
+            <button 
+              onClick={() => navigateTo('groupMap')}
+              className="w-10 h-10 bg-white/10 text-white rounded-xl flex items-center justify-center active:scale-95 transition-transform shrink-0"
+              title="Ver Mapa Tático do Grupo"
+            >
+              <span className="material-symbols-outlined text-xl">map</span>
+            </button>
+            
             {/* Botão de Postar */}
             <button 
               onClick={() => {
@@ -334,7 +345,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
                   value={postSearchQuery}
                   onChange={(e) => setPostSearchQuery(e.target.value)}
                   placeholder="BUSCAR NOME, CPF OU OBSERVAÇÃO..."
-                  className="w-full pl-9 pr-4 py-3 bg-white/60 border-none rounded-2xl text-[10px] font-black uppercase placeholder:text-slate-400 focus:ring-2 focus:ring-pmmg-navy/10 transition-all shadow-inner"
+                  className="w-full pl-10 pr-4 py-3 bg-white/60 border-none rounded-2xl text-[10px] font-black uppercase placeholder:text-slate-400 focus:ring-2 focus:ring-pmmg-navy/10 transition-all shadow-inner"
                 />
               </div>
               
