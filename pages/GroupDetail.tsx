@@ -34,6 +34,7 @@ interface GroupDetailProps {
   // Novas props para gerenciamento (simuladas no App.tsx)
   onUpdateGroup: (updatedGroup: Group) => void;
   onDeleteGroup: (groupId: string) => void;
+  onAddToCollection: (suspectId: string) => void; // NOVO: Adicionar à coleção
 }
 
 type PostFilterStatus = Suspect['status'] | 'Todos';
@@ -43,7 +44,7 @@ const STATUS_OPTIONS: PostFilterStatus[] = ['Todos', 'Foragido', 'Suspeito', 'Pr
 const CURRENT_USER_ID = 'EU';
 
 
-const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspects, onOpenProfile, onShareSuspect, onUpdateGroup, onDeleteGroup }) => {
+const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspects, onOpenProfile, onShareSuspect, onUpdateGroup, onDeleteGroup, onAddToCollection }) => {
   const [activeTab, setActiveTab] = useState<'timeline' | 'members'>('timeline');
   const [viewMode, setViewMode] = useState<'list' | 'gallery'>('list');
   const [showShareModal, setShowShareModal] = useState(false);
@@ -364,7 +365,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
               {showTimelineFilters && (
                 <div 
                   ref={timelineFilterRef}
-                  className="absolute top-full right-0 mt-2 w-72 bg-white rounded-3xl shadow-2xl border border-pmmg-navy/10 z-[100] p-5 animate-in fade-in slide-in-from-top-2 duration-200"
+                  className="absolute top-full right-0 mt-3 w-72 bg-white rounded-3xl shadow-2xl border border-pmmg-navy/10 z-[100] p-5 animate-in fade-in slide-in-from-top-2 duration-200"
                 >
                   <div className="flex items-center justify-between mb-4">
                     <h4 className="text-[9px] font-black uppercase tracking-widest text-pmmg-navy/60">Filtros Operacionais</h4>
@@ -437,23 +438,43 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
             {filteredPosts.length > 0 ? (
               viewMode === 'list' ? (
                 <div className="space-y-6 mt-4 animate-in fade-in duration-300">
-                  {filteredPosts.map((post) => (
+                  {filteredPosts.map((post) => {
+                    const isMyPost = post.authorId === CURRENT_USER_ID;
+                    
+                    return (
                     <div key={post.id} className="relative pl-6">
                       {/* Timeline Connector */}
                       <div className="absolute left-0 top-0 bottom-0 w-1 bg-pmmg-navy/10 rounded-full"></div>
-                      <div className="absolute left-[-4px] top-4 w-3 h-3 bg-pmmg-navy border-2 border-white rounded-full shadow-sm"></div>
+                      <div className={`absolute left-[-4px] top-4 w-3 h-3 rounded-full shadow-sm ${isMyPost ? 'bg-pmmg-red border-2 border-white' : 'bg-pmmg-navy border-2 border-white'}`}></div>
 
-                      <div className="pmmg-card overflow-hidden shadow-md">
+                      <div className={`pmmg-card overflow-hidden shadow-md transition-all ${isMyPost ? 'border-2 border-pmmg-red/50 bg-pmmg-red/5' : ''}`}>
                         <div className="p-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-pmmg-navy text-pmmg-yellow text-[9px] font-black flex items-center justify-center uppercase border-2 border-white shadow-sm">
+                            <div className={`w-8 h-8 rounded-full text-[9px] font-black flex items-center justify-center uppercase border-2 border-white shadow-sm ${isMyPost ? 'bg-pmmg-red text-white' : 'bg-pmmg-navy text-pmmg-yellow'}`}>
                               {post.authorName.charAt(0)}
                             </div>
                             <div>
-                              <p className="text-[10px] font-black text-pmmg-navy uppercase leading-none">{post.authorRank} {post.authorName}</p>
+                              <p className="text-[10px] font-black text-pmmg-navy uppercase leading-none">
+                                {post.authorRank} {post.authorName}
+                                {isMyPost && <span className="text-[8px] font-black text-pmmg-red ml-1">(VOCÊ)</span>}
+                              </p>
                               <p className="text-[8px] font-bold text-slate-400 mt-0.5">{post.timestamp}</p>
                             </div>
                           </div>
+                          
+                          {/* Botão Adicionar à Coleção (Apenas para posts de outros usuários) */}
+                          {!isMyPost && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onAddToCollection(post.suspectId);
+                              }}
+                              className="bg-pmmg-navy text-pmmg-yellow p-1.5 rounded-full active:scale-90 transition-transform shadow-md"
+                              title="Adicionar à sua coleção"
+                            >
+                              <span className="material-symbols-outlined text-lg fill-icon">bookmark_add</span>
+                            </button>
+                          )}
                         </div>
 
                         <div 
@@ -481,7 +502,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
                         )}
                       </div>
                     </div>
-                  ))}
+                  })}
                 </div>
               ) : (
                 /* MODO GALERIA PARA O GRUPO */
@@ -495,7 +516,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
                       <img src={post.suspectPhoto} alt={post.suspectName} className="w-full h-full object-cover" />
                       
                       {/* Autor Badge */}
-                      <div className="absolute top-1 left-1 bg-pmmg-navy/70 backdrop-blur-sm text-[6px] font-black text-white px-1.5 py-0.5 rounded uppercase tracking-tighter z-10">
+                      <div className={`absolute top-1 left-1 backdrop-blur-sm text-[6px] font-black text-white px-1.5 py-0.5 rounded uppercase tracking-tighter z-10 ${post.authorId === CURRENT_USER_ID ? 'bg-pmmg-red/80' : 'bg-pmmg-navy/70'}`}>
                         {post.authorName.split(' ')[0]}
                       </div>
 

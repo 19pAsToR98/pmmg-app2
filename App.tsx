@@ -217,8 +217,13 @@ interface EnrichedGroupPost extends GroupPost {
   suspectPhoto: string;
 }
 
+interface GroupParticipantDetail extends Officer {
+  isAdmin: boolean;
+  role: 'admin' | 'member';
+}
+
 interface EnrichedGroup extends Group {
-  members: GroupParticipant[];
+  members: GroupParticipantDetail[];
   posts: EnrichedGroupPost[];
 }
 
@@ -325,6 +330,15 @@ const App: React.FC = () => {
   const openGroup = (groupId: string) => {
     setActiveGroupId(groupId);
     navigateTo('groupDetail');
+  };
+  
+  // --- NOVO: Lógica de Adicionar à Coleção (Simulação) ---
+  const handleAddToCollection = (suspectId: string) => {
+    const suspect = suspects.find(s => s.id === suspectId);
+    if (suspect) {
+      alert(`✅ Suspeito ${suspect.name} adicionado à sua coleção de monitoramento!`);
+      // Em uma aplicação real, isso adicionaria o ID a uma lista de favoritos do usuário.
+    }
   };
 
   // --- Lógica de Contatos (para convites de grupo) ---
@@ -549,6 +563,7 @@ const App: React.FC = () => {
           onShareSuspect={handleShareSuspect}
           onUpdateGroup={handleUpdateGroup}
           onDeleteGroup={handleDeleteGroup}
+          onAddToCollection={handleAddToCollection} // PASSANDO A NOVA FUNÇÃO
         />
       )}
       
