@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { BiometricAuth } from '@capacitor-community/biometric-auth';
 
 interface BiometricAuthButtonProps {
   onSuccess: () => void;
@@ -6,28 +7,58 @@ interface BiometricAuthButtonProps {
 
 const BiometricAuthButton: React.FC<BiometricAuthButtonProps> = ({ onSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isAvailable, setIsAvailable] = useState(false);
+
+  useEffect(() => {
+    const checkAvailability = async () => {
+      try {
+        const result = await BiometricAuth.isAvailable();
+        // Verifica se o tipo de biometria é suportado (ex: 'fingerprint', 'face', 'iris')
+        setIsAvailable(result.type !== 'none');
+      } catch (e) {
+        // Se o plugin não estiver disponível (ex: rodando no web/browser), ele falha.
+        setIsAvailable(false);
+        console.warn("BiometricAuth plugin not available or failed to check availability.", e);
+      }
+    };
+    checkAvailability();
+  }, []);
 
   const handleBiometricLogin = async () => {
-    setIsLoading(true);
-    
-    // NOTA PARA FUTURA IMPLEMENTAÇÃO NATIVA:
-    // Para iOS/Android, use um plugin Capacitor (ex: @capacitor/identity-vault ou similar)
-    // para chamar a API nativa de biometria.
-    
-    // --- SIMULAÇÃO DE AUTENTICAÇÃO ---
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Simulação: 90% de chance de sucesso
-    const success = Math.random() > 0.1; 
-
-    if (success) {
-      onSuccess();
-    } else {
-      alert('Falha na autenticação biométrica. Tente novamente ou use a senha.');
+    if (!isAvailable) {
+      alert('Autenticação biométrica não está disponível neste dispositivo ou ambiente.');
+      return;
     }
     
-    setIsLoading(false);
+    setIsLoading(true);
+    
+    try {
+      const result = await BiometricAuth.authenticate({
+        reason: 'Acesso seguro ao Sistema Operacional PMMG',
+        title: 'Autenticação Necessária',
+        subtitle: 'Use sua biometria para entrar.',
+        description: 'Confirme sua identidade para prosseguir.',
+      });
+
+      if (result.isAuthenticated) {
+        onSuccess();
+      } else {
+        // Isso geralmente não é acionado se o usuário cancelar, mas sim em falhas de hardware/configuração
+        alert('Falha na autenticação biométrica. Tente novamente ou use a senha.');
+      }
+    } catch (error) {
+      // Captura erros como cancelamento do usuário ou falha na leitura
+      console.error('Erro de autenticação biométrica:', error);
+      alert('Autenticação biométrica falhou ou foi cancelada. Tente novamente ou use a senha.');
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  if (!isAvailable) {
+    // Se não estiver disponível, o botão não é renderizado, e o usuário usa a opção de senha.
+    return null;
+  }
 
   return (
     <button 
