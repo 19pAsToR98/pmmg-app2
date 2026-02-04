@@ -1,5 +1,6 @@
 import React from 'react';
 import { Screen } from '../types';
+import BiometricAuthButton from '../components/BiometricAuthButton';
 
 interface WelcomeScreenProps {
   onEnter: () => void;
@@ -34,11 +35,14 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onEnter, onRequest }) => 
       </div>
 
       <div className="relative z-10 w-full space-y-4 max-w-sm mb-8">
+        {/* Novo botão de acesso biométrico */}
+        <BiometricAuthButton onSuccess={onEnter} />
+        
         <button 
           onClick={onEnter}
           className="w-full bg-pmmg-navy border-2 border-pmmg-gold py-4 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.4)] active:scale-[0.98] transition-all flex items-center justify-center gap-3"
         >
-          <span className="text-pmmg-gold font-bold tracking-widest text-sm uppercase">Entrar no Sistema</span>
+          <span className="text-pmmg-gold font-bold tracking-widest text-sm uppercase">Entrar com Senha</span>
           <span className="material-symbols-outlined text-pmmg-gold text-xl">login</span>
         </button>
         <button 
