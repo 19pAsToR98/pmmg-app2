@@ -181,7 +181,15 @@ const MOCK_GROUPS: Group[] = [
     inviteCode: 'P402-BH', // ADDED
     posts: [
       {
+        id: 'p0',
+        type: 'event', // NOVO: Evento de criação
+        authorId: 'EU',
+        eventType: 'group_created',
+        timestamp: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
+      },
+      {
         id: 'p1',
+        type: 'suspect',
         suspectId: '1', // Ricardo "Sombra" Silveira
         authorId: 'o1',
         observation: 'Suspeito visto na área de cobertura. Prioridade máxima.',
@@ -189,6 +197,7 @@ const MOCK_GROUPS: Group[] = [
       },
       {
         id: 'p2',
+        type: 'suspect',
         suspectId: '5', // Patrícia Mendes
         authorId: 'EU',
         observation: 'Adicionando ficha de Patrícia. Possível rota de fuga para Contagem.',
@@ -225,8 +234,8 @@ const DEFAULT_AI_AVATAR: UserAvatar = {
 interface EnrichedGroupPost extends GroupPost {
   authorName: string;
   authorRank: UserRank;
-  suspectName: string;
-  suspectPhoto: string;
+  suspectName?: string; // Opcional para eventos
+  suspectPhoto?: string; // Opcional para eventos
 }
 
 interface EnrichedGroup extends Group {
@@ -299,7 +308,15 @@ const App: React.FC = () => {
     const newGroup: Group = {
       ...newGroupData,
       id: `g${Date.now()}`,
-      posts: [],
+      posts: [
+        {
+          id: `p${Date.now()}`,
+          type: 'event',
+          authorId: 'EU',
+          eventType: 'group_created',
+          timestamp: new Date().toISOString(),
+        }
+      ],
       inviteCode: `G${Math.floor(Math.random() * 9000) + 1000}-${newGroupData.name.slice(0, 2).toUpperCase()}`, // Generate mock invite code
       customMarkers: [], // Initialize empty markers array
     };
@@ -319,6 +336,7 @@ const App: React.FC = () => {
   const handleShareSuspect = (groupId: string, suspectId: string, observation: string) => {
     const newPost: GroupPost = {
       id: `p${Date.now()}`,
+      type: 'suspect',
       suspectId,
       authorId: 'EU', // Current user
       observation,
@@ -338,6 +356,35 @@ const App: React.FC = () => {
   const openGroup = (groupId: string) => {
     setActiveGroupId(groupId);
     navigateTo('groupDetail');
+  };
+  
+  // NOVO: Simula a entrada de um membro no grupo (ex: aceitando convite)
+  const handleJoinGroup = (groupId: string, memberId: string) => {
+    const member = officers.find(o => o.id === memberId);
+    if (!member) return;
+    
+    setGroups(prev => prev.map(group => {
+      if (group.id === groupId && !group.memberIds.includes(memberId)) {
+        const newMemberIds = [...group.memberIds, memberId];
+        const newPost: GroupPost = {
+          id: `p${Date.now()}`,
+          type: 'event',
+          authorId: memberId, // O próprio membro é o autor do evento de entrada
+          eventType: 'member_joined',
+          eventTargetId: memberId,
+          timestamp: new Date().toISOString(),
+        };
+        
+        // Adiciona o post de evento no início
+        return { 
+          ...group, 
+          memberIds: newMemberIds,
+          posts: [newPost, ...group.posts]
+        };
+      }
+      return group;
+    }));
+    alert(`${member.name} entrou no grupo.`);
   };
   
   // --- Lógica de Marcadores de Grupo ---
@@ -497,11 +544,24 @@ const App: React.FC = () => {
     // 2. Enrich Posts
     const enrichedPosts: EnrichedGroupPost[] = activeGroup.posts.map(post => {
       const author = allParticipants.find(o => o.id === post.authorId);
-      const suspect = suspects.find(s => s.id === post.suspectId);
       
       // Format timestamp for display (e.g., "DD/MM/YYYY HH:MM")
       const date = new Date(post.timestamp);
       const formattedTimestamp = `${date.toLocaleDateString('pt-BR')} ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+      
+      if (post.type === 'event') {
+        const targetMember = post.eventTargetId ? allParticipants.find(o => o.id === post.eventTargetId) : null;
+        return {
+          ...post,
+          authorName: author?.name || 'Sistema',
+          authorRank: author?.rank || 'Soldado',
+          timestamp: formattedTimestamp,
+          // Campos de suspeito são undefined
+        } as EnrichedGroupPost;
+      }
+      
+      // Se for 'suspect'
+      const suspect = suspects.find(s => s.id === post.suspectId);
       
       return {
         ...post,
@@ -510,7 +570,7 @@ const App: React.FC = () => {
         suspectName: suspect?.name || 'Indivíduo Desconhecido',
         suspectPhoto: suspect?.photoUrl || 'https://picsum.photos/seed/placeholder/100/100',
         timestamp: formattedTimestamp, // Use formatted timestamp
-      };
+      } as EnrichedGroupPost;
     });
 
     return {
@@ -597,6 +657,8 @@ const App: React.FC = () => {
           onShareSuspect={handleShareSuspect}
           onUpdateGroup={handleUpdateGroup}
           onDeleteGroup={handleDeleteGroup}
+          // Adicionando função de teste para entrada de membro
+          onJoinGroup={() => handleJoinGroup(enrichedActiveGroup.id, 'o2')}
         />
       )}
       

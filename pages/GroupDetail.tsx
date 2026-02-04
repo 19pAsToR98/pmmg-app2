@@ -5,14 +5,17 @@ import GroupTimelineFilters from '../components/GroupTimelineFilters';
 // Define the expected enriched types based on App.tsx logic
 interface EnrichedGroupPost {
   id: string;
-  suspectId: string;
+  type: 'suspect' | 'event'; // NEW
+  suspectId?: string;
   authorId: string;
-  observation: string;
+  observation?: string;
+  eventType?: 'member_joined' | 'member_removed' | 'group_created'; // NEW
+  eventTargetId?: string; // NEW
   timestamp: string; // Formatted string
   authorName: string;
   authorRank: UserRank;
-  suspectName: string;
-  suspectPhoto: string;
+  suspectName?: string;
+  suspectPhoto?: string;
 }
 
 interface GroupParticipantDetail extends Officer {
@@ -35,6 +38,7 @@ interface GroupDetailProps {
   // Novas props para gerenciamento (simuladas no App.tsx)
   onUpdateGroup: (updatedGroup: Group) => void;
   onDeleteGroup: (groupId: string) => void;
+  onJoinGroup: () => void; // NOVO: Função de teste para entrada de membro
 }
 
 type ActiveTab = 'timeline' | 'members'; // Revertido para 2 tabs
@@ -45,7 +49,7 @@ const STATUS_OPTIONS: PostFilterStatus[] = ['Todos', 'Foragido', 'Suspeito', 'Pr
 const CURRENT_USER_ID = 'EU';
 
 
-const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspects, onOpenProfile, onShareSuspect, onUpdateGroup, onDeleteGroup }) => {
+const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspects, onOpenProfile, onShareSuspect, onUpdateGroup, onDeleteGroup, onJoinGroup }) => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('timeline');
   const [viewMode, setViewMode] = useState<'list' | 'gallery'>('list');
   const [showShareModal, setShowShareModal] = useState(false);
@@ -100,11 +104,16 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
     const query = postSearchQuery.toLowerCase();
     
     return group.posts.filter(post => {
-      // 1. Busca Unificada
+      // Filtros de status e busca só se aplicam a posts de suspeito
+      if (post.type === 'event') {
+        return true; // Eventos sempre aparecem, a menos que a busca seja muito específica
+      }
+      
+      // 1. Busca Unificada (apenas para posts de suspeito)
       const matchesSearch = !query || 
-        post.suspectName.toLowerCase().includes(query) ||
+        (post.suspectName && post.suspectName.toLowerCase().includes(query)) ||
         post.authorName.toLowerCase().includes(query) ||
-        post.observation.toLowerCase().includes(query);
+        (post.observation && post.observation.toLowerCase().includes(query));
       
       if (!matchesSearch) return false;
 
@@ -235,6 +244,96 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
       onUpdateGroup(updatedGroup);
       alert(`${memberName} removido do grupo.`);
     }
+  };
+  
+  // Função auxiliar para renderizar um post da timeline
+  const renderTimelinePost = (post: EnrichedGroupPost) => {
+    const baseClasses = "relative pl-6";
+    const connectorClasses = "absolute left-0 top-0 bottom-0 w-1 bg-pmmg-navy/10 rounded-full";
+    
+    if (post.type === 'event') {
+      const targetMember = group.members.find(m => m.id === post.eventTargetId);
+      
+      let message = '';
+      let icon = 'info';
+      let color = 'text-pmmg-blue';
+      
+      if (post.eventType === 'member_joined' && targetMember) {
+        message = `${targetMember.rank} ${targetMember.name} entrou no grupo.`;
+        icon = 'person_add';
+        color = 'text-green-600';
+      } else if (post.eventType === 'group_created') {
+        message = `Grupo criado por ${post.authorName}.`;
+        icon = 'group_add';
+        color = 'text-pmmg-yellow';
+      } else {
+        message = `Evento administrativo: ${post.eventType}`;
+      }
+      
+      return (
+        <div key={post.id} className={baseClasses}>
+          <div className={connectorClasses}></div>
+          <div className={`absolute left-[-4px] top-4 w-3 h-3 ${color.replace('text-', 'bg-')} border-2 border-white rounded-full shadow-sm`}></div>
+          
+          <div className="pmmg-card p-3 bg-white/80 border-l-4 border-l-pmmg-navy/20 shadow-sm">
+            <div className="flex items-center gap-3">
+              <span className={`material-symbols-outlined text-xl ${color} fill-icon`}>{icon}</span>
+              <p className="text-[11px] font-bold text-pmmg-navy uppercase leading-tight">{message}</p>
+            </div>
+            <p className="text-[8px] font-bold text-slate-400 mt-1 ml-8">{post.timestamp}</p>
+          </div>
+        </div>
+      );
+    }
+    
+    // Renderização de posts de suspeito (existente)
+    const suspectPost = post as EnrichedGroupPost;
+    
+    return (
+      <div key={suspectPost.id} className={baseClasses}>
+        {/* Timeline Connector */}
+        <div className={connectorClasses}></div>
+        <div className="absolute left-[-4px] top-4 w-3 h-3 bg-pmmg-navy border-2 border-white rounded-full shadow-sm"></div>
+
+        <div className="pmmg-card overflow-hidden shadow-md">
+          <div className="p-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-pmmg-navy text-pmmg-yellow text-[9px] font-black flex items-center justify-center uppercase border-2 border-white shadow-sm">
+                {suspectPost.authorName.charAt(0)}
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-pmmg-navy uppercase leading-none">{suspectPost.authorRank} {suspectPost.authorName}</p>
+                <p className="text-[8px] font-bold text-slate-400 mt-0.5">{suspectPost.timestamp}</p>
+              </div>
+            </div>
+          </div>
+
+          <div 
+            onClick={() => suspectPost.suspectId && onOpenProfile(suspectPost.suspectId)}
+            className="flex p-3 gap-3 active:bg-slate-50 transition-colors cursor-pointer"
+          >
+            <div className="w-20 h-24 bg-slate-200 rounded-lg overflow-hidden border border-slate-200 shrink-0 shadow-sm">
+              <img src={suspectPost.suspectPhoto} alt={suspectPost.suspectName} className="w-full h-full object-cover" />
+            </div>
+            <div className="flex-1 min-w-0 flex flex-col justify-center">
+              <h4 className="text-[11px] font-black text-pmmg-navy uppercase tracking-tight line-clamp-2 leading-tight mb-1">{suspectPost.suspectName}</h4>
+              <p className="text-[9px] font-bold text-pmmg-red italic uppercase">Visualizar Ficha Técnica</p>
+            </div>
+            <span className="material-symbols-outlined text-slate-200 self-center">chevron_right</span>
+          </div>
+
+          {suspectPost.observation && (
+            <div className="px-4 pb-4">
+              <div className="bg-pmmg-navy/5 p-3 rounded-xl border border-pmmg-navy/5">
+                <p className="text-[11px] text-slate-600 font-medium italic leading-relaxed">
+                  "{suspectPost.observation}"
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
   };
 
 
@@ -444,76 +543,40 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
                 )}
               </div>
             )}
+            
+            {/* Botão de teste para entrada de membro */}
+            <button 
+              onClick={onJoinGroup}
+              className="w-full bg-green-500 text-white text-[10px] font-bold py-2 rounded-xl uppercase tracking-widest active:scale-[0.98] transition-transform"
+            >
+              [TESTE] Adicionar Cap. Pereira (o2)
+            </button>
 
             {filteredPosts.length > 0 ? (
               viewMode === 'list' ? (
                 <div className="space-y-6 mt-4 animate-in fade-in duration-300">
-                  {filteredPosts.map((post) => (
-                    <div key={post.id} className="relative pl-6">
-                      {/* Timeline Connector */}
-                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-pmmg-navy/10 rounded-full"></div>
-                      <div className="absolute left-[-4px] top-4 w-3 h-3 bg-pmmg-navy border-2 border-white rounded-full shadow-sm"></div>
-
-                      <div className="pmmg-card overflow-hidden shadow-md">
-                        <div className="p-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-pmmg-navy text-pmmg-yellow text-[9px] font-black flex items-center justify-center uppercase border-2 border-white shadow-sm">
-                              {post.authorName.charAt(0)}
-                            </div>
-                            <div>
-                              <p className="text-[10px] font-black text-pmmg-navy uppercase leading-none">{post.authorRank} {post.authorName}</p>
-                              <p className="text-[8px] font-bold text-slate-400 mt-0.5">{post.timestamp}</p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div 
-                          onClick={() => onOpenProfile(post.suspectId)}
-                          className="flex p-3 gap-3 active:bg-slate-50 transition-colors cursor-pointer"
-                        >
-                          <div className="w-20 h-24 bg-slate-200 rounded-lg overflow-hidden border border-slate-200 shrink-0 shadow-sm">
-                            <img src={post.suspectPhoto} alt={post.suspectName} className="w-full h-full object-cover" />
-                          </div>
-                          <div className="flex-1 min-w-0 flex flex-col justify-center">
-                            <h4 className="text-[11px] font-black text-pmmg-navy uppercase tracking-tight line-clamp-2 leading-tight mb-1">{post.suspectName}</h4>
-                            <p className="text-[9px] font-bold text-pmmg-red italic uppercase">Visualizar Ficha Técnica</p>
-                          </div>
-                          <span className="material-symbols-outlined text-slate-200 self-center">chevron_right</span>
-                        </div>
-
-                        {post.observation && (
-                          <div className="px-4 pb-4">
-                            <div className="bg-pmmg-navy/5 p-3 rounded-xl border border-pmmg-navy/5">
-                              <p className="text-[11px] text-slate-600 font-medium italic leading-relaxed">
-                                "{post.observation}"
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                  {filteredPosts.map(renderTimelinePost)}
                 </div>
               ) : (
                 /* MODO GALERIA PARA O GRUPO */
                 <div className="grid grid-cols-3 gap-3 mt-4 animate-in zoom-in-95 duration-300">
-                  {filteredPosts.map((post) => (
+                  {filteredPosts.filter(p => p.type === 'suspect').map((post) => (
                     <div 
                       key={post.id}
-                      onClick={() => onOpenProfile(post.suspectId)}
+                      onClick={() => post.suspectId && onOpenProfile(post.suspectId)}
                       className="relative aspect-[3/4] pmmg-card overflow-hidden shadow-lg border-2 border-pmmg-navy/10 active:scale-95 transition-all cursor-pointer"
                     >
                       <img src={post.suspectPhoto} alt={post.suspectName} className="w-full h-full object-cover" />
                       
                       {/* Autor Badge */}
                       <div className="absolute top-1 left-1 bg-pmmg-navy/70 backdrop-blur-sm text-[6px] font-black text-white px-1.5 py-0.5 rounded uppercase tracking-tighter z-10">
-                        {post.authorName.split(' ')[0]}
+                        {post.authorName.charAt(0)}
                       </div>
 
                       {/* Info Overlay */}
                       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-1.5 pt-4">
                         <p className="text-[8px] font-black text-white uppercase truncate text-center drop-shadow-md">
-                          {post.suspectName.split(' ')[0]}
+                          {post.suspectName?.split(' ')[0]}
                         </p>
                         <p className="text-[6px] text-pmmg-yellow/80 font-bold uppercase text-center tracking-tighter mt-0.5">
                           {post.timestamp.split(' ')[0]}

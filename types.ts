@@ -74,9 +74,12 @@ export interface Officer {
 
 export interface GroupPost {
   id: string;
-  suspectId: string; // ID da ficha compartilhada
-  authorId: string; // ID do oficial que compartilhou
-  observation: string; // Observação do autor
+  type: 'suspect' | 'event'; // NEW: Tipo de postagem
+  suspectId?: string; // Opcional, usado apenas se type === 'suspect'
+  authorId: string; // ID do oficial que compartilhou/gerou o evento
+  observation?: string; // Opcional, usado para posts de suspeito
+  eventType?: 'member_joined' | 'member_removed' | 'group_created'; // NEW: Tipo de evento
+  eventTargetId?: string; // NEW: ID do membro que entrou/saiu (se for um evento)
   timestamp: string; // Data e hora do post (ISO string or formatted string)
 }
 
