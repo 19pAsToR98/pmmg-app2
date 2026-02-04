@@ -502,7 +502,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
                         )}
                       </div>
                     </div>
-                  })}
+                  ))}
                 </div>
               ) : (
                 /* MODO GALERIA PARA O GRUPO */
