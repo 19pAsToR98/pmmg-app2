@@ -1,8 +1,9 @@
 import React from 'react';
-import { GoogleMap, useLoadScript } from '@react-google-maps/api';
+import { GoogleMap } from '@react-google-maps/api';
+import { useGoogleMaps } from './GoogleMapsProvider';
 
 // Libraries required for the map (geometry for utility functions, places if needed later)
-const libraries: ("places" | "geometry" | "drawing" | "visualization")[] = ["geometry"];
+// A lista de bibliotecas foi movida para GoogleMapsProvider.
 
 interface GoogleMapWrapperProps {
   children: React.ReactNode;
@@ -55,13 +56,8 @@ const GoogleMapWrapper: React.FC<GoogleMapWrapperProps> = ({
   onLoad,
   onClick
 }) => {
-  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
   
-  const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: apiKey || '',
-    libraries,
-    language: 'pt-BR',
-  });
+  const { isLoaded, loadError } = useGoogleMaps();
 
   if (loadError) {
     return <div className="p-4 text-center text-pmmg-red">Erro ao carregar o Google Maps. Verifique a chave API.</div>;
