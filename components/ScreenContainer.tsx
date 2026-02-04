@@ -10,16 +10,15 @@ interface ScreenContainerProps {
 const ScreenContainer: React.FC<ScreenContainerProps> = ({ screenId, activeScreen, children }) => {
   const isActive = screenId === activeScreen;
   
-  // Renderiza o componente sempre, mas o move para fora da tela se não estiver ativo.
-  // Usamos 'absolute' para que ele não afete o layout quando inativo.
+  // Se a tela não estiver ativa, ela é movida para fora da tela e escondida
   const containerClasses = `
-    absolute inset-0 w-full h-full transition-transform duration-300 ease-in-out
-    ${isActive ? 'translate-x-0 z-10' : 'translate-x-full z-0'}
+    absolute inset-0 w-full h-full
+    ${isActive ? 'translate-x-0 z-10' : 'translate-x-full z-0 hidden'}
   `;
 
-  // Para telas que não são o mapa, podemos usar 'hidden' para otimizar, mas para o mapa,
-  // precisamos que ele esteja no DOM para manter o estado.
-  // Como o mapa é a principal preocupação, vamos usar a transição de slide.
+  // Nota: Usamos 'hidden' para garantir que elementos como o mapa não tentem renderizar
+  // quando estão fora da tela, mas o fato de estarem no DOM e serem re-renderizados
+  // com a mesma chave (key) no App.tsx deve preservar o estado do GoogleMap.
   
   return (
     <div className={containerClasses}>
