@@ -45,7 +45,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 shrink-0 bg-white rounded-full flex items-center justify-center p-1 border-2 border-pmmg-red shadow-inner">
-              <span className="material-symbols-outlined text-pmmg-navy text-2xl">shield</span>
+              <span className="material-symbols-outlined text-primary-dark text-2xl">shield</span>
             </div>
             <div>
               <h1 className="font-bold text-sm leading-none text-white uppercase tracking-tight">PMMG OPERACIONAL</h1>
@@ -72,7 +72,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
         {/* Search Bar (Fixed in header) */}
         <div className="relative group">
           <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-            <span className="material-symbols-outlined text-pmmg-navy text-xl">search</span>
+            <span className="material-symbols-outlined text-primary-dark text-xl">search</span>
           </div>
           <input 
             value={searchTerm}
@@ -88,28 +88,28 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
         {/* Stats Grid */}
         <section className="px-4 pt-4 grid grid-cols-2 gap-3">
           <button onClick={() => handleCardClick('Foragido')} className="pmmg-card p-3 border-l-4 border-l-pmmg-red active:scale-[0.98] transition-transform text-left">
-            <span className="text-[10px] font-bold uppercase text-pmmg-navy/60 block mb-1">Foragidos</span>
+            <span className="text-[10px] font-bold uppercase text-secondary-light block mb-1">Foragidos</span>
             <div className="flex items-end justify-between">
               <span className="text-2xl font-black text-pmmg-red">{stats.foragidos}</span>
               <span className="material-symbols-outlined text-pmmg-red/30">release_alert</span>
             </div>
           </button>
           <button onClick={() => handleCardClick('Suspeito')} className="pmmg-card p-3 border-l-4 border-l-pmmg-yellow active:scale-[0.98] transition-transform text-left">
-            <span className="text-[10px] font-bold uppercase text-pmmg-navy/60 block mb-1">Suspeitos</span>
+            <span className="text-[10px] font-bold uppercase text-secondary-light block mb-1">Suspeitos</span>
             <div className="flex items-end justify-between">
-              <span className="text-2xl font-black text-pmmg-navy">{stats.suspeitos}</span>
+              <span className="text-2xl font-black text-primary-dark">{stats.suspeitos}</span>
               <span className="material-symbols-outlined text-pmmg-yellow">visibility</span>
             </div>
           </button>
           <button onClick={() => handleCardClick('Preso')} className="pmmg-card p-3 border-l-4 border-l-pmmg-blue active:scale-[0.98] transition-transform text-left">
-            <span className="text-[10px] font-bold uppercase text-pmmg-navy/60 block mb-1">Presos</span>
+            <span className="text-[10px] font-bold uppercase text-secondary-light block mb-1">Presos</span>
             <div className="flex items-end justify-between">
               <span className="text-2xl font-black text-pmmg-blue">{stats.presos}</span>
               <span className="material-symbols-outlined text-pmmg-blue/30">lock</span>
             </div>
           </button>
           <button onClick={() => handleCardClick('CPF Cancelado')} className="pmmg-card p-3 border-l-4 border-l-slate-600 active:scale-[0.98] transition-transform text-left">
-            <span className="text-[10px] font-bold uppercase text-pmmg-navy/60 block mb-1">CPF Cancelado</span>
+            <span className="text-[10px] font-bold uppercase text-secondary-light block mb-1">CPF Cancelado</span>
             <div className="flex items-end justify-between">
               <span className="text-2xl font-black text-slate-600">{stats.cancelados}</span>
               <span className="material-symbols-outlined text-slate-400">cancel</span>
@@ -132,7 +132,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
         <div className="px-4 pt-8 pb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="h-4 w-1.5 bg-pmmg-red rounded-full"></div>
-            <h3 className="font-bold text-xs text-pmmg-navy uppercase tracking-widest italic">
+            <h3 className="font-bold text-xs text-primary-dark uppercase tracking-widest italic">
               Alertas e Registros Recentes {searchTerm ? '(Filtrados)' : ''}
             </h3>
           </div>
@@ -146,7 +146,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                   <img alt={alert.name} className="w-full h-full object-cover" src={alert.photoUrl} />
                   <div className={`absolute top-0 left-0 text-white text-[8px] font-bold px-2 py-1 uppercase rounded-br-lg shadow-md ${
                     alert.status === 'Foragido' ? 'bg-pmmg-red' : 
-                    alert.status === 'Suspeito' ? 'bg-pmmg-yellow text-pmmg-navy' :
+                    alert.status === 'Suspeito' ? 'bg-pmmg-yellow text-primary-dark' :
                     alert.status === 'Preso' ? 'bg-pmmg-blue' : 'bg-slate-700'
                   }`}>
                     {alert.status}
@@ -155,7 +155,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                 <div className="flex-1 p-3 flex flex-col justify-between overflow-hidden">
                   <div>
                     <div className="flex justify-between items-start">
-                      <h4 className="font-bold text-sm text-pmmg-navy uppercase leading-tight truncate pr-1">{alert.name}</h4>
+                      <h4 className="font-bold text-sm text-primary-dark uppercase leading-tight truncate pr-1">{alert.name}</h4>
                       <span className={`material-symbols-outlined fill-icon text-lg ${
                         alert.status === 'Foragido' ? 'text-pmmg-red' : 'text-pmmg-yellow'
                       }`}>
@@ -165,12 +165,12 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                     <p className="text-[10px] font-semibold text-slate-500 mt-1">CPF: {alert.cpf}</p>
                     <div className="mt-2 space-y-1">
                       <div className="flex items-center gap-1.5">
-                        <span className="material-symbols-outlined text-[14px] text-pmmg-navy">location_on</span>
-                        <span className="text-[10px] text-slate-700 truncate">Visto em: {alert.lastSeen}</span>
+                        <span className="material-symbols-outlined text-[14px] text-primary-dark">location_on</span>
+                        <span className="text-[10px] text-secondary-light truncate">Visto em: {alert.lastSeen}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <span className="material-symbols-outlined text-[14px] text-pmmg-navy">history</span>
-                        <span className="text-[10px] text-slate-700">Há {alert.timeAgo}</span>
+                        <span className="material-symbols-outlined text-[14px] text-primary-dark">history</span>
+                        <span className="text-[10px] text-secondary-light">Há {alert.timeAgo}</span>
                       </div>
                       {/* Link VER NO MAPA */}
                       {alert.lat && alert.lng && (
@@ -178,8 +178,8 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                           onClick={() => handleViewOnMap(alert)}
                           className="flex items-center gap-1.5 cursor-pointer active:opacity-70 transition-opacity"
                         >
-                          <span className="material-symbols-outlined text-[14px] text-slate-700 fill-icon">map</span>
-                          <span className="text-[10px] text-slate-700 font-bold uppercase tracking-wider">Ver no Mapa</span>
+                          <span className="material-symbols-outlined text-[14px] text-secondary-light fill-icon">map</span>
+                          <span className="text-[10px] text-secondary-light font-bold uppercase tracking-wider">Ver no Mapa</span>
                         </div>
                       )}
                     </div>
@@ -195,7 +195,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                       onClick={() => alert(`Compartilhando ficha de: ${alert.name}`)}
                       className="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center"
                     >
-                      <span className="material-symbols-outlined text-pmmg-navy text-lg">share</span>
+                      <span className="material-symbols-outlined text-primary-dark text-lg">share</span>
                     </button>
                   </div>
                 </div>

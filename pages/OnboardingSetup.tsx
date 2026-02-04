@@ -163,8 +163,8 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
         const currentInstitution = INSTITUTION_OPTIONS[currentInstitutionIndex];
         return (
           <div className="space-y-6 text-center">
-            <h2 className="text-xl font-bold text-pmmg-navy uppercase tracking-tight">Instituição Militar</h2>
-            <p className="text-sm text-slate-600">Selecione a corporação à qual você pertence.</p>
+            <h2 className="text-xl font-bold text-primary-dark uppercase tracking-tight">Instituição Militar</h2>
+            <p className="text-sm text-secondary-light">Selecione a corporação à qual você pertence.</p>
             
             {/* Slider Container */}
             <div className="relative flex items-center justify-center pt-4 pb-4">
@@ -172,7 +172,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
               {/* Previous Button */}
               <button
                 onClick={() => handleInstitutionChange('prev')}
-                className="absolute left-0 z-10 p-2 rounded-full bg-pmmg-navy/10 text-pmmg-navy shadow-md active:scale-95 transition-transform ml-2"
+                className="absolute left-0 z-10 p-2 rounded-full bg-pmmg-navy/10 text-primary-dark shadow-md active:scale-95 transition-transform ml-2"
               >
                 <span className="material-symbols-outlined">arrow_back_ios</span>
               </button>
@@ -196,7 +196,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
               {/* Next Button */}
               <button
                 onClick={() => handleInstitutionChange('next')}
-                className="absolute right-0 z-10 p-2 rounded-full bg-pmmg-navy/10 text-pmmg-navy shadow-md active:scale-95 transition-transform mr-2"
+                className="absolute right-0 z-10 p-2 rounded-full bg-pmmg-navy/10 text-primary-dark shadow-md active:scale-95 transition-transform mr-2"
               >
                 <span className="material-symbols-outlined">arrow_forward_ios</span>
               </button>
@@ -213,7 +213,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
             </div>
             
             <div className="text-center pt-2">
-              <p className="text-pmmg-navy font-bold uppercase text-sm">Instituição Selecionada:</p>
+              <p className="text-primary-dark font-bold uppercase text-sm">Instituição Selecionada:</p>
               <p className="text-pmmg-red font-black text-lg mt-1">{currentInstitution.name}</p>
             </div>
           </div>
@@ -221,8 +221,8 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
       case 2: // Old Step 1: Name
         return (
           <div className="space-y-6">
-            <h2 className="text-xl font-bold text-pmmg-navy uppercase tracking-tight">Identificação Pessoal</h2>
-            <p className="text-sm text-slate-600">Insira seu nome completo para identificação no sistema.</p>
+            <h2 className="text-xl font-bold text-primary-dark uppercase tracking-tight">Identificação Pessoal</h2>
+            <p className="text-sm text-secondary-light">Insira seu nome completo para identificação no sistema.</p>
             <div>
               <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Nome Completo</label>
               <input 
@@ -238,8 +238,8 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
       case 3: // Old Step 2: Rank
         return (
           <div className="space-y-6">
-            <h2 className="text-xl font-bold text-pmmg-navy uppercase tracking-tight">Graduação Militar</h2>
-            <p className="text-sm text-slate-600">Selecione sua graduação atual. Isso define sua hierarquia tática.</p>
+            <h2 className="text-xl font-bold text-primary-dark uppercase tracking-tight">Graduação Militar</h2>
+            <p className="text-sm text-secondary-light">Selecione sua graduação atual. Isso define sua hierarquia tática.</p>
             
             <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar justify-center">
               {RANKS.map((r) => (
@@ -253,14 +253,14 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
                   }`}
                 >
                   <RankBadge rank={r} size="md" />
-                  <span className={`text-[9px] font-black uppercase ${rank === r ? 'text-pmmg-yellow' : 'text-pmmg-navy'}`}>
+                  <span className={`text-[9px] font-black uppercase ${rank === r ? 'text-pmmg-yellow' : 'text-primary-dark'}`}>
                     {r}
                   </span>
                 </button>
               ))}
             </div>
             <div className="text-center">
-              <p className="text-pmmg-navy font-bold uppercase text-sm">Graduação Selecionada:</p>
+              <p className="text-primary-dark font-bold uppercase text-sm">Graduação Selecionada:</p>
               <p className="text-pmmg-red font-black text-lg mt-1">{rank}</p>
             </div>
           </div>
@@ -268,8 +268,8 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
       case 4: // Old Step 3: City
         return (
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-pmmg-navy uppercase tracking-tight">Cidade Padrão</h2>
-            <p className="text-sm text-slate-600">Defina sua cidade de atuação principal para otimizar alertas e mapas.</p>
+            <h2 className="text-xl font-bold text-primary-dark uppercase tracking-tight">Cidade Padrão</h2>
+            <p className="text-sm text-secondary-light">Defina sua cidade de atuação principal para otimizar alertas e mapas.</p>
             
             <div className="relative">
               <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Buscar Cidade em MG/SP</label>
@@ -287,7 +287,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
                     <button
                       key={index}
                       onClick={() => handleSelectCity(loc)}
-                      className="w-full text-left px-4 py-2 text-sm text-pmmg-navy hover:bg-pmmg-khaki/50 transition-colors border-b border-pmmg-navy/5 last:border-b-0"
+                      className="w-full text-left px-4 py-2 text-sm text-primary-dark hover:bg-pmmg-khaki/50 transition-colors border-b border-pmmg-navy/5 last:border-b-0"
                     >
                       {loc.name}
                     </button>
@@ -303,7 +303,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
             {selectedLocation && (
               <div className="pmmg-card overflow-hidden">
                 <div className="p-3 bg-pmmg-navy/5 flex items-center justify-between">
-                  <p className="text-[10px] font-bold text-pmmg-navy uppercase tracking-wider">Cidade Selecionada: {city || 'Carregando...'}</p>
+                  <p className="text-[10px] font-bold text-primary-dark uppercase tracking-wider">Cidade Selecionada: {city || 'Carregando...'}</p>
                   <span className="text-[9px] text-green-600 font-bold uppercase">GPS OK</span>
                 </div>
                 {/* Google Map Wrapper */}
@@ -333,8 +333,8 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
         
         return (
           <div className="space-y-6">
-            <h2 className="text-xl font-bold text-pmmg-navy uppercase tracking-tight">Avatar Tático</h2>
-            <p className="text-sm text-slate-600">Selecione o avatar que representará você e o assistente de IA na plataforma.</p>
+            <h2 className="text-xl font-bold text-primary-dark uppercase tracking-tight">Avatar Tático</h2>
+            <p className="text-sm text-secondary-light">Selecione o avatar que representará você e o assistente de IA na plataforma.</p>
             
             {/* Container do Slider: Fundo limpo, apenas setas e avatar */}
             <div className="relative flex items-center justify-center pt-8 pb-4">
@@ -342,7 +342,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
               {/* Previous Button */}
               <button
                 onClick={() => handleAvatarChange('prev')}
-                className="absolute left-0 z-10 p-2 rounded-full bg-pmmg-navy/10 text-pmmg-navy shadow-md active:scale-95 transition-transform ml-2"
+                className="absolute left-0 z-10 p-2 rounded-full bg-pmmg-navy/10 text-primary-dark shadow-md active:scale-95 transition-transform ml-2"
               >
                 <span className="material-symbols-outlined">arrow_back_ios</span>
               </button>
@@ -367,7 +367,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
               {/* Next Button */}
               <button
                 onClick={() => handleAvatarChange('next')}
-                className="absolute right-0 z-10 p-2 rounded-full bg-pmmg-navy/10 text-pmmg-navy shadow-md active:scale-95 transition-transform mr-2"
+                className="absolute right-0 z-10 p-2 rounded-full bg-pmmg-navy/10 text-primary-dark shadow-md active:scale-95 transition-transform mr-2"
               >
                 <span className="material-symbols-outlined">arrow_forward_ios</span>
               </button>
@@ -394,7 +394,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
       <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 shrink-0 bg-pmmg-yellow rounded-full flex items-center justify-center">
-            <span className="material-symbols-outlined text-pmmg-navy text-xl fill-icon">person_check</span>
+            <span className="material-symbols-outlined text-primary-dark text-xl fill-icon">person_check</span>
           </div>
           <div>
             <h1 className="font-bold text-sm leading-none text-white uppercase tracking-tight">Configuração Inicial</h1>
@@ -415,7 +415,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
           <button 
             onClick={handleBack}
             disabled={step === 1}
-            className="flex-1 bg-slate-200 text-pmmg-navy font-bold py-3 rounded-xl text-xs uppercase disabled:opacity-50"
+            className="flex-1 bg-slate-200 text-primary-dark font-bold py-3 rounded-xl text-xs uppercase disabled:opacity-50"
           >
             <span className="material-symbols-outlined text-lg">arrow_back</span>
           </button>

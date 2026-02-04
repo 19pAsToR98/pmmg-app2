@@ -21,7 +21,7 @@ const SuspectListItem: React.FC<SuspectListItemProps> = ({
   const longPressProps = useLongPress(() => handleLongPress(s.id));
 
   const statusColor = s.status === 'Foragido' ? 'bg-pmmg-red' : 
-                        s.status === 'Suspeito' ? 'bg-pmmg-yellow text-pmmg-navy' :
+                        s.status === 'Suspeito' ? 'bg-pmmg-yellow text-primary-dark' :
                         s.status === 'Preso' ? 'bg-pmmg-blue' : 'bg-slate-700';
     
   const primaryVehicle = s.vehicles && s.vehicles.length > 0 ? `${s.vehicles[0].plate} (${s.vehicles[0].model})` : null;
@@ -47,7 +47,7 @@ const SuspectListItem: React.FC<SuspectListItemProps> = ({
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-0.5">
-           <h3 className="text-[11px] font-black text-pmmg-navy uppercase truncate pr-2">{s.name}</h3>
+           <h3 className="text-[11px] font-black text-primary-dark uppercase truncate pr-2">{s.name}</h3>
            <span className={`text-[7px] font-black px-1.5 py-0.5 rounded shadow-sm uppercase ${statusColor}`}>
               {s.status}
            </span>
@@ -58,12 +58,12 @@ const SuspectListItem: React.FC<SuspectListItemProps> = ({
         </div>
         <div className="mt-1.5 flex flex-wrap gap-2">
            {primaryVehicle && (
-             <div className="flex items-center gap-1 text-[8px] bg-white px-2 py-0.5 rounded border border-pmmg-navy/5 text-slate-600 font-bold">
+             <div className="flex items-center gap-1 text-[8px] bg-white px-2 py-0.5 rounded border border-pmmg-navy/5 text-secondary-light font-bold">
                 <span className="material-symbols-outlined text-[10px]">directions_car</span>
                 {primaryVehicle}
              </div>
            )}
-           <div className="flex items-center gap-1 text-[8px] bg-white px-2 py-0.5 rounded border border-pmmg-navy/5 text-slate-600 font-bold">
+           <div className="flex items-center gap-1 text-[8px] bg-white px-2 py-0.5 rounded border border-pmmg-navy/5 text-secondary-light font-bold">
               <span className="material-symbols-outlined text-[10px]">location_on</span>
               {s.lastSeen}
            </div>

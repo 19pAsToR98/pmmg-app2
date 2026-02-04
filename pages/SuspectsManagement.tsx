@@ -157,7 +157,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
               {/* Toggle Filter Menu */}
               <button 
                 onClick={() => setShowFilterMenu(!showFilterMenu)}
-                className={`p-2 rounded-lg flex items-center justify-center transition-all ${showFilterMenu || statusFilter !== 'Todos' || dateFilter ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white hover:bg-white/10'}`}
+                className={`p-2 rounded-lg flex items-center justify-center transition-all ${showFilterMenu || statusFilter !== 'Todos' || dateFilter ? 'bg-pmmg-yellow text-primary-dark shadow-md' : 'text-white hover:bg-white/10'}`}
               >
                 <span className={`material-symbols-outlined text-xl ${showFilterMenu ? 'fill-icon' : ''}`}>tune</span>
               </button>
@@ -169,7 +169,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
         {!isSelectionMode && (
           <div className="relative group mb-2">
             <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-              <span className="material-symbols-outlined text-pmmg-navy text-xl group-focus-within:text-pmmg-yellow transition-colors">manage_search</span>
+              <span className="material-symbols-outlined text-primary-dark text-xl group-focus-within:text-pmmg-yellow transition-colors">manage_search</span>
             </div>
             <input 
               value={globalSearch}
@@ -181,7 +181,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
               {globalSearch && (
                 <button 
                   onClick={() => setGlobalSearch('')}
-                  className="p-1 text-slate-400 hover:text-pmmg-navy transition-colors"
+                  className="p-1 text-slate-400 hover:text-primary-dark transition-colors"
                 >
                   <span className="material-symbols-outlined text-lg">close</span>
                 </button>
@@ -228,12 +228,12 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
                 <div>
                   <label className="block text-[9px] font-black uppercase text-pmmg-navy/40 mb-2 tracking-wider">Data de Registro (Mock)</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-sm text-pmmg-navy/30">calendar_today</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-pmmg-navy/30">calendar_today</span>
                     <input 
                       type="text" // Changed to text since we don't have registryDate field
                       value={dateFilter}
                       onChange={(e) => setDateFilter(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-xs font-bold text-pmmg-navy focus:ring-2 focus:ring-pmmg-navy/10 transition-all"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-xs font-bold text-primary-dark focus:ring-2 focus:ring-pmmg-navy/10 transition-all"
                       placeholder="DD/MM/AAAA"
                     />
                   </div>
@@ -258,7 +258,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
           </span>
           <div className="flex items-center gap-1.5 bg-pmmg-navy/5 px-2 py-1 rounded-full border border-pmmg-navy/5">
              <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-             <span className="text-[8px] font-bold text-pmmg-navy uppercase tracking-tighter">Sincronizado</span>
+             <span className="text-[8px] font-bold text-primary-dark uppercase tracking-tighter">Sincronizado</span>
           </div>
         </div>
 

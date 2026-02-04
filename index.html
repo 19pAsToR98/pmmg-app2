@@ -42,6 +42,10 @@
           @apply font-sans antialiased bg-pmmg-khaki text-slate-800;
           min-height: 100dvh;
         }
+        
+        /* --- CLASSES DE TEXTO SEMÂNTICAS (Padrão PMMG) --- */
+        .text-primary-dark { @apply text-pmmg-navy; }
+        .text-secondary-light { @apply text-slate-600; }
       }
       
       /* --- PMESP Theme Overrides --- */
@@ -101,6 +105,12 @@
         /* Sobrescrita PMESP: Azul Primário PMESP (#234485) */
         background-image: linear-gradient(to bottom, #234485, rgba(35, 68, 133, 0.8));
       }
+      
+      /* --- SOBRESCRITA DE TEXTO SEMÂNTICO PARA PMESP --- */
+      /* No PMESP, o fundo é branco, então o texto principal deve ser o azul primário */
+      .theme-pmesp .text-primary-dark { color: #234485 !important; }
+      /* O texto secundário pode ser um cinza escuro */
+      .theme-pmesp .text-secondary-light { color: #4b5563 !important; } /* slate-600 */
       
       .material-symbols-outlined {
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;

@@ -8,7 +8,7 @@ interface SuspectGridCardProps {
 
 const SuspectGridCard: React.FC<SuspectGridCardProps> = ({ suspect }) => {
   const statusColor = suspect.status === 'Foragido' ? 'bg-pmmg-red' : 
-                        suspect.status === 'Suspeito' ? 'bg-pmmg-yellow text-pmmg-navy' :
+                        suspect.status === 'Suspeito' ? 'bg-pmmg-yellow text-primary-dark' :
                         suspect.status === 'Preso' ? 'bg-pmmg-blue' : 'bg-slate-700';
   
   return (
@@ -24,8 +24,8 @@ const SuspectGridCard: React.FC<SuspectGridCardProps> = ({ suspect }) => {
       </div>
       <div className="flex-1 p-3 flex flex-col justify-between">
         <div>
-          <h4 className="font-bold text-xs text-pmmg-navy uppercase leading-tight truncate">{suspect.name}</h4>
-          <p className="text-[9px] font-semibold text-slate-500 mt-1">CPF: {suspect.cpf}</p>
+          <h4 className="font-bold text-xs text-primary-dark uppercase leading-tight truncate">{suspect.name}</h4>
+          <p className="text-[9px] font-semibold text-secondary-light mt-1">CPF: {suspect.cpf}</p>
         </div>
         <div className="mt-2">
           <button 

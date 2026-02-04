@@ -143,7 +143,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
         <div className="flex items-center gap-2">
           <button 
             onClick={() => onEdit(suspect.id)} 
-            className="bg-pmmg-yellow text-pmmg-navy p-1.5 rounded-full border border-pmmg-yellow/50 active:scale-95 transition-transform"
+            className="bg-pmmg-yellow text-primary-dark p-1.5 rounded-full border border-pmmg-yellow/50 active:scale-95 transition-transform"
             title="Editar Ficha"
           >
             <span className="material-symbols-outlined text-xl fill-icon">edit</span>
@@ -181,7 +181,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
               <div className="flex justify-end mb-2">
                 <span className={`text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg border border-white/20 uppercase tracking-widest ${
                   suspect.status === 'Foragido' ? 'bg-pmmg-red animate-pulse' : 
-                  suspect.status === 'Suspeito' ? 'bg-pmmg-yellow text-pmmg-navy' : 'bg-pmmg-blue'
+                  suspect.status === 'Suspeito' ? 'bg-pmmg-yellow text-primary-dark' : 'bg-pmmg-blue'
                 }`}>
                   {suspect.status}
                 </span>
@@ -210,7 +210,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
         <div className="px-4 -mt-6 space-y-3">
           <div className="pmmg-card">
             <div onClick={() => toggleSection('data')} className="flex items-center justify-between p-4 cursor-pointer">
-              <div className="flex items-center gap-3 text-pmmg-navy">
+              <div className="flex items-center gap-3 text-primary-dark">
                 <span className="material-symbols-outlined">person</span>
                 <span className="text-sm font-bold uppercase">Dados do Indivíduo</span>
               </div>
@@ -223,22 +223,22 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase tracking-wider mb-0.5">CPF</p>
-                    <p className="text-sm font-bold text-slate-800">{suspect.cpf}</p>
+                    <p className="text-sm font-bold text-primary-dark">{suspect.cpf}</p>
                   </div>
                   <div>
                     <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase tracking-wider mb-0.5">RG</p>
-                    <p className="text-sm font-bold text-slate-800">{suspect.rg || 'N/D'}</p>
+                    <p className="text-sm font-bold text-primary-dark">{suspect.rg || 'N/D'}</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase tracking-wider mb-0.5">Nascimento</p>
-                    <p className="text-sm font-bold text-slate-800">{suspect.birthDate || 'N/D'}</p>
+                    <p className="text-sm font-bold text-primary-dark">{suspect.birthDate || 'N/D'}</p>
                   </div>
                 </div>
                 <div>
                   <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase tracking-wider mb-0.5">Filiação (Genitora)</p>
-                  <p className="text-sm font-bold text-slate-800">{suspect.motherName || 'Não Informado'}</p>
+                  <p className="text-sm font-bold text-primary-dark">{suspect.motherName || 'Não Informado'}</p>
                 </div>
               </div>
             )}
@@ -246,7 +246,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
 
           <div className="pmmg-card">
              <div onClick={() => toggleSection('articles')} className="flex items-center justify-between p-4 cursor-pointer">
-              <div className="flex items-center gap-3 text-pmmg-navy">
+              <div className="flex items-center gap-3 text-primary-dark">
                 <span className="material-symbols-outlined">gavel</span>
                 <span className="text-sm font-bold uppercase">Artigos Criminais</span>
               </div>
@@ -258,8 +258,8 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
               <div className="p-4 space-y-3 border-t border-pmmg-navy/5">
                 {suspect.articles && suspect.articles.length > 0 ? suspect.articles.map((art, i) => (
                   <div key={i} className="flex items-start gap-3 p-2 bg-pmmg-navy/5 rounded border border-pmmg-navy/10">
-                    <span className="text-pmmg-navy font-bold text-sm">{art}</span>
-                    <p className="text-[10px] text-slate-500 italic mt-0.5">Enquadramento ativo no sistema.</p>
+                    <span className="text-primary-dark font-bold text-sm">{art}</span>
+                    <p className="text-[10px] text-secondary-light italic mt-0.5">Enquadramento ativo no sistema.</p>
                   </div>
                 )) : (
                   <p className="text-xs text-slate-400 italic">Nenhum artigo registrado.</p>
@@ -271,7 +271,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
           {/* Vehicles Section */}
           <div className="pmmg-card">
             <div onClick={() => toggleSection('vehicles')} className="flex items-center justify-between p-4 cursor-pointer">
-              <div className="flex items-center gap-3 text-pmmg-navy">
+              <div className="flex items-center gap-3 text-primary-dark">
                 <span className="material-symbols-outlined">directions_car</span>
                 <span className="text-sm font-bold uppercase">Veículos Cadastrados</span>
               </div>
@@ -284,10 +284,10 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                 {suspect.vehicles && suspect.vehicles.length > 0 ? suspect.vehicles.map((vehicle, i) => (
                   <div key={i} className="p-3 bg-pmmg-navy/5 rounded border border-pmmg-navy/10">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-bold text-pmmg-navy">{vehicle.plate}</p>
-                      <span className="text-[10px] font-semibold text-slate-500">{vehicle.color}</span>
+                      <p className="text-sm font-bold text-primary-dark">{vehicle.plate}</p>
+                      <span className="text-[10px] font-semibold text-secondary-light">{vehicle.color}</span>
                     </div>
-                    <p className="text-[11px] text-slate-700 mt-1">{vehicle.model}</p>
+                    <p className="text-[11px] text-secondary-light">{vehicle.model}</p>
                   </div>
                 )) : (
                   <p className="text-xs text-slate-400 italic">Nenhum veículo registrado.</p>
@@ -299,7 +299,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
           {/* Associations Section */}
           <div className="pmmg-card">
             <div onClick={() => toggleSection('associations')} className="flex items-center justify-between p-4 cursor-pointer">
-              <div className="flex items-center gap-3 text-pmmg-navy">
+              <div className="flex items-center gap-3 text-primary-dark">
                 <span className="material-symbols-outlined">link</span>
                 <span className="text-sm font-bold uppercase">Ligações e Contatos</span>
               </div>
@@ -324,7 +324,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase tracking-wider truncate">{association.relationship}</p>
-                        <h4 className="text-sm font-bold text-pmmg-navy truncate">{associatedSuspect.name}</h4>
+                        <h4 className="text-sm font-bold text-primary-dark truncate">{associatedSuspect.name}</h4>
                       </div>
                       <span className="material-symbols-outlined text-pmmg-navy/40 text-lg shrink-0">arrow_forward_ios</span>
                     </div>
@@ -359,7 +359,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
           {/* Endereço Principal */}
           {suspect.lat && suspect.lng && (
             <div className="pmmg-card overflow-hidden">
-              <div className="p-4 text-pmmg-navy bg-white/40">
+              <div className="p-4 text-primary-dark bg-white/40">
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined">location_on</span>
                   <span className="text-sm font-bold uppercase">Endereço Principal</span>
@@ -398,7 +398,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
           {/* Endereço da Abordagem (NOVO MAPA) */}
           {suspect.approachAddress && suspect.approachLat && suspect.approachLng && (
             <div className="pmmg-card overflow-hidden">
-              <div className="p-4 text-pmmg-navy bg-white/40">
+              <div className="p-4 text-primary-dark bg-white/40">
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined">pin_drop</span>
                   <span className="text-sm font-bold uppercase">Endereço da Abordagem</span>
