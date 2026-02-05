@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
-import { Screen, Suspect, CustomMarker, GeocodedLocation, TacticalArea } from '../types';
+import { Screen, Suspect, CustomMarker, GeocodedLocation } from '../types';
 import BottomNav from '../components/BottomNav';
 import GoogleMapWrapper from '../components/GoogleMapWrapper';
-import { MarkerF, InfoWindowF, OverlayViewF, OverlayView, PolygonF } from '@react-google-maps/api';
+import { MarkerF, InfoWindowF, OverlayViewF, OverlayView } from '@react-google-maps/api';
 import { ICON_PATHS } from '../utils/iconPaths';
-import { getCurrentLocation } from '../utils/geolocation';
-import TacticalAreaDrawer from '../components/TacticalAreaDrawer'; // NOVO IMPORT
+import { getCurrentLocation } from '../utils/geolocation'; // NEW IMPORT
 
 // Definindo tipos enriquecidos para uso interno (se vierem do GroupTacticalMap)
 interface EnrichedSuspect extends Suspect {
@@ -23,18 +22,12 @@ interface TacticalMapProps {
   suspects: EnrichedSuspect[]; // Pode receber suspeitos enriquecidos
   onOpenProfile: (id: string) => void;
   initialCenter?: [number, number] | null;
-  userDefaultLocation: GeocodedLocation | null;
+  userDefaultLocation: GeocodedLocation | null; // NEW PROP
   customMarkers: EnrichedCustomMarker[]; // Pode receber marcadores enriquecidos
   addCustomMarker: (marker: CustomMarker) => void;
   updateCustomMarker: (marker: CustomMarker) => void;
   deleteCustomMarker: (id: string) => void;
   groupName?: string; // NOVO: Nome do grupo, se estiver no contexto de grupo
-  
-  // NOVO: Props para Áreas Táticas
-  tacticalAreas: TacticalArea[];
-  addTacticalArea: (area: Omit<TacticalArea, 'id'>) => void;
-  updateTacticalArea: (area: TacticalArea) => void;
-  deleteTacticalArea: (id: string) => void;
 }
 
 type MapFilter = 'Todos' | 'Foragido' | 'Suspeito' | 'Preso' | 'CPF Cancelado';
@@ -186,23 +179,7 @@ const UserMarkerComponent = memo<{
   );
 });
 
-const TacticalMap: React.FC<TacticalMapProps> = ({ 
-  navigateTo, 
-  suspects, 
-  onOpenProfile, 
-  initialCenter, 
-  userDefaultLocation, 
-  customMarkers, 
-  addCustomMarker, 
-  updateCustomMarker, 
-  deleteCustomMarker, 
-  groupName,
-  // NOVO: Props de Áreas Táticas
-  tacticalAreas,
-  addTacticalArea,
-  updateTacticalArea,
-  deleteTacticalArea,
-}) => {
+const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenProfile, initialCenter, userDefaultLocation, customMarkers, addCustomMarker, updateCustomMarker, deleteCustomMarker, groupName }) => {
   // CORREÇÃO: Inicializando useRef com null
   const mapRef = useRef<google.maps.Map | null>(null);
   
@@ -216,15 +193,6 @@ const TacticalMap: React.FC<TacticalMapProps> = ({
   const [currentZoom, setCurrentZoom] = useState(initialCenter ? 17 : 14);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); 
   const [activeInfoWindow, setActiveInfoWindow] = useState<string | null>(null); 
-  
-  // --- NOVO: Estados para Desenho de Polígono ---
-  const [isDrawingArea, setIsDrawingArea] = useState(false);
-  const [newAreaPaths, setNewAreaPaths] = useState<{ lat: number; lng: number }[]>([]);
-  const [activeAreaInfoWindow, setActiveAreaInfoWindow] = useState<TacticalArea | null>(null);
-  const [editingArea, setEditingArea] = useState<TacticalArea | null>(null);
-  
-  // Sincroniza o estado de edição do drawer com o estado local
-  const isEditingArea = !!editingArea;
 
   // Center state managed by initialCenter prop or user position
   const center = initialCenter 
@@ -257,11 +225,14 @@ const TacticalMap: React.FC<TacticalMapProps> = ({
     map.addListener('zoom_changed', () => {
       setCurrentZoom(map.getZoom() ?? 14);
     });
+    
+    // REMOVIDO: Lógica de abertura automática do InfoWindow ao carregar o mapa.
+    // O mapa deve apenas centralizar no ponto inicial, se fornecido.
+
   }, []);
 
   const handleMapClick = (e: google.maps.MapMouseEvent) => {
     setActiveInfoWindow(null); // Fecha qualquer InfoWindow aberta
-    setActiveAreaInfoWindow(null); // Fecha InfoWindow de área
     
     if (isAddingMarker && e.latLng) {
       setNewMarkerData({
@@ -274,14 +245,8 @@ const TacticalMap: React.FC<TacticalMapProps> = ({
       });
       setIsAddingMarker(false);
     }
-    
-    // Lógica de Desenho de Área
-    if (isDrawingArea && e.latLng) {
-      setNewAreaPaths(prev => [...prev, { lat: e.latLng!.lat(), lng: e.latLng!.lng() }]);
-    }
   };
 
-  // --- Marker CRUD Handlers (Existing) ---
   const handleSaveNewMarker = () => {
     if (newMarkerData) {
       const marker: CustomMarker = {
@@ -313,58 +278,6 @@ const TacticalMap: React.FC<TacticalMapProps> = ({
     }
   };
   
-  // --- Tactical Area CRUD Handlers (NEW) ---
-  
-  const handleSaveNewArea = (name: string, description: string, color: string, paths: { lat: number; lng: number }[]) => {
-    const newArea: Omit<TacticalArea, 'id'> = {
-      name,
-      description,
-      paths,
-      color,
-      strokeColor: color, // Usando a mesma cor para a borda
-      opacity: 0.3,
-    };
-    addTacticalArea(newArea);
-    setNewAreaPaths([]);
-    setIsDrawingArea(false);
-  };
-  
-  const handleUpdateArea = (updatedArea: TacticalArea) => {
-    updateTacticalArea(updatedArea);
-    setEditingArea(null);
-  };
-  
-  const handleCancelDrawing = () => {
-    setNewAreaPaths([]);
-    setIsDrawingArea(false);
-  };
-  
-  const handleAreaSelect = (area: TacticalArea) => {
-    setActiveAreaInfoWindow(area);
-    if (mapRef.current) {
-      // Centraliza no primeiro ponto do polígono
-      mapRef.current.panTo(area.paths[0]);
-    }
-  };
-  
-  const handleAreaEdit = (area: TacticalArea) => {
-    setEditingArea(area);
-    setActiveAreaInfoWindow(null);
-  };
-  
-  const handleCancelEditArea = () => {
-    setEditingArea(null);
-  };
-  
-  const handleAreaDelete = (id: string) => {
-    if (window.confirm("Tem certeza que deseja excluir esta Área Tática?")) {
-      deleteTacticalArea(id);
-      setActiveAreaInfoWindow(null);
-    }
-  };
-  
-  // --- End Tactical Area CRUD Handlers ---
-
   const handleShareLocation = useCallback(async (lat: number, lng: number, title: string) => {
     const locationLink = `https://maps.google.com/maps?q=${lat},${lng}`;
     const shareText = `🚨 PMMG TÁTICO - Localização Compartilhada 🚨\n\n📍 Ponto: ${title}\n🔗 Link do Mapa: ${locationLink}\n\nCoord: ${lat.toFixed(5)}, ${lng.toFixed(5)}\n(Via Sistema Operacional PMMG)`;
@@ -640,68 +553,6 @@ const TacticalMap: React.FC<TacticalMapProps> = ({
               title="Clique no mapa para posicionar"
             />
           )}
-          
-          {/* ✅ POLÍGONOS DE ÁREAS TÁTICAS */}
-          {tacticalAreas.map(area => (
-            <PolygonF
-              key={area.id}
-              paths={area.paths}
-              options={{
-                fillColor: area.color,
-                fillOpacity: area.opacity,
-                strokeColor: area.strokeColor,
-                strokeOpacity: 0.8,
-                strokeWeight: 2,
-                clickable: true,
-              }}
-              onClick={() => handleAreaSelect(area)}
-            />
-          ))}
-          
-          {/* ✅ POLÍGONO EM DESENHO (Linha temporária) */}
-          {isDrawingArea && newAreaPaths.length > 0 && (
-            <PolygonF
-              paths={newAreaPaths}
-              options={{
-                fillColor: '#ffcc00',
-                fillOpacity: 0.1,
-                strokeColor: '#ffcc00',
-                strokeOpacity: 1.0,
-                strokeWeight: 3,
-                clickable: false,
-                geodesic: true,
-              }}
-            />
-          )}
-          
-          {/* InfoWindow para Área Tática */}
-          {activeAreaInfoWindow && activeAreaInfoWindow.paths.length > 0 && (
-            <InfoWindowF 
-              position={activeAreaInfoWindow.paths[0]} 
-              onCloseClick={() => setActiveAreaInfoWindow(null)}
-            >
-              <div className="p-2 min-w-[150px]">
-                <p className="font-bold text-[11px] text-pmmg-navy uppercase leading-tight">{activeAreaInfoWindow.name}</p>
-                <p className="text-[10px] text-slate-600 mt-1">{activeAreaInfoWindow.description}</p>
-                <p className="text-[9px] text-pmmg-red font-bold uppercase mt-2">Área de {activeAreaInfoWindow.paths.length} pontos</p>
-                
-                <div className="flex gap-2 mt-3">
-                  <button 
-                    onClick={() => { handleAreaEdit(activeAreaInfoWindow); setActiveAreaInfoWindow(null); }}
-                    className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center"
-                  >
-                    <span className="material-symbols-outlined text-sm">edit</span>
-                  </button>
-                  <button 
-                    onClick={() => handleAreaDelete(activeAreaInfoWindow.id)}
-                    className="flex-1 bg-pmmg-red text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center"
-                  >
-                    <span className="material-symbols-outlined text-sm">delete</span>
-                  </button>
-                </div>
-              </div>
-            </InfoWindowF>
-          )}
         </GoogleMapWrapper>
         
         {/* Marker Configuration Modal (New or Edit) */}
@@ -913,23 +764,6 @@ const TacticalMap: React.FC<TacticalMapProps> = ({
             </div>
           </div>
         </div>
-        
-        {/* DRAWER DE ÁREAS TÁTICAS (NOVO) */}
-        <TacticalAreaDrawer
-          areas={tacticalAreas}
-          isDrawing={isDrawingArea}
-          setIsDrawing={setIsDrawingArea}
-          onAreaSelect={handleAreaSelect}
-          onAreaDelete={handleAreaDelete}
-          onAreaEdit={handleAreaEdit}
-          onCancelDrawing={handleCancelDrawing}
-          onSaveNewArea={handleSaveNewArea}
-          newAreaPaths={newAreaPaths}
-          isEditingArea={isEditingArea}
-          editingArea={editingArea}
-          onCancelEdit={handleCancelEditArea}
-          onUpdateArea={handleUpdateArea}
-        />
       </div>
 
       <BottomNav activeScreen={groupName ? 'groupsList' : 'map'} navigateTo={navigateTo} />
