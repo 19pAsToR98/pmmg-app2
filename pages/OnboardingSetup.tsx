@@ -10,7 +10,19 @@ interface OnboardingSetupProps {
   onInstitutionChange: (institution: Institution) => void; // NOVO
 }
 
-const RANKS: UserRank[] = ['Soldado', 'Cabo', '3º Sargento', '2º Sargento', '1º Sargento', 'Subtenente'];
+// Graduações simplificadas para exibição
+type SimplifiedRank = 'Soldado' | 'Cabo' | 'Sargento' | 'Tenente';
+
+// Mapeamento de Graduações Simplificadas para UserRank (para compatibilidade com types.ts)
+const RANK_MAPPING: Record<SimplifiedRank, UserRank> = {
+    'Soldado': 'Soldado',
+    'Cabo': 'Cabo',
+    'Sargento': '3º Sargento', // Usando a menor patente de Sargento como padrão
+    'Tenente': 'Subtenente', // Usando Subtenente como representação de Oficial/Praça mais alta
+};
+
+const SIMPLIFIED_RANKS: SimplifiedRank[] = ['Soldado', 'Cabo', 'Sargento', 'Tenente'];
+
 
 // Mock data for city search (since we cannot use external APIs)
 const MOCK_CITIES = [
@@ -43,7 +55,8 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
   const institution = INSTITUTION_OPTIONS[currentInstitutionIndex].id; // Derive institution from index
   
   const [name, setName] = useState('');
-  const [rank, setRank] = useState<UserRank>('Soldado'); // Padrão: Soldado
+  // Usando SimplifiedRank para o estado local
+  const [simplifiedRank, setSimplifiedRank] = useState<SimplifiedRank>('Soldado'); 
   const [city, setCity] = useState('');
   const [citySearchTerm, setSearchTerm] = useState('');
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number, lng: number, name: string } | null>(MOCK_CITIES[0]); // Default to BH
@@ -102,8 +115,9 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
     if (step < 5) { // 5 steps total
       setStep(step + 1);
     } else {
-      // Final Step
-      onComplete(name.trim(), rank, city.trim(), selectedAvatar, institution); // Pass institution
+      // Final Step: Mapeia a graduação simplificada para a graduação real
+      const finalRank = RANK_MAPPING[simplifiedRank];
+      onComplete(name.trim(), finalRank, city.trim(), selectedAvatar, institution); // Pass institution
     }
   };
 
@@ -242,18 +256,19 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
             <p className="text-sm text-secondary-light">Selecione sua graduação atual. Isso define sua hierarquia tática.</p>
             
             <div className="flex overflow-x-auto gap-4 pb-4 no-scrollbar justify-center">
-              {RANKS.map((r) => (
+              {SIMPLIFIED_RANKS.map((r) => (
                 <button
                   key={r}
-                  onClick={() => setRank(r)}
+                  onClick={() => setSimplifiedRank(r)}
                   className={`flex flex-col items-center gap-2 shrink-0 transition-all p-2 rounded-xl border-2 ${
-                    rank === r 
+                    simplifiedRank === r 
                       ? 'bg-pmmg-navy border-pmmg-yellow shadow-lg scale-105' 
                       : 'bg-white border-transparent grayscale opacity-60'
                   }`}
                 >
-                  <RankBadge rank={r} size="md" />
-                  <span className={`text-[9px] font-black uppercase ${rank === r ? 'text-pmmg-yellow' : 'text-primary-dark'}`}>
+                  {/* Usamos o RANK_MAPPING para obter o UserRank real para o RankBadge */}
+                  <RankBadge rank={RANK_MAPPING[r]} size="md" />
+                  <span className={`text-[9px] font-black uppercase ${simplifiedRank === r ? 'text-pmmg-yellow' : 'text-primary-dark'}`}>
                     {r}
                   </span>
                 </button>
@@ -261,7 +276,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
             </div>
             <div className="text-center">
               <p className="text-primary-dark font-bold uppercase text-sm">Graduação Selecionada:</p>
-              <p className="text-pmmg-red font-black text-lg mt-1">{rank}</p>
+              <p className="text-pmmg-red font-black text-lg mt-1">{simplifiedRank}</p>
             </div>
           </div>
         );
