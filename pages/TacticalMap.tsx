@@ -226,24 +226,10 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       setCurrentZoom(map.getZoom() ?? 14);
     });
     
-    // Se houver um initialCenter, abre o InfoWindow correspondente
-    if (initialCenter) {
-        // Find the suspect or custom marker at the initial center
-        const targetSuspect = filteredSuspects.find(s => 
-            (locationFilter === 'residence' && s.lat === initialCenter[0] && s.lng === initialCenter[1]) ||
-            (locationFilter === 'approach' && s.approachLat === initialCenter[0] && s.approachLng === initialCenter[1])
-        );
-        if (targetSuspect) {
-            setActiveInfoWindow(`suspect-${targetSuspect.id}`);
-        } else {
-            const targetCustom = customMarkers.find(m => m.lat === initialCenter[0] && m.lng === initialCenter[1]);
-            if (targetCustom) {
-                setActiveInfoWindow(`custom-${targetCustom.id}`);
-            }
-        }
-    }
+    // REMOVIDO: Lógica de abertura automática do InfoWindow ao carregar o mapa.
+    // O mapa deve apenas centralizar no ponto inicial, se fornecido.
 
-  }, [initialCenter, filteredSuspects, customMarkers, locationFilter]);
+  }, []);
 
   const handleMapClick = (e: google.maps.MapMouseEvent) => {
     setActiveInfoWindow(null); // Fecha qualquer InfoWindow aberta
