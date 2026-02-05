@@ -1,8 +1,4 @@
-export interface GeocodedLocation {
-  name: string;
-  lat: number;
-  lng: number;
-}
+import { GeocodedLocation } from '../types';
 
 const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
 

@@ -1,14 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Screen, UserRank, UserAvatar, Institution } from '../types';
+import { Screen, UserRank, UserAvatar, Institution, GeocodedLocation } from '../types';
 import RankBadge from '../components/RankBadge';
 import GoogleMapWrapper from '../components/GoogleMapWrapper';
 import { MarkerF } from '@react-google-maps/api';
 import { ICON_PATHS } from '../utils/iconPaths';
-import { searchGoogleAddress, GeocodedLocation } from '../utils/googleMapsApi'; // NEW IMPORT
+import { searchGoogleAddress } from '../utils/googleMapsApi';
 
 interface OnboardingSetupProps {
-  onComplete: (name: string, rank: UserRank, city: string, avatar: UserAvatar, institution: Institution) => void;
-  onInstitutionChange: (institution: Institution) => void; // NOVO
+  onComplete: (name: string, rank: UserRank, city: string, avatar: UserAvatar, institution: Institution, defaultLocation: GeocodedLocation) => void; // MODIFIED
+  onInstitutionChange: (institution: Institution) => void;
 }
 
 // Graduações simplificadas para exibição
@@ -131,7 +131,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
       setStep(step + 1);
     } else {
       const finalRank = RANK_MAPPING[simplifiedRank];
-      onComplete(name.trim(), finalRank, city.trim(), selectedAvatar, institution);
+      onComplete(name.trim(), finalRank, city.trim(), selectedAvatar, institution, selectedLocation!); // MODIFIED
     }
   };
 
@@ -326,7 +326,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
               
               {/* Dropdown de Sugestões (Posicionamento Absoluto) */}
               {citySuggestions.length > 0 && (
-                <div className="absolute z-10 w-full bg-white border border-pmmg-navy/20 rounded-lg mt-1 shadow-lg max-h-40 overflow-y-auto">
+                <div className="absolute z-50 w-full bg-white border border-pmmg-navy/20 rounded-lg mt-1 shadow-lg max-h-40 overflow-y-auto">
                   {citySuggestions.map((loc, index) => (
                     <button
                       key={index}

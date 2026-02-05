@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Screen, Suspect, UserRank, CustomMarker, Officer, Contact, ContactStatus, UserAvatar, Group, GroupPost, GroupParticipant, Institution } from './types';
+import { Screen, Suspect, UserRank, CustomMarker, Officer, Contact, ContactStatus, UserAvatar, Group, GroupPost, GroupParticipant, Institution, GeocodedLocation } from './types';
 import WelcomeScreen from './pages/WelcomeScreen'; // Renomeado
 import Dashboard from './pages/Dashboard';
 import SuspectRegistry from './pages/SuspectRegistry';
@@ -259,6 +259,7 @@ const App: React.FC = () => {
   const [userRank, setUserRank] = useState<UserRank>('Soldado');
   const [userName, setUserName] = useState('Rodrigo Alves');
   const [userCity, setUserCity] = useState('Belo Horizonte');
+  const [userDefaultLocation, setUserDefaultLocation] = useState<GeocodedLocation | null>(null); // NEW STATE
   const [isRegistered, setIsRegistered] = useState(false);
   const [userAvatar, setUserAvatar] = useState<UserAvatar>(DEFAULT_USER_AVATAR);
   const [userInstitution, setUserInstitution] = useState<Institution>('PMMG'); // NEW STATE
@@ -493,12 +494,13 @@ const App: React.FC = () => {
     navigateTo('registry');
   };
   
-  const handleOnboardingComplete = (name: string, rank: UserRank, city: string, avatar: UserAvatar, institution: Institution) => {
+  const handleOnboardingComplete = (name: string, rank: UserRank, city: string, avatar: UserAvatar, institution: Institution, defaultLocation: GeocodedLocation) => {
     setUserName(name);
     setUserRank(rank);
     setUserCity(city);
     setAiAvatar(avatar);
     setUserInstitution(institution);
+    setUserDefaultLocation(defaultLocation); // STORE LOCATION
     navigateTo('dashboard');
   };
 
@@ -721,6 +723,7 @@ const App: React.FC = () => {
           suspects={suspects} 
           onOpenProfile={openProfile} 
           initialCenter={mapCenter} 
+          userDefaultLocation={userDefaultLocation} // PASSING NEW PROP
           customMarkers={customMarkers} 
           addCustomMarker={addCustomMarker} 
           updateCustomMarker={updateCustomMarker}

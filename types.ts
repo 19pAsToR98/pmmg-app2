@@ -20,6 +20,12 @@ export interface Association {
   relationship: string; // e.g., 'Cúmplice', 'Familiar', 'Contato'
 }
 
+export interface GeocodedLocation {
+  name: string;
+  lat: number;
+  lng: number;
+}
+
 export interface CustomMarker {
   id: string;
   lat: number;

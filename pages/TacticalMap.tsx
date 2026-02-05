@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
-import { Screen, Suspect, CustomMarker } from '../types';
+import { Screen, Suspect, CustomMarker, GeocodedLocation } from '../types';
 import BottomNav from '../components/BottomNav';
 import GoogleMapWrapper from '../components/GoogleMapWrapper';
 import { MarkerF, InfoWindowF, OverlayViewF, OverlayView } from '@react-google-maps/api';
@@ -22,6 +22,7 @@ interface TacticalMapProps {
   suspects: EnrichedSuspect[]; // Pode receber suspeitos enriquecidos
   onOpenProfile: (id: string) => void;
   initialCenter?: [number, number] | null;
+  userDefaultLocation: GeocodedLocation | null; // NEW PROP
   customMarkers: EnrichedCustomMarker[]; // Pode receber marcadores enriquecidos
   addCustomMarker: (marker: CustomMarker) => void;
   updateCustomMarker: (marker: CustomMarker) => void;
@@ -178,7 +179,7 @@ const UserMarkerComponent = memo<{
   );
 });
 
-const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenProfile, initialCenter, customMarkers, addCustomMarker, updateCustomMarker, deleteCustomMarker, groupName }) => {
+const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenProfile, initialCenter, userDefaultLocation, customMarkers, addCustomMarker, updateCustomMarker, deleteCustomMarker, groupName }) => {
   // CORREÇÃO: Inicializando useRef com null
   const mapRef = useRef<google.maps.Map | null>(null);
   
@@ -194,7 +195,11 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   const [activeInfoWindow, setActiveInfoWindow] = useState<string | null>(null); 
 
   // Center state managed by initialCenter prop or user position
-  const center = initialCenter ? { lat: initialCenter[0], lng: initialCenter[1] } : userPos || DEFAULT_CENTER;
+  const center = initialCenter 
+    ? { lat: initialCenter[0], lng: initialCenter[1] } 
+    : userPos 
+      ? userPos 
+      : userDefaultLocation || DEFAULT_CENTER; // USE userDefaultLocation as fallback
 
   // Filtragem dos suspeitos
   const filteredSuspects = suspects.filter(s => {
