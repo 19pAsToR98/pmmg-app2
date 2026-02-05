@@ -53,7 +53,7 @@ const GroupCreation: React.FC<GroupCreationProps> = ({ navigateTo, allOfficers, 
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
-      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-xl">
+      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 pt-safe flex items-center justify-between shadow-xl">
         <div className="flex items-center gap-3">
           <button onClick={() => navigateTo('groupsList')} className="text-white">
             <span className="material-symbols-outlined">arrow_back_ios</span>
@@ -137,7 +137,7 @@ const GroupCreation: React.FC<GroupCreationProps> = ({ navigateTo, allOfficers, 
         </div>
       </main>
 
-      <footer className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 border-t border-pmmg-navy/10 backdrop-blur-lg max-w-md mx-auto">
+      <footer className="fixed bottom-0 left-0 right-0 p-4 pb-safe bg-white/95 border-t border-pmmg-navy/10 backdrop-blur-lg max-w-md mx-auto">
         <button 
           onClick={handleCreate}
           disabled={!groupName.trim() || !description.trim()}

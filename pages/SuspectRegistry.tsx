@@ -416,7 +416,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
-      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-lg">
+      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 pt-safe flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-3">
           <button onClick={() => navigateTo(isEditing ? 'profile' : 'dashboard')} className="text-white active:scale-90 transition-transform">
             <span className="material-symbols-outlined">arrow_back_ios</span>

@@ -118,7 +118,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
-      <header className={`sticky top-0 z-[100] px-4 pt-6 pb-4 shadow-xl shrink-0 transition-colors ${isSelectionMode ? 'bg-pmmg-red' : 'bg-pmmg-navy'}`}>
+      <header className={`sticky top-0 z-[100] px-4 pt-safe pb-4 shadow-xl shrink-0 transition-colors ${isSelectionMode ? 'bg-pmmg-red' : 'bg-pmmg-navy'}`}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <button onClick={isSelectionMode ? handleExitSelectionMode : () => navigateTo('dashboard')} className="text-white active:scale-90 transition-transform">

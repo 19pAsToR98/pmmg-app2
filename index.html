@@ -2,7 +2,7 @@
 <html lang="pt-br">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>PMMG Operacional</title>
     <link rel="manifest" href="/manifest.json" /> <!-- PWA Manifest -->
     
@@ -111,6 +111,14 @@
       .theme-pmesp .text-primary-dark { color: #234485 !important; }
       /* O texto secundário pode ser um cinza escuro */
       .theme-pmesp .text-secondary-light { color: #4b5563 !important; } /* slate-600 */
+      
+      /* --- Safe Area Insets for Mobile/Capacitor --- */
+      .pt-safe {
+        padding-top: env(safe-area-inset-top, 1rem); /* Fallback to 16px */
+      }
+      .pb-safe {
+        padding-bottom: env(safe-area-inset-bottom, 2rem); /* Fallback to 32px */
+      }
       
       .material-symbols-outlined {
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;

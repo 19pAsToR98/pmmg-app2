@@ -19,7 +19,7 @@ const BottomNav: React.FC<BottomNavProps> = ({ activeScreen, navigateTo }) => {
   // Se o badge for necessário para 'Assistente', ele deve ser passado via props. Por enquanto, setei para 0.
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white/95 border-t border-pmmg-navy/10 px-6 pt-3 pb-8 z-50 backdrop-blur-lg max-w-md mx-auto">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white/95 border-t border-pmmg-navy/10 px-6 pt-3 pb-safe z-50 backdrop-blur-lg max-w-md mx-auto">
       <div className="flex items-center justify-between">
         {tabs.map((tab) => (
           <button
