@@ -140,7 +140,11 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
 
         <section className="px-4 space-y-4">
           {filteredSuspects.length > 0 ? filteredSuspects.map((alert) => (
-            <div key={alert.id} className="pmmg-card overflow-hidden transition-all active:scale-[0.98]">
+            <div 
+              key={alert.id} 
+              onClick={() => onOpenProfile(alert.id)} // Adicionado onClick ao container principal
+              className="pmmg-card overflow-hidden transition-all active:scale-[0.98] cursor-pointer"
+            >
               <div className="flex">
                 <div className="w-32 h-44 relative bg-slate-200 shrink-0">
                   <img alt={alert.name} className="w-full h-full object-cover" src={alert.photoUrl} />
@@ -175,7 +179,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                       {/* Link VER NO MAPA */}
                       {alert.lat && alert.lng && (
                         <div 
-                          onClick={() => handleViewOnMap(alert)}
+                          onClick={(e) => { e.stopPropagation(); handleViewOnMap(alert); }} // Adicionado stopPropagation
                           className="flex items-center gap-1.5 cursor-pointer active:opacity-70 transition-opacity"
                         >
                           <span className="material-symbols-outlined text-[14px] text-secondary-light fill-icon">map</span>
@@ -186,13 +190,13 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                   </div>
                   <div className="flex gap-2">
                     <button 
-                      onClick={() => onOpenProfile(alert.id)}
+                      onClick={(e) => e.stopPropagation()} // Remove a navegação, apenas impede a propagação
                       className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-2 rounded-lg uppercase tracking-wide"
                     >
                       Ficha Completa
                     </button>
                     <button 
-                      onClick={() => alert(`Compartilhando ficha de: ${alert.name}`)}
+                      onClick={(e) => { e.stopPropagation(); alert(`Compartilhando ficha de: ${alert.name}`); }} // Adicionado stopPropagation
                       className="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center"
                     >
                       <span className="material-symbols-outlined text-primary-dark text-lg">share</span>
