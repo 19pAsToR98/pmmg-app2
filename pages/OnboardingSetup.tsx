@@ -11,17 +11,17 @@ interface OnboardingSetupProps {
 }
 
 // Graduações simplificadas para exibição
-type SimplifiedRank = 'Soldado' | 'Cabo' | 'Sargento' | 'Tenente';
+type SimplifiedRank = 'Soldado' | 'Cabo' | 'Sargento'; // 'Tenente' removido
 
 // Mapeamento de Graduações Simplificadas para UserRank (para compatibilidade com types.ts)
 const RANK_MAPPING: Record<SimplifiedRank, UserRank> = {
     'Soldado': 'Soldado',
     'Cabo': 'Cabo',
     'Sargento': '3º Sargento', // Usando a menor patente de Sargento como padrão
-    'Tenente': 'Subtenente', // Usando Subtenente como representação de Oficial/Praça mais alta
+    // Se 'Sargento' for selecionado, o sistema usará '3º Sargento'
 };
 
-const SIMPLIFIED_RANKS: SimplifiedRank[] = ['Soldado', 'Cabo', 'Sargento', 'Tenente'];
+const SIMPLIFIED_RANKS: SimplifiedRank[] = ['Soldado', 'Cabo', 'Sargento']; // 'Tenente' removido
 
 
 // Mock data for city search (since we cannot use external APIs)
