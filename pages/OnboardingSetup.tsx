@@ -95,7 +95,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
 
   const handleSelectCity = (location: { lat: number, lng: number, name: string }) => {
     setSelectedLocation(location);
-    setCity(location.name);
+    setCity(location.name); // Garante que o estado 'city' seja atualizado
     setSearchTerm('');
     setCitySuggestions([]);
   };
