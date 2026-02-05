@@ -15,7 +15,7 @@ const AITools: React.FC<AIToolsProps> = ({ navigateTo, userRank, aiAvatar }) => 
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
-      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 pt-safe flex items-center justify-between shadow-xl">
+      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-xl">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 shrink-0 bg-white rounded-full flex items-center justify-center p-1 border-2 border-pmmg-red">
             <span className="material-symbols-outlined text-pmmg-navy text-2xl">shield</span>

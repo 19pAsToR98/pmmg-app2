@@ -29,7 +29,7 @@ const RequestAccess: React.FC<RequestAccessProps> = ({ onBack, onSuccess }) => {
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
-      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-5 pt-safe flex items-center justify-between shadow-xl">
+      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-5 flex items-center justify-between shadow-xl">
         <div className="flex items-center gap-3">
           <button onClick={onBack} className="text-white">
             <span className="material-symbols-outlined">arrow_back_ios</span>
@@ -101,7 +101,7 @@ const RequestAccess: React.FC<RequestAccessProps> = ({ onBack, onSuccess }) => {
         </div>
       </main>
 
-      <footer className="fixed bottom-0 left-0 right-0 p-5 pb-safe bg-gradient-to-t from-pmmg-khaki via-pmmg-khaki to-transparent max-w-md mx-auto">
+      <footer className="fixed bottom-0 left-0 right-0 p-5 bg-gradient-to-t from-pmmg-khaki via-pmmg-khaki to-transparent max-w-md mx-auto">
         <button 
           onClick={handleSubmit}
           className="w-full bg-pmmg-navy text-white font-bold py-4 rounded-xl shadow-2xl flex items-center justify-center gap-3 active:scale-[0.98] transition-transform"

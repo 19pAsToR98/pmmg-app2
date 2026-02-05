@@ -40,7 +40,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
-      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 pt-safe pb-4 shadow-xl">
+      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 pt-4 pb-4 shadow-xl">
         {/* Top Bar */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">

@@ -16,7 +16,7 @@ const RANKS: UserRank[] = ['Soldado', 'Cabo', '3º Sargento', '2º Sargento', '1
 const ProfileSettings: React.FC<ProfileSettingsProps> = ({ navigateTo, onBack, currentRank, onRankChange, userAvatar }) => {
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
-      <header className="bg-pmmg-navy px-6 pt-safe pb-8 rounded-b-[40px] shadow-2xl relative overflow-hidden">
+      <header className="bg-pmmg-navy px-6 pt-12 pb-8 rounded-b-[40px] shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-pmmg-yellow/10 rounded-full -mr-16 -mt-16"></div>
         <div className="relative z-10 flex flex-col items-center">
           <div className="relative mb-4">

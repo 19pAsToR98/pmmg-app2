@@ -30,7 +30,7 @@ const TacticalContacts: React.FC<TacticalContactsProps> = ({ navigateTo, officer
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
-      <header className="sticky top-0 z-50 bg-pmmg-navy text-white shadow-xl px-4 py-4 pt-safe flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-pmmg-navy text-white shadow-xl px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button onClick={() => navigateTo('groupsList')} className="text-white">
             <span className="material-symbols-outlined">arrow_back_ios</span>

@@ -346,7 +346,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
-      <header className="sticky top-0 z-[1000] bg-pmmg-navy px-4 py-4 pt-safe shadow-xl">
+      <header className="sticky top-0 z-[1000] bg-pmmg-navy px-4 py-4 shadow-xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={() => navigateTo(groupName ? 'groupDetail' : 'dashboard')} className="text-white active:scale-90 transition-transform">

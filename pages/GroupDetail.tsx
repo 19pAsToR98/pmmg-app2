@@ -339,7 +339,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden relative">
-      <header className="bg-pmmg-navy px-4 pt-safe pb-4 shadow-xl z-50 shrink-0">
+      <header className="bg-pmmg-navy px-4 pt-6 pb-4 shadow-xl z-50 shrink-0">
         <div className="flex items-center gap-3 mb-6">
           <button onClick={() => navigateTo('groupsList')} className="text-white active:scale-90 transition-transform shrink-0">
             <span className="material-symbols-outlined">arrow_back_ios</span>
