@@ -52,6 +52,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
   const [selectedLocation, setSelectedLocation] = useState<GeocodedLocation | null>(DEFAULT_LOCATION); // Default to BH
   const [citySuggestions, setCitySuggestions] = useState<GeocodedLocation[]>([]);
   const [isCitySearching, setIsCitySearching] = useState(false);
+  const [searchExecuted, setSearchExecuted] = useState(false); // NOVO: Indica se uma busca foi executada
   
   // NEW State for Avatar selection index
   const [selectedAvatarIndex, setSelectedAvatarIndex] = useState(0);
@@ -67,6 +68,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
   const handleCitySearchChange = (term: string) => {
     setSearchTerm(term);
     setCitySuggestions([]);
+    setSearchExecuted(false); // Reseta o estado de busca executada ao digitar
     
     // Se o termo for limpo, limpa as sugestões
     if (term.length === 0) return;
@@ -86,6 +88,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
     
     setIsCitySearching(true);
     setCitySuggestions([]);
+    setSearchExecuted(true); // Marca que a busca foi executada
 
     try {
       // Usando a função real de geocodificação
@@ -94,7 +97,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
       if (results.length > 0) {
         setCitySuggestions(results);
       } else {
-        alert("Nenhuma cidade encontrada. Tente um termo mais específico.");
+        // Se não houver resultados, a mensagem será exibida
       }
     } catch (error) {
       console.error("Erro ao buscar cidade:", error);
@@ -109,6 +112,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
     setCity(location.name); // Garante que o estado 'city' seja atualizado
     setSearchTerm(location.name); // Preenche o input com o nome completo
     setCitySuggestions([]);
+    setSearchExecuted(false); // Esconde a mensagem de erro se houver
   };
 
   // --- Navigation Logic ---
@@ -320,6 +324,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
                 </button>
               </div>
               
+              {/* Dropdown de Sugestões (Posicionamento Absoluto) */}
               {citySuggestions.length > 0 && (
                 <div className="absolute z-10 w-full bg-white border border-pmmg-navy/20 rounded-lg mt-1 shadow-lg max-h-40 overflow-y-auto">
                   {citySuggestions.map((loc, index) => (
@@ -333,8 +338,10 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
                   ))}
                 </div>
               )}
-              {citySearchTerm.length > 0 && citySuggestions.length === 0 && !isCitySearching && (
-                <p className="text-[10px] text-pmmg-navy/50 mt-2 text-center">Nenhuma cidade encontrada.</p>
+              
+              {/* Mensagem de "Nenhuma cidade encontrada" (Controlada por searchExecuted) */}
+              {searchExecuted && citySuggestions.length === 0 && !isCitySearching && (
+                <p className="text-[10px] text-pmmg-red italic text-center mt-2">Nenhuma cidade encontrada.</p>
               )}
             </div>
             
