@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Screen, Suspect, CustomMarker, Group, Officer, GeocodedLocation } from '../types';
+import { Screen, Suspect, CustomMarker, Group, Officer, GeocodedLocation, GroupPost } from '../types';
 import TacticalMap from './TacticalMap';
 
 // Definindo tipos enriquecidos para passar ao TacticalMap
@@ -34,7 +34,7 @@ const GroupTacticalMap: React.FC<GroupTacticalMapProps> = ({
   allOfficers,
   userName,
   userRank,
-  userDefaultLocation, // NOVO
+  userDefaultLocation,
   onOpenProfile,
   addCustomMarker,
   updateCustomMarker,
@@ -49,68 +49,83 @@ const GroupTacticalMap: React.FC<GroupTacticalMapProps> = ({
 
   const findAuthor = (authorId: string) => allParticipants.find(o => o.id === authorId);
 
-  // 1. Identifica IDs de suspeitos compartilhados e o autor mais recente
-  const sharedSuspectsMap = useMemo(() => {
-    const map = new Map<string, { suspect: Suspect, authorId: string }>();
-    
-    // Posts são ordenados do mais novo para o mais antigo no App.tsx, mas vamos garantir o autor mais recente
-    // Na verdade, vamos usar o autor do post mais recente para simplificar a exibição no mapa.
-    const postsBySuspectId = new Map<string, GroupPost>();
-    
-    // Itera posts do mais novo para o mais antigo (se o App.tsx garantir a ordem)
-    group.posts.forEach(post => {
-        if (post.suspectId && !postsBySuspectId.has(post.suspectId)) {
-            postsBySuspectId.set(post.suspectId, post);
-        }
-    });
-
-    postsBySuspectId.forEach((post, suspectId) => {
-        const suspect = allSuspects.find(s => s.id === suspectId);
-        if (suspect) {
-            map.set(suspectId, { suspect, authorId: post.authorId });
-        }
-    });
-    
-    return map;
-  }, [group.posts, allSuspects]);
-
-  // 2. Filtra e enriquece a lista de suspeitos
+  // 1. Identifica e enriquece suspeitos compartilhados, ordenando pelo post mais recente
   const groupSuspects: EnrichedSuspect[] = useMemo(() => {
-    return Array.from(sharedSuspectsMap.values()).map(({ suspect, authorId }) => {
-        const author = findAuthor(authorId);
-        return {
+    // Mapeia posts de suspeitos para enriquecer os dados
+    const suspectPosts = group.posts
+      .filter(post => post.type === 'suspect' && post.suspectId)
+      .map(post => {
+        const suspect = allSuspects.find(s => s.id === post.suspectId);
+        const author = findAuthor(post.authorId);
+        
+        if (suspect) {
+          return {
             ...suspect,
             authorName: author?.name,
             authorRank: author?.rank,
-        };
-    });
-  }, [sharedSuspectsMap, findAuthor]);
+            postTimestamp: new Date(post.timestamp).getTime(), // Adiciona timestamp para ordenação
+          };
+        }
+        return null;
+      })
+      .filter((s): s is EnrichedSuspect & { postTimestamp: number } => s !== null);
 
-  // 3. Enriquece os marcadores customizados
-  const enrichedCustomMarkers: EnrichedCustomMarker[] = useMemo(() => {
-    // Para marcadores customizados, precisamos de uma forma de rastrear o autor.
-    // Como a interface CustomMarker não tem 'authorId', vamos assumir que o autor é o primeiro admin do grupo
-    // ou, idealmente, o autor do post que levou à criação do marcador (o que não temos no mock).
-    // Por simplicidade, vamos usar o primeiro admin como autor do marcador customizado.
+    // Ordena do mais recente para o mais antigo
+    suspectPosts.sort((a, b) => b.postTimestamp - a.postTimestamp);
+    
+    // Remove duplicatas (mantendo o mais recente)
+    const uniqueSuspects = new Map<string, EnrichedSuspect>();
+    suspectPosts.forEach(s => {
+        if (!uniqueSuspects.has(s.id)) {
+            uniqueSuspects.set(s.id, s);
+        }
+    });
+    
+    return Array.from(uniqueSuspects.values());
+  }, [group.posts, allSuspects, findAuthor]);
+
+  // 2. Enriquece os marcadores customizados
+  const enrichedCustomMarkers: (EnrichedCustomMarker & { postTimestamp: number })[] = useMemo(() => {
+    // Para marcadores customizados, assumimos que o autor é o primeiro admin do grupo
     const adminId = group.adminIds[0];
     const admin = findAuthor(adminId);
     
+    // Como não temos timestamp para marcadores customizados no mock, 
+    // vamos usar a data de criação do grupo como fallback para ordenação.
+    const groupCreationTime = new Date(group.posts.find(p => p.eventType === 'group_created')?.timestamp || Date.now()).getTime();
+
     return group.customMarkers.map(marker => ({
         ...marker,
         authorName: admin?.name,
         authorRank: admin?.rank,
+        postTimestamp: groupCreationTime, // Usando data de criação do grupo como mock de timestamp
     }));
-  }, [group.customMarkers, group.adminIds, findAuthor]);
+  }, [group.customMarkers, group.adminIds, findAuthor, group.posts]);
 
 
-  // Determine the initial center based on the first shared suspect, if available
+  // 3. Determine o centro inicial (Prioridade: Ponto mais recente com coordenadas)
   const initialCenter = useMemo(() => {
-    const firstSuspect = groupSuspects.find(s => s.lat && s.lng);
-    if (firstSuspect && firstSuspect.lat && firstSuspect.lng) {
-      return [firstSuspect.lat, firstSuspect.lng] as [number, number];
+    
+    // 3.1. Busca o suspeito mais recente com coordenadas válidas
+    const mostRecentSuspect = groupSuspects.find(s => s.lat && s.lng);
+    
+    // 3.2. Busca o marcador customizado mais recente (usando o mock de timestamp)
+    // Nota: Como o timestamp do marcador é mockado, ele só será usado se não houver suspeitos.
+    const mostRecentMarker = enrichedCustomMarkers.length > 0 ? enrichedCustomMarkers[0] : null;
+    
+    // 3.3. Compara e seleciona o ponto mais recente
+    if (mostRecentSuspect) {
+        // Se o suspeito mais recente tiver coordenadas, centraliza nele.
+        return [mostRecentSuspect.lat!, mostRecentSuspect.lng!] as [number, number];
     }
-    return null;
-  }, [groupSuspects]);
+    
+    if (mostRecentMarker) {
+        // Se não houver suspeitos, mas houver marcadores customizados, centraliza no primeiro marcador.
+        return [mostRecentMarker.lat, mostRecentMarker.lng] as [number, number];
+    }
+    
+    return null; // Deixa o TacticalMap usar userDefaultLocation ou DEFAULT_CENTER
+  }, [groupSuspects, enrichedCustomMarkers]);
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -121,7 +136,7 @@ const GroupTacticalMap: React.FC<GroupTacticalMapProps> = ({
           suspects={groupSuspects} // Suspeitos enriquecidos
           onOpenProfile={onOpenProfile}
           initialCenter={initialCenter}
-          userDefaultLocation={userDefaultLocation} // PASSANDO A LOCALIZAÇÃO PADRÃO
+          userDefaultLocation={userDefaultLocation}
           customMarkers={enrichedCustomMarkers} // Marcadores enriquecidos
           addCustomMarker={(marker) => addCustomMarker(group.id, marker)}
           updateCustomMarker={(marker) => updateCustomMarker(group.id, marker)}
