@@ -4,6 +4,7 @@ import RankBadge from '../components/RankBadge';
 import GoogleMapWrapper from '../components/GoogleMapWrapper';
 import { MarkerF } from '@react-google-maps/api';
 import { ICON_PATHS } from '../utils/iconPaths';
+import { searchGoogleAddress, GeocodedLocation } from '../utils/googleMapsApi'; // NEW IMPORT
 
 interface OnboardingSetupProps {
   onComplete: (name: string, rank: UserRank, city: string, avatar: UserAvatar, institution: Institution) => void;
@@ -11,30 +12,19 @@ interface OnboardingSetupProps {
 }
 
 // Graduações simplificadas para exibição
-type SimplifiedRank = 'Soldado' | 'Cabo' | 'Sargento'; // 'Tenente' removido
+type SimplifiedRank = 'Soldado' | 'Cabo' | 'Sargento';
 
 // Mapeamento de Graduações Simplificadas para UserRank (para compatibilidade com types.ts)
 const RANK_MAPPING: Record<SimplifiedRank, UserRank> = {
     'Soldado': 'Soldado',
     'Cabo': 'Cabo',
-    'Sargento': '3º Sargento', // Usando a menor patente de Sargento como padrão
-    // Se 'Sargento' for selecionado, o sistema usará '3º Sargento'
+    'Sargento': '3º Sargento',
 };
 
-const SIMPLIFIED_RANKS: SimplifiedRank[] = ['Soldado', 'Cabo', 'Sargento']; // 'Tenente' removido
+const SIMPLIFIED_RANKS: SimplifiedRank[] = ['Soldado', 'Cabo', 'Sargento'];
 
-
-// Mock data for city search (since we cannot use external APIs)
-const MOCK_CITIES = [
-  { name: 'Belo Horizonte', lat: -19.9167, lng: -43.9345 },
-  { name: 'Contagem', lat: -19.9300, lng: -44.0500 },
-  { name: 'Uberlândia', lat: -18.9183, lng: -48.2750 },
-  { name: 'Juiz de Fora', lat: -21.7639, lng: -43.3400 },
-  { name: 'Montes Claros', lat: -16.7342, lng: -43.8611 },
-  // Adicionando cidades de SP para PMESP
-  { name: 'São Paulo', lat: -23.5505, lng: -46.6333 },
-  { name: 'Campinas', lat: -22.9056, lng: -47.0608 },
-];
+// NEW: Default location for map initialization before search
+const DEFAULT_LOCATION: GeocodedLocation = { name: 'Belo Horizonte', lat: -19.9167, lng: -43.9345 };
 
 // NEW: Institution options
 const INSTITUTION_OPTIONS: { id: Institution, name: string, logo: string }[] = [
@@ -57,10 +47,11 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
   const [name, setName] = useState('');
   // Usando SimplifiedRank para o estado local
   const [simplifiedRank, setSimplifiedRank] = useState<SimplifiedRank>('Soldado'); 
-  const [city, setCity] = useState('');
+  const [city, setCity] = useState(DEFAULT_LOCATION.name); // Initialize city name
   const [citySearchTerm, setSearchTerm] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState<{ lat: number, lng: number, name: string } | null>(MOCK_CITIES[0]); // Default to BH
-  const [citySuggestions, setCitySuggestions] = useState<typeof MOCK_CITIES>([]);
+  const [selectedLocation, setSelectedLocation] = useState<GeocodedLocation | null>(DEFAULT_LOCATION); // Default to BH
+  const [citySuggestions, setCitySuggestions] = useState<GeocodedLocation[]>([]);
+  const [isCitySearching, setIsCitySearching] = useState(false);
   
   // NEW State for Avatar selection index
   const [selectedAvatarIndex, setSelectedAvatarIndex] = useState(0);
@@ -69,55 +60,74 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
   // Efeito para notificar o App.tsx sobre a mudança de instituição
   useEffect(() => {
     onInstitutionChange(institution);
-  }, [institution, onInstitutionChange]); // Garante que o tema mude dinamicamente
+  }, [institution, onInstitutionChange]);
 
   // --- Map/City Logic ---
   
-  // Efeito para garantir que a cidade inicial seja definida
-  useEffect(() => {
-    if (!city && selectedLocation) {
-        setCity(selectedLocation.name);
-    }
-  }, [city, selectedLocation]);
-
-
   const handleCitySearchChange = (term: string) => {
     setSearchTerm(term);
-    if (term.length > 1) {
-      const filtered = MOCK_CITIES.filter(c => 
-        c.name.toLowerCase().includes(term.toLowerCase())
-      );
-      setCitySuggestions(filtered);
-    } else {
-      setCitySuggestions([]);
+    setCitySuggestions([]);
+    
+    // Se o termo for limpo, limpa as sugestões
+    if (term.length === 0) return;
+    
+    // Se o usuário digitar, limpa a localização selecionada (para forçar a re-seleção)
+    if (selectedLocation && selectedLocation.name !== term) {
+        setSelectedLocation(null);
+        setCity('');
+    }
+  };
+  
+  const handleCitySearch = async () => {
+    if (citySearchTerm.length < 3) {
+      alert("Digite pelo menos 3 caracteres para buscar uma cidade.");
+      return;
+    }
+    
+    setIsCitySearching(true);
+    setCitySuggestions([]);
+
+    try {
+      // Usando a função real de geocodificação
+      const results = await searchGoogleAddress(citySearchTerm);
+
+      if (results.length > 0) {
+        setCitySuggestions(results);
+      } else {
+        alert("Nenhuma cidade encontrada. Tente um termo mais específico.");
+      }
+    } catch (error) {
+      console.error("Erro ao buscar cidade:", error);
+      alert("Erro na comunicação com o serviço de geocodificação do Google.");
+    } finally {
+      setIsCitySearching(false);
     }
   };
 
-  const handleSelectCity = (location: { lat: number, lng: number, name: string }) => {
+  const handleSelectCity = (location: GeocodedLocation) => {
     setSelectedLocation(location);
     setCity(location.name); // Garante que o estado 'city' seja atualizado
-    setSearchTerm('');
+    setSearchTerm(location.name); // Preenche o input com o nome completo
     setCitySuggestions([]);
   };
 
   // --- Navigation Logic ---
 
   const handleNext = () => {
-    if (step === 2 && !name.trim()) { // Step 2 is now Name
+    if (step === 2 && !name.trim()) {
       alert("Por favor, insira seu nome completo.");
       return;
     }
-    if (step === 4 && !city.trim()) { // Step 4 is now City
-      alert("Por favor, selecione sua cidade padrão.");
+    if (step === 4 && (!city.trim() || !selectedLocation)) {
+      alert("Por favor, selecione sua cidade padrão no mapa.");
       return;
     }
     
-    if (step < 5) { // 5 steps total
+    if (step < 5) {
       setStep(step + 1);
     } else {
-      // Final Step: Mapeia a graduação simplificada para a graduação real
       const finalRank = RANK_MAPPING[simplifiedRank];
-      onComplete(name.trim(), finalRank, city.trim(), selectedAvatar, institution); // Pass institution
+      onComplete(name.trim(), finalRank, city.trim(), selectedAvatar, institution);
     }
   };
 
@@ -137,7 +147,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
     });
   };
   
-  // NEW: Slider navigation for Institution
+  // Slider navigation for Institution
   const handleInstitutionChange = (direction: 'next' | 'prev') => {
     setCurrentInstitutionIndex(prev => {
       const total = INSTITUTION_OPTIONS.length;
@@ -152,11 +162,10 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
   };
 
   const getCityMarkerIcon = () => {
-    if (typeof window === 'undefined' || !window.google || !window.google.maps) return undefined; // Safety check
+    if (typeof window === 'undefined' || !window.google || !window.google.maps) return undefined;
 
     const pathData = ICON_PATHS['location_on'];
     
-    // Aplicando REGRA DE OURO 2: translate(6 6) scale(0.75)
     const svg = `
       <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
         <circle cx="16" cy="16" r="14" fill="#002147" stroke="#ffcc00" stroke-width="2"/>
@@ -173,7 +182,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
 
   const renderStepContent = () => {
     switch (step) {
-      case 1: // NEW STEP: Institution Selection (Slider Refactored)
+      case 1: // Institution Selection
         const currentInstitution = INSTITUTION_OPTIONS[currentInstitutionIndex];
         return (
           <div className="space-y-6 text-center">
@@ -193,7 +202,6 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
 
               {/* Institution Display (Centralized) */}
               <div className="flex flex-col items-center transition-all duration-300 ease-in-out p-4">
-                {/* REMOVIDA A MOLDURA QUADRADA */}
                 <div className="w-64 h-64 mb-6 p-4 flex items-center justify-center">
                   <img 
                     src={currentInstitution.logo} 
@@ -232,7 +240,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
             </div>
           </div>
         );
-      case 2: // Old Step 1: Name
+      case 2: // Name
         return (
           <div className="space-y-6">
             <h2 className="text-xl font-bold text-primary-dark uppercase tracking-tight">Identificação Pessoal</h2>
@@ -249,7 +257,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
             </div>
           </div>
         );
-      case 3: // Old Step 2: Rank
+      case 3: // Rank
         return (
           <div className="space-y-6">
             <h2 className="text-xl font-bold text-primary-dark uppercase tracking-tight">Graduação Militar</h2>
@@ -266,7 +274,6 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
                       : 'bg-white border-transparent grayscale opacity-60'
                   }`}
                 >
-                  {/* Usamos o RANK_MAPPING para obter o UserRank real para o RankBadge */}
                   <RankBadge rank={RANK_MAPPING[r]} size="md" />
                   <span className={`text-[9px] font-black uppercase ${simplifiedRank === r ? 'text-pmmg-yellow' : 'text-primary-dark'}`}>
                     {r}
@@ -280,7 +287,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
             </div>
           </div>
         );
-      case 4: // Old Step 3: City
+      case 4: // City
         return (
           <div className="space-y-4">
             <h2 className="text-xl font-bold text-primary-dark uppercase tracking-tight">Cidade Padrão</h2>
@@ -288,15 +295,32 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
             
             <div className="relative">
               <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Buscar Cidade em MG/SP</label>
-              <input 
-                value={citySearchTerm}
-                onChange={(e) => handleCitySearchChange(e.target.value)}
-                className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
-                placeholder="Ex: Belo Horizonte ou São Paulo" 
-                type="text" 
-              />
+              <div className="flex gap-2">
+                <input 
+                  value={citySearchTerm}
+                  onChange={(e) => handleCitySearchChange(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleCitySearch();
+                    }
+                  }}
+                  className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+                  placeholder="Ex: Belo Horizonte ou São Paulo" 
+                  type="text" 
+                />
+                <button 
+                  onClick={handleCitySearch}
+                  disabled={isCitySearching || citySearchTerm.length < 3}
+                  className="bg-pmmg-navy text-white p-3 rounded-lg active:scale-95 transition-transform disabled:opacity-50 shrink-0"
+                  title="Buscar Cidade"
+                >
+                  <span className="material-symbols-outlined text-xl animate-spin" style={{ display: isCitySearching ? 'block' : 'none' }}>progress_activity</span>
+                  <span className="material-symbols-outlined text-xl" style={{ display: isCitySearching ? 'none' : 'block' }}>search</span>
+                </button>
+              </div>
               
-              {citySearchTerm.length > 0 && citySuggestions.length > 0 && (
+              {citySuggestions.length > 0 && (
                 <div className="absolute z-10 w-full bg-white border border-pmmg-navy/20 rounded-lg mt-1 shadow-lg max-h-40 overflow-y-auto">
                   {citySuggestions.map((loc, index) => (
                     <button
@@ -309,12 +333,12 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
                   ))}
                 </div>
               )}
-              {citySearchTerm.length > 0 && citySuggestions.length === 0 && (
+              {citySearchTerm.length > 0 && citySuggestions.length === 0 && !isCitySearching && (
                 <p className="text-[10px] text-pmmg-navy/50 mt-2 text-center">Nenhuma cidade encontrada.</p>
               )}
             </div>
             
-            {/* Exibe o mapa se uma cidade foi selecionada ou se estamos no passo 3 (usando fallback) */}
+            {/* Exibe o mapa se uma cidade foi selecionada */}
             {selectedLocation && (
               <div className="pmmg-card overflow-hidden">
                 <div className="p-3 bg-pmmg-navy/5 flex items-center justify-between">
@@ -343,7 +367,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
             )}
           </div>
         );
-      case 5: // Old Step 4: Avatar Selection (Slider)
+      case 5: // Avatar Selection (Slider)
         const currentOption = AVATAR_OPTIONS[selectedAvatarIndex];
         
         return (

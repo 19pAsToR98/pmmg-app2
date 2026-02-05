@@ -4,7 +4,8 @@ import BottomNav from '../components/BottomNav';
 import GoogleMapWrapper from '../components/GoogleMapWrapper';
 import { MarkerF } from '@react-google-maps/api';
 import { ICON_PATHS } from '../utils/iconPaths';
-import { getCurrentLocation } from '../utils/geolocation'; // NEW IMPORT
+import { getCurrentLocation } from '../utils/geolocation';
+import { searchGoogleAddress, reverseGeocode, GeocodedLocation } from '../utils/googleMapsApi'; // NEW IMPORT
 
 interface SuspectRegistryProps {
   navigateTo: (screen: Screen) => void;
@@ -14,69 +15,9 @@ interface SuspectRegistryProps {
   allSuspects: Suspect[];
 }
 
-interface GeocodedLocation {
-  name: string;
-  lat: number;
-  lng: number;
-}
+const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY; // Mantido, mas não usado diretamente aqui
 
-const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
-
-// Função auxiliar para buscar endereço usando a API de Geocodificação do Google
-const searchGoogleAddress = async (address: string): Promise<GeocodedLocation[]> => {
-  if (!GOOGLE_MAPS_API_KEY) {
-    console.error("GOOGLE_MAPS_API_KEY is missing.");
-    return [];
-  }
-  
-  // Usando components=country:br para focar no Brasil e language=pt-BR
-  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&components=country:br&language=pt-BR&key=${GOOGLE_MAPS_API_KEY}`;
-  const response = await fetch(url);
-  const data = await response.json();
-
-  if (data.status === 'OK' && data.results.length > 0) {
-    // Mapeia os 5 primeiros resultados para sugestões
-    return data.results.slice(0, 5).map((item: any) => ({
-      name: item.formatted_address,
-      lat: item.geometry.location.lat,
-      lng: item.geometry.location.lng,
-    }));
-  }
-  
-  if (data.status !== 'ZERO_RESULTS') {
-    console.error("Google Geocoding Error Status:", data.status, data.error_message);
-  }
-  
-  return [];
-};
-
-// NOVO: Função auxiliar para Geocodificação Reversa (Coordenadas -> Endereço)
-const reverseGeocode = async (lat: number, lng: number): Promise<GeocodedLocation | null> => {
-  if (!GOOGLE_MAPS_API_KEY) {
-    console.error("GOOGLE_MAPS_API_KEY is missing.");
-    return null;
-  }
-  
-  const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&language=pt-BR&key=${GOOGLE_MAPS_API_KEY}`;
-  const response = await fetch(url);
-  const data = await response.json();
-
-  if (data.status === 'OK' && data.results.length > 0) {
-    const result = data.results[0];
-    return {
-      name: result.formatted_address,
-      lat: lat,
-      lng: lng,
-    };
-  }
-  
-  if (data.status !== 'ZERO_RESULTS') {
-    console.error("Google Reverse Geocoding Error Status:", data.status, data.error_message);
-  }
-  
-  return null;
-};
-
+// Removidas as funções searchGoogleAddress e reverseGeocode
 
 const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, onUpdate, currentSuspect, allSuspects }) => {
   const isEditing = !!currentSuspect;
@@ -88,7 +29,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
   const [rg, setRg] = useState(currentSuspect?.rg || '');
   const [nickname, setNickname] = useState(currentSuspect?.nickname || '');
   const [motherName, setMotherName] = useState(currentSuspect?.motherName || '');
-  const [birthDate, setBirthDate] = useState(currentSuspect?.birthDate || '');
+  const [birthDate, setBirthDate] = (currentSuspect?.birthDate || '');
   const [description, setDescription] = useState(currentSuspect?.description || '');
   const [currentArticle, setCurrentArticle] = useState('');
   const [articles, setArticles] = useState<string[]>(currentSuspect?.articles || []);
