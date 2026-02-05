@@ -382,41 +382,39 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
             <h2 className="text-xl font-bold text-primary-dark uppercase tracking-tight">Avatar Tático</h2>
             <p className="text-sm text-secondary-light">Selecione o avatar que representará você e o assistente de IA na plataforma.</p>
             
-            {/* Container do Slider: Fundo limpo, apenas setas e avatar */}
-            <div className="relative flex items-center justify-center pt-8 pb-4">
-              
-              {/* Previous Button */}
-              <button
-                onClick={() => handleAvatarChange('prev')}
-                className="absolute left-0 z-10 p-2 rounded-full bg-pmmg-navy/10 text-primary-dark shadow-md active:scale-95 transition-transform ml-2"
-              >
-                <span className="material-symbols-outlined">arrow_back_ios</span>
-              </button>
-
-              {/* Avatar Display */}
-              <div className="flex flex-col items-center text-center transition-all duration-300 ease-in-out">
-                {/* Moldura Circular e Aumento de Tamanho */}
-                <div className="w-64 h-64 overflow-hidden mb-4 rounded-full border-4 border-pmmg-navy shadow-xl p-1 bg-white">
-                  <img 
-                    src={currentOption.avatar.url} 
-                    alt={currentOption.avatar.name} 
-                    className="w-full h-full object-contain rounded-full" 
-                  />
-                </div>
-                {/* Nome do Personagem */}
-                <div className="bg-pmmg-navy text-white px-4 py-2 rounded-full shadow-lg">
-                  <p className="text-lg font-black uppercase tracking-widest">{currentOption.avatar.name}</p>
-                  {/* Gênero removido */}
-                </div>
+            {/* Container do Avatar */}
+            <div className="flex flex-col items-center text-center transition-all duration-300 ease-in-out">
+              {/* Moldura Circular e Aumento de Tamanho */}
+              <div className="w-64 h-64 overflow-hidden mb-4 rounded-full border-4 border-pmmg-navy shadow-xl p-1 bg-white">
+                <img 
+                  src={currentOption.avatar.url} 
+                  alt={currentOption.avatar.name} 
+                  className="w-full h-full object-contain rounded-full" 
+                />
               </div>
-
-              {/* Next Button */}
-              <button
-                onClick={() => handleAvatarChange('next')}
-                className="absolute right-0 z-10 p-2 rounded-full bg-pmmg-navy/10 text-primary-dark shadow-md active:scale-95 transition-transform mr-2"
-              >
-                <span className="material-symbols-outlined">arrow_forward_ios</span>
-              </button>
+              
+              {/* Nome do Personagem com Setas */}
+              <div className="flex items-center justify-center gap-3">
+                {/* Previous Button */}
+                <button
+                  onClick={() => handleAvatarChange('prev')}
+                  className="p-2 rounded-full bg-pmmg-navy/10 text-primary-dark shadow-md active:scale-95 transition-transform"
+                >
+                  <span className="material-symbols-outlined">arrow_back_ios</span>
+                </button>
+                
+                <div className="bg-pmmg-navy text-white px-4 py-2 rounded-full shadow-lg shrink-0">
+                  <p className="text-lg font-black uppercase tracking-widest">{currentOption.avatar.name}</p>
+                </div>
+                
+                {/* Next Button */}
+                <button
+                  onClick={() => handleAvatarChange('next')}
+                  className="p-2 rounded-full bg-pmmg-navy/10 text-primary-dark shadow-md active:scale-95 transition-transform"
+                >
+                  <span className="material-symbols-outlined">arrow_forward_ios</span>
+                </button>
+              </div>
             </div>
             
             {/* Dots Indicator */}
