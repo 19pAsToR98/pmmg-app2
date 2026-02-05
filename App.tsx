@@ -672,6 +672,7 @@ const App: React.FC = () => {
             allOfficers={officers} // Passando todos os oficiais
             userName={userName} // Passando nome do usuário
             userRank={userRank} // Passando patente do usuário
+            userDefaultLocation={userDefaultLocation} // PASSANDO A LOCALIZAÇÃO PADRÃO
             onOpenProfile={openProfile}
             addCustomMarker={(marker) => addGroupCustomMarker(activeGroup.id, marker)}
             updateCustomMarker={(marker) => updateGroupCustomMarker(activeGroup.id, marker)}

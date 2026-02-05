@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Screen, Suspect, CustomMarker, Group, Officer } from '../types';
+import { Screen, Suspect, CustomMarker, Group, Officer, GeocodedLocation } from '../types';
 import TacticalMap from './TacticalMap';
 
 // Definindo tipos enriquecidos para passar ao TacticalMap
@@ -20,6 +20,7 @@ interface GroupTacticalMapProps {
   allOfficers: Officer[]; // Adicionado para buscar o nome do autor
   userName: string; // Adicionado para o usuário 'EU'
   userRank: Officer['rank']; // Adicionado para o usuário 'EU'
+  userDefaultLocation: GeocodedLocation | null; // NOVO: Localização padrão do usuário
   onOpenProfile: (id: string) => void;
   addCustomMarker: (marker: CustomMarker) => void;
   updateCustomMarker: (marker: CustomMarker) => void;
@@ -33,6 +34,7 @@ const GroupTacticalMap: React.FC<GroupTacticalMapProps> = ({
   allOfficers,
   userName,
   userRank,
+  userDefaultLocation, // NOVO
   onOpenProfile,
   addCustomMarker,
   updateCustomMarker,
@@ -57,7 +59,7 @@ const GroupTacticalMap: React.FC<GroupTacticalMapProps> = ({
     
     // Itera posts do mais novo para o mais antigo (se o App.tsx garantir a ordem)
     group.posts.forEach(post => {
-        if (!postsBySuspectId.has(post.suspectId)) {
+        if (post.suspectId && !postsBySuspectId.has(post.suspectId)) {
             postsBySuspectId.set(post.suspectId, post);
         }
     });
@@ -119,6 +121,7 @@ const GroupTacticalMap: React.FC<GroupTacticalMapProps> = ({
           suspects={groupSuspects} // Suspeitos enriquecidos
           onOpenProfile={onOpenProfile}
           initialCenter={initialCenter}
+          userDefaultLocation={userDefaultLocation} // PASSANDO A LOCALIZAÇÃO PADRÃO
           customMarkers={enrichedCustomMarkers} // Marcadores enriquecidos
           addCustomMarker={(marker) => addCustomMarker(group.id, marker)}
           updateCustomMarker={(marker) => updateCustomMarker(group.id, marker)}
