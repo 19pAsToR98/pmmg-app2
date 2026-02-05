@@ -84,6 +84,7 @@ const GoogleMapWrapper: React.FC<GoogleMapWrapperProps> = ({
       options={{
         disableDefaultUI: true,
         zoomControl: true,
+        rotateControl: true, // Habilitado para permitir rotação (tilt)
         streetViewControl: false,
         mapTypeControl: false,
         fullscreenControl: false,
