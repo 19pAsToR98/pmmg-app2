@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Screen, Suspect, UserRank, CustomMarker, Officer, Contact, ContactStatus, UserAvatar, Group, GroupPost, GroupParticipant, Institution, GeocodedLocation } from './types';
+import { Screen, Suspect, UserRank, CustomMarker, Officer, Contact, ContactStatus, UserAvatar, Group, GroupPost, GroupParticipant, Institution, GeocodedLocation, TacticalArea } from './types';
 import WelcomeScreen from './pages/WelcomeScreen'; // Renomeado
 import Dashboard from './pages/Dashboard';
 import SuspectRegistry from './pages/SuspectRegistry';
@@ -157,6 +157,23 @@ const INITIAL_CUSTOM_MARKERS: CustomMarker[] = [
   }
 ];
 
+const INITIAL_TACTICAL_AREAS: TacticalArea[] = [
+  {
+    id: 'a1',
+    name: 'Área de Atuação - Facção Alfa',
+    description: 'Zona de influência da Facção Alfa. Prioridade de patrulhamento.',
+    paths: [
+      { lat: -19.9350, lng: -43.9450 },
+      { lat: -19.9350, lng: -43.9350 },
+      { lat: -19.9250, lng: -43.9350 },
+      { lat: -19.9250, lng: -43.9450 },
+    ],
+    color: '#e31c1c', // PMMG Red
+    strokeColor: '#8b0000',
+    opacity: 0.3,
+  }
+];
+
 const MOCK_OFFICERS: Officer[] = [
   { id: 'o1', name: 'Sgt. Douglas', rank: '3º Sargento', unit: '1º BPM', photoUrl: 'https://picsum.photos/seed/douglas/100/100', isOnline: true },
   { id: 'o2', name: 'Cap. Pereira', rank: 'Subtenente', unit: 'ROCCA', photoUrl: 'https://picsum.photos/seed/pereira/100/100', isOnline: true },
@@ -248,6 +265,7 @@ const App: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>('welcomeScreen');
   const [suspects, setSuspects] = useState<Suspect[]>(INITIAL_SUSPECTS);
   const [customMarkers, setCustomMarkers] = useState<CustomMarker[]>(INITIAL_CUSTOM_MARKERS);
+  const [tacticalAreas, setTacticalAreas] = useState<TacticalArea[]>(INITIAL_TACTICAL_AREAS); // NOVO ESTADO
   const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null);
   const [editingSuspectId, setEditingSuspectId] = useState<string | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
@@ -412,15 +430,7 @@ const App: React.FC = () => {
   };
 
   const deleteGroupCustomMarker = (groupId: string, markerId: string) => {
-    setGroups(prev => prev.map(group => {
-        if (group.id === groupId) {
-            return { 
-                ...group, 
-                customMarkers: group.customMarkers.filter(m => m.id !== markerId) 
-            };
-        }
-        return group;
-    }));
+    setGroups(prev => prev.filter(g => g.id === groupId ? { ...g, customMarkers: g.customMarkers.filter(m => m.id !== markerId) } : g));
   };
 
   // --- Lógica de Contatos (para convites de grupo) ---
@@ -483,6 +493,29 @@ const App: React.FC = () => {
   const deleteCustomMarker = (id: string) => {
     setCustomMarkers(prev => prev.filter(m => m.id !== id));
   };
+  
+  // --- Lógica de Áreas Táticas ---
+  
+  const addTacticalArea = (area: Omit<TacticalArea, 'id'>) => {
+    const newArea: TacticalArea = {
+      ...area,
+      id: `a${Date.now()}`,
+    };
+    setTacticalAreas(prev => [...prev, newArea]);
+    alert(`Área Tática "${area.name}" salva.`);
+  };
+
+  const updateTacticalArea = (updatedArea: TacticalArea) => {
+    setTacticalAreas(prev => prev.map(a => a.id === updatedArea.id ? updatedArea : a));
+    alert(`Área Tática "${updatedArea.name}" atualizada.`);
+  };
+
+  const deleteTacticalArea = (id: string) => {
+    setTacticalAreas(prev => prev.filter(a => a.id !== id));
+    alert('Área Tática excluída.');
+  };
+  
+  // --- Fim Lógica de Áreas Táticas ---
 
   const openProfile = (id: string) => {
     setSelectedSuspectId(id);
@@ -729,6 +762,10 @@ const App: React.FC = () => {
           addCustomMarker={addCustomMarker} 
           updateCustomMarker={updateCustomMarker}
           deleteCustomMarker={deleteCustomMarker}
+          tacticalAreas={tacticalAreas} // PASSANDO NOVAS ÁREAS
+          addTacticalArea={addTacticalArea} // PASSANDO FUNÇÕES CRUD
+          updateTacticalArea={updateTacticalArea}
+          deleteTacticalArea={deleteTacticalArea}
         />
       )}
       {currentScreen === 'contacts' && (

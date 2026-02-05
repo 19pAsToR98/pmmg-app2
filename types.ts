@@ -36,6 +36,16 @@ export interface CustomMarker {
   color: string; // Tailwind color class (e.g., 'bg-pmmg-gold')
 }
 
+export interface TacticalArea {
+  id: string;
+  name: string;
+  description: string;
+  paths: { lat: number; lng: number }[]; // Array de coordenadas que formam o polígono
+  color: string; // Cor do preenchimento (ex: '#e31c1c' para facção)
+  strokeColor: string; // Cor da borda
+  opacity: number; // Opacidade do preenchimento
+}
+
 export interface Suspect {
   id: string;
   name: string;
