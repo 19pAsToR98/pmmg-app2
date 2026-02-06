@@ -15,6 +15,7 @@
     <!-- Leaflet CSS REMOVIDO -->
     <script>
       tailwind.config = {
+        darkMode: 'class', // Habilita o modo escuro baseado na classe 'dark' no HTML
         theme: {
           extend: {
             colors: {
@@ -27,6 +28,8 @@
               "pmmg-red": "#e31c1c",
               "pmmg-gold": "#d4af37",
               "pmmg-blue": "#0047ab",
+              // Cores PMESP
+              "pmesp-blue": "#234485",
             },
             fontFamily: {
               sans: ["Inter", "system-ui", "sans-serif"],
@@ -43,14 +46,21 @@
           min-height: 100dvh;
         }
         
+        /* Dark Mode Base Overrides (PMMG Default Dark) */
+        .dark body {
+          @apply bg-slate-900 text-slate-200;
+        }
+        
         /* --- CLASSES DE TEXTO SEMÂNTICAS (Padrão PMMG) --- */
         .text-primary-dark { @apply text-pmmg-navy; }
         .text-secondary-light { @apply text-slate-600; }
+        
+        /* Dark Mode Semantic Overrides */
+        .dark .text-primary-dark { @apply text-pmmg-yellow; }
+        .dark .text-secondary-light { @apply text-slate-400; }
       }
       
       /* --- PMESP Theme Overrides --- */
-      /* Novas Cores PMESP: Primary: #234485, Background: #FFFFFF, Accent: #e31c1c, Secondary: #ffcc00 */
-      
       /* Sobrescreve o fundo e texto do container principal */
       .theme-pmesp {
         background-color: #FFFFFF !important; /* PMESP Background */
@@ -60,9 +70,9 @@
       /* Sobrescreve classes utilitárias */
       
       /* pmmg-navy -> PMESP Primary Blue */
-      .theme-pmesp .bg-pmmg-navy { background-color: #234485 !important; }
-      .theme-pmesp .text-pmmg-navy { color: #234485 !important; }
-      .theme-pmesp .border-pmmg-navy { border-color: #234485 !important; }
+      .theme-pmesp .bg-pmmg-navy { background-color: theme('colors.pmesp-blue') !important; }
+      .theme-pmesp .text-pmmg-navy { color: theme('colors.pmesp-blue') !important; }
+      .theme-pmesp .border-pmmg-navy { border-color: theme('colors.pmesp-blue') !important; }
       
       /* pmmg-khaki -> PMESP Background White */
       .theme-pmesp .bg-pmmg-khaki { background-color: #FFFFFF !important; }
@@ -85,32 +95,59 @@
       .theme-pmesp .border-pmmg-gold { border-color: #ffcc00 !important; }
 
       /* pmmg-blue -> PMESP Primary Blue */
-      .theme-pmesp .bg-pmmg-blue { background-color: #234485 !important; }
-      .theme-pmesp .text-pmmg-blue { color: #234485 !important; }
-      .theme-pmesp .border-pmmg-blue { border-color: #234485 !important; }
+      .theme-pmesp .bg-pmmg-blue { background-color: theme('colors.pmesp-blue') !important; }
+      .theme-pmesp .text-pmmg-blue { color: theme('colors.pmesp-blue') !important; }
+      .theme-pmesp .border-pmmg-blue { border-color: theme('colors.pmesp-blue') !important; }
+      
+      /* --- PMESP Dark Mode Overrides --- */
+      .theme-pmesp.dark {
+        background-color: #121212 !important;
+        color: #e2e8f0 !important;
+      }
+      .theme-pmesp.dark .bg-pmmg-khaki { background-color: #121212 !important; }
+      .theme-pmesp.dark .text-pmmg-khaki { color: #e2e8f0 !important; }
+      .theme-pmesp.dark .text-primary-dark { color: #ffcc00 !important; }
+      .theme-pmesp.dark .text-secondary-light { color: #94a3b8 !important; }
+      .theme-pmesp.dark .border-pmmg-navy { border-color: #ffcc00 !important; }
+      .theme-pmesp.dark .bg-pmmg-navy { background-color: theme('colors.pmesp-blue') !important; }
+      .theme-pmesp.dark .text-pmmg-navy { color: #ffcc00 !important; }
       
       /* Re-add pmmg-card definition */
       .pmmg-card {
-        /* Ajustando para fundo branco/transparente no PMESP */
+        /* Padrão Light */
         @apply bg-white/70 border border-pmmg-navy/10 rounded-xl shadow-sm backdrop-blur-md;
+      }
+      
+      /* Dark Mode Card Overrides (Applies to both themes unless overridden by .theme-pmesp.dark .pmmg-card) */
+      .dark .pmmg-card {
+        @apply bg-slate-800/80 border-slate-700 shadow-lg;
+      }
+      
+      .theme-pmesp.dark .pmmg-card {
+        @apply bg-slate-900/80 border-slate-800 shadow-lg;
       }
       
       /* --- Gradiente do Cabeçalho do Perfil --- */
       .profile-header-gradient {
-        /* Padrão PMMG */
+        /* Padrão PMMG Light */
         background-image: linear-gradient(to bottom, #002147, rgba(0, 33, 71, 0.8));
       }
       
       .theme-pmesp .profile-header-gradient {
-        /* Sobrescrita PMESP: Azul Primário PMESP (#234485) */
-        background-image: linear-gradient(to bottom, #234485, rgba(35, 68, 133, 0.8));
+        /* Sobrescrita PMESP Light */
+        background-image: linear-gradient(to bottom, theme('colors.pmesp-blue'), rgba(35, 68, 133, 0.8));
       }
       
-      /* --- SOBRESCRITA DE TEXTO SEMÂNTICO PARA PMESP --- */
-      /* No PMESP, o fundo é branco, então o texto principal deve ser o azul primário */
-      .theme-pmesp .text-primary-dark { color: #234485 !important; }
-      /* O texto secundário pode ser um cinza escuro */
-      .theme-pmesp .text-secondary-light { color: #4b5563 !important; } /* slate-600 */
+      /* Dark Mode Header Gradient Overrides */
+      .dark .profile-header-gradient {
+        /* PMMG Dark */
+        background-image: linear-gradient(to bottom, #001530, rgba(0, 21, 48, 0.8));
+      }
+      
+      .theme-pmesp.dark .profile-header-gradient {
+        /* PMESP Dark */
+        background-image: linear-gradient(to bottom, #121212, rgba(18, 18, 18, 0.8));
+      }
       
       .material-symbols-outlined {
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
@@ -126,33 +163,6 @@
         scrollbar-width: none;
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
-</head>
-  <body>
-    <div id="root"></div>
-    <script>
-      // Register Service Worker for PWA functionality
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/service-worker.js')
-            .then(registration => {
-              console.log('SW registered: ', registration);
-            })
-            .catch(registrationError => {
-              console.log('SW registration failed: ', registrationError);
-            });
-        });
-      }
-    </script>
   <script type="module" src="/index.tsx"></script>
 </body>
 </html>

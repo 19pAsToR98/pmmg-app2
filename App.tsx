@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Screen, Suspect, UserRank, CustomMarker, Officer, Contact, ContactStatus, UserAvatar, Group, GroupPost, GroupParticipant, Institution, GeocodedLocation } from './types';
 import WelcomeScreen from './pages/WelcomeScreen'; // Renomeado
 import Dashboard from './pages/Dashboard';
@@ -281,6 +281,42 @@ const App: React.FC = () => {
   
   // NOVO ESTADO: Gerencia o compartilhamento pendente (SuspectId para ser compartilhado)
   const [shareTarget, setShareTarget] = useState<{ suspectId: string, groupId: string } | null>(null);
+
+  // NEW: Dark Mode State
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Effect to load dark mode preference from localStorage and apply class
+  useEffect(() => {
+    const savedMode = localStorage.getItem('pmmg-theme-mode');
+    // Check if window.matchMedia is available (not in all environments)
+    const prefersDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    let initialMode = false;
+    if (savedMode === 'dark') {
+      initialMode = true;
+    } else if (savedMode === 'light') {
+      initialMode = false;
+    } else if (prefersDark) {
+      initialMode = true;
+    }
+    
+    setIsDarkMode(initialMode);
+  }, []); // Run once on mount
+
+  // Effect to apply 'dark' class to document.documentElement whenever isDarkMode changes
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isDarkMode) {
+      root.classList.add('dark');
+      localStorage.setItem('pmmg-theme-mode', 'dark');
+    } else {
+      root.classList.remove('dark');
+      localStorage.setItem('pmmg-theme-mode', 'light');
+    }
+  }, [isDarkMode]);
+  
+  const toggleDarkMode = () => setIsDarkMode(prev => !prev);
+
 
   const navigateTo = (screen: Screen, param?: string | [number, number]) => {
     if (Array.isArray(param)) {
@@ -739,6 +775,8 @@ const App: React.FC = () => {
           currentRank={userRank} 
           onRankChange={setUserRank}
           userAvatar={userAvatar}
+          isDarkMode={isDarkMode}
+          toggleDarkMode={toggleDarkMode}
         />
       )}
       

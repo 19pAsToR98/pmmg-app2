@@ -16,7 +16,7 @@ const SuspectGridCard: React.FC<SuspectGridCardProps> = ({ suspect }) => {
       // onClick={() => onOpenProfile(suspect.id)} // Removido
       className="pmmg-card overflow-hidden transition-all cursor-pointer flex flex-col h-full"
     >
-      <div className="w-full aspect-[3/4] relative bg-slate-200 shrink-0">
+      <div className="w-full aspect-[3/4] relative bg-slate-200 dark:bg-slate-700 shrink-0">
         <img alt={suspect.name} className="w-full h-full object-cover" src={suspect.photoUrl} />
         <div className={`absolute top-0 left-0 text-white text-[8px] font-bold px-2 py-1 uppercase rounded-br-lg shadow-md ${statusColor}`}>
           {suspect.status}

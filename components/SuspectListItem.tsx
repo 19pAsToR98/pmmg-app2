@@ -36,7 +36,7 @@ const SuspectListItem: React.FC<SuspectListItemProps> = ({
     >
       {isSelectionMode && (
         <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all shrink-0 ${
-          isSelected ? 'bg-pmmg-red border-white shadow-lg' : 'bg-white/70 border-pmmg-navy/30'
+          isSelected ? 'bg-pmmg-red border-white shadow-lg' : 'bg-white/70 border-pmmg-navy/30 dark:bg-slate-700/70 dark:border-slate-500'
         }`}>
           {isSelected && <span className="material-symbols-outlined text-white text-sm fill-icon">check</span>}
         </div>
@@ -58,18 +58,18 @@ const SuspectListItem: React.FC<SuspectListItemProps> = ({
         </div>
         <div className="mt-1.5 flex flex-wrap gap-2">
            {primaryVehicle && (
-             <div className="flex items-center gap-1 text-[8px] bg-white px-2 py-0.5 rounded border border-pmmg-navy/5 text-secondary-light font-bold">
+             <div className="flex items-center gap-1 text-[8px] bg-white px-2 py-0.5 rounded border border-pmmg-navy/5 text-secondary-light font-bold dark:bg-slate-800 dark:border-slate-700">
                 <span className="material-symbols-outlined text-[10px]">directions_car</span>
                 {primaryVehicle}
              </div>
            )}
-           <div className="flex items-center gap-1 text-[8px] bg-white px-2 py-0.5 rounded border border-pmmg-navy/5 text-secondary-light font-bold">
+           <div className="flex items-center gap-1 text-[8px] bg-white px-2 py-0.5 rounded border border-pmmg-navy/5 text-secondary-light font-bold dark:bg-slate-800 dark:border-slate-700">
               <span className="material-symbols-outlined text-[10px]">location_on</span>
               {s.lastSeen}
            </div>
         </div>
       </div>
-      <span className="material-symbols-outlined text-pmmg-navy/20 shrink-0">chevron_right</span>
+      <span className="material-symbols-outlined text-pmmg-navy/20 dark:text-slate-600 shrink-0">chevron_right</span>
     </div>
   );
 };

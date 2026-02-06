@@ -139,7 +139,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
               {/* Novo Registro Button */}
               <button 
                 onClick={() => navigateTo('registry')}
-                className="bg-pmmg-red/20 p-2 rounded-lg text-pmmg-red border border-pmmg-red/50 active:bg-pmmg-red/30 transition-all"
+                className="bg-pmmg-red/20 p-2 rounded-lg text-pmmg-red border border-pmmg-red/50 active:bg-pmmg-red/30 transition-all dark:bg-pmmg-red/30 dark:border-pmmg-red/70 dark:text-white"
                 title="Novo Registro de Indivíduo"
               >
                 <span className="material-symbols-outlined text-lg fill-icon">person_add</span>
@@ -157,7 +157,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
               {/* Toggle Filter Menu */}
               <button 
                 onClick={() => setShowFilterMenu(!showFilterMenu)}
-                className={`p-2 rounded-lg flex items-center justify-center transition-all ${showFilterMenu || statusFilter !== 'Todos' || dateFilter ? 'bg-pmmg-yellow text-primary-dark shadow-md' : 'text-white hover:bg-white/10'}`}
+                className={`p-2 rounded-lg flex items-center justify-center transition-all shrink-0 ${showFilterMenu || statusFilter !== 'Todos' || dateFilter ? 'bg-pmmg-yellow text-primary-dark shadow-md' : 'text-white hover:bg-white/10'}`}
               >
                 <span className={`material-symbols-outlined text-xl ${showFilterMenu ? 'fill-icon' : ''}`}>tune</span>
               </button>
@@ -175,13 +175,13 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
               value={globalSearch}
               onChange={(e) => setGlobalSearch(e.target.value)}
               placeholder="NOME, VULGO, PLACA, ENDEREÇO..."
-              className="w-full pl-12 pr-24 py-4 bg-white rounded-2xl border-none focus:ring-4 focus:ring-pmmg-yellow/20 text-xs font-black uppercase shadow-inner placeholder:text-slate-400"
+              className="w-full pl-12 pr-24 py-4 bg-white rounded-2xl border-none focus:ring-4 focus:ring-pmmg-yellow/20 text-xs font-black uppercase shadow-inner placeholder:text-slate-400 dark:bg-slate-700 dark:text-slate-200 dark:placeholder-slate-500 dark:focus:ring-pmmg-yellow/30"
             />
             <div className="absolute inset-y-0 right-2 flex items-center gap-1">
               {globalSearch && (
                 <button 
                   onClick={() => setGlobalSearch('')}
-                  className="p-1 text-slate-400 hover:text-primary-dark transition-colors"
+                  className="p-1 text-slate-400 hover:text-primary-dark transition-colors dark:text-slate-500 dark:hover:text-pmmg-yellow"
                 >
                   <span className="material-symbols-outlined text-lg">close</span>
                 </button>
@@ -192,10 +192,10 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
             {showFilterMenu && (
               <div 
                 ref={filterMenuRef}
-                className="absolute top-full right-0 mt-3 w-72 bg-white rounded-3xl shadow-2xl border border-pmmg-navy/10 z-[200] p-5 animate-in fade-in slide-in-from-top-2 duration-200"
+                className="absolute top-full right-0 mt-3 w-72 bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-pmmg-navy/10 dark:border-slate-700 z-[200] p-5 animate-in fade-in slide-in-from-top-2 duration-200"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-[10px] font-black uppercase tracking-widest text-pmmg-navy/60">Filtros Avançados</h4>
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-pmmg-navy/60 dark:text-slate-400">Filtros Avançados</h4>
                   <button 
                     onClick={handleClearFilters}
                     className="text-[9px] font-black text-pmmg-red uppercase"
@@ -206,7 +206,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
 
                 {/* Status Section */}
                 <div className="mb-5">
-                  <label className="block text-[9px] font-black uppercase text-pmmg-navy/40 mb-2 tracking-wider">Status Operacional</label>
+                  <label className="block text-[9px] font-black uppercase text-pmmg-navy/40 dark:text-slate-500 mb-2 tracking-wider">Status Operacional</label>
                   <div className="flex flex-wrap gap-2">
                     {STATUS_OPTIONS.map(opt => (
                       <button
@@ -215,7 +215,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
                         className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all border ${
                           statusFilter === opt 
                           ? 'bg-pmmg-navy text-white border-pmmg-navy shadow-md' 
-                          : 'bg-slate-50 text-pmmg-navy/60 border-slate-200'
+                          : 'bg-slate-50 text-pmmg-navy/60 border-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600'
                         }`}
                       >
                         {opt}
@@ -226,14 +226,14 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
 
                 {/* Date Section (Mocked) */}
                 <div>
-                  <label className="block text-[9px] font-black uppercase text-pmmg-navy/40 mb-2 tracking-wider">Data de Registro (Mock)</label>
+                  <label className="block text-[9px] font-black uppercase text-pmmg-navy/40 dark:text-slate-500 mb-2 tracking-wider">Data de Registro (Mock)</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-pmmg-navy/30">calendar_today</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-pmmg-navy/30 dark:text-slate-500">calendar_today</span>
                     <input 
                       type="text" // Changed to text since we don't have registryDate field
                       value={dateFilter}
                       onChange={(e) => setDateFilter(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-xs font-bold text-primary-dark focus:ring-2 focus:ring-pmmg-navy/10 transition-all"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 pl-10 pr-4 text-xs font-bold text-primary-dark focus:ring-2 focus:ring-pmmg-navy/10 transition-all dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200"
                       placeholder="DD/MM/AAAA"
                     />
                   </div>
@@ -253,10 +253,10 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
 
       <main className="flex-1 overflow-y-auto pb-40 px-4 pt-4 no-scrollbar">
         <div className="flex items-center justify-between mb-4 px-1">
-          <span className="text-[10px] font-black text-pmmg-navy/50 uppercase tracking-widest italic">
+          <span className="text-[10px] font-black text-pmmg-navy/50 dark:text-slate-400 uppercase tracking-widest italic">
             Exibindo {filteredSuspects.length} resultados táticos
           </span>
-          <div className="flex items-center gap-1.5 bg-pmmg-navy/5 px-2 py-1 rounded-full border border-pmmg-navy/5">
+          <div className="flex items-center gap-1.5 bg-pmmg-navy/5 dark:bg-slate-700 px-2 py-1 rounded-full border border-pmmg-navy/5 dark:border-slate-600">
              <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
              <span className="text-[8px] font-bold text-primary-dark uppercase tracking-tighter">Sincronizado</span>
           </div>
@@ -293,9 +293,9 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
             )
           ) : (
             <div className="flex flex-col items-center justify-center py-24 opacity-30 text-center">
-              <span className="material-symbols-outlined text-7xl mb-4 animate-pulse">person_search</span>
-              <h4 className="text-sm font-black uppercase tracking-[0.2em]">Varredura sem Resultados</h4>
-              <p className="text-[10px] font-bold uppercase mt-2 px-10">Não encontramos alvos com estes parâmetros na base de dados atual.</p>
+              <span className="material-symbols-outlined text-7xl mb-4 animate-pulse text-pmmg-navy/30 dark:text-slate-600">person_search</span>
+              <h4 className="text-sm font-black uppercase tracking-[0.2em] text-primary-dark">Varredura sem Resultados</h4>
+              <p className="text-[10px] font-bold uppercase mt-2 px-10 text-secondary-light">Não encontramos alvos com estes parâmetros na base de dados atual.</p>
             </div>
           )}
         </section>
