@@ -117,7 +117,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
   };
 
   return (
-    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
+    <div className="flex flex-col h-full bg-pmmg-khaki dark:bg-slate-900 overflow-hidden">
       <header className={`sticky top-0 z-[100] px-4 pt-6 pb-4 shadow-xl shrink-0 transition-colors ${isSelectionMode ? 'bg-pmmg-red' : 'bg-pmmg-navy'}`}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -169,7 +169,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
         {!isSelectionMode && (
           <div className="relative group mb-2">
             <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-              <span className="material-symbols-outlined text-primary-dark text-xl group-focus-within:text-pmmg-yellow transition-colors">manage_search</span>
+              <span className="material-symbols-outlined text-primary-dark text-xl group-focus-within:text-pmmg-yellow transition-colors dark:text-slate-400">manage_search</span>
             </div>
             <input 
               value={globalSearch}
@@ -251,14 +251,14 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
         )}
       </header>
 
-      <main className="flex-1 overflow-y-auto pb-40 px-4 pt-4 no-scrollbar">
+      <main className="flex-1 overflow-y-auto pb-40 px-4 pt-4 no-scrollbar bg-pmmg-khaki dark:bg-slate-900">
         <div className="flex items-center justify-between mb-4 px-1">
           <span className="text-[10px] font-black text-pmmg-navy/50 dark:text-slate-400 uppercase tracking-widest italic">
             Exibindo {filteredSuspects.length} resultados táticos
           </span>
           <div className="flex items-center gap-1.5 bg-pmmg-navy/5 dark:bg-slate-700 px-2 py-1 rounded-full border border-pmmg-navy/5 dark:border-slate-600">
              <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-             <span className="text-[8px] font-bold text-primary-dark uppercase tracking-tighter">Sincronizado</span>
+             <span className="text-[8px] font-bold text-primary-dark uppercase tracking-tighter dark:text-slate-300">Sincronizado</span>
           </div>
         </div>
 
@@ -294,8 +294,8 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
           ) : (
             <div className="flex flex-col items-center justify-center py-24 opacity-30 text-center">
               <span className="material-symbols-outlined text-7xl mb-4 animate-pulse text-pmmg-navy/30 dark:text-slate-600">person_search</span>
-              <h4 className="text-sm font-black uppercase tracking-[0.2em] text-primary-dark">Varredura sem Resultados</h4>
-              <p className="text-[10px] font-bold uppercase mt-2 px-10 text-secondary-light">Não encontramos alvos com estes parâmetros na base de dados atual.</p>
+              <h4 className="text-sm font-black uppercase tracking-[0.2em] text-primary-dark dark:text-slate-400">Varredura sem Resultados</h4>
+              <p className="text-[10px] font-bold uppercase mt-2 px-10 text-secondary-light dark:text-slate-500">Não encontramos alvos com estes parâmetros na base de dados atual.</p>
             </div>
           )}
         </section>
