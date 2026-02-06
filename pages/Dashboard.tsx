@@ -4,7 +4,7 @@ import BottomNav from '../components/BottomNav';
 
 interface DashboardProps {
   navigateTo: (screen: Screen) => void;
-  navigateToSuspectsManagement: (status: Suspect['status'] | 'Todos') => void;
+  navigateToSuspectsManagement: (status: Suspect['status'] | 'Todos', searchTerm?: string) => void;
   onOpenProfile: (id: string) => void;
   suspects: Suspect[];
   startShareFlow: (suspectId: string) => void; // NOVO
@@ -36,6 +36,14 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
       navigateTo('map', [suspect.lat, suspect.lng]);
     } else {
       alert("Localização não registrada para este indivíduo.");
+    }
+  };
+  
+  const handleSearch = () => {
+    if (searchTerm.trim()) {
+      // Navega para a tela de gerenciamento de suspeitos com o termo de pesquisa aplicado
+      navigateToSuspectsManagement('Todos', searchTerm.trim());
+      setSearchTerm(''); // Limpa o termo de pesquisa após a navegação
     }
   };
 
@@ -71,17 +79,28 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
         </div>
 
         {/* Search Bar (Fixed in header) */}
-        <div className="relative group">
-          <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-            <span className="material-symbols-outlined text-primary-dark text-xl">search</span>
+        <div className="relative group flex gap-2">
+          <div className="relative flex-1">
+            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+              <span className="material-symbols-outlined text-primary-dark text-xl">search</span>
+            </div>
+            <input 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              className="block w-full pl-10 pr-4 py-3 bg-white rounded-xl border-2 border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-0 text-sm font-bold placeholder-pmmg-navy/40 shadow-sm" 
+              placeholder="BUSCAR INDIVÍDUO (NOME, CPF, ALCUNHA)" 
+              type="text" 
+            />
           </div>
-          <input 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="block w-full pl-10 pr-4 py-3 bg-white rounded-xl border-2 border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-0 text-sm font-bold placeholder-pmmg-navy/40 shadow-sm" 
-            placeholder="BUSCAR INDIVÍDUO (NOME, CPF, ALCUNHA)" 
-            type="text" 
-          />
+          <button 
+            onClick={handleSearch}
+            disabled={!searchTerm.trim()}
+            className="bg-pmmg-yellow text-pmmg-navy p-3 rounded-xl active:scale-95 transition-transform disabled:opacity-50 shrink-0"
+            title="Buscar no Banco de Dados"
+          >
+            <span className="material-symbols-outlined text-xl fill-icon">manage_search</span>
+          </button>
         </div>
       </header>
 

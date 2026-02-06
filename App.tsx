@@ -270,6 +270,8 @@ const App: React.FC = () => {
   
   // Suspect Management Filter State
   const [initialSuspectFilter, setInitialSuspectFilter] = useState<Suspect['status'] | 'Todos'>('Todos');
+  // NOVO ESTADO: Termo de pesquisa inicial para SuspectsManagement
+  const [initialSearchTerm, setInitialSearchTerm] = useState(''); 
   
   // Social States (Only Officers and Contacts remain)
   const [officers, setOfficers] = useState<Officer[]>(MOCK_OFFICERS);
@@ -305,10 +307,16 @@ const App: React.FC = () => {
     if (screen !== 'groupDetail') {
         setShareTarget(null);
     }
+    
+    // Limpa o termo de pesquisa inicial ao navegar para qualquer tela que não seja SuspectsManagement
+    if (screen !== 'suspectsManagement') {
+        setInitialSearchTerm('');
+    }
   };
   
-  const navigateToSuspectsManagement = (statusFilter: Suspect['status'] | 'Todos' = 'Todos') => {
+  const navigateToSuspectsManagement = (statusFilter: Suspect['status'] | 'Todos' = 'Todos', searchTerm: string = '') => {
     setInitialSuspectFilter(statusFilter);
+    setInitialSearchTerm(searchTerm); // Define o termo de pesquisa
     navigateTo('suspectsManagement');
   };
   
@@ -337,7 +345,7 @@ const App: React.FC = () => {
           type: 'event',
           authorId: 'EU',
           eventType: 'group_created',
-          timestamp: new Date().toISOString(),
+          timestamp: new Date(Date.now() + 1000).toISOString(), // Garante que seja o mais recente
         }
       ],
       inviteCode: `G${Math.floor(Math.random() * 9000) + 1000}-${newGroupData.name.slice(0, 2).toUpperCase()}`, // Generate mock invite code
@@ -650,6 +658,7 @@ const App: React.FC = () => {
           suspects={suspects}
           initialStatusFilter={initialSuspectFilter}
           deleteSuspects={deleteSuspects}
+          initialSearchTerm={initialSearchTerm} // PASSANDO O NOVO TERMO DE PESQUISA
         />
       )}
       
