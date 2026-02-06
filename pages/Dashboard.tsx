@@ -7,9 +7,10 @@ interface DashboardProps {
   navigateToSuspectsManagement: (status: Suspect['status'] | 'Todos') => void;
   onOpenProfile: (id: string) => void;
   suspects: Suspect[];
+  startShareFlow: (suspectId: string) => void; // NOVO
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsManagement, onOpenProfile, suspects }) => {
+const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsManagement, onOpenProfile, suspects, startShareFlow }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   // Quick filter for recent alerts on the dashboard (limited to top 5 if no search term)
@@ -196,7 +197,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                       Ficha Completa
                     </button>
                     <button 
-                      onClick={(e) => { e.stopPropagation(); alert(`Compartilhando ficha de: ${s.name}`); }}
+                      onClick={(e) => { e.stopPropagation(); startShareFlow(s.id); }} // USANDO NOVO FLUXO
                       className="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center"
                     >
                       <span className="material-symbols-outlined text-primary-dark text-lg">share</span>

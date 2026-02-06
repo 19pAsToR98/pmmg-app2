@@ -12,9 +12,10 @@ interface SuspectProfileProps {
   allSuspects: Suspect[];
   onOpenProfile: (id: string) => void;
   onEdit: (id: string) => void; // NOVO: Função para iniciar a edição
+  startShareFlow: (suspectId: string) => void; // NOVO: Função para iniciar o fluxo de compartilhamento
 }
 
-const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, navigateTo, allSuspects, onOpenProfile, onEdit }) => {
+const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, navigateTo, allSuspects, onOpenProfile, onEdit, startShareFlow }) => {
   const [expandedSection, setExpandedSection] = useState<string | null>('data');
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   
@@ -148,7 +149,11 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
           >
             <span className="material-symbols-outlined text-xl fill-icon">edit</span>
           </button>
-          <button onClick={() => alert('Compartilhando...')} className="bg-white/10 p-1.5 rounded-full">
+          <button 
+            onClick={() => startShareFlow(suspect.id)} // USANDO NOVO FLUXO
+            className="bg-white/10 p-1.5 rounded-full"
+            title="Compartilhar Ficha em Grupo"
+          >
             <span className="material-symbols-outlined text-white text-xl">share</span>
           </button>
         </div>

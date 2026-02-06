@@ -39,6 +39,7 @@ interface GroupDetailProps {
   onUpdateGroup: (updatedGroup: Group) => void;
   onDeleteGroup: (groupId: string) => void;
   onJoinGroup: () => void; // NOVO: Função de teste para entrada de membro
+  shareTarget: { suspectId: string, groupId: string } | null; // NOVO: Alvo de compartilhamento pré-selecionado
 }
 
 type ActiveTab = 'timeline' | 'members'; // Revertido para 2 tabs
@@ -49,7 +50,7 @@ const STATUS_OPTIONS: PostFilterStatus[] = ['Todos', 'Foragido', 'Suspeito', 'Pr
 const CURRENT_USER_ID = 'EU';
 
 
-const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspects, onOpenProfile, onShareSuspect, onUpdateGroup, onDeleteGroup, onJoinGroup }) => {
+const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspects, onOpenProfile, onShareSuspect, onUpdateGroup, onDeleteGroup, onJoinGroup, shareTarget }) => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('timeline');
   const [viewMode, setViewMode] = useState<'list' | 'gallery'>('list');
   const [showShareModal, setShowShareModal] = useState(false);
@@ -74,6 +75,17 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
   const menuRef = useRef<HTMLDivElement>(null);
 
   const isCurrentUserAdmin = group.adminIds.includes(CURRENT_USER_ID);
+
+  // EFEITO: Abrir modal de compartilhamento se houver um alvo pré-selecionado
+  useEffect(() => {
+    if (shareTarget && shareTarget.suspectId) {
+      setSelectedSuspectId(shareTarget.suspectId);
+      setShowShareModal(true);
+      // Limpar a observação para forçar o usuário a digitar
+      setObservation(''); 
+    }
+  }, [shareTarget]);
+
 
   // Fechar menus ao clicar fora
   useEffect(() => {
@@ -474,7 +486,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
               {showTimelineFilters && (
                 <div 
                   ref={timelineFilterRef}
-                  className="absolute top-full right-0 mt-2 w-72 bg-white rounded-3xl shadow-2xl border border-pmmg-navy/10 z-[100] p-5 animate-in fade-in slide-in-from-top-2 duration-200"
+                  className="absolute top-full right-0 mt-3 w-72 bg-white rounded-3xl shadow-2xl border border-pmmg-navy/10 z-[100] p-5 animate-in fade-in slide-in-from-top-2 duration-200"
                 >
                   <div className="flex items-center justify-between mb-4">
                     <h4 className="text-[9px] font-black uppercase tracking-widest text-pmmg-navy/60">Filtros Operacionais</h4>
@@ -769,7 +781,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
                   <h3 className="text-lg font-black text-pmmg-navy uppercase leading-none">Compartilhar Ficha</h3>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Alimentar Rede de Inteligência</p>
                </div>
-               <button onClick={() => setShowShareModal(false)} className="w-10 h-10 bg-slate-100 rounded-full text-slate-400 flex items-center justify-center active:scale-90 transition-transform shrink-0">
+               <button onClick={() => { setShowShareModal(false); setSelectedSuspectId(null); }} className="w-10 h-10 bg-slate-100 rounded-full text-slate-400 flex items-center justify-center active:scale-90 transition-transform shrink-0">
                   <span className="material-symbols-outlined">close</span>
                </button>
             </div>

@@ -19,6 +19,7 @@ import GroupsList from './pages/GroupsList'; // NOVO: Lista de Grupos
 import GroupCreation from './pages/GroupCreation'; // NOVO: Criação de Grupo
 import GroupDetail from './pages/GroupDetail'; // NOVO: Detalhe do Grupo
 import GroupTacticalMap from './pages/GroupTacticalMap'; // NOVO: Mapa do Grupo
+import ShareGroupSelector from './components/ShareGroupSelector'; // NOVO: Componente para seleção de grupo
 
 const INITIAL_SUSPECTS: Suspect[] = [
   {
@@ -277,6 +278,9 @@ const App: React.FC = () => {
   // Group States
   const [groups, setGroups] = useState<Group[]>(MOCK_GROUPS);
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
+  
+  // NOVO ESTADO: Gerencia o compartilhamento pendente (SuspectId para ser compartilhado)
+  const [shareTarget, setShareTarget] = useState<{ suspectId: string, groupId: string } | null>(null);
 
   const navigateTo = (screen: Screen, param?: string | [number, number]) => {
     if (Array.isArray(param)) {
@@ -296,11 +300,29 @@ const App: React.FC = () => {
     
     // Limpa IDs ativos ao sair das telas de detalhe
     if (screen !== 'groupDetail' && screen !== 'groupMap') setActiveGroupId(null);
+    
+    // Limpa o alvo de compartilhamento ao navegar para qualquer tela que não seja o GroupDetail
+    if (screen !== 'groupDetail') {
+        setShareTarget(null);
+    }
   };
   
   const navigateToSuspectsManagement = (statusFilter: Suspect['status'] | 'Todos' = 'Todos') => {
     setInitialSuspectFilter(statusFilter);
     navigateTo('suspectsManagement');
+  };
+  
+  // NOVO: Inicia o fluxo de compartilhamento (abre o seletor de grupo)
+  const startShareFlow = (suspectId: string) => {
+      setSelectedSuspectId(suspectId); // Mantém o suspeito selecionado
+      setCurrentScreen('shareGroupSelector'); // Nova tela/modal
+  };
+  
+  // NOVO: Seleciona o grupo e navega para o GroupDetail com o alvo pré-selecionado
+  const selectGroupForShare = (groupId: string, suspectId: string) => {
+      setActiveGroupId(groupId);
+      setShareTarget({ suspectId, groupId }); // Define o alvo de compartilhamento
+      navigateTo('groupDetail'); // Navega para o detalhe do grupo
   };
 
   // --- Lógica de Grupos ---
@@ -600,7 +622,7 @@ const App: React.FC = () => {
         />
       )}
       
-      {currentScreen === 'dashboard' && <Dashboard navigateTo={navigateTo} navigateToSuspectsManagement={navigateToSuspectsManagement} onOpenProfile={openProfile} suspects={suspects} />}
+      {currentScreen === 'dashboard' && <Dashboard navigateTo={navigateTo} navigateToSuspectsManagement={navigateToSuspectsManagement} onOpenProfile={openProfile} suspects={suspects} startShareFlow={startShareFlow} />}
       {currentScreen === 'registry' && (
         <SuspectRegistry 
           navigateTo={navigateTo} 
@@ -618,6 +640,7 @@ const App: React.FC = () => {
           allSuspects={suspects} 
           onOpenProfile={openProfile}
           onEdit={handleEditProfile}
+          startShareFlow={startShareFlow} // NOVO: Passando a função de compartilhamento
         />
       )}
       {currentScreen === 'suspectsManagement' && (
@@ -659,8 +682,9 @@ const App: React.FC = () => {
           onShareSuspect={handleShareSuspect}
           onUpdateGroup={handleUpdateGroup}
           onDeleteGroup={handleDeleteGroup}
-          // Adicionando função de teste para entrada de membro
           onJoinGroup={() => handleJoinGroup(enrichedActiveGroup.id, 'o2')}
+          // NOVO: Passando o alvo de compartilhamento pendente
+          shareTarget={shareTarget}
         />
       )}
       
@@ -739,6 +763,16 @@ const App: React.FC = () => {
           onSendRequest={onSendRequest}
           onAcceptRequest={onAcceptRequest}
           onRejectRequest={onRejectRequest}
+        />
+      )}
+      
+      {/* NOVO: Seletor de Grupo de Compartilhamento (Modal) */}
+      {currentScreen === 'shareGroupSelector' && selectedSuspectId && (
+        <ShareGroupSelector
+          suspect={suspects.find(s => s.id === selectedSuspectId)!}
+          userGroups={userGroups}
+          onSelectGroup={selectGroupForShare}
+          onClose={() => navigateTo('dashboard')} // Volta para a tela anterior (Dashboard ou Profile)
         />
       )}
     </div>
