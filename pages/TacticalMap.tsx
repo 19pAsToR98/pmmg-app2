@@ -68,12 +68,22 @@ const SuspectPhotoMarker = memo<{
     e.stopPropagation(); // IMPEDE QUE O CLIQUE SE PROPAGUE PARA O MAPA
     onClick();
   };
+  
+  // CORREÇÃO DE OFFSET: 
+  // Se for foto (40x40), a âncora deve ser na base central: x=-20, y=-40
+  // Se for ícone (24x24), a âncora deve ser na base central: x=-12, y=-24
+  const getOffset = () => {
+    if (usePhotoMarker) {
+      return { x: -20, y: -40 };
+    }
+    return { x: -12, y: -24 };
+  };
 
   return (
     <OverlayViewF
       position={position}
       mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-      getPixelPositionOffset={() => ({ x: -20, y: -20 })} // Ajuste para centralizar o marcador de 40x40
+      getPixelPositionOffset={getOffset} 
     >
       <div 
         onClick={handleClick}
@@ -122,12 +132,15 @@ const CustomMarkerComponent = memo<{
     e.stopPropagation(); // IMPEDE QUE O CLIQUE SE PROPAGUE PARA O MAPA
     onClick();
   };
+  
+  // CORREÇÃO DE OFFSET: Marcador 32x32. Âncora na base central: x=-16, y=-32
+  const getOffset = () => ({ x: -16, y: -32 });
 
   return (
     <OverlayViewF
       position={position}
       mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-      getPixelPositionOffset={() => ({ x: -16, y: -16 })} // Ajuste para centralizar o marcador de 32x32
+      getPixelPositionOffset={getOffset} 
     >
       <div 
         onClick={handleClick}
@@ -157,12 +170,15 @@ const UserMarkerComponent = memo<{
     e.stopPropagation(); // IMPEDE QUE O CLIQUE SE PROPAGUE PARA O MAPA
     onClick();
   };
+  
+  // CORREÇÃO DE OFFSET: Marcador 32x32. Âncora na base central: x=-16, y=-32
+  const getOffset = () => ({ x: -16, y: -32 });
 
   return (
     <OverlayViewF
       position={position}
       mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-      getPixelPositionOffset={() => ({ x: -16, y: -16 })} // Ajuste para centralizar o marcador de 32x32
+      getPixelPositionOffset={getOffset} 
     >
       <div 
         onClick={handleClick}
@@ -551,6 +567,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                   </svg>
                 `),
                 scaledSize: new window.google.maps.Size(40, 40),
+                // CORREÇÃO: Âncora na base central para o InfoWindow
                 anchor: new window.google.maps.Point(20, 40),
               }}
               title="Clique no mapa para posicionar"
