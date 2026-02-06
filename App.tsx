@@ -792,6 +792,7 @@ const App: React.FC = () => {
           userAvatar={userAvatar}
           isDarkMode={isDarkMode}
           toggleDarkMode={toggleDarkMode}
+          userName={userName}
         />
       )}
       
