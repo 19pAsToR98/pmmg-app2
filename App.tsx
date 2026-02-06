@@ -19,6 +19,7 @@ import GroupsList from './pages/GroupsList'; // NOVO: Lista de Grupos
 import GroupCreation from './pages/GroupCreation'; // NOVO: Criação de Grupo
 import GroupDetail from './pages/GroupDetail'; // NOVO: Detalhe do Grupo
 import GroupTacticalMap from './pages/GroupTacticalMap'; // NOVO: Mapa do Grupo
+import ShareSuspectModal from './components/ShareSuspectModal'; // NOVO: Modal de Compartilhamento
 
 const INITIAL_SUSPECTS: Suspect[] = [
   {
@@ -277,6 +278,10 @@ const App: React.FC = () => {
   // Group States
   const [groups, setGroups] = useState<Group[]>(MOCK_GROUPS);
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
+  
+  // --- NEW: Share Modal States ---
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [suspectIdToShare, setSuspectIdToShare] = useState<string | null>(null);
 
   const navigateTo = (screen: Screen, param?: string | [number, number]) => {
     if (Array.isArray(param)) {
@@ -503,6 +508,17 @@ const App: React.FC = () => {
     setUserDefaultLocation(defaultLocation); // STORE LOCATION
     navigateTo('dashboard');
   };
+  
+  // --- Share Modal Handlers ---
+  const openShareModal = (suspectId: string) => {
+    setSuspectIdToShare(suspectId);
+    setIsShareModalOpen(true);
+  };
+  
+  const closeShareModal = () => {
+    setIsShareModalOpen(false);
+    setSuspectIdToShare(null);
+  };
 
   const selectedSuspect = suspects.find(s => s.id === selectedSuspectId) || suspects[0];
   const suspectToEdit = suspects.find(s => s.id === editingSuspectId);
@@ -600,7 +616,15 @@ const App: React.FC = () => {
         />
       )}
       
-      {currentScreen === 'dashboard' && <Dashboard navigateTo={navigateTo} navigateToSuspectsManagement={navigateToSuspectsManagement} onOpenProfile={openProfile} suspects={suspects} />}
+      {currentScreen === 'dashboard' && (
+        <Dashboard 
+          navigateTo={navigateTo} 
+          navigateToSuspectsManagement={navigateToSuspectsManagement} 
+          onOpenProfile={openProfile} 
+          suspects={suspects} 
+          onShareSuspectClick={openShareModal} // NOVO: Passando a função para abrir o modal
+        />
+      )}
       {currentScreen === 'registry' && (
         <SuspectRegistry 
           navigateTo={navigateTo} 
@@ -741,6 +765,16 @@ const App: React.FC = () => {
           onRejectRequest={onRejectRequest}
         />
       )}
+      
+      {/* Modal de Compartilhamento (Global) */}
+      <ShareSuspectModal
+        isOpen={isShareModalOpen}
+        onClose={closeShareModal}
+        onShare={handleShareSuspect}
+        allSuspects={suspects}
+        userGroups={userGroups}
+        initialSuspectId={suspectIdToShare}
+      />
     </div>
   );
 };

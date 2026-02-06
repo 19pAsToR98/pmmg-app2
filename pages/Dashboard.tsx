@@ -7,9 +7,10 @@ interface DashboardProps {
   navigateToSuspectsManagement: (status: Suspect['status'] | 'Todos') => void;
   onOpenProfile: (id: string) => void;
   suspects: Suspect[];
+  onShareSuspectClick: (suspectId: string) => void; // NOVO: Função para abrir o modal de compartilhamento
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsManagement, onOpenProfile, suspects }) => {
+const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsManagement, onOpenProfile, suspects, onShareSuspectClick }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   // Quick filter for recent alerts on the dashboard (limited to top 5 if no search term)
@@ -196,7 +197,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                       Ficha Completa
                     </button>
                     <button 
-                      onClick={(e) => { e.stopPropagation(); alert(`Compartilhando ficha de: ${s.name}`); }}
+                      onClick={(e) => { e.stopPropagation(); onShareSuspectClick(s.id); }} // CORRIGIDO: Abre o modal de compartilhamento
                       className="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center"
                     >
                       <span className="material-symbols-outlined text-primary-dark text-lg">share</span>
