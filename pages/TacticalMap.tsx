@@ -28,6 +28,7 @@ interface TacticalMapProps {
   updateCustomMarker: (marker: CustomMarker) => void;
   deleteCustomMarker: (id: string) => void;
   groupName?: string; // NOVO: Nome do grupo, se estiver no contexto de grupo
+  isDarkMode: boolean; // NEW PROP
 }
 
 type MapFilter = 'Todos' | 'Foragido' | 'Suspeito' | 'Preso' | 'CPF Cancelado';
@@ -179,7 +180,7 @@ const UserMarkerComponent = memo<{
   );
 });
 
-const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenProfile, initialCenter, userDefaultLocation, customMarkers, addCustomMarker, updateCustomMarker, deleteCustomMarker, groupName }) => {
+const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenProfile, initialCenter, userDefaultLocation, customMarkers, addCustomMarker, updateCustomMarker, deleteCustomMarker, groupName, isDarkMode }) => {
   // CORREÇÃO: Inicializando useRef com null
   const mapRef = useRef<google.maps.Map | null>(null);
   
@@ -384,6 +385,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           options={{
             mapTypeId: mapType, // USANDO O NOVO ESTADO mapType
           }}
+          isDarkMode={isDarkMode} // PASSING NEW PROP
         >
           {/* ✅ MARCADOR DO USUÁRIO COM HTML COMPLETO */}
           {userPos && (

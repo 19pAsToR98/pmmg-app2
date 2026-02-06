@@ -13,13 +13,14 @@ interface SuspectRegistryProps {
   onUpdate: (suspect: Suspect) => void; // NOVO: Função para atualizar
   currentSuspect?: Suspect | null; // NOVO: Suspeito a ser editado
   allSuspects: Suspect[];
+  isDarkMode: boolean; // NEW PROP
 }
 
 const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY; // Mantido, mas não usado diretamente aqui
 
 // Removidas as funções searchGoogleAddress e reverseGeocode
 
-const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, onUpdate, currentSuspect, allSuspects }) => {
+const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, onUpdate, currentSuspect, allSuspects, isDarkMode }) => {
   const isEditing = !!currentSuspect;
   
   // Inicializa estados com dados do suspeito atual se estiver editando
@@ -668,6 +669,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
                   zoomControl: false,
                   mapTypeId: 'roadmap'
                 }}
+                isDarkMode={isDarkMode} // PASSING NEW PROP
               >
                 <MarkerF
                   position={selectedLastSeenLocation}
@@ -750,6 +752,7 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
                   zoomControl: false,
                   mapTypeId: 'roadmap'
                 }}
+                isDarkMode={isDarkMode} // PASSING NEW PROP
               >
                 <MarkerF
                   position={selectedApproachLocation}

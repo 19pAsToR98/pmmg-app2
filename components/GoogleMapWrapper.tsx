@@ -1,5 +1,6 @@
 import React from 'react';
 import { GoogleMap, useLoadScript } from '@react-google-maps/api';
+import { LIGHT_MAP_STYLES, DARK_MAP_STYLES } from '../utils/mapStyles';
 
 // Libraries required for the map (geometry for utility functions, places if needed later)
 const libraries: ("places" | "geometry" | "drawing" | "visualization")[] = ["geometry"];
@@ -12,39 +13,8 @@ interface GoogleMapWrapperProps {
   options?: google.maps.MapOptions;
   onLoad?: (map: google.maps.Map) => void;
   onClick?: (e: google.maps.MapMouseEvent) => void;
+  isDarkMode?: boolean; // NEW PROP
 }
-
-const MAP_STYLES: google.maps.MapTypeStyle[] = [
-  // Oculta todos os Pontos de Interesse (POIs)
-  {
-    featureType: "poi",
-    stylers: [{ visibility: "off" }]
-  },
-  // Oculta ícones de transporte público
-  {
-    featureType: "transit",
-    elementType: "labels.icon",
-    stylers: [{ visibility: "off" }]
-  },
-  // Simplifica a geometria das estradas (mantém as estradas visíveis, mas menos detalhadas)
-  {
-    featureType: "road",
-    elementType: "geometry",
-    stylers: [{ lightness: 100 }, { visibility: "simplified" }]
-  },
-  // Reabilita rótulos de estradas (nomes de ruas)
-  {
-    featureType: "road",
-    elementType: "labels.text",
-    stylers: [{ visibility: "on" }]
-  },
-  // Reabilita rótulos de áreas administrativas (cidades, bairros)
-  {
-    featureType: "administrative",
-    elementType: "labels.text",
-    stylers: [{ visibility: "on" }]
-  }
-];
 
 const GoogleMapWrapper: React.FC<GoogleMapWrapperProps> = ({ 
   children, 
@@ -53,7 +23,8 @@ const GoogleMapWrapper: React.FC<GoogleMapWrapperProps> = ({
   mapContainerClassName, 
   options, 
   onLoad,
-  onClick
+  onClick,
+  isDarkMode = false, // Default to false
 }) => {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
   
@@ -62,6 +33,9 @@ const GoogleMapWrapper: React.FC<GoogleMapWrapperProps> = ({
     libraries,
     language: 'pt-BR',
   });
+  
+  // Determine which style to use based on dark mode state
+  const mapStyles = isDarkMode ? DARK_MAP_STYLES : LIGHT_MAP_STYLES;
 
   if (loadError) {
     return <div className="p-4 text-center text-pmmg-red">Erro ao carregar o Google Maps. Verifique a chave API.</div>;
@@ -88,7 +62,7 @@ const GoogleMapWrapper: React.FC<GoogleMapWrapperProps> = ({
         streetViewControl: false,
         mapTypeControl: false,
         fullscreenControl: false,
-        styles: MAP_STYLES, // Aplicando os novos estilos
+        styles: mapStyles, // Aplicando o estilo dinâmico
         ...options,
       }}
       onLoad={onLoad}

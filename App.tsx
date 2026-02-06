@@ -249,7 +249,7 @@ const App: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>('welcomeScreen');
   const [suspects, setSuspects] = useState<Suspect[]>(INITIAL_SUSPECTS);
   const [customMarkers, setCustomMarkers] = useState<CustomMarker[]>(INITIAL_CUSTOM_MARKERS);
-  const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null);
+  const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(selectedSuspectId);
   const [editingSuspectId, setEditingSuspectId] = useState<string | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
   
@@ -666,6 +666,7 @@ const App: React.FC = () => {
           onUpdate={updateSuspect}
           currentSuspect={suspectToEdit}
           allSuspects={suspects} 
+          isDarkMode={isDarkMode} // PASSING NEW PROP
         />
       )}
       {currentScreen === 'profile' && selectedSuspect && (
@@ -677,6 +678,7 @@ const App: React.FC = () => {
           onOpenProfile={openProfile}
           onEdit={handleEditProfile}
           startShareFlow={startShareFlow} // NOVO: Passando a função de compartilhamento
+          isDarkMode={isDarkMode} // PASSING NEW PROP
         />
       )}
       {currentScreen === 'suspectsManagement' && (
@@ -791,6 +793,7 @@ const App: React.FC = () => {
           addCustomMarker={addCustomMarker} 
           updateCustomMarker={updateCustomMarker}
           deleteCustomMarker={deleteCustomMarker}
+          isDarkMode={isDarkMode} // PASSING NEW PROP
         />
       )}
       {currentScreen === 'contacts' && (

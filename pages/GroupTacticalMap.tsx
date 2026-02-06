@@ -25,6 +25,7 @@ interface GroupTacticalMapProps {
   addCustomMarker: (marker: CustomMarker) => void;
   updateCustomMarker: (marker: CustomMarker) => void;
   deleteCustomMarker: (id: string) => void;
+  isDarkMode: boolean; // NEW PROP
 }
 
 const GroupTacticalMap: React.FC<GroupTacticalMapProps> = ({
@@ -39,6 +40,7 @@ const GroupTacticalMap: React.FC<GroupTacticalMapProps> = ({
   addCustomMarker,
   updateCustomMarker,
   deleteCustomMarker,
+  isDarkMode,
 }) => {
   
   // Inclui o usuário atual na lista de oficiais para lookup
@@ -142,6 +144,7 @@ const GroupTacticalMap: React.FC<GroupTacticalMapProps> = ({
           updateCustomMarker={(marker) => updateCustomMarker(group.id, marker)}
           deleteCustomMarker={(markerId) => deleteCustomMarker(group.id, markerId)}
           groupName={group.name}
+          isDarkMode={isDarkMode} // PASSING NEW PROP
         />
       </div>
     </div>

@@ -13,9 +13,10 @@ interface SuspectProfileProps {
   onOpenProfile: (id: string) => void;
   onEdit: (id: string) => void; // NOVO: Função para iniciar a edição
   startShareFlow: (suspectId: string) => void; // NOVO: Função para iniciar o fluxo de compartilhamento
+  isDarkMode: boolean; // NEW PROP
 }
 
-const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, navigateTo, allSuspects, onOpenProfile, onEdit, startShareFlow }) => {
+const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, navigateTo, allSuspects, onOpenProfile, onEdit, startShareFlow, isDarkMode }) => {
   const [expandedSection, setExpandedSection] = useState<string | null>('data');
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   
@@ -384,6 +385,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                     zoomControl: false,
                     mapTypeId: 'roadmap'
                   }}
+                  isDarkMode={isDarkMode} // PASSING NEW PROP
                 >
                   <MarkerF
                     position={{ lat: suspect.lat, lng: suspect.lng }}
@@ -423,6 +425,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                     zoomControl: false,
                     mapTypeId: 'roadmap'
                   }}
+                  isDarkMode={isDarkMode} // PASSING NEW PROP
                 >
                   <MarkerF
                     position={{ lat: suspect.approachLat, lng: suspect.approachLng }}
