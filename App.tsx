@@ -251,7 +251,7 @@ const App: React.FC = () => {
   const [suspects, setSuspects] = useState<Suspect[]>(INITIAL_SUSPECTS);
   const [customMarkers, setCustomMarkers] = useState<CustomMarker[]>(INITIAL_CUSTOM_MARKERS);
   const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null);
-  const [editingSuspectId, setEditingSuspectId] = useState<string | null>(null);
+  const [editingSuspectId, setEditingSuspectId] = useState<string | null>(selectedSuspectId);
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
   
   // State for Store navigation
@@ -644,6 +644,9 @@ const App: React.FC = () => {
 
   const pendingRequestsCount = contacts.filter(c => c.status === 'Pending' && !c.isRequester).length;
 
+  // NOVO: Contagem total de suspeitos
+  const suspectCount = suspects.length;
+
   // Determina a classe de tema (FIXA PMMG)
   const themeClass = 'theme-pmmg';
 
@@ -795,6 +798,7 @@ const App: React.FC = () => {
           toggleDarkMode={toggleDarkMode}
           userName={userName}
           userEmail={userEmail}
+          suspectCount={suspectCount}
         />
       )}
       

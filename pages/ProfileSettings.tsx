@@ -13,6 +13,7 @@ interface ProfileSettingsProps {
   toggleDarkMode: () => void;
   userName: string;
   userEmail: string; // NOVO: Email do usuário
+  suspectCount: number; // NOVO: Contagem real de suspeitos
 }
 
 // Helper function to map UserRank to a display string (e.g., "Sargento de Polícia • 1ª Classe")
@@ -30,14 +31,12 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
   isDarkMode, 
   toggleDarkMode,
   userName,
-  userEmail, // Usando a nova prop
+  userEmail,
+  suspectCount, // Usando a contagem real
 }) => {
   
   // Mock state for biometric switch (since we don't have Capacitor Biometric API implemented yet)
   const [isBiometricEnabled, setIsBiometricEnabled] = useState(true);
-  
-  // Mock data for stats
-  const mockSuspectCount = 142;
   
   // Helper classes based on the provided HTML styles
   const iosListItemClasses = "flex items-center justify-between py-4 border-b border-pmmg-navy/5 dark:border-slate-700 last:border-0 px-4";
@@ -84,7 +83,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
         <div className="pmmg-card p-4 flex items-center justify-between">
           <div>
             <h4 className="text-[10px] font-bold text-pmmg-navy/50 dark:text-slate-400 uppercase tracking-widest mb-1">Meus Registros</h4>
-            <p className="text-xl font-black text-pmmg-navy dark:text-slate-200 uppercase">{mockSuspectCount} <span className="text-[10px] font-normal text-slate-500 dark:text-slate-400 ml-1 tracking-normal italic">Suspeitos Identificados</span></p>
+            <p className="text-xl font-black text-pmmg-navy dark:text-slate-200 uppercase">{suspectCount} <span className="text-[10px] font-normal text-slate-500 dark:text-slate-400 ml-1 tracking-normal italic">Suspeitos Identificados</span></p>
           </div>
           <div className={iconContainerClasses}>
             <span className="material-symbols-outlined text-pmmg-navy dark:text-pmmg-yellow">person_search</span>
