@@ -2,7 +2,8 @@ export type Screen = 'welcomeScreen' | 'dashboard' | 'registry' | 'profile' | 'g
 
 export type UserRank = 'Soldado' | 'Cabo' | '3º Sargento' | '2º Sargento' | '1º Sargento' | 'Subtenente';
 
-export type Institution = 'PMMG' | 'PMESP';
+// Removendo o tipo Institution
+// export type Institution = 'PMMG' | 'PMESP';
 
 export interface UserAvatar {
   name: string;

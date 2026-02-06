@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Screen, UserRank, UserAvatar, Institution, GeocodedLocation } from '../types';
+import { Screen, UserRank, UserAvatar, GeocodedLocation } from '../types';
 import RankBadge from '../components/RankBadge';
 import GoogleMapWrapper from '../components/GoogleMapWrapper';
 import { MarkerF } from '@react-google-maps/api';
@@ -7,8 +7,9 @@ import { ICON_PATHS } from '../utils/iconPaths';
 import { searchGoogleAddress } from '../utils/googleMapsApi';
 
 interface OnboardingSetupProps {
-  onComplete: (name: string, rank: UserRank, city: string, avatar: UserAvatar, institution: Institution, defaultLocation: GeocodedLocation) => void; // MODIFIED
-  onInstitutionChange: (institution: Institution) => void;
+  onComplete: (name: string, rank: UserRank, city: string, avatar: UserAvatar, defaultLocation: GeocodedLocation) => void; // MODIFICADO: Removida Institution
+  // onInstitutionChange: (institution: Institution) => void; // REMOVIDO
+  defaultAvatar: UserAvatar; // NOVO: Recebe o avatar padrão
 }
 
 // Graduações simplificadas para exibição
@@ -23,26 +24,13 @@ const RANK_MAPPING: Record<SimplifiedRank, UserRank> = {
 
 const SIMPLIFIED_RANKS: SimplifiedRank[] = ['Soldado', 'Cabo', 'Sargento'];
 
-// NEW: Default location for map initialization before search
+// Default location for map initialization before search
 const DEFAULT_LOCATION: GeocodedLocation = { name: 'Belo Horizonte', lat: -19.9167, lng: -43.9345 };
 
-// NEW: Institution options
-const INSTITUTION_OPTIONS: { id: Institution, name: string, logo: string }[] = [
-  { id: 'PMMG', name: 'Polícia Militar de Minas Gerais', logo: 'brasoes/pmmg.png' },
-  { id: 'PMESP', name: 'Polícia Militar do Estado de São Paulo', logo: 'brasoes/pmesp.png' },
-];
 
-// NEW: Avatar options (Masculino agora é o primeiro)
-const AVATAR_OPTIONS: { gender: 'Masculino' | 'Feminino', avatar: UserAvatar }[] = [
-  { gender: 'Masculino', avatar: { name: 'Cabo Loso', url: 'https://iili.io/fiLMgHX.gif' } },
-  { gender: 'Feminino', avatar: { name: 'Sgt Bisonha', url: 'https://iili.io/fiLMrRn.gif' } },
-];
-
-
-const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitutionChange }) => {
+const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, defaultAvatar }) => {
+  // Os passos agora são 1 (Nome), 2 (Graduação), 3 (Cidade)
   const [step, setStep] = useState(1);
-  const [currentInstitutionIndex, setCurrentInstitutionIndex] = useState(0); // NEW STATE for slider index
-  const institution = INSTITUTION_OPTIONS[currentInstitutionIndex].id; // Derive institution from index
   
   const [name, setName] = useState('');
   // Usando SimplifiedRank para o estado local
@@ -52,16 +40,9 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
   const [selectedLocation, setSelectedLocation] = useState<GeocodedLocation | null>(DEFAULT_LOCATION); // Default to BH
   const [citySuggestions, setCitySuggestions] = useState<GeocodedLocation[]>([]);
   const [isCitySearching, setIsCitySearching] = useState(false);
-  const [searchExecuted, setSearchExecuted] = useState(false); // NOVO: Indica se uma busca foi executada
+  const [searchExecuted, setSearchExecuted] = useState(false); // Indica se uma busca foi executada
   
-  // NEW State for Avatar selection index
-  const [selectedAvatarIndex, setSelectedAvatarIndex] = useState(0);
-  const selectedAvatar = AVATAR_OPTIONS[selectedAvatarIndex].avatar;
-
-  // Efeito para notificar o App.tsx sobre a mudança de instituição
-  useEffect(() => {
-    onInstitutionChange(institution);
-  }, [institution, onInstitutionChange]);
+  // O avatar é fixo e vem de defaultAvatar
 
   // --- Map/City Logic ---
   
@@ -69,9 +50,6 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
     setSearchTerm(term);
     setCitySuggestions([]);
     setSearchExecuted(false); // Reseta o estado de busca executada ao digitar
-    
-    // Se o termo for limpo, limpa as sugestões
-    if (term.length === 0) return;
     
     // Se o usuário digitar, limpa a localização selecionada (para forçar a re-seleção)
     if (selectedLocation && selectedLocation.name !== term) {
@@ -118,20 +96,21 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
   // --- Navigation Logic ---
 
   const handleNext = () => {
-    if (step === 2 && !name.trim()) {
+    if (step === 1 && !name.trim()) {
       alert("Por favor, insira seu nome completo.");
       return;
     }
-    if (step === 4 && (!city.trim() || !selectedLocation)) {
+    if (step === 3 && (!city.trim() || !selectedLocation)) {
       alert("Por favor, selecione sua cidade padrão no mapa.");
       return;
     }
     
-    if (step < 5) {
+    if (step < 3) {
       setStep(step + 1);
     } else {
       const finalRank = RANK_MAPPING[simplifiedRank];
-      onComplete(name.trim(), finalRank, city.trim(), selectedAvatar, institution, selectedLocation!); // MODIFIED
+      // Chamando onComplete com o avatar padrão
+      onComplete(name.trim(), finalRank, city.trim(), defaultAvatar, selectedLocation!); 
     }
   };
 
@@ -141,30 +120,6 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
     }
   };
   
-  const handleAvatarChange = (direction: 'next' | 'prev') => {
-    setSelectedAvatarIndex(prev => {
-      if (direction === 'next') {
-        return (prev + 1) % AVATAR_OPTIONS.length;
-      } else {
-        return (prev - 1 + AVATAR_OPTIONS.length) % AVATAR_OPTIONS.length;
-      }
-    });
-  };
-  
-  // Slider navigation for Institution
-  const handleInstitutionChange = (direction: 'next' | 'prev') => {
-    setCurrentInstitutionIndex(prev => {
-      const total = INSTITUTION_OPTIONS.length;
-      let newIndex;
-      if (direction === 'next') {
-        newIndex = (prev + 1) % total;
-      } else {
-        newIndex = (prev - 1 + total) % total;
-      }
-      return newIndex;
-    });
-  };
-
   const getCityMarkerIcon = () => {
     if (typeof window === 'undefined' || !window.google || !window.google.maps) return undefined;
 
@@ -186,65 +141,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
 
   const renderStepContent = () => {
     switch (step) {
-      case 1: // Institution Selection
-        const currentInstitution = INSTITUTION_OPTIONS[currentInstitutionIndex];
-        return (
-          <div className="space-y-6 text-center">
-            <h2 className="text-xl font-bold text-primary-dark uppercase tracking-tight">Instituição Militar</h2>
-            <p className="text-sm text-secondary-light">Selecione a corporação à qual você pertence.</p>
-            
-            {/* Slider Container */}
-            <div className="relative flex items-center justify-center pt-4 pb-4">
-              
-              {/* Previous Button */}
-              <button
-                onClick={() => handleInstitutionChange('prev')}
-                className="absolute left-0 z-10 p-2 rounded-full bg-pmmg-navy/10 dark:bg-slate-700/50 text-primary-dark dark:text-slate-200 shadow-md active:scale-95 transition-transform ml-2"
-              >
-                <span className="material-symbols-outlined">arrow_back_ios</span>
-              </button>
-
-              {/* Institution Display (Centralized) */}
-              <div className="flex flex-col items-center transition-all duration-300 ease-in-out p-4">
-                <div className="w-64 h-64 mb-6 p-4 flex items-center justify-center">
-                  <img 
-                    src={currentInstitution.logo} 
-                    alt={currentInstitution.name} 
-                    className="w-full h-full object-contain" 
-                  />
-                </div>
-                
-                <div className="bg-pmmg-navy text-white px-6 py-2 rounded-full shadow-lg">
-                  <p className="text-lg font-black uppercase tracking-widest">{currentInstitution.id}</p>
-                </div>
-              </div>
-
-              {/* Next Button */}
-              <button
-                onClick={() => handleInstitutionChange('next')}
-                className="absolute right-0 z-10 p-2 rounded-full bg-pmmg-navy/10 dark:bg-slate-700/50 text-primary-dark dark:text-slate-200 shadow-md active:scale-95 transition-transform mr-2"
-              >
-                <span className="material-symbols-outlined">arrow_forward_ios</span>
-              </button>
-            </div>
-            
-            {/* Dots Indicator */}
-            <div className="flex justify-center gap-2 pt-2">
-              {INSTITUTION_OPTIONS.map((_, index) => (
-                <div 
-                  key={index}
-                  className={`w-2 h-2 rounded-full transition-all ${currentInstitutionIndex === index ? 'bg-pmmg-navy dark:bg-pmmg-yellow w-4' : 'bg-slate-300 dark:bg-slate-600'}`}
-                ></div>
-              ))}
-            </div>
-            
-            <div className="text-center pt-2">
-              <p className="text-primary-dark font-bold uppercase text-sm">Instituição Selecionada:</p>
-              <p className="text-pmmg-red font-black text-lg mt-1">{currentInstitution.name}</p>
-            </div>
-          </div>
-        );
-      case 2: // Name
+      case 1: // Name (Antigo Passo 2)
         return (
           <div className="space-y-6">
             <h2 className="text-xl font-bold text-primary-dark uppercase tracking-tight">Identificação Pessoal</h2>
@@ -261,7 +158,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
             </div>
           </div>
         );
-      case 3: // Rank
+      case 2: // Rank (Antigo Passo 3)
         return (
           <div className="space-y-6">
             <h2 className="text-xl font-bold text-primary-dark uppercase tracking-tight">Graduação Militar</h2>
@@ -291,14 +188,14 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
             </div>
           </div>
         );
-      case 4: // City
+      case 3: // City (Antigo Passo 4)
         return (
           <div className="space-y-4">
             <h2 className="text-xl font-bold text-primary-dark uppercase tracking-tight">Cidade Padrão</h2>
             <p className="text-sm text-secondary-light">Defina sua cidade de atuação principal para otimizar alertas e mapas.</p>
             
             <div className="relative">
-              <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 dark:text-slate-400 mb-1 ml-1 tracking-wider">Buscar Cidade em MG/SP</label>
+              <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 dark:text-slate-400 mb-1 ml-1 tracking-wider">Buscar Cidade em MG</label>
               <div className="flex gap-2">
                 <input 
                   value={citySearchTerm}
@@ -310,7 +207,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
                     }
                   }}
                   className="block w-full px-4 py-3 bg-white/80 dark:bg-slate-700 border border-pmmg-navy/20 dark:border-slate-600 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm dark:text-slate-200" 
-                  placeholder="Ex: Belo Horizonte ou São Paulo" 
+                  placeholder="Ex: Belo Horizonte" 
                   type="text" 
                 />
                 <button 
@@ -374,60 +271,6 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
             )}
           </div>
         );
-      case 5: // Avatar Selection (Slider)
-        const currentOption = AVATAR_OPTIONS[selectedAvatarIndex];
-        
-        return (
-          <div className="space-y-6">
-            <h2 className="text-xl font-bold text-primary-dark uppercase tracking-tight">Avatar Tático</h2>
-            <p className="text-sm text-secondary-light">Selecione o avatar que representará você e o assistente de IA na plataforma.</p>
-            
-            {/* Container do Avatar */}
-            <div className="flex flex-col items-center text-center transition-all duration-300 ease-in-out">
-              {/* Moldura Circular e Aumento de Tamanho */}
-              <div className="w-64 h-64 overflow-hidden mb-4 rounded-full border-4 border-pmmg-navy dark:border-pmmg-yellow shadow-xl p-1 bg-white dark:bg-slate-700">
-                <img 
-                  src={currentOption.avatar.url} 
-                  alt={currentOption.avatar.name} 
-                  className="w-full h-full object-contain rounded-full" 
-                />
-              </div>
-              
-              {/* Nome do Personagem com Setas */}
-              <div className="flex items-center justify-center gap-3">
-                {/* Previous Button */}
-                <button
-                  onClick={() => handleAvatarChange('prev')}
-                  className="p-2 rounded-full bg-pmmg-navy/10 dark:bg-slate-700/50 text-primary-dark dark:text-slate-200 shadow-md active:scale-95 transition-transform"
-                >
-                  <span className="material-symbols-outlined">arrow_back_ios</span>
-                </button>
-                
-                <div className="bg-pmmg-navy text-white px-4 py-2 rounded-full shadow-lg shrink-0">
-                  <p className="text-lg font-black uppercase tracking-widest">{currentOption.avatar.name}</p>
-                </div>
-                
-                {/* Next Button */}
-                <button
-                  onClick={() => handleAvatarChange('next')}
-                  className="p-2 rounded-full bg-pmmg-navy/10 dark:bg-slate-700/50 text-primary-dark dark:text-slate-200 shadow-md active:scale-95 transition-transform"
-                >
-                  <span className="material-symbols-outlined">arrow_forward_ios</span>
-                </button>
-              </div>
-            </div>
-            
-            {/* Dots Indicator */}
-            <div className="flex justify-center gap-2 pt-2">
-              {AVATAR_OPTIONS.map((_, index) => (
-                <div 
-                  key={index}
-                  className={`w-2 h-2 rounded-full transition-all ${selectedAvatarIndex === index ? 'bg-pmmg-navy dark:bg-pmmg-yellow w-4' : 'bg-slate-300 dark:bg-slate-600'}`}
-                ></div>
-              ))}
-            </div>
-          </div>
-        );
       default:
         return null;
     }
@@ -442,14 +285,14 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
           </div>
           <div>
             <h1 className="font-bold text-sm leading-none text-white uppercase tracking-tight">Configuração Inicial</h1>
-            <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">Passo {step} de 5</p>
+            <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">Passo {step} de 3</p>
           </div>
         </div>
       </header>
 
       <main className="flex-1 overflow-y-auto pb-24 no-scrollbar px-4 pt-6">
         {/* Aplicando fundo branco sólido ao container principal do passo 4 */}
-        <div className={`rounded-xl shadow-md p-6 ${step === 5 ? 'bg-white dark:bg-slate-800' : 'pmmg-card'}`}>
+        <div className={`rounded-xl shadow-md p-6 pmmg-card`}>
           {renderStepContent()}
         </div>
       </main>
@@ -467,7 +310,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
             onClick={handleNext}
             className="flex-[3] bg-pmmg-navy text-white font-bold py-3 rounded-xl text-xs uppercase flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
           >
-            {step === 5 ? (
+            {step === 3 ? (
               <>
                 <span className="material-symbols-outlined text-pmmg-yellow">check_circle</span>
                 Concluir Configuração

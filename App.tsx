@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Screen, Suspect, UserRank, CustomMarker, Officer, Contact, ContactStatus, UserAvatar, Group, GroupPost, GroupParticipant, Institution, GeocodedLocation } from './types';
+import { Screen, Suspect, UserRank, CustomMarker, Officer, Contact, ContactStatus, UserAvatar, Group, GroupPost, GroupParticipant, GeocodedLocation } from './types';
 import WelcomeScreen from './pages/WelcomeScreen'; // Renomeado
 import Dashboard from './pages/Dashboard';
 import SuspectRegistry from './pages/SuspectRegistry';
@@ -219,16 +219,16 @@ const MOCK_GROUPS: Group[] = [
   }
 ];
 
-// ATUALIZADO: Usando uma imagem de perfil genérica para o usuário
+// ATUALIZADO: Avatar padrão fixo (Masculino)
 const DEFAULT_USER_AVATAR: UserAvatar = { 
-  name: 'Oficial PMMG', 
-  url: 'https://i.pravatar.cc/150?img=5' // Imagem de perfil genérica
+  name: 'Cabo Loso', 
+  url: 'https://iili.io/fiLMgHX.gif' 
 };
 
-// Avatar padrão para a IA antes do onboarding
+// Avatar padrão para a IA (Fixo)
 const DEFAULT_AI_AVATAR: UserAvatar = {
-  name: 'AI Assistente',
-  url: 'https://regularmei.com.br/wp-content/uploads/2026/01/ai_mascot.gif'
+  name: 'Sgt Bisonha',
+  url: 'https://iili.io/fiLMrRn.gif'
 };
 
 // Define enriched types for GroupDetail consumption
@@ -246,33 +246,33 @@ interface EnrichedGroup extends Group {
 
 
 const App: React.FC = () => {
+  // Se o nome não estiver definido, a tela inicial será 'welcomeScreen'
   const [currentScreen, setCurrentScreen] = useState<Screen>('welcomeScreen');
   const [suspects, setSuspects] = useState<Suspect[]>(INITIAL_SUSPECTS);
   const [customMarkers, setCustomMarkers] = useState<CustomMarker[]>(INITIAL_CUSTOM_MARKERS);
-  // FIX: Initializing selectedSuspectId with null
   const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null);
   const [editingSuspectId, setEditingSuspectId] = useState<string | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
   
-  // NEW: State for Store navigation
+  // State for Store navigation
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>(undefined);
   
   // User Profile States
   const [userRank, setUserRank] = useState<UserRank>('Soldado');
-  const [userName, setUserName] = useState('Rodrigo Alves');
+  const [userName, setUserName] = useState(''); // Inicializa vazio para forçar onboarding
   const [userCity, setUserCity] = useState('Belo Horizonte');
-  const [userDefaultLocation, setUserDefaultLocation] = useState<GeocodedLocation | null>(null); // NEW STATE
-  const [isRegistered, setIsRegistered] = useState(false);
-  const [userAvatar, setUserAvatar] = useState<UserAvatar>(DEFAULT_USER_AVATAR);
-  const [userInstitution, setUserInstitution] = useState<Institution>('PMMG'); // NEW STATE
+  const [userDefaultLocation, setUserDefaultLocation] = useState<GeocodedLocation | null>(null); 
+  // REMOVIDO: isRegistered
+  // REMOVIDO: userInstitution
   
-  // AI Avatar State (Selected during onboarding)
-  const [aiAvatar, setAiAvatar] = useState<UserAvatar>(DEFAULT_AI_AVATAR);
+  // Avatar States (Fixos)
+  const userAvatar = DEFAULT_USER_AVATAR;
+  const aiAvatar = DEFAULT_AI_AVATAR;
   
   // Suspect Management Filter State
   const [initialSuspectFilter, setInitialSuspectFilter] = useState<Suspect['status'] | 'Todos'>('Todos');
   
-  // Social States (Only Officers and Contacts remain)
+  // Social States
   const [officers, setOfficers] = useState<Officer[]>(MOCK_OFFICERS);
   const [contacts, setContacts] = useState<Contact[]>(INITIAL_CONTACTS);
   
@@ -280,16 +280,15 @@ const App: React.FC = () => {
   const [groups, setGroups] = useState<Group[]>(MOCK_GROUPS);
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
   
-  // NOVO ESTADO: Gerencia o compartilhamento pendente (SuspectId para ser compartilhado)
+  // Gerencia o compartilhamento pendente
   const [shareTarget, setShareTarget] = useState<{ suspectId: string, groupId: string } | null>(null);
 
-  // NEW: Dark Mode State
+  // Dark Mode State
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Effect to load dark mode preference from localStorage and apply class
   useEffect(() => {
     const savedMode = localStorage.getItem('pmmg-theme-mode');
-    // Check if window.matchMedia is available (not in all environments)
     const prefersDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     
     let initialMode = false;
@@ -302,7 +301,7 @@ const App: React.FC = () => {
     }
     
     setIsDarkMode(initialMode);
-  }, []); // Run once on mount
+  }, []); 
 
   // Effect to apply 'dark' class to document.documentElement whenever isDarkMode changes
   useEffect(() => {
@@ -315,6 +314,13 @@ const App: React.FC = () => {
       localStorage.setItem('pmmg-theme-mode', 'light');
     }
   }, [isDarkMode]);
+  
+  // NOVO: Efeito para forçar o onboarding se o nome não estiver definido
+  useEffect(() => {
+    if (userName === '' && currentScreen !== 'welcomeScreen' && currentScreen !== 'requestAccess' && currentScreen !== 'onboardingSetup') {
+        setCurrentScreen('onboardingSetup');
+    }
+  }, [userName, currentScreen]);
   
   const toggleDarkMode = () => setIsDarkMode(prev => !prev);
 
@@ -349,13 +355,13 @@ const App: React.FC = () => {
     navigateTo('suspectsManagement');
   };
   
-  // NOVO: Inicia o fluxo de compartilhamento (abre o seletor de grupo)
+  // Inicia o fluxo de compartilhamento (abre o seletor de grupo)
   const startShareFlow = (suspectId: string) => {
       setSelectedSuspectId(suspectId); // Mantém o suspeito selecionado
       setCurrentScreen('shareGroupSelector'); // Nova tela/modal
   };
   
-  // NOVO: Seleciona o grupo e navega para o GroupDetail com o alvo pré-selecionado
+  // Seleciona o grupo e navega para o GroupDetail com o alvo pré-selecionado
   const selectGroupForShare = (groupId: string, suspectId: string) => {
       setActiveGroupId(groupId);
       setShareTarget({ suspectId, groupId }); // Define o alvo de compartilhamento
@@ -418,7 +424,7 @@ const App: React.FC = () => {
     navigateTo('groupDetail');
   };
   
-  // NOVO: Simula a entrada de um membro no grupo (ex: aceitando convite)
+  // Simula a entrada de um membro no grupo (ex: aceitando convite)
   const handleJoinGroup = (groupId: string, memberId: string) => {
     const member = officers.find(o => o.id === memberId);
     if (!member) return;
@@ -553,12 +559,12 @@ const App: React.FC = () => {
     navigateTo('registry');
   };
   
-  const handleOnboardingComplete = (name: string, rank: UserRank, city: string, avatar: UserAvatar, institution: Institution, defaultLocation: GeocodedLocation) => {
+  // MODIFICADO: Removida Institution
+  const handleOnboardingComplete = (name: string, rank: UserRank, city: string, avatar: UserAvatar, defaultLocation: GeocodedLocation) => {
     setUserName(name);
     setUserRank(rank);
     setUserCity(city);
-    setAiAvatar(avatar);
-    setUserInstitution(institution);
+    // O avatar é fixo, mas mantemos a estrutura para compatibilidade
     setUserDefaultLocation(defaultLocation); // STORE LOCATION
     navigateTo('dashboard');
   };
@@ -569,11 +575,6 @@ const App: React.FC = () => {
   
   // Grupos que o usuário é membro
   const userGroups = groups.filter(g => g.memberIds.includes('EU'));
-  
-  // Filtra oficiais que são contatos aceitos
-  const acceptedOfficers = officers.filter(o => 
-    contacts.some(c => c.officerId === o.id && c.status === 'Accepted')
-  );
   
   // Data enrichment for GroupDetail
   const enrichedActiveGroup: EnrichedGroup | null = useMemo(() => {
@@ -611,7 +612,6 @@ const App: React.FC = () => {
       const formattedTimestamp = `${date.toLocaleDateString('pt-BR')} ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
       
       if (post.type === 'event') {
-        const targetMember = post.eventTargetId ? allParticipants.find(o => o.id === post.eventTargetId) : null;
         return {
           ...post,
           authorName: author?.name || 'Sistema',
@@ -643,19 +643,31 @@ const App: React.FC = () => {
 
   const pendingRequestsCount = contacts.filter(c => c.status === 'Pending' && !c.isRequester).length;
 
-  // Determina a classe de tema
-  const themeClass = userInstitution === 'PMMG' ? 'theme-pmmg' : 'theme-pmesp';
+  // Determina a classe de tema (FIXA PMMG)
+  const themeClass = 'theme-pmmg';
+
+  // Se o nome do usuário estiver vazio, força a tela de onboarding, a menos que já esteja no fluxo de login/registro
+  if (userName === '' && currentScreen !== 'welcomeScreen' && currentScreen !== 'requestAccess' && currentScreen !== 'onboardingSetup') {
+    return (
+      <div className={`flex flex-col h-screen max-w-md mx-auto relative overflow-hidden ${themeClass}`}>
+        <OnboardingSetup 
+          onComplete={handleOnboardingComplete} 
+          defaultAvatar={userAvatar}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={`flex flex-col h-screen max-w-md mx-auto relative overflow-hidden ${themeClass}`}>
       {currentScreen === 'welcomeScreen' && <WelcomeScreen onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />}
       
-      {currentScreen === 'requestAccess' && <RequestAccess onBack={() => navigateTo('welcomeScreen')} onSuccess={() => { setIsRegistered(true); navigateTo('onboardingSetup'); }} />}
+      {currentScreen === 'requestAccess' && <RequestAccess onBack={() => navigateTo('welcomeScreen')} onSuccess={() => { setUserName('Oficial PMMG'); navigateTo('onboardingSetup'); }} />}
       
-      {currentScreen === 'onboardingSetup' && isRegistered && (
+      {currentScreen === 'onboardingSetup' && (
         <OnboardingSetup 
           onComplete={handleOnboardingComplete} 
-          onInstitutionChange={setUserInstitution} // Passando o setter para atualização dinâmica
+          defaultAvatar={userAvatar}
         />
       )}
       
@@ -667,7 +679,7 @@ const App: React.FC = () => {
           onUpdate={updateSuspect}
           currentSuspect={suspectToEdit}
           allSuspects={suspects} 
-          isDarkMode={isDarkMode} // PASSING NEW PROP
+          isDarkMode={isDarkMode}
         />
       )}
       {currentScreen === 'profile' && selectedSuspect && (
@@ -678,8 +690,8 @@ const App: React.FC = () => {
           allSuspects={suspects} 
           onOpenProfile={openProfile}
           onEdit={handleEditProfile}
-          startShareFlow={startShareFlow} // NOVO: Passando a função de compartilhamento
-          isDarkMode={isDarkMode} // PASSING NEW PROP
+          startShareFlow={startShareFlow}
+          isDarkMode={isDarkMode}
         />
       )}
       {currentScreen === 'suspectsManagement' && (
@@ -722,7 +734,6 @@ const App: React.FC = () => {
           onUpdateGroup={handleUpdateGroup}
           onDeleteGroup={handleDeleteGroup}
           onJoinGroup={() => handleJoinGroup(enrichedActiveGroup.id, 'o2')}
-          // NOVO: Passando o alvo de compartilhamento pendente
           shareTarget={shareTarget}
         />
       )}
@@ -732,15 +743,15 @@ const App: React.FC = () => {
             navigateTo={navigateTo}
             group={activeGroup}
             allSuspects={suspects}
-            allOfficers={officers} // Passando todos os oficiais
-            userName={userName} // Passando nome do usuário
-            userRank={userRank} // Passando patente do usuário
-            userDefaultLocation={userDefaultLocation} // PASSANDO A LOCALIZAÇÃO PADRÃO
+            allOfficers={officers}
+            userName={userName}
+            userRank={userRank}
+            userDefaultLocation={userDefaultLocation}
             onOpenProfile={openProfile}
             addCustomMarker={(marker) => addGroupCustomMarker(activeGroup.id, marker)}
             updateCustomMarker={(marker) => updateGroupCustomMarker(activeGroup.id, marker)}
             deleteCustomMarker={(markerId) => deleteGroupCustomMarker(activeGroup.id, markerId)}
-            isDarkMode={isDarkMode} // PASSING NEW PROP
+            isDarkMode={isDarkMode}
         />
       )}
       
@@ -790,12 +801,12 @@ const App: React.FC = () => {
           suspects={suspects} 
           onOpenProfile={openProfile} 
           initialCenter={mapCenter} 
-          userDefaultLocation={userDefaultLocation} // PASSING NEW PROP
+          userDefaultLocation={userDefaultLocation}
           customMarkers={customMarkers} 
           addCustomMarker={addCustomMarker} 
           updateCustomMarker={updateCustomMarker}
           deleteCustomMarker={deleteCustomMarker}
-          isDarkMode={isDarkMode} // PASSING NEW PROP
+          isDarkMode={isDarkMode}
         />
       )}
       {currentScreen === 'contacts' && (
@@ -809,7 +820,7 @@ const App: React.FC = () => {
         />
       )}
       
-      {/* NOVO: Seletor de Grupo de Compartilhamento (Modal) */}
+      {/* Seletor de Grupo de Compartilhamento (Modal) */}
       {currentScreen === 'shareGroupSelector' && selectedSuspectId && (
         <ShareGroupSelector
           suspect={suspects.find(s => s.id === selectedSuspectId)!}

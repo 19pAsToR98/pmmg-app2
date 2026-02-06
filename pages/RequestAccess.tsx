@@ -24,7 +24,7 @@ const RequestAccess: React.FC<RequestAccessProps> = ({ onBack, onSuccess }) => {
     
     // Simulação de envio de credenciais
     alert('Credenciais registradas. Iniciando configuração de perfil...');
-    onSuccess();
+    onSuccess(); // Chama onSuccess, que no App.tsx navega para 'onboardingSetup' e define um nome temporário.
   };
 
   return (

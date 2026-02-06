@@ -28,8 +28,7 @@
               "pmmg-red": "#e31c1c",
               "pmmg-gold": "#d4af37",
               "pmmg-blue": "#0047ab",
-              // Cores PMESP
-              "pmesp-blue": "#234485",
+              // Cores PMESP REMOVIDAS
             },
             fontFamily: {
               sans: ["Inter", "system-ui", "sans-serif"],
@@ -61,60 +60,7 @@
         .dark .text-secondary-light { @apply text-slate-400; }
       }
       
-      /* --- PMESP Theme Overrides --- */
-      /* Sobrescreve o fundo e texto do container principal */
-      .theme-pmesp {
-        background-color: #FFFFFF !important; /* PMESP Background */
-        color: #212121 !important; /* Darker Gray */
-      }
-
-      /* Sobrescreve classes utilitárias */
-      
-      /* pmmg-navy -> PMESP Primary Blue */
-      .theme-pmesp .bg-pmmg-navy { background-color: theme('colors.pmesp-blue') !important; }
-      .theme-pmesp .text-pmmg-navy { color: theme('colors.pmesp-blue') !important; }
-      .theme-pmesp .border-pmmg-navy { border-color: theme('colors.pmesp-blue') !important; }
-      
-      /* pmmg-khaki -> PMESP Background White */
-      .theme-pmesp .bg-pmmg-khaki { background-color: #FFFFFF !important; }
-      .theme-pmesp .text-pmmg-khaki { color: #212121 !important; }
-      .theme-pmesp .border-pmmg-khaki { border-color: #FFFFFF !important; }
-
-      /* pmmg-yellow -> PMESP Accent Yellow (Mantido) */
-      .theme-pmesp .bg-pmmg-yellow { background-color: #ffcc00 !important; }
-      .theme-pmesp .text-pmmg-yellow { color: #ffcc00 !important; }
-      .theme-pmesp .border-pmmg-yellow { border-color: #ffcc00 !important; }
-
-      /* pmmg-red -> PMESP Critical Red (Mantido) */
-      .theme-pmesp .bg-pmmg-red { background-color: #e31c1c !important; }
-      .theme-pmesp .text-pmmg-red { color: #e31c1c !important; }
-      .theme-pmesp .border-pmmg-red { border-color: #e31c1c !important; }
-
-      /* pmmg-gold -> PMESP Accent Yellow */
-      .theme-pmesp .bg-pmmg-gold { background-color: #ffcc00 !important; }
-      .theme-pmesp .text-pmmg-gold { color: #ffcc00 !important; }
-      .theme-pmesp .border-pmmg-gold { border-color: #ffcc00 !important; }
-
-      /* pmmg-blue -> PMESP Primary Blue */
-      .theme-pmesp .bg-pmmg-blue { background-color: theme('colors.pmesp-blue') !important; }
-      .theme-pmesp .text-pmmg-blue { color: theme('colors.pmesp-blue') !important; }
-      .theme-pmesp .border-pmmg-blue { border-color: theme('colors.pmesp-blue') !important; }
-      
-      /* --- PMESP Dark Mode Overrides --- */
-      .theme-pmesp.dark {
-        background-color: #121212 !important;
-        color: #e2e8f0 !important;
-      }
-      .theme-pmesp.dark .bg-pmmg-khaki { background-color: #121212 !important; }
-      .theme-pmesp.dark .text-pmmg-khaki { color: #e2e8f0 !important; }
-      /* MUDANÇA: De pmmg-yellow para slate-200 */
-      .theme-pmesp.dark .text-primary-dark { color: theme('colors.slate.200') !important; }
-      .theme-pmesp.dark .text-secondary-light { color: #94a3b8 !important; }
-      /* MUDANÇA: Borda de destaque para branco/slate-200 */
-      .theme-pmesp.dark .border-pmmg-navy { border-color: theme('colors.slate.200') !important; }
-      .theme-pmesp.dark .bg-pmmg-navy { background-color: theme('colors.pmesp-blue') !important; }
-      /* MUDANÇA: Texto pmmg-navy em dark mode para branco/slate-200 */
-      .theme-pmesp.dark .text-pmmg-navy { color: theme('colors.slate.200') !important; }
+      /* --- PMESP Theme Overrides REMOVIDAS --- */
       
       /* Re-add pmmg-card definition */
       .pmmg-card {
@@ -127,30 +73,16 @@
         @apply bg-slate-800/80 border-slate-700 shadow-lg;
       }
       
-      .theme-pmesp.dark .pmmg-card {
-        @apply bg-slate-900/80 border-slate-800 shadow-lg;
-      }
-      
       /* --- Gradiente do Cabeçalho do Perfil --- */
       .profile-header-gradient {
         /* Padrão PMMG Light */
         background-image: linear-gradient(to bottom, #002147, rgba(0, 33, 71, 0.8));
       }
       
-      .theme-pmesp .profile-header-gradient {
-        /* Sobrescrita PMESP Light */
-        background-image: linear-gradient(to bottom, theme('colors.pmesp-blue'), rgba(35, 68, 133, 0.8));
-      }
-      
       /* Dark Mode Header Gradient Overrides */
       .dark .profile-header-gradient {
         /* PMMG Dark */
         background-image: linear-gradient(to bottom, #001530, rgba(0, 21, 48, 0.8));
-      }
-      
-      .theme-pmesp.dark .profile-header-gradient {
-        /* PMESP Dark */
-        background-image: linear-gradient(to bottom, #121212, rgba(18, 18, 18, 0.8));
       }
       
       .material-symbols-outlined {
