@@ -13,32 +13,27 @@ interface SuspectsManagementProps {
   suspects: Suspect[];
   initialStatusFilter: SuspectStatusFilter;
   deleteSuspects: (ids: string[]) => void; // Nova prop
-  initialSearchTerm: string; // NOVO: Termo de pesquisa inicial
 }
 
 const STATUS_OPTIONS: SuspectStatusFilter[] = ['Todos', 'Foragido', 'Suspeito', 'Preso', 'CPF Cancelado'];
 
-const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onOpenProfile, suspects, initialStatusFilter, deleteSuspects, initialSearchTerm }) => {
+const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onOpenProfile, suspects, initialStatusFilter, deleteSuspects }) => {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [showFilterMenu, setShowFilterMenu] = useState(false);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedSuspectIds, setSelectedSuspectIds] = useState<string[]>([]);
   
   // States para filtros
-  const [globalSearch, setGlobalSearch] = useState(initialSearchTerm); // Inicializa com o termo de pesquisa
+  const [globalSearch, setGlobalSearch] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState<SuspectStatusFilter>(initialStatusFilter);
 
   const filterMenuRef = useRef<HTMLDivElement>(null);
 
-  // Atualiza o filtro de status e o termo de pesquisa se props iniciais forem passadas
+  // Atualiza o filtro de status se um filtro inicial for passado (ex: ao clicar no card do Dashboard)
   useEffect(() => {
     setStatusFilter(initialStatusFilter);
   }, [initialStatusFilter]);
-  
-  useEffect(() => {
-    setGlobalSearch(initialSearchTerm);
-  }, [initialSearchTerm]);
 
   // Close filter menu when clicking outside
   useEffect(() => {
@@ -217,7 +212,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
                       <button
                         key={opt}
                         onClick={() => setStatusFilter(opt)}
-                        className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all border shrink-0 ${
+                        className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all border ${
                           statusFilter === opt 
                           ? 'bg-pmmg-navy text-white border-pmmg-navy shadow-md' 
                           : 'bg-slate-50 text-pmmg-navy/60 border-slate-200'
