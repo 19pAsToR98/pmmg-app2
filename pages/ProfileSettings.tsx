@@ -95,7 +95,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
         <section>
           <h3 className="px-4 mb-2 text-[11px] font-bold text-pmmg-navy/80 dark:text-slate-400 uppercase tracking-widest">Dados da Conta</h3>
           <div className="pmmg-card">
-            {/* NOVO: E-mail Funcional */}
+            {/* E-mail Funcional */}
             <div className={iosListItemClasses}>
               <div className="flex flex-col">
                 <span className="text-[9px] text-pmmg-navy/50 dark:text-slate-500 font-bold uppercase tracking-tighter">E-mail Funcional</span>
@@ -141,12 +141,12 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
           <h3 className="px-4 mb-2 text-[11px] font-bold text-pmmg-navy/80 dark:text-slate-400 uppercase tracking-widest">Configurações e Segurança</h3>
           <div className="pmmg-card">
             
-            {/* Modo Escuro (Usando ThemeToggle Component) - Corrigido para ocupar a largura total */}
+            {/* Modo Escuro (Usando ThemeToggle Component) - Agora ocupa a largura total do item da lista */}
             <div className={iosListItemClasses + ' !p-0'}>
               <ThemeToggle isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
             </div>
             
-            {/* Biometria (Simulada) */}
+            {/* Biometria (Simulada) - Corrigido o toggle */}
             <div className={iosListItemClasses}>
               <div className="flex items-center gap-3">
                 <div className={iconContainerClasses + ' !w-8 !h-8'}>
@@ -158,7 +158,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
                 onClick={() => setIsBiometricEnabled(prev => !prev)}
                 className={`relative w-11 h-6 rounded-full transition-colors focus:outline-none ${isBiometricEnabled ? 'bg-green-600' : 'bg-slate-300 dark:bg-slate-600'}`}
               >
-                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-md ${isBiometricEnabled ? 'translate-x-6' : 'translate-x-1'}`}></span>
+                <span className={`absolute left-0.5 top-0.5 inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-md ${isBiometricEnabled ? 'translate-x-5' : 'translate-x-0'}`}></span>
               </button>
             </div>
             

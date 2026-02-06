@@ -7,7 +7,7 @@ interface ThemeToggleProps {
 
 const ThemeToggle: React.FC<ThemeToggleProps> = ({ isDarkMode, toggleDarkMode }) => {
   return (
-    <div className="flex items-center justify-between p-4 bg-white/40 dark:bg-slate-800/50 rounded-xl border border-pmmg-navy/10 dark:border-slate-700 shadow-sm transition-colors">
+    <div className="flex items-center justify-between w-full p-4 bg-white/40 dark:bg-slate-800/50 rounded-xl border border-pmmg-navy/10 dark:border-slate-700 shadow-sm transition-colors">
       <div className="flex items-center gap-3">
         <span className="material-symbols-outlined text-pmmg-navy dark:text-pmmg-yellow fill-icon">
           {isDarkMode ? 'dark_mode' : 'light_mode'}
