@@ -56,7 +56,8 @@
         .text-secondary-light { @apply text-slate-600; }
         
         /* Dark Mode Semantic Overrides */
-        .dark .text-primary-dark { @apply text-pmmg-yellow; }
+        /* MUDANÇA: De pmmg-yellow para slate-200 (branco suave) */
+        .dark .text-primary-dark { @apply text-slate-200; }
         .dark .text-secondary-light { @apply text-slate-400; }
       }
       
@@ -106,11 +107,14 @@
       }
       .theme-pmesp.dark .bg-pmmg-khaki { background-color: #121212 !important; }
       .theme-pmesp.dark .text-pmmg-khaki { color: #e2e8f0 !important; }
-      .theme-pmesp.dark .text-primary-dark { color: #ffcc00 !important; }
+      /* MUDANÇA: De pmmg-yellow para slate-200 */
+      .theme-pmesp.dark .text-primary-dark { color: theme('colors.slate.200') !important; }
       .theme-pmesp.dark .text-secondary-light { color: #94a3b8 !important; }
-      .theme-pmesp.dark .border-pmmg-navy { border-color: #ffcc00 !important; }
+      /* MUDANÇA: Borda de destaque para branco/slate-200 */
+      .theme-pmesp.dark .border-pmmg-navy { border-color: theme('colors.slate.200') !important; }
       .theme-pmesp.dark .bg-pmmg-navy { background-color: theme('colors.pmesp-blue') !important; }
-      .theme-pmesp.dark .text-pmmg-navy { color: #ffcc00 !important; }
+      /* MUDANÇA: Texto pmmg-navy em dark mode para branco/slate-200 */
+      .theme-pmesp.dark .text-pmmg-navy { color: theme('colors.slate.200') !important; }
       
       /* Re-add pmmg-card definition */
       .pmmg-card {
