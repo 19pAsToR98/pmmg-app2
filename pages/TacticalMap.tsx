@@ -69,14 +69,14 @@ const SuspectPhotoMarker = memo<{
     onClick();
   };
   
-  // CORREÇÃO DE OFFSET: 
-  // Se for foto (40x40), a âncora deve ser na base central: x=-20, y=-40
-  // Se for ícone (24x24), a âncora deve ser na base central: x=-12, y=-24
+  // AJUSTE: Centralizando o elemento no ponto (lat, lng)
   const getOffset = () => {
     if (usePhotoMarker) {
-      return { x: -20, y: -40 };
+      // 40x40 -> Offset para o centro: -20, -20
+      return { x: -20, y: -20 };
     }
-    return { x: -12, y: -24 };
+    // 24x24 -> Offset para o centro: -12, -12
+    return { x: -12, y: -12 };
   };
 
   return (
@@ -133,8 +133,9 @@ const CustomMarkerComponent = memo<{
     onClick();
   };
   
-  // CORREÇÃO DE OFFSET: Marcador 32x32. Âncora na base central: x=-16, y=-32
-  const getOffset = () => ({ x: -16, y: -32 });
+  // AJUSTE: Centralizando o elemento no ponto (lat, lng)
+  // Marcador 32x32. Offset para o centro: -16, -16
+  const getOffset = () => ({ x: -16, y: -16 });
 
   return (
     <OverlayViewF
@@ -171,8 +172,9 @@ const UserMarkerComponent = memo<{
     onClick();
   };
   
-  // CORREÇÃO DE OFFSET: Marcador 32x32. Âncora na base central: x=-16, y=-32
-  const getOffset = () => ({ x: -16, y: -32 });
+  // AJUSTE: Centralizando o elemento no ponto (lat, lng)
+  // Marcador 32x32. Offset para o centro: -16, -16
+  const getOffset = () => ({ x: -16, y: -16 });
 
   return (
     <OverlayViewF
@@ -412,7 +414,11 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               />
               
               {activeInfoWindow === 'user-pos' && (
-                <InfoWindowF position={userPos} onCloseClick={() => setActiveInfoWindow(null)}>
+                <InfoWindowF 
+                  position={userPos} 
+                  onCloseClick={() => setActiveInfoWindow(null)}
+                  pixelOffset={{ width: 0, height: 0 }} // AJUSTE PARA CENTRALIZAR
+                >
                   <div className="p-2">
                     <p className="font-bold text-pmmg-navy text-sm">Você (Oficial)</p>
                     <p className="text-[10px] text-slate-500">Localização Atual</p>
@@ -457,7 +463,11 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                   />
                   
                   {activeInfoWindow === markerId && (
-                    <InfoWindowF position={position} onCloseClick={() => setActiveInfoWindow(null)}>
+                    <InfoWindowF 
+                      position={position} 
+                      onCloseClick={() => setActiveInfoWindow(null)}
+                      pixelOffset={{ width: 0, height: 0 }} // AJUSTE PARA CENTRALIZAR
+                    >
                       <div className="p-2 min-w-[150px]">
                         <div className="flex items-center gap-2 mb-2">
                           <div className="w-10 h-10 rounded bg-slate-200 overflow-hidden">
@@ -515,7 +525,11 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                 />
                 
                 {activeInfoWindow === markerId && (
-                  <InfoWindowF position={position} onCloseClick={() => setActiveInfoWindow(null)}>
+                  <InfoWindowF 
+                    position={position} 
+                    onCloseClick={() => setActiveInfoWindow(null)}
+                    pixelOffset={{ width: 0, height: 0 }} // AJUSTE PARA CENTRALIZAR
+                  >
                     <div className="p-2 min-w-[150px]">
                       <p className="font-bold text-[11px] text-pmmg-navy uppercase leading-tight">{markerData.title}</p>
                       <p className="text-[10px] text-slate-600 mt-1">{markerData.description}</p>
