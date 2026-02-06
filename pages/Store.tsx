@@ -15,7 +15,7 @@ const Store: React.FC<StoreProps> = ({ navigateTo }) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
+    <div className="flex flex-col h-full bg-pmmg-khaki dark:bg-slate-900 overflow-hidden">
       <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-xl">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 shrink-0 bg-white rounded-full flex items-center justify-center p-1 border-2 border-pmmg-yellow shadow-inner">
@@ -35,7 +35,7 @@ const Store: React.FC<StoreProps> = ({ navigateTo }) => {
       </header>
 
       <main className="flex-1 overflow-y-auto pb-32 no-scrollbar px-4 pt-6">
-        <p className="text-[10px] font-bold uppercase text-pmmg-navy/70 mb-4 text-center tracking-wider">
+        <p className="text-[10px] font-bold uppercase text-pmmg-navy/70 dark:text-slate-400 mb-4 text-center tracking-wider">
           Links para fornecedores parceiros e materiais recomendados.
         </p>
 
@@ -45,7 +45,7 @@ const Store: React.FC<StoreProps> = ({ navigateTo }) => {
               {/* Category Header (Clickable) */}
               <button
                 onClick={() => handleCategoryClick(category.id)}
-                className="w-full flex items-center p-3 gap-3 border-l-4 border-pmmg-navy/50 active:bg-slate-50 transition-colors"
+                className="w-full flex items-center p-3 gap-3 border-l-4 border-pmmg-navy/50 dark:border-pmmg-yellow/50 active:bg-slate-50 dark:active:bg-slate-700 transition-colors"
               >
                 <div className="w-14 h-14 flex items-center justify-center rounded-xl shrink-0 bg-pmmg-navy text-pmmg-yellow">
                   <span className="material-symbols-outlined text-3xl fill-icon">
@@ -53,12 +53,12 @@ const Store: React.FC<StoreProps> = ({ navigateTo }) => {
                   </span>
                 </div>
                 <div className="flex-1 min-w-0 text-left">
-                  <h3 className="font-bold text-sm truncate uppercase tracking-tight text-pmmg-navy">{category.name}</h3>
-                  <p className="text-xs text-slate-600 truncate leading-tight mt-0.5">
+                  <h3 className="font-bold text-sm truncate uppercase tracking-tight text-pmmg-navy dark:text-slate-200">{category.name}</h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 truncate leading-tight mt-0.5">
                     {category.products.length} itens disponíveis
                   </p>
                 </div>
-                <span className="material-symbols-outlined text-pmmg-navy/40 text-lg shrink-0 transition-transform duration-300">
+                <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600 text-lg shrink-0 transition-transform duration-300">
                   chevron_right
                 </span>
               </button>
@@ -67,8 +67,8 @@ const Store: React.FC<StoreProps> = ({ navigateTo }) => {
         </div>
 
         <div className="mt-8 text-center opacity-50">
-          <span className="material-symbols-outlined text-4xl text-pmmg-navy/20">info</span>
-          <p className="text-[9px] font-bold uppercase tracking-widest text-pmmg-navy/40 mt-2">
+          <span className="material-symbols-outlined text-4xl text-pmmg-navy/20 dark:text-slate-700">info</span>
+          <p className="text-[9px] font-bold uppercase tracking-widest text-pmmg-navy/40 dark:text-slate-600 mt-2">
             Os links são externos e a PMMG não se responsabiliza pelas compras.
           </p>
         </div>

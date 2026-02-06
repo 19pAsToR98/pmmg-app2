@@ -50,7 +50,7 @@ const VoiceReport: React.FC<VoiceReportProps> = ({ navigateTo, userRank }) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
+    <div className="flex flex-col h-full bg-pmmg-khaki dark:bg-slate-900 overflow-hidden">
       <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-xl">
         <div className="flex items-center gap-3">
           <button onClick={() => navigateTo('aiTools')} className="text-white active:scale-90 transition-transform">
@@ -77,8 +77,8 @@ const VoiceReport: React.FC<VoiceReportProps> = ({ navigateTo, userRank }) => {
               />
             </div>
           </div>
-          <div className="relative bg-white rounded-[1.5rem] p-4 px-6 shadow-lg mb-12 text-center border-2 border-pmmg-navy/5 after:content-[''] after:absolute after:top-0 after:left-1/2 after:w-0 after:h-0 after:border-[20px] after:border-transparent after:border-b-white after:mt-[-20px] after:ml-[-20px] after:border-t-0">
-            <p className="text-pmmg-navy font-semibold text-sm">
+          <div className="relative bg-white dark:bg-slate-800 rounded-[1.5rem] p-4 px-6 shadow-lg mb-12 text-center border-2 border-pmmg-navy/5 dark:border-slate-700 after:content-[''] after:absolute after:top-0 after:left-1/2 after:w-0 after:h-0 after:border-[20px] after:border-transparent after:border-b-white dark:after:border-b-slate-800 after:mt-[-20px] after:ml-[-20px] after:border-t-0">
+            <p className="text-pmmg-navy dark:text-slate-200 font-semibold text-sm">
               Pressione o microfone para iniciar o relato. O tempo máximo de gravação é de <span className="font-bold text-pmmg-red">2 minutos</span>.
             </p>
           </div>
@@ -88,10 +88,10 @@ const VoiceReport: React.FC<VoiceReportProps> = ({ navigateTo, userRank }) => {
         <section className="flex flex-col items-center justify-center flex-1 w-full max-w-xs">
           
           <div className={`w-full text-center mb-8 transition-opacity duration-500 ${isRecording ? 'opacity-100' : 'opacity-50'}`}>
-            <p className="text-pmmg-navy font-black text-4xl tracking-widest">
+            <p className="text-pmmg-navy dark:text-slate-200 font-black text-4xl tracking-widest">
               {formatTime(duration)}
             </p>
-            <p className="text-[10px] font-bold uppercase text-pmmg-navy/60 mt-1">
+            <p className="text-[10px] font-bold uppercase text-pmmg-navy/60 dark:text-slate-400 mt-1">
               {isRecording ? 'GRAVANDO RELATO TÁTICO...' : 'PRONTO PARA INICIAR'}
             </p>
           </div>

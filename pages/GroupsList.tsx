@@ -38,7 +38,7 @@ const GroupsList: React.FC<GroupsListProps> = ({ navigateTo, userGroups, officer
   };
 
   return (
-    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
+    <div className="flex flex-col h-full bg-pmmg-khaki dark:bg-slate-900 overflow-hidden">
       <header className="sticky top-0 z-50 bg-pmmg-navy text-white shadow-xl px-4 py-4 shrink-0">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -97,7 +97,7 @@ const GroupsList: React.FC<GroupsListProps> = ({ navigateTo, userGroups, officer
       <main className="flex-1 overflow-y-auto pb-40 no-scrollbar px-4 pt-4">
         <div className="flex items-center gap-2 mb-4 px-1">
           <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
-          <h3 className="text-[10px] font-black text-pmmg-navy/60 uppercase tracking-widest">Meus Grupos de Operação</h3>
+          <h3 className="text-[10px] font-black text-pmmg-navy/60 dark:text-slate-400 uppercase tracking-widest">Meus Grupos de Operação</h3>
         </div>
 
         <div className="space-y-4">
@@ -107,39 +107,39 @@ const GroupsList: React.FC<GroupsListProps> = ({ navigateTo, userGroups, officer
               <div 
                 key={group.id}
                 onClick={() => openGroup(group.id)}
-                className="pmmg-card p-4 flex flex-col gap-3 active:scale-[0.98] transition-all shadow-md border-l-4 border-l-pmmg-navy"
+                className="pmmg-card p-4 flex flex-col gap-3 active:scale-[0.98] transition-all shadow-md border-l-4 border-l-pmmg-navy dark:border-l-pmmg-yellow"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-pmmg-navy/5 flex items-center justify-center text-pmmg-navy">
+                    <div className="w-12 h-12 rounded-xl bg-pmmg-navy/5 dark:bg-slate-700 flex items-center justify-center text-pmmg-navy dark:text-pmmg-yellow">
                       <span className="material-symbols-outlined text-3xl">folder_shared</span>
                     </div>
                     <div>
-                      <h4 className="text-sm font-black text-pmmg-navy uppercase leading-none">{group.name}</h4>
-                      <p className="text-[9px] text-pmmg-navy/40 font-bold uppercase mt-1 tracking-wider">{members.length} membros ativos</p>
+                      <h4 className="text-sm font-black text-pmmg-navy dark:text-slate-200 uppercase leading-none">{group.name}</h4>
+                      <p className="text-[9px] text-pmmg-navy/40 dark:text-slate-500 font-bold uppercase mt-1 tracking-wider">{members.length} membros ativos</p>
                     </div>
                   </div>
-                  <span className="material-symbols-outlined text-slate-300">chevron_right</span>
+                  <span className="material-symbols-outlined text-slate-300 dark:text-slate-600">chevron_right</span>
                 </div>
                 
-                <p className="text-[11px] text-slate-600 font-medium line-clamp-2 italic">
+                <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium line-clamp-2 italic">
                   {group.description || "Nenhuma descrição definida para este grupo tático."}
                 </p>
 
-                <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700">
                   <div className="flex -space-x-2">
                     {members.slice(0, 3).map((m, i) => (
-                      <div key={i} className="w-7 h-7 rounded-full bg-pmmg-navy text-pmmg-yellow text-[8px] font-black flex items-center justify-center border-2 border-white shadow-sm ring-1 ring-black/5 uppercase">
+                      <div key={i} className="w-7 h-7 rounded-full bg-pmmg-navy text-pmmg-yellow text-[8px] font-black flex items-center justify-center border-2 border-white dark:border-slate-800 shadow-sm ring-1 ring-black/5 uppercase">
                         {m.name.charAt(0)}
                       </div>
                     ))}
                     {members.length > 3 && (
-                      <div className="w-7 h-7 rounded-full bg-slate-200 text-slate-500 text-[8px] font-black flex items-center justify-center border-2 border-white shadow-sm">
+                      <div className="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-500 text-[8px] font-black flex items-center justify-center border-2 border-white dark:border-slate-800 shadow-sm">
                         +{members.length - 3}
                       </div>
                     )}
                   </div>
-                  <div className="bg-pmmg-navy/5 px-2 py-1 rounded text-[8px] font-black text-pmmg-navy/60 uppercase tracking-widest border border-pmmg-navy/5">
+                  <div className="bg-pmmg-navy/5 dark:bg-slate-700 px-2 py-1 rounded text-[8px] font-black text-pmmg-navy/60 dark:text-slate-400 uppercase tracking-widest border border-pmmg-navy/5 dark:border-slate-600">
                     {group.posts.length} FICHAS COMPARTILHADAS
                   </div>
                 </div>

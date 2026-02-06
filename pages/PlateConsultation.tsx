@@ -35,7 +35,7 @@ const PlateConsultation: React.FC<PlateConsultationProps> = ({ navigateTo, userR
   };
 
   return (
-    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
+    <div className="flex flex-col h-full bg-pmmg-khaki dark:bg-slate-900 overflow-hidden">
       <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-xl">
         <div className="flex items-center gap-3">
           <button onClick={() => navigateTo('aiTools')} className="text-white active:scale-90 transition-transform">
@@ -62,8 +62,8 @@ const PlateConsultation: React.FC<PlateConsultationProps> = ({ navigateTo, userR
               />
             </div>
           </div>
-          <div className="relative bg-white rounded-[1.5rem] p-4 px-6 shadow-lg mb-8 text-center border-2 border-pmmg-navy/5 after:content-[''] after:absolute after:top-0 after:left-1/2 after:w-0 after:h-0 after:border-[20px] after:border-transparent after:border-b-white after:mt-[-20px] after:ml-[-20px] after:border-t-0">
-            <p className="text-pmmg-navy font-semibold text-sm">
+          <div className="relative bg-white dark:bg-slate-800 rounded-[1.5rem] p-4 px-6 shadow-lg mb-8 text-center border-2 border-pmmg-navy/5 dark:border-slate-700 after:content-[''] after:absolute after:top-0 after:left-1/2 after:w-0 after:h-0 after:border-[20px] after:border-transparent after:border-b-white dark:after:border-b-slate-800 after:mt-[-20px] after:ml-[-20px] after:border-t-0">
+            <p className="text-pmmg-navy dark:text-slate-200 font-semibold text-sm">
               <span className="font-bold text-pmmg-red">{rankLabel}</span>, insira a placa manualmente ou utilize a câmera para leitura automática.
             </p>
           </div>
@@ -72,14 +72,14 @@ const PlateConsultation: React.FC<PlateConsultationProps> = ({ navigateTo, userR
         {/* Input Section (Simplified) */}
         <section className="mt-4 space-y-4">
           <div className="pmmg-card p-4 space-y-3">
-            <h3 className="text-[11px] font-bold text-pmmg-navy/60 uppercase tracking-wider">Consulta de Veículo</h3>
+            <h3 className="text-[11px] font-bold text-pmmg-navy/60 dark:text-slate-400 uppercase tracking-wider">Consulta de Veículo</h3>
             <div className="flex gap-2">
               <input 
                 value={plate}
                 onChange={(e) => setPlate(e.target.value.toUpperCase())}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 // Adicionando min-w-0 para garantir que o input possa se comprimir
-                className="flex-1 min-w-0 px-4 py-3 bg-white border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm font-bold uppercase tracking-widest" 
+                className="flex-1 min-w-0 px-4 py-3 bg-white dark:bg-slate-700 border border-pmmg-navy/20 dark:border-slate-600 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm font-bold uppercase tracking-widest dark:text-slate-200" 
                 placeholder="Ex: ABC1234 ou ABC-1234" 
                 type="text" 
                 maxLength={8}

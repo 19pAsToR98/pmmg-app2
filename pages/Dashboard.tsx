@@ -35,7 +35,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
   };
 
   return (
-    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
+    <div className="flex flex-col h-full bg-pmmg-khaki dark:bg-slate-900 overflow-hidden">
       <header className="sticky top-0 z-50 bg-pmmg-navy px-4 pt-4 pb-4 shadow-xl">
         {/* Top Bar */}
         <div className="flex items-center justify-between mb-4">
@@ -74,7 +74,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
             <span className="material-symbols-outlined text-primary-dark text-xl">search</span>
           </div>
           <div 
-            className="block w-full pl-10 pr-4 py-3 bg-white rounded-xl border-2 border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-0 text-sm font-bold placeholder-pmmg-navy/40 shadow-sm text-pmmg-navy/60 whitespace-nowrap overflow-hidden" 
+            className="block w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-700 rounded-xl border-2 border-pmmg-navy/20 dark:border-slate-600 focus:border-pmmg-navy focus:ring-0 text-sm font-bold placeholder-pmmg-navy/40 shadow-sm text-pmmg-navy/60 dark:text-slate-300 dark:placeholder-slate-500 whitespace-nowrap overflow-hidden" 
           >
             BUSCAR INDIVÍDUO (NOME, CPF, ALCUNHA)
           </div>
@@ -144,7 +144,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
               className="pmmg-card overflow-hidden transition-all active:scale-[0.98] cursor-pointer"
             >
               <div className="flex">
-                <div className="w-32 h-44 relative bg-slate-200 shrink-0">
+                <div className="w-32 h-44 relative bg-slate-200 dark:bg-slate-700 shrink-0">
                   <img alt={s.name} className="w-full h-full object-cover" src={s.photoUrl} />
                   <div className={`absolute top-0 left-0 text-white text-[8px] font-bold px-2 py-1 uppercase rounded-br-lg shadow-md ${
                     s.status === 'Foragido' ? 'bg-pmmg-red' : 
@@ -164,7 +164,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                         {s.status === 'Foragido' ? 'priority_high' : 'warning'}
                       </span>
                     </div>
-                    <p className="text-[10px] font-semibold text-slate-500 mt-1">CPF: {s.cpf}</p>
+                    <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 mt-1">CPF: {s.cpf}</p>
                     <div className="mt-2 space-y-1">
                       <div className="flex items-center gap-1.5">
                         <span className="material-symbols-outlined text-[14px] text-primary-dark">location_on</span>
@@ -195,7 +195,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                     </button>
                     <button 
                       onClick={(e) => { e.stopPropagation(); startShareFlow(s.id); }} // USANDO NOVO FLUXO
-                      className="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center"
+                      className="px-3 border-2 border-pmmg-navy/20 dark:border-slate-600 rounded-lg flex items-center justify-center"
                     >
                       <span className="material-symbols-outlined text-primary-dark text-lg">share</span>
                     </button>

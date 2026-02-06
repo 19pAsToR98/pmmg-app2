@@ -199,7 +199,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
               {/* Previous Button */}
               <button
                 onClick={() => handleInstitutionChange('prev')}
-                className="absolute left-0 z-10 p-2 rounded-full bg-pmmg-navy/10 text-primary-dark shadow-md active:scale-95 transition-transform ml-2"
+                className="absolute left-0 z-10 p-2 rounded-full bg-pmmg-navy/10 dark:bg-slate-700/50 text-primary-dark dark:text-slate-200 shadow-md active:scale-95 transition-transform ml-2"
               >
                 <span className="material-symbols-outlined">arrow_back_ios</span>
               </button>
@@ -222,7 +222,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
               {/* Next Button */}
               <button
                 onClick={() => handleInstitutionChange('next')}
-                className="absolute right-0 z-10 p-2 rounded-full bg-pmmg-navy/10 text-primary-dark shadow-md active:scale-95 transition-transform mr-2"
+                className="absolute right-0 z-10 p-2 rounded-full bg-pmmg-navy/10 dark:bg-slate-700/50 text-primary-dark dark:text-slate-200 shadow-md active:scale-95 transition-transform mr-2"
               >
                 <span className="material-symbols-outlined">arrow_forward_ios</span>
               </button>
@@ -233,7 +233,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
               {INSTITUTION_OPTIONS.map((_, index) => (
                 <div 
                   key={index}
-                  className={`w-2 h-2 rounded-full transition-all ${currentInstitutionIndex === index ? 'bg-pmmg-navy w-4' : 'bg-slate-300'}`}
+                  className={`w-2 h-2 rounded-full transition-all ${currentInstitutionIndex === index ? 'bg-pmmg-navy dark:bg-pmmg-yellow w-4' : 'bg-slate-300 dark:bg-slate-600'}`}
                 ></div>
               ))}
             </div>
@@ -250,11 +250,11 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
             <h2 className="text-xl font-bold text-primary-dark uppercase tracking-tight">Identificação Pessoal</h2>
             <p className="text-sm text-secondary-light">Insira seu nome completo para identificação no sistema.</p>
             <div>
-              <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Nome Completo</label>
+              <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 dark:text-slate-400 mb-1 ml-1 tracking-wider">Nome Completo</label>
               <input 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+                className="block w-full px-4 py-3 bg-white/80 dark:bg-slate-700 border border-pmmg-navy/20 dark:border-slate-600 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm dark:text-slate-200" 
                 placeholder="Ex: Rodrigo Alves da Silva" 
                 type="text" 
               />
@@ -275,7 +275,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
                   className={`flex flex-col items-center gap-2 shrink-0 transition-all p-2 rounded-xl border-2 ${
                     simplifiedRank === r 
                       ? 'bg-pmmg-navy border-pmmg-yellow shadow-lg scale-105' 
-                      : 'bg-white border-transparent grayscale opacity-60'
+                      : 'bg-white dark:bg-slate-700 border-transparent grayscale opacity-60'
                   }`}
                 >
                   <RankBadge rank={RANK_MAPPING[r]} size="md" />
@@ -298,7 +298,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
             <p className="text-sm text-secondary-light">Defina sua cidade de atuação principal para otimizar alertas e mapas.</p>
             
             <div className="relative">
-              <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Buscar Cidade em MG/SP</label>
+              <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 dark:text-slate-400 mb-1 ml-1 tracking-wider">Buscar Cidade em MG/SP</label>
               <div className="flex gap-2">
                 <input 
                   value={citySearchTerm}
@@ -309,7 +309,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
                       handleCitySearch();
                     }
                   }}
-                  className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+                  className="block w-full px-4 py-3 bg-white/80 dark:bg-slate-700 border border-pmmg-navy/20 dark:border-slate-600 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm dark:text-slate-200" 
                   placeholder="Ex: Belo Horizonte ou São Paulo" 
                   type="text" 
                 />
@@ -326,12 +326,12 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
               
               {/* Dropdown de Sugestões (Posicionamento Absoluto) */}
               {citySuggestions.length > 0 && (
-                <div className="absolute z-50 w-full bg-white border border-pmmg-navy/20 rounded-lg mt-1 shadow-lg max-h-40 overflow-y-auto">
+                <div className="absolute z-50 w-full bg-white dark:bg-slate-800 border border-pmmg-navy/20 dark:border-slate-700 rounded-lg mt-1 shadow-lg max-h-40 overflow-y-auto">
                   {citySuggestions.map((loc, index) => (
                     <button
                       key={index}
                       onClick={() => handleSelectCity(loc)}
-                      className="w-full text-left px-4 py-2 text-sm text-primary-dark hover:bg-pmmg-khaki/50 transition-colors border-b border-pmmg-navy/5 last:border-b-0"
+                      className="w-full text-left px-4 py-2 text-sm text-primary-dark hover:bg-pmmg-khaki/50 dark:hover:bg-slate-700 transition-colors border-b border-pmmg-navy/5 dark:border-slate-700 last:border-b-0"
                     >
                       {loc.name}
                     </button>
@@ -348,7 +348,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
             {/* Exibe o mapa se uma cidade foi selecionada */}
             {selectedLocation && (
               <div className="pmmg-card overflow-hidden">
-                <div className="p-3 bg-pmmg-navy/5 flex items-center justify-between">
+                <div className="p-3 bg-pmmg-navy/5 dark:bg-slate-700 flex items-center justify-between">
                   <p className="text-[10px] font-bold text-primary-dark uppercase tracking-wider">Cidade Selecionada: {city || 'Carregando...'}</p>
                   <span className="text-[9px] text-green-600 font-bold uppercase">GPS OK</span>
                 </div>
@@ -385,7 +385,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
             {/* Container do Avatar */}
             <div className="flex flex-col items-center text-center transition-all duration-300 ease-in-out">
               {/* Moldura Circular e Aumento de Tamanho */}
-              <div className="w-64 h-64 overflow-hidden mb-4 rounded-full border-4 border-pmmg-navy shadow-xl p-1 bg-white">
+              <div className="w-64 h-64 overflow-hidden mb-4 rounded-full border-4 border-pmmg-navy dark:border-pmmg-yellow shadow-xl p-1 bg-white dark:bg-slate-700">
                 <img 
                   src={currentOption.avatar.url} 
                   alt={currentOption.avatar.name} 
@@ -398,7 +398,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
                 {/* Previous Button */}
                 <button
                   onClick={() => handleAvatarChange('prev')}
-                  className="p-2 rounded-full bg-pmmg-navy/10 text-primary-dark shadow-md active:scale-95 transition-transform"
+                  className="p-2 rounded-full bg-pmmg-navy/10 dark:bg-slate-700/50 text-primary-dark dark:text-slate-200 shadow-md active:scale-95 transition-transform"
                 >
                   <span className="material-symbols-outlined">arrow_back_ios</span>
                 </button>
@@ -410,7 +410,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
                 {/* Next Button */}
                 <button
                   onClick={() => handleAvatarChange('next')}
-                  className="p-2 rounded-full bg-pmmg-navy/10 text-primary-dark shadow-md active:scale-95 transition-transform"
+                  className="p-2 rounded-full bg-pmmg-navy/10 dark:bg-slate-700/50 text-primary-dark dark:text-slate-200 shadow-md active:scale-95 transition-transform"
                 >
                   <span className="material-symbols-outlined">arrow_forward_ios</span>
                 </button>
@@ -422,7 +422,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
               {AVATAR_OPTIONS.map((_, index) => (
                 <div 
                   key={index}
-                  className={`w-2 h-2 rounded-full transition-all ${selectedAvatarIndex === index ? 'bg-pmmg-navy w-4' : 'bg-slate-300'}`}
+                  className={`w-2 h-2 rounded-full transition-all ${selectedAvatarIndex === index ? 'bg-pmmg-navy dark:bg-pmmg-yellow w-4' : 'bg-slate-300 dark:bg-slate-600'}`}
                 ></div>
               ))}
             </div>
@@ -434,7 +434,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
   };
 
   return (
-    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
+    <div className="flex flex-col h-full bg-pmmg-khaki dark:bg-slate-900 overflow-hidden">
       <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 shrink-0 bg-pmmg-yellow rounded-full flex items-center justify-center">
@@ -449,17 +449,17 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, onInstitu
 
       <main className="flex-1 overflow-y-auto pb-24 no-scrollbar px-4 pt-6">
         {/* Aplicando fundo branco sólido ao container principal do passo 4 */}
-        <div className={`rounded-xl shadow-md p-6 ${step === 5 ? 'bg-white' : 'pmmg-card'}`}>
+        <div className={`rounded-xl shadow-md p-6 ${step === 5 ? 'bg-white dark:bg-slate-800' : 'pmmg-card'}`}>
           {renderStepContent()}
         </div>
       </main>
 
-      <footer className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 border-t border-pmmg-navy/10 backdrop-blur-lg max-w-md mx-auto">
+      <footer className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 dark:bg-slate-900/95 border-t border-pmmg-navy/10 dark:border-slate-700 backdrop-blur-lg max-w-md mx-auto">
         <div className="flex justify-between gap-3">
           <button 
             onClick={handleBack}
             disabled={step === 1}
-            className="flex-1 bg-slate-200 text-primary-dark font-bold py-3 rounded-xl text-xs uppercase disabled:opacity-50"
+            className="flex-1 bg-slate-200 dark:bg-slate-700 text-primary-dark dark:text-slate-200 font-bold py-3 rounded-xl text-xs uppercase disabled:opacity-50"
           >
             <span className="material-symbols-outlined text-lg">arrow_back</span>
           </button>

@@ -261,7 +261,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
   // Função auxiliar para renderizar um post da timeline
   const renderTimelinePost = (post: EnrichedGroupPost) => {
     const baseClasses = "relative pl-6";
-    const connectorClasses = "absolute left-0 top-0 bottom-0 w-1 bg-pmmg-navy/10 rounded-full";
+    const connectorClasses = "absolute left-0 top-0 bottom-0 w-1 bg-pmmg-navy/10 dark:bg-slate-700 rounded-full";
     
     if (post.type === 'event') {
       const targetMember = group.members.find(m => m.id === post.eventTargetId);
@@ -285,12 +285,12 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
       return (
         <div key={post.id} className={baseClasses}>
           <div className={connectorClasses}></div>
-          <div className={`absolute left-[-4px] top-4 w-3 h-3 ${color.replace('text-', 'bg-')} border-2 border-white rounded-full shadow-sm`}></div>
+          <div className={`absolute left-[-4px] top-4 w-3 h-3 ${color.replace('text-', 'bg-')} border-2 border-white dark:border-slate-900 rounded-full shadow-sm`}></div>
           
-          <div className="pmmg-card p-3 bg-white/80 border-l-4 border-l-pmmg-navy/20 shadow-sm">
+          <div className="pmmg-card p-3 bg-white/80 dark:bg-slate-800 border-l-4 border-l-pmmg-navy/20 dark:border-l-slate-700 shadow-sm">
             <div className="flex items-center gap-3">
               <span className={`material-symbols-outlined text-xl ${color} fill-icon`}>{icon}</span>
-              <p className="text-[11px] font-bold text-pmmg-navy uppercase leading-tight">{message}</p>
+              <p className="text-[11px] font-bold text-pmmg-navy dark:text-slate-200 uppercase leading-tight">{message}</p>
             </div>
             <p className="text-[8px] font-bold text-slate-400 mt-1 ml-8">{post.timestamp}</p>
           </div>
@@ -305,16 +305,16 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
       <div key={suspectPost.id} className={baseClasses}>
         {/* Timeline Connector */}
         <div className={connectorClasses}></div>
-        <div className="absolute left-[-4px] top-4 w-3 h-3 bg-pmmg-navy border-2 border-white rounded-full shadow-sm"></div>
+        <div className="absolute left-[-4px] top-4 w-3 h-3 bg-pmmg-navy border-2 border-white dark:border-slate-900 rounded-full shadow-sm"></div>
 
         <div className="pmmg-card overflow-hidden shadow-md">
-          <div className="p-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+          <div className="p-3 bg-slate-50 dark:bg-slate-700 border-b border-slate-100 dark:border-slate-600 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-pmmg-navy text-pmmg-yellow text-[9px] font-black flex items-center justify-center uppercase border-2 border-white shadow-sm">
+              <div className="w-8 h-8 rounded-full bg-pmmg-navy text-pmmg-yellow text-[9px] font-black flex items-center justify-center uppercase border-2 border-white dark:border-slate-800 shadow-sm">
                 {suspectPost.authorName.charAt(0)}
               </div>
               <div>
-                <p className="text-[10px] font-black text-pmmg-navy uppercase leading-none">{suspectPost.authorRank} {suspectPost.authorName}</p>
+                <p className="text-[10px] font-black text-pmmg-navy dark:text-slate-200 uppercase leading-none">{suspectPost.authorRank} {suspectPost.authorName}</p>
                 <p className="text-[8px] font-bold text-slate-400 mt-0.5">{suspectPost.timestamp}</p>
               </div>
             </div>
@@ -322,22 +322,22 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
 
           <div 
             onClick={() => suspectPost.suspectId && onOpenProfile(suspectPost.suspectId)}
-            className="flex p-3 gap-3 active:bg-slate-50 transition-colors cursor-pointer"
+            className="flex p-3 gap-3 active:bg-slate-50 dark:active:bg-slate-700 transition-colors cursor-pointer"
           >
             <div className="w-20 h-24 bg-slate-200 rounded-lg overflow-hidden border border-slate-200 shrink-0 shadow-sm">
               <img src={suspectPost.suspectPhoto} alt={suspectPost.suspectName} className="w-full h-full object-cover" />
             </div>
             <div className="flex-1 min-w-0 flex flex-col justify-center">
-              <h4 className="text-[11px] font-black text-pmmg-navy uppercase tracking-tight line-clamp-2 leading-tight mb-1">{suspectPost.suspectName}</h4>
+              <h4 className="text-[11px] font-black text-pmmg-navy dark:text-slate-200 uppercase tracking-tight line-clamp-2 leading-tight mb-1">{suspectPost.suspectName}</h4>
               <p className="text-[9px] font-bold text-pmmg-red italic uppercase">Visualizar Ficha Técnica</p>
             </div>
-            <span className="material-symbols-outlined text-slate-200 self-center">chevron_right</span>
+            <span className="material-symbols-outlined text-slate-200 dark:text-slate-600 self-center">chevron_right</span>
           </div>
 
           {suspectPost.observation && (
             <div className="px-4 pb-4">
-              <div className="bg-pmmg-navy/5 p-3 rounded-xl border border-pmmg-navy/5">
-                <p className="text-[11px] text-slate-600 font-medium italic leading-relaxed">
+              <div className="bg-pmmg-navy/5 dark:bg-slate-700 p-3 rounded-xl border border-pmmg-navy/5 dark:border-slate-600">
+                <p className="text-[11px] text-slate-600 dark:text-slate-300 font-medium italic leading-relaxed">
                   "{suspectPost.observation}"
                 </p>
               </div>
@@ -350,7 +350,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
 
 
   return (
-    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden relative">
+    <div className="flex flex-col h-full bg-pmmg-khaki dark:bg-slate-900 overflow-hidden relative">
       <header className="bg-pmmg-navy px-4 pt-6 pb-4 shadow-xl z-50 shrink-0">
         <div className="flex items-center gap-3 mb-6">
           <button onClick={() => navigateTo('groupsList')} className="text-white active:scale-90 transition-transform shrink-0">
@@ -397,11 +397,11 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
                 {showMenu && (
                   <div 
                     ref={menuRef}
-                    className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-pmmg-navy/10 z-[100] p-2 animate-in fade-in slide-in-from-top-2 duration-200"
+                    className="absolute top-full right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-pmmg-navy/10 dark:border-slate-700 z-[100] p-2 animate-in fade-in slide-in-from-top-2 duration-200"
                   >
                     <button 
                       onClick={() => { setShowEditModal(true); setShowMenu(false); }}
-                      className="flex items-center gap-2 w-full p-2 text-sm text-pmmg-navy hover:bg-slate-100 rounded-lg"
+                      className="flex items-center gap-2 w-full p-2 text-sm text-pmmg-navy dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg"
                     >
                       <span className="material-symbols-outlined text-lg">edit</span> Editar Grupo
                     </button>
@@ -411,10 +411,10 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
                     >
                       <span className="material-symbols-outlined text-lg">delete</span> Excluir Grupo
                     </button>
-                    <div className="h-px bg-slate-100 my-1"></div>
+                    <div className="h-px bg-slate-100 dark:bg-slate-700 my-1"></div>
                     <button 
                       onClick={() => { alert('Saindo do grupo...'); navigateTo('groupsList'); }}
-                      className="flex items-center gap-2 w-full p-2 text-sm text-slate-500 hover:bg-slate-100 rounded-lg"
+                      className="flex items-center gap-2 w-full p-2 text-sm text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg"
                     >
                       <span className="material-symbols-outlined text-lg">logout</span> Sair do Grupo
                     </button>
@@ -429,7 +429,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
           <button 
             onClick={() => setActiveTab('timeline')}
             className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-              activeTab === 'timeline' ? 'bg-white text-pmmg-navy shadow-md' : 'text-white/40'
+              activeTab === 'timeline' ? 'bg-white dark:bg-slate-800 text-pmmg-navy dark:text-pmmg-yellow shadow-md' : 'text-white/40'
             }`}
           >
             Compartilhamentos
@@ -437,7 +437,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
           <button 
             onClick={() => setActiveTab('members')}
             className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-              activeTab === 'members' ? 'bg-white text-pmmg-navy shadow-md' : 'text-white/40'
+              activeTab === 'members' ? 'bg-white dark:bg-slate-800 text-pmmg-navy dark:text-pmmg-yellow shadow-md' : 'text-white/40'
             }`}
           >
             Membros ({group.members.length})
@@ -451,25 +451,25 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
             {/* Barra de Busca e Alternância de Visualização */}
             <div className="flex items-center gap-2 mb-2 relative">
               <div className="relative flex-1">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-pmmg-navy/30 text-lg">search</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-pmmg-navy/30 dark:text-slate-500 text-lg">search</span>
                 <input 
                   value={postSearchQuery}
                   onChange={(e) => setPostSearchQuery(e.target.value)}
                   placeholder="BUSCAR NOME, CPF OU OBSERVAÇÃO..."
-                  className="w-full pl-10 pr-4 py-3 bg-white/60 border-none rounded-2xl text-[10px] font-black uppercase placeholder:text-slate-400 focus:ring-2 focus:ring-pmmg-navy/10 transition-all shadow-inner"
+                  className="w-full pl-10 pr-4 py-3 bg-white/60 dark:bg-slate-700 border-none rounded-2xl text-[10px] font-black uppercase placeholder:text-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-pmmg-navy/10 transition-all shadow-inner dark:text-slate-200"
                 />
               </div>
               
-              <div className="flex bg-white/40 p-1 rounded-2xl border border-white/20 shadow-sm shrink-0">
+              <div className="flex bg-white/40 dark:bg-slate-700 p-1 rounded-2xl border border-white/20 dark:border-slate-600 shadow-sm shrink-0">
                 <button 
                   onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-xl transition-all ${viewMode === 'list' ? 'bg-pmmg-navy text-pmmg-yellow shadow-md' : 'text-pmmg-navy/40'}`}
+                  className={`p-2 rounded-xl transition-all ${viewMode === 'list' ? 'bg-pmmg-navy text-pmmg-yellow shadow-md' : 'text-pmmg-navy/40 dark:text-slate-400'}`}
                 >
                   <span className="material-symbols-outlined text-xl">view_day</span>
                 </button>
                 <button 
                   onClick={() => setViewMode('gallery')}
-                  className={`p-2 rounded-xl transition-all ${viewMode === 'gallery' ? 'bg-pmmg-navy text-pmmg-yellow shadow-md' : 'text-pmmg-navy/40'}`}
+                  className={`p-2 rounded-xl transition-all ${viewMode === 'gallery' ? 'bg-pmmg-navy text-pmmg-yellow shadow-md' : 'text-pmmg-navy/40 dark:text-slate-400'}`}
                 >
                   <span className="material-symbols-outlined text-xl">grid_view</span>
                 </button>
@@ -477,7 +477,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
 
               <button 
                 onClick={() => setShowTimelineFilters(prev => !prev)}
-                className={`p-3 rounded-2xl flex items-center justify-center transition-all shrink-0 ${isFilterActive ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'bg-white/40 text-pmmg-navy border border-white/20'}`}
+                className={`p-3 rounded-2xl flex items-center justify-center transition-all shrink-0 ${isFilterActive ? 'bg-pmmg-yellow text-primary-dark shadow-md' : 'bg-white/40 dark:bg-slate-700 text-pmmg-navy dark:text-slate-200 border border-white/20 dark:border-slate-600'}`}
               >
                 <span className={`material-symbols-outlined text-xl ${isFilterActive ? 'fill-icon' : ''}`}>tune</span>
               </button>
@@ -486,10 +486,10 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
               {showTimelineFilters && (
                 <div 
                   ref={timelineFilterRef}
-                  className="absolute top-full right-0 mt-3 w-72 bg-white rounded-3xl shadow-2xl border border-pmmg-navy/10 z-[100] p-5 animate-in fade-in slide-in-from-top-2 duration-200"
+                  className="absolute top-full right-0 mt-3 w-72 bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-pmmg-navy/10 dark:border-slate-700 z-[100] p-5 animate-in fade-in slide-in-from-top-2 duration-200"
                 >
                   <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-[9px] font-black uppercase tracking-widest text-pmmg-navy/60">Filtros Operacionais</h4>
+                    <h4 className="text-[9px] font-black uppercase tracking-widest text-pmmg-navy/60 dark:text-slate-400">Filtros Operacionais</h4>
                     {isFilterActive && (
                       <button 
                         onClick={handleClearFilters}
@@ -503,7 +503,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
                   <div className="space-y-5">
                     {/* Filtro por Status */}
                     <div>
-                      <label className="block text-[8px] font-black uppercase text-pmmg-navy/40 mb-2 tracking-wider">Status do Indivíduo</label>
+                      <label className="block text-[8px] font-black uppercase text-pmmg-navy/40 dark:text-slate-500 mb-2 tracking-wider">Status do Indivíduo</label>
                       <div className="flex flex-wrap gap-2 pb-1 no-scrollbar">
                         {STATUS_OPTIONS.map(opt => (
                           <button
@@ -512,7 +512,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
                             className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all border shrink-0 ${
                               statusFilter === opt 
                               ? 'bg-pmmg-navy text-white border-pmmg-navy shadow-md' 
-                              : 'bg-slate-50 text-pmmg-navy/60 border-slate-200'
+                              : 'bg-slate-50 dark:bg-slate-700 text-pmmg-navy/60 dark:text-slate-300 border-slate-200 dark:border-slate-600'
                             }`}
                           >
                             {opt}
@@ -536,19 +536,19 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
             {isFilterActive && (
               <div className="flex flex-wrap gap-2 mb-2">
                 {postSearchQuery && (
-                  <div className="bg-pmmg-navy/10 text-pmmg-navy px-3 py-1 rounded-full text-[8px] font-black uppercase flex items-center gap-1 border border-pmmg-navy/10">
+                  <div className="bg-pmmg-navy/10 dark:bg-slate-700 text-pmmg-navy dark:text-slate-300 px-3 py-1 rounded-full text-[8px] font-black uppercase flex items-center gap-1 border border-pmmg-navy/10 dark:border-slate-600">
                     Busca: {postSearchQuery}
                     <button onClick={() => setPostSearchQuery('')} className="material-symbols-outlined text-xs">close</button>
                   </div>
                 )}
                 {statusFilter !== 'Todos' && (
-                  <div className="bg-pmmg-navy/10 text-pmmg-navy px-3 py-1 rounded-full text-[8px] font-black uppercase flex items-center gap-1 border border-pmmg-navy/10">
+                  <div className="bg-pmmg-navy/10 dark:bg-slate-700 text-pmmg-navy dark:text-slate-300 px-3 py-1 rounded-full text-[8px] font-black uppercase flex items-center gap-1 border border-pmmg-navy/10 dark:border-slate-600">
                     Status: {statusFilter}
                     <button onClick={() => setStatusFilter('Todos')} className="material-symbols-outlined text-xs">close</button>
                   </div>
                 )}
                 {selectedMemberFilterId && activeMemberFilter && (
-                  <div className="bg-pmmg-navy/10 text-pmmg-navy px-3 py-1 rounded-full text-[8px] font-black uppercase flex items-center gap-1 border border-pmmg-navy/10">
+                  <div className="bg-pmmg-navy/10 dark:bg-slate-700 text-pmmg-navy dark:text-slate-300 px-3 py-1 rounded-full text-[8px] font-black uppercase flex items-center gap-1 border border-pmmg-navy/10 dark:border-slate-600">
                     Autor: {activeMemberFilter.name.split(' ')[0]}
                     <button onClick={() => setSelectedMemberFilterId(null)} className="material-symbols-outlined text-xs">close</button>
                   </div>
@@ -576,7 +576,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
                     <div 
                       key={post.id}
                       onClick={() => post.suspectId && onOpenProfile(post.suspectId)}
-                      className="relative aspect-[3/4] pmmg-card overflow-hidden shadow-lg border-2 border-pmmg-navy/10 active:scale-95 transition-all cursor-pointer"
+                      className="relative aspect-[3/4] pmmg-card overflow-hidden shadow-lg border-2 border-pmmg-navy/10 dark:border-slate-700 active:scale-95 transition-all cursor-pointer"
                     >
                       <img src={post.suspectPhoto} alt={post.suspectName} className="w-full h-full object-cover" />
                       
@@ -609,10 +609,10 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
           </div>
         ) : (
           <div className="p-4 space-y-3">
-            <div className="bg-white/40 p-4 rounded-3xl border border-white/20 mb-6 flex items-center justify-between">
+            <div className="bg-white/40 dark:bg-slate-700 p-4 rounded-3xl border border-white/20 dark:border-slate-600 mb-6 flex items-center justify-between">
               <div>
-                <p className="text-[9px] font-black text-pmmg-navy/40 uppercase tracking-widest mb-1">Convite para Oficiais</p>
-                <p className="text-sm font-black text-pmmg-navy tracking-widest">{group.inviteCode}</p>
+                <p className="text-[9px] font-black text-pmmg-navy/40 dark:text-slate-400 uppercase tracking-widest mb-1">Convite para Oficiais</p>
+                <p className="text-sm font-black text-pmmg-navy dark:text-slate-200 tracking-widest">{group.inviteCode}</p>
               </div>
               <button 
                 onClick={() => {
@@ -627,19 +627,19 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
             
             {/* Campo de Pesquisa de Membros */}
             <div className="relative mb-4">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-pmmg-navy/30 text-lg">search</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-pmmg-navy/30 dark:text-slate-500 text-lg">search</span>
               <input 
                 value={memberSearchQuery}
                 onChange={(e) => setMemberSearchQuery(e.target.value)}
                 placeholder="BUSCAR MEMBRO (NOME, UNIDADE, POSTO)..."
-                className="w-full pl-10 pr-4 py-3 bg-white/60 border-none rounded-2xl text-[10px] font-black uppercase placeholder:text-slate-400 focus:ring-2 focus:ring-pmmg-navy/10 transition-all shadow-inner"
+                className="w-full pl-10 pr-4 py-3 bg-white/60 dark:bg-slate-700 border-none rounded-2xl text-[10px] font-black uppercase placeholder:text-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-pmmg-navy/10 transition-all shadow-inner dark:text-slate-200"
               />
             </div>
 
             {filteredMembers.length > 0 ? filteredMembers.map(member => (
               <div 
                 key={member.id} 
-                className="pmmg-card p-3 flex items-center justify-between shadow-sm border-l-4 border-l-pmmg-navy"
+                className="pmmg-card p-3 flex items-center justify-between shadow-sm border-l-4 border-l-pmmg-navy dark:border-l-pmmg-yellow"
               >
                 <div 
                   onClick={() => handleFilterByMember(member.id)}
@@ -649,8 +649,8 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
                     <img src={member.photoUrl} alt={member.name} className="w-full h-full object-cover" />
                   </div>
                   <div>
-                    <h4 className="text-[11px] font-black text-pmmg-navy uppercase leading-none">{member.rank} {member.name}</h4>
-                    <span className={`text-[8px] font-black uppercase tracking-tighter ${member.role === 'admin' ? 'text-pmmg-red' : 'text-slate-400'}`}>
+                    <h4 className="text-[11px] font-black text-pmmg-navy dark:text-slate-200 uppercase leading-none">{member.rank} {member.name}</h4>
+                    <span className={`text-[8px] font-black uppercase tracking-tighter ${member.role === 'admin' ? 'text-pmmg-red' : 'text-slate-400 dark:text-slate-500'}`}>
                       {member.role === 'admin' ? 'Responsável Técnico' : 'Agente Operacional'}
                     </span>
                   </div>
@@ -688,7 +688,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
                 
                 {/* Ícone de navegação (se não for admin ou se for o próprio usuário) */}
                 {(!isCurrentUserAdmin || member.id === CURRENT_USER_ID) && (
-                    <span className="material-symbols-outlined text-pmmg-navy/40 text-lg shrink-0">arrow_forward_ios</span>
+                    <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600 text-lg shrink-0">arrow_forward_ios</span>
                 )}
               </div>
             )) : (
@@ -704,26 +704,26 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
       {/* MODAL: Editar Grupo */}
       {showEditModal && (
         <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4 bg-pmmg-navy/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6">
-            <h3 className="text-lg font-black text-pmmg-navy uppercase mb-4 border-b pb-2">Editar Grupo</h3>
+          <div className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl shadow-2xl p-6">
+            <h3 className="text-lg font-black text-pmmg-navy dark:text-slate-200 uppercase mb-4 border-b dark:border-slate-700 pb-2">Editar Grupo</h3>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Nome do Grupo</label>
+                <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 dark:text-slate-400 mb-1 ml-1 tracking-wider">Nome do Grupo</label>
                 <input 
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+                  className="block w-full px-4 py-3 bg-white/80 dark:bg-slate-700 border border-pmmg-navy/20 dark:border-slate-600 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm dark:text-slate-200" 
                   type="text" 
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 mb-1 ml-1 tracking-wider">Descrição Tática</label>
+                <label className="block text-[10px] font-bold uppercase text-pmmg-navy/70 dark:text-slate-400 mb-1 ml-1 tracking-wider">Descrição Tática</label>
                 <textarea 
                   value={editDescription}
                   onChange={(e) => setEditDescription(e.target.value)}
                   rows={3}
-                  className="block w-full px-4 py-3 bg-white/80 border border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm" 
+                  className="block w-full px-4 py-3 bg-white/80 dark:bg-slate-700 border border-pmmg-navy/20 dark:border-slate-600 focus:border-pmmg-navy focus:ring-1 focus:ring-pmmg-navy rounded-lg text-sm dark:text-slate-200" 
                 />
               </div>
             </div>
@@ -731,7 +731,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
             <div className="flex gap-3 mt-6">
               <button 
                 onClick={() => setShowEditModal(false)}
-                className="flex-1 bg-slate-200 text-pmmg-navy font-bold py-3 rounded-xl text-xs uppercase"
+                className="flex-1 bg-slate-200 dark:bg-slate-700 text-pmmg-navy dark:text-slate-200 font-bold py-3 rounded-xl text-xs uppercase"
               >
                 Cancelar
               </button>
@@ -749,15 +749,15 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
       {/* MODAL: Confirmação de Exclusão */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4 bg-pmmg-navy/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 text-center">
+          <div className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl shadow-2xl p-6 text-center">
             <span className="material-symbols-outlined text-pmmg-red text-5xl mb-4 fill-icon">warning</span>
-            <h3 className="text-lg font-black text-pmmg-navy uppercase mb-2">Excluir Grupo?</h3>
-            <p className="text-sm text-slate-600 mb-6">Esta ação é irreversível e removerá todos os dados e posts do grupo "{group.name}".</p>
+            <h3 className="text-lg font-black text-pmmg-navy dark:text-slate-200 uppercase mb-2">Excluir Grupo?</h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">Esta ação é irreversível e removerá todos os dados e posts do grupo "{group.name}".</p>
             
             <div className="flex gap-3">
               <button 
                 onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 bg-slate-200 text-pmmg-navy font-bold py-3 rounded-xl text-xs uppercase"
+                className="flex-1 bg-slate-200 dark:bg-slate-700 text-pmmg-navy dark:text-slate-200 font-bold py-3 rounded-xl text-xs uppercase"
               >
                 Cancelar
               </button>
@@ -775,13 +775,13 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
       {/* Share Suspect Modal (Mantido) */}
       {showShareModal && (
         <div className="fixed inset-0 z-[1000] flex items-end justify-center p-4 bg-pmmg-navy/80 backdrop-blur-md animate-in fade-in slide-in-from-bottom-10 duration-300">
-          <div className="bg-white w-full max-w-sm rounded-[3rem] shadow-2xl p-6 flex flex-col max-h-[90vh]">
+          <div className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-[3rem] shadow-2xl p-6 flex flex-col max-h-[90vh]">
             <div className="flex items-center justify-between mb-6 shrink-0">
                <div>
-                  <h3 className="text-lg font-black text-pmmg-navy uppercase leading-none">Compartilhar Ficha</h3>
+                  <h3 className="text-lg font-black text-pmmg-navy dark:text-slate-200 uppercase leading-none">Compartilhar Ficha</h3>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Alimentar Rede de Inteligência</p>
                </div>
-               <button onClick={() => { setShowShareModal(false); setSelectedSuspectId(null); }} className="w-10 h-10 bg-slate-100 rounded-full text-slate-400 flex items-center justify-center active:scale-90 transition-transform shrink-0">
+               <button onClick={() => { setShowShareModal(false); setSelectedSuspectId(null); }} className="w-10 h-10 bg-slate-100 dark:bg-slate-700 rounded-full text-slate-400 flex items-center justify-center active:scale-90 transition-transform shrink-0">
                   <span className="material-symbols-outlined">close</span>
                </button>
             </div>
@@ -789,12 +789,12 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
             {!selectedSuspectId ? (
               <>
                 <div className="relative mb-4 shrink-0">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-pmmg-navy/30">search</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-pmmg-navy/30 dark:text-slate-500">search</span>
                   <input 
                     value={searchSuspect}
                     onChange={(e) => setSearchSuspect(e.target.value)}
                     placeholder="BUSCAR NOME OU CPF..."
-                    className="w-full pl-10 pr-4 py-4 bg-slate-50 border-none rounded-2xl text-xs font-black uppercase placeholder:text-slate-300 shadow-inner"
+                    className="w-full pl-10 pr-4 py-4 bg-slate-50 dark:bg-slate-700 border-none rounded-2xl text-xs font-black uppercase placeholder:text-slate-300 dark:placeholder-slate-500 shadow-inner dark:text-slate-200"
                   />
                 </div>
                 <div className="flex-1 overflow-y-auto no-scrollbar space-y-2 mb-4">
@@ -802,41 +802,41 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
                     <div 
                       key={s.id}
                       onClick={() => setSelectedSuspectId(s.id)}
-                      className="p-3 bg-slate-50 rounded-2xl flex items-center gap-3 border border-slate-100 active:bg-slate-100 transition-colors cursor-pointer"
+                      className="p-3 bg-slate-50 dark:bg-slate-700 rounded-2xl flex items-center gap-3 border border-slate-100 dark:border-slate-600 active:bg-slate-100 dark:active:bg-slate-600 transition-colors cursor-pointer"
                     >
                       <img src={s.photoUrl} className="w-12 h-14 rounded-lg object-cover shadow-sm" />
                       <div>
-                        <p className="text-[10px] font-black text-pmmg-navy uppercase leading-tight">{s.name}</p>
+                        <p className="text-[10px] font-black text-pmmg-navy dark:text-slate-200 uppercase leading-tight">{s.name}</p>
                         <p className="text-[9px] font-bold text-slate-400 mt-0.5">{s.cpf}</p>
                       </div>
                     </div>
                   )) : (
-                    <p className="text-center text-[10px] text-pmmg-navy/50 mt-4">Nenhum suspeito encontrado.</p>
+                    <p className="text-center text-[10px] text-pmmg-navy/50 dark:text-slate-400 mt-4">Nenhum suspeito encontrado.</p>
                   )}
                 </div>
               </>
             ) : (
               <div className="space-y-6 flex-1 flex flex-col">
-                <div className="flex items-center gap-4 bg-pmmg-navy/5 p-4 rounded-3xl border border-pmmg-navy/5 shrink-0">
+                <div className="flex items-center gap-4 bg-pmmg-navy/5 dark:bg-slate-700 p-4 rounded-3xl border border-pmmg-navy/5 dark:border-slate-600 shrink-0">
                   <img 
                     src={allSuspects.find(s => s.id === selectedSuspectId)?.photoUrl} 
                     className="w-16 h-20 rounded-xl object-cover shadow-lg" 
                     alt="Suspect"
                   />
                   <div>
-                    <p className="text-[9px] font-black text-pmmg-navy/40 uppercase tracking-widest">Alvo Selecionado</p>
-                    <h4 className="text-sm font-black text-pmmg-navy uppercase mt-1">{allSuspects.find(s => s.id === selectedSuspectId)?.name}</h4>
+                    <p className="text-[9px] font-black text-pmmg-navy/40 dark:text-slate-400 uppercase tracking-widest">Alvo Selecionado</p>
+                    <h4 className="text-sm font-black text-pmmg-navy dark:text-slate-200 uppercase mt-1">{allSuspects.find(s => s.id === selectedSuspectId)?.name}</h4>
                     <button onClick={() => setSelectedSuspectId(null)} className="text-[9px] font-black text-pmmg-red uppercase mt-2 active:opacity-70 transition-opacity">Alterar Alvo</button>
                   </div>
                 </div>
 
                 <div className="flex-1 min-h-[150px]">
-                  <label className="block text-[10px] font-black uppercase text-pmmg-navy/40 mb-2 ml-2 tracking-widest">Observação Tática</label>
+                  <label className="block text-[10px] font-black uppercase text-pmmg-navy/40 dark:text-slate-400 mb-2 ml-2 tracking-widest">Observação Tática</label>
                   <textarea 
                     autoFocus
                     value={observation}
                     onChange={(e) => setObservation(e.target.value)}
-                    className="w-full bg-slate-50 border-none rounded-3xl p-5 text-sm font-medium italic h-full min-h-[150px] shadow-inner"
+                    className="w-full bg-slate-50 dark:bg-slate-700 border-none rounded-3xl p-5 text-sm font-medium italic h-full min-h-[150px] shadow-inner dark:text-slate-200"
                     placeholder="Descreva a movimentação, novas evidências ou local de avistamento..."
                   />
                 </div>

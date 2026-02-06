@@ -13,9 +13,9 @@ const ProductList: React.FC<ProductListProps> = ({ navigateTo, categoryId }) => 
 
   if (!category) {
     return (
-      <div className="flex flex-col h-full bg-pmmg-khaki items-center justify-center p-8">
+      <div className="flex flex-col h-full bg-pmmg-khaki dark:bg-slate-900 items-center justify-center p-8">
         <span className="material-symbols-outlined text-pmmg-red text-6xl mb-4">error</span>
-        <h1 className="font-bold text-xl text-pmmg-navy uppercase">Categoria Não Encontrada</h1>
+        <h1 className="font-bold text-xl text-pmmg-navy dark:text-slate-200 uppercase">Categoria Não Encontrada</h1>
         <button onClick={() => navigateTo('store')} className="mt-6 bg-pmmg-navy text-white py-3 px-6 rounded-xl text-sm font-bold uppercase">
           Voltar para a Loja
         </button>
@@ -24,7 +24,7 @@ const ProductList: React.FC<ProductListProps> = ({ navigateTo, categoryId }) => 
   }
 
   return (
-    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
+    <div className="flex flex-col h-full bg-pmmg-khaki dark:bg-slate-900 overflow-hidden">
       <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-xl">
         <div className="flex items-center gap-3">
           <button onClick={() => navigateTo('store')} className="text-white active:scale-90 transition-transform">
@@ -44,7 +44,7 @@ const ProductList: React.FC<ProductListProps> = ({ navigateTo, categoryId }) => 
       </header>
 
       <main className="flex-1 overflow-y-auto pb-32 no-scrollbar px-4 pt-6">
-        <p className="text-[10px] font-bold uppercase text-pmmg-navy/70 mb-6 text-center tracking-wider">
+        <p className="text-[10px] font-bold uppercase text-pmmg-navy/70 dark:text-slate-400 mb-6 text-center tracking-wider">
           {category.products.length} itens disponíveis em {category.name}.
         </p>
 
@@ -55,18 +55,18 @@ const ProductList: React.FC<ProductListProps> = ({ navigateTo, categoryId }) => 
               href={product.link}
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex flex-col p-3 bg-white rounded-xl shadow-md border border-pmmg-navy/10 active:scale-[0.98] transition-transform"
+              className="flex flex-col p-3 bg-white dark:bg-slate-800 rounded-xl shadow-md border border-pmmg-navy/10 dark:border-slate-700 active:scale-[0.98] transition-transform"
             >
-              <div className="w-full aspect-square rounded-lg overflow-hidden bg-slate-100 mb-3">
+              <div className="w-full aspect-square rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700 mb-3">
                 <img 
                   src={product.imageUrl} 
                   alt={product.name} 
                   className="w-full h-full object-cover"
                 />
               </div>
-              <h4 className="text-[10px] font-black text-pmmg-navy uppercase leading-tight line-clamp-2">{product.name}</h4>
+              <h4 className="text-[10px] font-black text-pmmg-navy dark:text-slate-200 uppercase leading-tight line-clamp-2">{product.name}</h4>
               <p className="text-sm font-bold text-pmmg-red mt-1">{product.price}</p>
-              <span className="text-[8px] font-bold text-slate-500 uppercase mt-2 flex items-center gap-1">
+              <span className="text-[8px] font-bold text-slate-500 dark:text-slate-400 uppercase mt-2 flex items-center gap-1">
                 <span className="material-symbols-outlined text-[10px]">open_in_new</span>
                 Ver Detalhes
               </span>

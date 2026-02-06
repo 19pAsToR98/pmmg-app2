@@ -79,7 +79,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
 
 
   return (
-    <div className="flex flex-col h-full bg-pmmg-khaki overflow-hidden">
+    <div className="flex flex-col h-full bg-pmmg-khaki dark:bg-slate-900 overflow-hidden">
       {/* Fullscreen Photo Modal */}
       {fullscreenImage && (
         <div 
@@ -219,30 +219,30 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                 <span className="material-symbols-outlined">person</span>
                 <span className="text-sm font-bold uppercase">Dados do Indivíduo</span>
               </div>
-              <span className="material-symbols-outlined text-pmmg-navy/40">
+              <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600">
                 {expandedSection === 'data' ? 'expand_less' : 'expand_more'}
               </span>
             </div>
             {expandedSection === 'data' && (
-              <div className="p-4 space-y-4 border-t border-pmmg-navy/5">
+              <div className="p-4 space-y-4 border-t border-pmmg-navy/5 dark:border-slate-700">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase tracking-wider mb-0.5">CPF</p>
+                    <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">CPF</p>
                     <p className="text-sm font-bold text-primary-dark">{suspect.cpf}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase tracking-wider mb-0.5">RG</p>
+                    <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">RG</p>
                     <p className="text-sm font-bold text-primary-dark">{suspect.rg || 'N/D'}</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase tracking-wider mb-0.5">Nascimento</p>
+                    <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">Nascimento</p>
                     <p className="text-sm font-bold text-primary-dark">{suspect.birthDate || 'N/D'}</p>
                   </div>
                 </div>
                 <div>
-                  <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase tracking-wider mb-0.5">Filiação (Genitora)</p>
+                  <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">Filiação (Genitora)</p>
                   <p className="text-sm font-bold text-primary-dark">{suspect.motherName || 'Não Informado'}</p>
                 </div>
               </div>
@@ -255,14 +255,14 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                 <span className="material-symbols-outlined">gavel</span>
                 <span className="text-sm font-bold uppercase">Artigos Criminais</span>
               </div>
-              <span className="material-symbols-outlined text-pmmg-navy/40">
+              <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600">
                 {expandedSection === 'articles' ? 'expand_less' : 'expand_more'}
               </span>
             </div>
             {expandedSection === 'articles' && (
-              <div className="p-4 space-y-3 border-t border-pmmg-navy/5">
+              <div className="p-4 space-y-3 border-t border-pmmg-navy/5 dark:border-slate-700">
                 {suspect.articles && suspect.articles.length > 0 ? suspect.articles.map((art, i) => (
-                  <div key={i} className="flex items-start gap-3 p-2 bg-pmmg-navy/5 rounded border border-pmmg-navy/10">
+                  <div key={i} className="flex items-start gap-3 p-2 bg-pmmg-navy/5 dark:bg-slate-700 rounded border border-pmmg-navy/10 dark:border-slate-600">
                     <span className="text-primary-dark font-bold text-sm">{art}</span>
                     <p className="text-[10px] text-secondary-light italic mt-0.5">Enquadramento ativo no sistema.</p>
                   </div>
@@ -280,14 +280,14 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                 <span className="material-symbols-outlined">directions_car</span>
                 <span className="text-sm font-bold uppercase">Veículos Cadastrados</span>
               </div>
-              <span className="material-symbols-outlined text-pmmg-navy/40">
+              <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600">
                 {expandedSection === 'vehicles' ? 'expand_less' : 'expand_more'}
               </span>
             </div>
             {expandedSection === 'vehicles' && (
-              <div className="p-4 space-y-3 border-t border-pmmg-navy/5">
+              <div className="p-4 space-y-3 border-t border-pmmg-navy/5 dark:border-slate-700">
                 {suspect.vehicles && suspect.vehicles.length > 0 ? suspect.vehicles.map((vehicle, i) => (
-                  <div key={i} className="p-3 bg-pmmg-navy/5 rounded border border-pmmg-navy/10">
+                  <div key={i} className="p-3 bg-pmmg-navy/5 dark:bg-slate-700 rounded border border-pmmg-navy/10 dark:border-slate-600">
                     <div className="flex items-center justify-between">
                       <p className="text-sm font-bold text-primary-dark">{vehicle.plate}</p>
                       <span className="text-[10px] font-semibold text-secondary-light">{vehicle.color}</span>
@@ -308,12 +308,12 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                 <span className="material-symbols-outlined">link</span>
                 <span className="text-sm font-bold uppercase">Ligações e Contatos</span>
               </div>
-              <span className="material-symbols-outlined text-pmmg-navy/40">
+              <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600">
                 {expandedSection === 'associations' ? 'expand_less' : 'expand_more'}
               </span>
             </div>
             {expandedSection === 'associations' && (
-              <div className="p-4 space-y-3 border-t border-pmmg-navy/5">
+              <div className="p-4 space-y-3 border-t border-pmmg-navy/5 dark:border-slate-700">
                 {suspect.associations && suspect.associations.length > 0 ? suspect.associations.map((association, i) => {
                   const associatedSuspect = findAssociatedSuspect(association.suspectId);
                   if (!associatedSuspect) return null;
@@ -321,17 +321,17 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                   return (
                     <div 
                       key={i} 
-                      className="flex items-center gap-3 p-3 bg-pmmg-navy/5 rounded border border-pmmg-navy/10 cursor-pointer active:bg-pmmg-navy/10 transition-colors"
+                      className="flex items-center gap-3 p-3 bg-pmmg-navy/5 dark:bg-slate-700 rounded border border-pmmg-navy/10 dark:border-slate-600 cursor-pointer active:bg-pmmg-navy/10 dark:active:bg-slate-600 transition-colors"
                       onClick={() => onOpenProfile(associatedSuspect.id)}
                     >
-                      <div className="w-10 h-10 shrink-0 rounded-full overflow-hidden bg-slate-300 border border-pmmg-navy/20">
+                      <div className="w-10 h-10 shrink-0 rounded-full overflow-hidden bg-slate-300 border border-pmmg-navy/20 dark:border-slate-600">
                         <img src={associatedSuspect.photoUrl} alt={associatedSuspect.name} className="w-full h-full object-cover" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[10px] text-pmmg-navy/50 font-bold uppercase tracking-wider truncate">{association.relationship}</p>
+                        <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider truncate">{association.relationship}</p>
                         <h4 className="text-sm font-bold text-primary-dark truncate">{associatedSuspect.name}</h4>
                       </div>
-                      <span className="material-symbols-outlined text-pmmg-navy/40 text-lg shrink-0">arrow_forward_ios</span>
+                      <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600 text-lg shrink-0">arrow_forward_ios</span>
                     </div>
                   );
                 }) : (
@@ -343,7 +343,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
 
           {/* Photo Gallery */}
           <div className="pmmg-card p-4">
-            <h3 className="text-[10px] font-bold text-pmmg-navy/60 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <h3 className="text-[10px] font-bold text-pmmg-navy/60 dark:text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
               <span className="material-symbols-outlined">photo_library</span>
               Galeria de Identificação ({photos.length})
             </h3>
@@ -352,7 +352,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                 <div 
                   key={i} 
                   onClick={() => setFullscreenImage(src)}
-                  className={`shrink-0 w-24 h-32 rounded-lg overflow-hidden border-2 transition-all active:scale-95 shadow-sm border-pmmg-navy/10`}
+                  className={`shrink-0 w-24 h-32 rounded-lg overflow-hidden border-2 transition-all active:scale-95 shadow-sm border-pmmg-navy/10 dark:border-slate-700`}
                 >
                   <img src={src} className="w-full h-full object-cover" alt="Thumbnail" />
                 </div>
@@ -364,7 +364,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
           {/* Endereço Principal */}
           {suspect.lat && suspect.lng && (
             <div className="pmmg-card overflow-hidden">
-              <div className="p-4 text-primary-dark bg-white/40">
+              <div className="p-4 text-primary-dark bg-white/40 dark:bg-slate-700/50">
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined">location_on</span>
                   <span className="text-sm font-bold uppercase">Endereço Principal</span>
@@ -403,7 +403,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
           {/* Endereço da Abordagem (NOVO MAPA) */}
           {suspect.approachAddress && suspect.approachLat && suspect.approachLng && (
             <div className="pmmg-card overflow-hidden">
-              <div className="p-4 text-primary-dark bg-white/40">
+              <div className="p-4 text-primary-dark bg-white/40 dark:bg-slate-700/50">
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined">pin_drop</span>
                   <span className="text-sm font-bold uppercase">Endereço da Abordagem</span>
