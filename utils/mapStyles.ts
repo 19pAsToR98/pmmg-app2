@@ -164,7 +164,7 @@ export const DARK_MAP_STYLES: google.maps.MapTypeStyle[] = [
         "elementType": "geometry.fill",
         "stylers": [
             {
-                "color": "#193a55"
+                "color": "#787878" // Cor alterada para #787878
             }
         ]
     },
