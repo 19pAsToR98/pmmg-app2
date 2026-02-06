@@ -12,6 +12,7 @@ interface ProfileSettingsProps {
   isDarkMode: boolean;
   toggleDarkMode: () => void;
   userName: string;
+  userEmail: string; // NOVO: Email do usuário
 }
 
 // Helper function to map UserRank to a display string (e.g., "Sargento de Polícia • 1ª Classe")
@@ -29,6 +30,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
   isDarkMode, 
   toggleDarkMode,
   userName,
+  userEmail, // Usando a nova prop
 }) => {
   
   // Mock state for biometric switch (since we don't have Capacitor Biometric API implemented yet)
@@ -93,6 +95,17 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
         <section>
           <h3 className="px-4 mb-2 text-[11px] font-bold text-pmmg-navy/80 dark:text-slate-400 uppercase tracking-widest">Dados da Conta</h3>
           <div className="pmmg-card">
+            {/* NOVO: E-mail Funcional */}
+            <div className={iosListItemClasses}>
+              <div className="flex flex-col">
+                <span className="text-[9px] text-pmmg-navy/50 dark:text-slate-500 font-bold uppercase tracking-tighter">E-mail Funcional</span>
+                <span className="text-sm font-semibold text-pmmg-navy dark:text-slate-200">{userEmail}</span>
+              </div>
+              <button onClick={() => alert('Simulação: Abrir edição de e-mail')} className="p-2 text-pmmg-navy/40 dark:text-slate-500 hover:text-pmmg-navy dark:hover:text-slate-300">
+                <span className="material-symbols-outlined text-lg">edit</span>
+              </button>
+            </div>
+            
             <div className={iosListItemClasses}>
               <div className="flex flex-col">
                 <span className="text-[9px] text-pmmg-navy/50 dark:text-slate-500 font-bold uppercase tracking-tighter">Nome Completo</span>
@@ -128,8 +141,8 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
           <h3 className="px-4 mb-2 text-[11px] font-bold text-pmmg-navy/80 dark:text-slate-400 uppercase tracking-widest">Configurações e Segurança</h3>
           <div className="pmmg-card">
             
-            {/* Modo Escuro (Usando ThemeToggle Component) */}
-            <div className={iosListItemClasses}>
+            {/* Modo Escuro (Usando ThemeToggle Component) - Corrigido para ocupar a largura total */}
+            <div className={iosListItemClasses + ' !p-0'}>
               <ThemeToggle isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
             </div>
             

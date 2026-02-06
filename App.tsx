@@ -258,8 +258,9 @@ const App: React.FC = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>(undefined);
   
   // User Profile States
-  const [userRank, setUserRank] = useState<UserRank>('Soldado');
-  const [userName, setUserName] = useState(''); // Inicializa vazio para forçar onboarding
+  const [userRank, setUserRank] = useState<UserRank>('Subtenente'); // Alterado para Subtenente para melhor visualização
+  const [userName, setUserName] = useState('Oficial PMMG'); // Inicializa com valor para pular onboarding no início
+  const [userEmail, setUserEmail] = useState('oficial.pmmg@mg.gov.br'); // NOVO: Email mockado
   const [userCity, setUserCity] = useState('Belo Horizonte');
   const [userDefaultLocation, setUserDefaultLocation] = useState<GeocodedLocation | null>(null); 
   // REMOVIDO: isRegistered
@@ -793,6 +794,7 @@ const App: React.FC = () => {
           isDarkMode={isDarkMode}
           toggleDarkMode={toggleDarkMode}
           userName={userName}
+          userEmail={userEmail}
         />
       )}
       
