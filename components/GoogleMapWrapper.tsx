@@ -57,13 +57,13 @@ const GoogleMapWrapper: React.FC<GoogleMapWrapperProps> = ({
       zoom={zoom}
       options={{
         disableDefaultUI: true,
-        zoomControl: true,
-        rotateControl: false, // DESABILITADO
-        tilt: 0, // DESABILITADO (força inclinação zero)
+        zoomControl: false, // DESABILITADO
+        rotateControl: false, 
+        tilt: 0, 
         streetViewControl: false,
         mapTypeControl: false,
         fullscreenControl: false,
-        styles: mapStyles, // Aplicando o estilo dinâmico
+        styles: mapStyles, 
         ...options,
       }}
       onLoad={onLoad}
