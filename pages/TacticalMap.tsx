@@ -279,7 +279,8 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   };
   
   const handleShareLocation = useCallback(async (lat: number, lng: number, title: string) => {
-    const locationLink = `https://maps.google.com/maps?q=${lat},${lng}`;
+    // Usando o formato de link de pesquisa do Google Maps, conforme o exemplo do usuário.
+    const locationLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
     const shareText = `🚨 PMMG TÁTICO - Localização Compartilhada 🚨\n\n📍 Ponto: ${title}\n🔗 Link do Mapa: ${locationLink}\n\nCoord: ${lat.toFixed(5)}, ${lng.toFixed(5)}\n(Via Sistema Operacional PMMG)`;
 
     if (navigator.share) {
@@ -505,7 +506,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                       {groupName && markerData.authorName && (
                         <div className="mt-2 pt-2 border-t border-slate-100">
                           <p className="text-[8px] font-bold text-pmmg-navy/50 uppercase">Criado por:</p>
-                          <p className="text-[10px] font-black text-pmmg-red uppercase">{markerData.authorRank}. {markerData.authorName}</p>
+                          <p className className="text-[10px] font-black text-pmmg-red uppercase">{markerData.authorRank}. {markerData.authorName}</p>
                         </div>
                       )}
                       
