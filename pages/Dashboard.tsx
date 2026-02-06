@@ -139,47 +139,47 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
         </div>
 
         <section className="px-4 space-y-4">
-          {filteredSuspects.length > 0 ? filteredSuspects.map((alert) => (
+          {filteredSuspects.length > 0 ? filteredSuspects.map((s) => (
             <div 
-              key={alert.id} 
-              onClick={() => onOpenProfile(alert.id)} // Adicionado onClick ao container principal
+              key={s.id} 
+              onClick={() => onOpenProfile(s.id)}
               className="pmmg-card overflow-hidden transition-all active:scale-[0.98] cursor-pointer"
             >
               <div className="flex">
                 <div className="w-32 h-44 relative bg-slate-200 shrink-0">
-                  <img alt={alert.name} className="w-full h-full object-cover" src={alert.photoUrl} />
+                  <img alt={s.name} className="w-full h-full object-cover" src={s.photoUrl} />
                   <div className={`absolute top-0 left-0 text-white text-[8px] font-bold px-2 py-1 uppercase rounded-br-lg shadow-md ${
-                    alert.status === 'Foragido' ? 'bg-pmmg-red' : 
-                    alert.status === 'Suspeito' ? 'bg-pmmg-yellow text-primary-dark' :
-                    alert.status === 'Preso' ? 'bg-pmmg-blue' : 'bg-slate-700'
+                    s.status === 'Foragido' ? 'bg-pmmg-red' : 
+                    s.status === 'Suspeito' ? 'bg-pmmg-yellow text-primary-dark' :
+                    s.status === 'Preso' ? 'bg-pmmg-blue' : 'bg-slate-700'
                   }`}>
-                    {alert.status}
+                    {s.status}
                   </div>
                 </div>
                 <div className="flex-1 p-3 flex flex-col justify-between overflow-hidden">
                   <div>
                     <div className="flex justify-between items-start">
-                      <h4 className="font-bold text-sm text-primary-dark uppercase leading-tight truncate pr-1">{alert.name}</h4>
+                      <h4 className="font-bold text-sm text-primary-dark uppercase leading-tight truncate pr-1">{s.name}</h4>
                       <span className={`material-symbols-outlined fill-icon text-lg ${
-                        alert.status === 'Foragido' ? 'text-pmmg-red' : 'text-pmmg-yellow'
+                        s.status === 'Foragido' ? 'text-pmmg-red' : 'text-pmmg-yellow'
                       }`}>
-                        {alert.status === 'Foragido' ? 'priority_high' : 'warning'}
+                        {s.status === 'Foragido' ? 'priority_high' : 'warning'}
                       </span>
                     </div>
-                    <p className="text-[10px] font-semibold text-slate-500 mt-1">CPF: {alert.cpf}</p>
+                    <p className="text-[10px] font-semibold text-slate-500 mt-1">CPF: {s.cpf}</p>
                     <div className="mt-2 space-y-1">
                       <div className="flex items-center gap-1.5">
                         <span className="material-symbols-outlined text-[14px] text-primary-dark">location_on</span>
-                        <span className="text-[10px] text-secondary-light truncate">Visto em: {alert.lastSeen}</span>
+                        <span className="text-[10px] text-secondary-light truncate">Visto em: {s.lastSeen}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <span className="material-symbols-outlined text-[14px] text-primary-dark">history</span>
-                        <span className="text-[10px] text-secondary-light">Há {alert.timeAgo}</span>
+                        <span className="text-[10px] text-secondary-light">Há {s.timeAgo}</span>
                       </div>
                       {/* Link VER NO MAPA */}
-                      {alert.lat && alert.lng && (
+                      {s.lat && s.lng && (
                         <div 
-                          onClick={(e) => { e.stopPropagation(); handleViewOnMap(alert); }} // Adicionado stopPropagation
+                          onClick={(e) => { e.stopPropagation(); handleViewOnMap(s); }}
                           className="flex items-center gap-1.5 cursor-pointer active:opacity-70 transition-opacity"
                         >
                           <span className="material-symbols-outlined text-[14px] text-secondary-light fill-icon">map</span>
@@ -190,13 +190,13 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                   </div>
                   <div className="flex gap-2">
                     <button 
-                      onClick={(e) => { e.stopPropagation(); onOpenProfile(alert.id); }} // CORRIGIDO: Chama onOpenProfile
+                      onClick={(e) => { e.stopPropagation(); onOpenProfile(s.id); }}
                       className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-2 rounded-lg uppercase tracking-wide"
                     >
                       Ficha Completa
                     </button>
                     <button 
-                      onClick={(e) => { e.stopPropagation(); alert(`Compartilhando ficha de: ${alert.name}`); }} // Mantido stopPropagation e alert
+                      onClick={(e) => { e.stopPropagation(); alert(`Compartilhando ficha de: ${s.name}`); }}
                       className="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center"
                     >
                       <span className="material-symbols-outlined text-primary-dark text-lg">share</span>
