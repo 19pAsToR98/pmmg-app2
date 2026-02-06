@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Screen, Suspect } from '../types';
 import BottomNav from '../components/BottomNav';
 
@@ -11,14 +11,9 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsManagement, onOpenProfile, suspects, startShareFlow }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-
-  // Quick filter for recent alerts on the dashboard (limited to top 5 if no search term)
-  const filteredSuspects = suspects.filter(s => 
-    s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.cpf.includes(searchTerm) ||
-    (s.nickname && s.nickname.toLowerCase().includes(searchTerm.toLowerCase()))
-  ).slice(0, searchTerm ? suspects.length : 5); 
+  
+  // Quick filter for recent alerts on the dashboard (limited to top 5)
+  const recentSuspects = suspects.slice(0, 5); 
 
   const stats = {
     foragidos: suspects.filter(s => s.status === 'Foragido').length,
@@ -70,19 +65,20 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
           </div>
         </div>
 
-        {/* Search Bar (Fixed in header) */}
-        <div className="relative group">
+        {/* Search Bar (Fixed in header) - NOW A BUTTON FOR NAVIGATION */}
+        <button 
+          onClick={() => navigateToSuspectsManagement('Todos')}
+          className="w-full relative group text-left active:scale-[0.99] transition-transform"
+        >
           <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
             <span className="material-symbols-outlined text-primary-dark text-xl">search</span>
           </div>
-          <input 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="block w-full pl-10 pr-4 py-3 bg-white rounded-xl border-2 border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-0 text-sm font-bold placeholder-pmmg-navy/40 shadow-sm" 
-            placeholder="BUSCAR INDIVÍDUO (NOME, CPF, ALCUNHA)" 
-            type="text" 
-          />
-        </div>
+          <div 
+            className="block w-full pl-10 pr-4 py-3 bg-white rounded-xl border-2 border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-0 text-sm font-bold placeholder-pmmg-navy/40 shadow-sm text-pmmg-navy/60" 
+          >
+            BUSCAR INDIVÍDUO (NOME, CPF, ALCUNHA)
+          </div>
+        </button>
       </header>
 
       <main className="flex-1 overflow-y-auto pb-32 no-scrollbar">
@@ -135,13 +131,13 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
           <div className="flex items-center gap-2">
             <div className="h-4 w-1.5 bg-pmmg-red rounded-full"></div>
             <h3 className="font-bold text-xs text-primary-dark uppercase tracking-widest italic">
-              Alertas e Registros Recentes {searchTerm ? '(Filtrados)' : ''}
+              Alertas e Registros Recentes
             </h3>
           </div>
         </div>
 
         <section className="px-4 space-y-4">
-          {filteredSuspects.length > 0 ? filteredSuspects.map((s) => (
+          {recentSuspects.length > 0 ? recentSuspects.map((s) => (
             <div 
               key={s.id} 
               onClick={() => onOpenProfile(s.id)}
