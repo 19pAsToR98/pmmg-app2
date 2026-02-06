@@ -249,7 +249,8 @@ const App: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>('welcomeScreen');
   const [suspects, setSuspects] = useState<Suspect[]>(INITIAL_SUSPECTS);
   const [customMarkers, setCustomMarkers] = useState<CustomMarker[]>(INITIAL_CUSTOM_MARKERS);
-  const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(selectedSuspectId);
+  // FIX: Initializing selectedSuspectId with null
+  const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null);
   const [editingSuspectId, setEditingSuspectId] = useState<string | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
   
@@ -739,6 +740,7 @@ const App: React.FC = () => {
             addCustomMarker={(marker) => addGroupCustomMarker(activeGroup.id, marker)}
             updateCustomMarker={(marker) => updateGroupCustomMarker(activeGroup.id, marker)}
             deleteCustomMarker={(markerId) => deleteGroupCustomMarker(activeGroup.id, markerId)}
+            isDarkMode={isDarkMode} // PASSING NEW PROP
         />
       )}
       
