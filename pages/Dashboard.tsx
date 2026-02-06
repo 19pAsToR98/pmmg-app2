@@ -74,7 +74,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
             <span className="material-symbols-outlined text-primary-dark text-xl">search</span>
           </div>
           <div 
-            className="block w-full pl-10 pr-4 py-3 bg-white rounded-xl border-2 border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-0 text-sm font-bold placeholder-pmmg-navy/40 shadow-sm text-pmmg-navy/60" 
+            className="block w-full pl-10 pr-4 py-3 bg-white rounded-xl border-2 border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-0 text-sm font-bold placeholder-pmmg-navy/40 shadow-sm text-pmmg-navy/60 whitespace-nowrap overflow-hidden" 
           >
             BUSCAR INDIVÍDUO (NOME, CPF, ALCUNHA)
           </div>
