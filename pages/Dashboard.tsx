@@ -11,6 +11,7 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsManagement, onOpenProfile, suspects, startShareFlow }) => {
+  // Mantemos o searchTerm apenas para filtrar os alertas recentes, mas o input principal será desabilitado.
   const [searchTerm, setSearchTerm] = useState('');
 
   // Quick filter for recent alerts on the dashboard (limited to top 5 if no search term)
@@ -37,6 +38,12 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
     } else {
       alert("Localização não registrada para este indivíduo.");
     }
+  };
+  
+  // Nova função para lidar com o clique na barra de pesquisa
+  const handleSearchClick = () => {
+    // Navega para a tela de gerenciamento de suspeitos com o filtro 'Todos'
+    navigateToSuspectsManagement('Todos');
   };
 
   return (
@@ -70,15 +77,19 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
           </div>
         </div>
 
-        {/* Search Bar (Fixed in header) */}
-        <div className="relative group">
+        {/* Search Bar (Agora um botão que navega) */}
+        <div 
+          onClick={handleSearchClick}
+          className="relative group cursor-pointer active:scale-[0.99] transition-transform"
+        >
           <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
             <span className="material-symbols-outlined text-primary-dark text-xl">search</span>
           </div>
           <input 
+            // O valor é mantido, mas o input é desabilitado para que o clique vá para o div pai
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="block w-full pl-10 pr-4 py-3 bg-white rounded-xl border-2 border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-0 text-sm font-bold placeholder-pmmg-navy/40 shadow-sm" 
+            disabled={true} 
+            className="block w-full pl-10 pr-4 py-3 bg-white rounded-xl border-2 border-pmmg-navy/20 focus:border-pmmg-navy focus:ring-0 text-sm font-bold placeholder-pmmg-navy/40 shadow-sm cursor-pointer" 
             placeholder="BUSCAR INDIVÍDUO (NOME, CPF, ALCUNHA)" 
             type="text" 
           />
