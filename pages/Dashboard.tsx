@@ -24,10 +24,10 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
     foragidos: suspects.filter(s => s.status === 'Foragido').length,
     suspeitos: suspects.filter(s => s.status === 'Suspeito').length,
     presos: suspects.filter(s => s.status === 'Preso').length,
-    cancelados: suspects.filter(s => s.status === 'CPF Cancelado').length,
+    total: suspects.length, // Novo: Contagem total
   };
 
-  const handleCardClick = (status: Suspect['status']) => {
+  const handleCardClick = (status: Suspect['status'] | 'Todos') => {
     navigateToSuspectsManagement(status);
   };
   
@@ -109,11 +109,12 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
               <span className="material-symbols-outlined text-pmmg-blue/30">lock</span>
             </div>
           </button>
-          <button onClick={() => handleCardClick('CPF Cancelado')} className="pmmg-card p-3 border-l-4 border-l-slate-600 active:scale-[0.98] transition-transform text-left">
-            <span className="text-[10px] font-bold uppercase text-secondary-light block mb-1">CPF Cancelado</span>
+          {/* NOVO CARD: TODOS */}
+          <button onClick={() => handleCardClick('Todos')} className="pmmg-card p-3 border-l-4 border-l-pmmg-navy active:scale-[0.98] transition-transform text-left">
+            <span className="text-[10px] font-bold uppercase text-secondary-light block mb-1">Todos Registros</span>
             <div className="flex items-end justify-between">
-              <span className="text-2xl font-black text-slate-600">{stats.cancelados}</span>
-              <span className="material-symbols-outlined text-slate-400">cancel</span>
+              <span className="text-2xl font-black text-pmmg-navy">{stats.total}</span>
+              <span className="material-symbols-outlined text-pmmg-navy/30">manage_search</span>
             </div>
           </button>
         </section>
