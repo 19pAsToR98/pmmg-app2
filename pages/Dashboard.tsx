@@ -190,13 +190,13 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                   </div>
                   <div className="flex gap-2">
                     <button 
-                      onClick={(e) => e.stopPropagation()} // Remove a navegação, apenas impede a propagação
+                      onClick={(e) => { e.stopPropagation(); onOpenProfile(alert.id); }} // CORRIGIDO: Chama onOpenProfile
                       className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-2 rounded-lg uppercase tracking-wide"
                     >
                       Ficha Completa
                     </button>
                     <button 
-                      onClick={(e) => { e.stopPropagation(); alert(`Compartilhando ficha de: ${alert.name}`); }} // Adicionado stopPropagation
+                      onClick={(e) => { e.stopPropagation(); alert(`Compartilhando ficha de: ${alert.name}`); }} // Mantido stopPropagation e alert
                       className="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center"
                     >
                       <span className="material-symbols-outlined text-primary-dark text-lg">share</span>
