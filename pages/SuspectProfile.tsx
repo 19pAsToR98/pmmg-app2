@@ -17,15 +17,13 @@ interface SuspectProfileProps {
 }
 
 const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, navigateTo, allSuspects, onOpenProfile, onEdit, startShareFlow, isDarkMode }) => {
-  // No desktop, vamos manter as seções abertas por padrão.
-  const [expandedSection, setExpandedSection] = useState<string | null>(null); // Null para fechar todas no mobile inicialmente
+  const [expandedSection, setExpandedSection] = useState<string | null>('data');
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   
   const photos = suspect.photoUrls && suspect.photoUrls.length > 0 ? suspect.photoUrls : [suspect.photoUrl];
   const currentPhotoIndex = fullscreenImage ? photos.indexOf(fullscreenImage) : -1;
 
   const toggleSection = (section: string) => {
-    // Apenas para mobile
     setExpandedSection(expandedSection === section ? null : section);
   };
 
@@ -83,7 +81,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki dark:bg-slate-900 overflow-hidden">
-      {/* Fullscreen Photo Modal (Mantido) */}
+      {/* Fullscreen Photo Modal */}
       {fullscreenImage && (
         <div 
           className="fixed inset-0 z-[2000] bg-black/95 flex flex-col items-center justify-center p-4 animate-in fade-in duration-200"
@@ -134,9 +132,6 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
         </div>
       )}
 
-      {/* ==================================================================================================== */}
-      {/* HEADER PRINCIPAL (Mobile & Desktop) */}
-      {/* ==================================================================================================== */}
       <header className="sticky top-0 z-50 bg-pmmg-navy px-4 lg:px-8 py-4 flex items-center justify-between shadow-lg shrink-0">
         <div className="flex items-center gap-3">
           <button onClick={onBack} className="text-white active:scale-90 transition-transform">
@@ -167,12 +162,10 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
 
       <main className="flex-1 overflow-y-auto pb-32 lg:pb-8 no-scrollbar">
         
-        {/* ==================================================================================================== */}
-        {/* SEÇÃO DE PERFIL (Mobile & Desktop) */}
-        {/* ==================================================================================================== */}
-        <section className="p-4 profile-header-gradient pb-12 rounded-b-[2rem] shadow-xl">
-          <div className="max-w-6xl mx-auto flex gap-6 relative items-start">
-            
+        {/* MOBILE HEADER SECTION (Mantido para mobile) */}
+        <section className="p-4 profile-header-gradient pb-12 rounded-b-[2rem] shadow-xl lg:hidden">
+          
+          <div className="flex gap-4 relative items-start">
             {/* Bloco da Foto (Esquerda) */}
             <div className="shrink-0">
               <div 
@@ -191,10 +184,9 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
             </div>
             
             {/* Bloco de Texto (Direita) */}
-            <div className="flex-1 flex flex-col justify-start pt-2">
-              <div className="flex justify-between items-start mb-2">
-                <h2 className="text-2xl font-black text-white uppercase leading-tight">{suspect.name}</h2>
-                <span className={`text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg border border-white/20 uppercase tracking-widest shrink-0 ${
+            <div className="flex-1 flex flex-col justify-start">
+              <div className="flex justify-end mb-2">
+                <span className={`text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg border border-white/20 uppercase tracking-widest ${
                   suspect.status === 'Foragido' ? 'bg-pmmg-red animate-pulse' : 
                   suspect.status === 'Suspeito' ? 'bg-pmmg-yellow text-primary-dark' : 'bg-pmmg-blue'
                 }`}>
@@ -202,44 +194,62 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                 </span>
               </div>
               
-              {suspect.nickname && <p className="text-pmmg-yellow text-sm font-semibold mt-1">Vulgo: "{suspect.nickname}"</p>}
-              
-              <div className="mt-4 pt-4 border-t border-white/20">
-                <p className="text-[10px] text-white/70 uppercase font-bold tracking-widest mb-1">Última Localização Conhecida</p>
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-pmmg-yellow text-lg">location_on</span>
-                  <p className="text-sm text-white font-medium leading-snug">
-                    {suspect.lastSeen} (Há {suspect.timeAgo})
-                  </p>
-                </div>
+              <div className="mb-2">
+                <h2 className="text-xl font-bold text-white uppercase leading-tight">{suspect.name}</h2>
+                {suspect.nickname && <p className="text-pmmg-yellow text-xs font-semibold mt-1">Vulgo: "{suspect.nickname}"</p>}
               </div>
+              
+              {/* Descrição Tática */}
+              {suspect.description && (
+                <p className="text-[10px] text-white/90 leading-snug italic font-medium">
+                  {suspect.description}
+                </p>
+              )}
+              {!suspect.description && (
+                <p className="text-[10px] text-white/60 leading-snug italic font-medium">
+                  Nenhuma observação física registrada no prontuário.
+                </p>
+              )}
             </div>
           </div>
         </section>
 
-        {/* ==================================================================================================== */}
-        {/* DESKTOP LAYOUT GRID (3 COLUNAS) */}
-        {/* ==================================================================================================== */}
-        <div className="lg:grid lg:grid-cols-3 lg:gap-8 lg:p-8 px-4 -mt-6 lg:mt-0 lg:px-0">
+        {/* DESKTOP LAYOUT GRID */}
+        <div className="lg:grid lg:grid-cols-3 lg:gap-8 lg:p-8">
           
-          {/* COLUNA 1: DADOS RÁPIDOS E DESCRIÇÃO */}
-          <div className="lg:col-span-1 space-y-6 sticky top-8 self-start pt-6 lg:pt-0">
+          {/* COLUNA 1 (Desktop): Foto e Dados Principais */}
+          <div className="hidden lg:block lg:col-span-1 space-y-6 sticky top-8 self-start">
             
-            {/* Descrição Tática */}
-            <div className="pmmg-card p-4">
-              <h3 className="text-[10px] font-bold uppercase text-pmmg-navy/70 dark:text-slate-400 mb-2 tracking-wider">Observação Tática</h3>
-              {suspect.description ? (
-                <p className="text-sm text-secondary-light italic leading-relaxed">
-                  {suspect.description}
-                </p>
-              ) : (
-                <p className="text-sm text-slate-400 italic">Nenhuma observação física registrada no prontuário.</p>
-              )}
+            {/* Foto Principal e Status */}
+            <div className="pmmg-card p-4 flex flex-col items-center text-center">
+              <div 
+                className="w-40 h-52 bg-slate-300 rounded-2xl border-4 border-pmmg-yellow/50 overflow-hidden shadow-2xl relative cursor-pointer active:scale-[0.98] transition-transform mb-4"
+                onClick={() => setFullscreenImage(suspect.photoUrl)}
+              >
+                <img 
+                  alt={suspect.name} 
+                  className="w-full h-full object-cover" 
+                  src={suspect.photoUrl} 
+                />
+                <div className="absolute bottom-0 right-0 p-1.5 bg-pmmg-navy/60 rounded-tl-xl backdrop-blur-sm">
+                  <span className="material-symbols-outlined text-white text-sm">zoom_in</span>
+                </div>
+              </div>
+              
+              <h2 className="text-xl font-black text-primary-dark uppercase leading-tight">{suspect.name}</h2>
+              {suspect.nickname && <p className="text-pmmg-red text-sm font-semibold mt-1">Vulgo: "{suspect.nickname}"</p>}
+              
+              <span className={`text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg border border-white/20 uppercase tracking-widest mt-3 ${
+                suspect.status === 'Foragido' ? 'bg-pmmg-red animate-pulse' : 
+                suspect.status === 'Suspeito' ? 'bg-pmmg-yellow text-primary-dark' : 'bg-pmmg-blue'
+              }`}>
+                {suspect.status}
+              </span>
             </div>
             
-            {/* Dados Pessoais Rápidos */}
+            {/* Dados Rápidos */}
             <div className="pmmg-card p-4 space-y-3">
-              <h3 className="text-[10px] font-bold uppercase text-pmmg-navy/70 dark:text-slate-400 mb-2 tracking-wider border-b border-pmmg-navy/10 dark:border-slate-700 pb-2">Dados Pessoais</h3>
+              <h3 className="text-[10px] font-bold uppercase text-pmmg-navy/70 dark:text-slate-400 mb-2 tracking-wider border-b border-pmmg-navy/10 dark:border-slate-700 pb-2">Dados Rápidos</h3>
               <div className="flex justify-between">
                 <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider">CPF</p>
                 <p className="text-sm font-bold text-primary-dark">{suspect.cpf}</p>
@@ -252,14 +262,10 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                 <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider">Nascimento</p>
                 <p className="text-sm font-bold text-primary-dark">{suspect.birthDate || 'N/D'}</p>
               </div>
-              <div className="flex justify-between">
-                <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider">Filiação (Genitora)</p>
-                <p className="text-sm font-bold text-primary-dark">{suspect.motherName || 'N/D'}</p>
-              </div>
             </div>
             
-            {/* Botões de Ação Rápida (Mobile: Oculto, Desktop: Visível) */}
-            <div className="space-y-3 hidden lg:block">
+            {/* Botões de Ação Rápida */}
+            <div className="space-y-3">
               <button 
                 onClick={() => onEdit(suspect.id)} 
                 className="w-full bg-pmmg-navy text-white text-sm font-bold py-3 rounded-xl uppercase tracking-widest flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
@@ -277,21 +283,71 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
             </div>
           </div>
 
-          {/* COLUNA 2: ARTIGOS, VEÍCULOS, LIGAÇÕES */}
-          <div className="lg:col-span-1 space-y-6 pt-6 lg:pt-0">
+          {/* COLUNA 2 (Mobile & Desktop): Detalhes e Seções Expansíveis */}
+          <div className="lg:col-span-2 px-4 -mt-6 lg:mt-0 lg:px-0 space-y-6">
             
+            {/* Descrição Tática (Apenas Desktop) */}
+            <div className="hidden lg:block pmmg-card p-4">
+              <h3 className="text-[10px] font-bold uppercase text-pmmg-navy/70 dark:text-slate-400 mb-2 tracking-wider">Observação Tática</h3>
+              {suspect.description ? (
+                <p className="text-sm text-secondary-light italic leading-relaxed">
+                  {suspect.description}
+                </p>
+              ) : (
+                <p className="text-sm text-slate-400 italic">Nenhuma observação física registrada no prontuário.</p>
+              )}
+            </div>
+            
+            {/* Dados do Indivíduo (Oculto no Desktop, pois está na Coluna 1) */}
+            <div className="pmmg-card lg:hidden">
+              <div onClick={() => toggleSection('data')} className="flex items-center justify-between p-4 cursor-pointer">
+                <div className="flex items-center gap-3 text-primary-dark">
+                  <span className="material-symbols-outlined">person</span>
+                  <span className="text-sm font-bold uppercase">Dados do Indivíduo</span>
+                </div>
+                <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600">
+                  {expandedSection === 'data' ? 'expand_less' : 'expand_more'}
+                </span>
+              </div>
+              {expandedSection === 'data' && (
+                <div className="p-4 space-y-4 border-t border-pmmg-navy/5 dark:border-slate-700">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">CPF</p>
+                      <p className="text-sm font-bold text-primary-dark">{suspect.cpf}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">RG</p>
+                      <p className="text-sm font-bold text-primary-dark">{suspect.rg || 'N/D'}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">Nascimento</p>
+                      <p className="text-sm font-bold text-primary-dark">{suspect.birthDate || 'N/D'}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">Filiação (Genitora)</p>
+                    <p className="text-sm font-bold text-primary-dark">{suspect.motherName || 'Não Informado'}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Artigos Criminais */}
             <div className="pmmg-card">
-               <div onClick={() => toggleSection('articles')} className="flex items-center justify-between p-4 cursor-pointer lg:cursor-default">
+               <div onClick={() => toggleSection('articles')} className="flex items-center justify-between p-4 cursor-pointer">
                 <div className="flex items-center gap-3 text-primary-dark">
                   <span className="material-symbols-outlined">gavel</span>
                   <span className="text-sm font-bold uppercase">Artigos Criminais</span>
                 </div>
-                <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600 lg:hidden">
+                <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600">
                   {expandedSection === 'articles' ? 'expand_less' : 'expand_more'}
                 </span>
               </div>
-              <div className={`p-4 space-y-3 border-t border-pmmg-navy/5 dark:border-slate-700 ${expandedSection === 'articles' || window.innerWidth >= 1024 ? 'block' : 'hidden'}`}>
+              {expandedSection === 'articles' && (
+                <div className="p-4 space-y-3 border-t border-pmmg-navy/5 dark:border-slate-700">
                   {suspect.articles && suspect.articles.length > 0 ? suspect.articles.map((art, i) => (
                     <div key={i} className="flex items-start gap-3 p-2 bg-pmmg-navy/5 dark:bg-slate-700 rounded border border-pmmg-navy/10 dark:border-slate-600">
                       <span className="text-primary-dark font-bold text-sm">{art}</span>
@@ -300,21 +356,23 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                   )) : (
                     <p className="text-xs text-slate-400 italic">Nenhum artigo registrado.</p>
                   )}
-              </div>
+                </div>
+              )}
             </div>
 
             {/* Vehicles Section */}
             <div className="pmmg-card">
-              <div onClick={() => toggleSection('vehicles')} className="flex items-center justify-between p-4 cursor-pointer lg:cursor-default">
+              <div onClick={() => toggleSection('vehicles')} className="flex items-center justify-between p-4 cursor-pointer">
                 <div className="flex items-center gap-3 text-primary-dark">
                   <span className="material-symbols-outlined">directions_car</span>
                   <span className="text-sm font-bold uppercase">Veículos Cadastrados</span>
                 </div>
-                <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600 lg:hidden">
+                <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600">
                   {expandedSection === 'vehicles' ? 'expand_less' : 'expand_more'}
                 </span>
               </div>
-              <div className={`p-4 space-y-3 border-t border-pmmg-navy/5 dark:border-slate-700 ${expandedSection === 'vehicles' || window.innerWidth >= 1024 ? 'block' : 'hidden'}`}>
+              {expandedSection === 'vehicles' && (
+                <div className="p-4 space-y-3 border-t border-pmmg-navy/5 dark:border-slate-700">
                   {suspect.vehicles && suspect.vehicles.length > 0 ? suspect.vehicles.map((vehicle, i) => (
                     <div key={i} className="p-3 bg-pmmg-navy/5 dark:bg-slate-700 rounded border border-pmmg-navy/10 dark:border-slate-600">
                       <div className="flex items-center justify-between">
@@ -326,21 +384,23 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                   )) : (
                     <p className="text-xs text-slate-400 italic">Nenhum veículo registrado.</p>
                   )}
-              </div>
+                </div>
+              )}
             </div>
 
             {/* Associations Section */}
             <div className="pmmg-card">
-              <div onClick={() => toggleSection('associations')} className="flex items-center justify-between p-4 cursor-pointer lg:cursor-default">
+              <div onClick={() => toggleSection('associations')} className="flex items-center justify-between p-4 cursor-pointer">
                 <div className="flex items-center gap-3 text-primary-dark">
                   <span className="material-symbols-outlined">link</span>
                   <span className="text-sm font-bold uppercase">Ligações e Contatos</span>
                 </div>
-                <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600 lg:hidden">
+                <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600">
                   {expandedSection === 'associations' ? 'expand_less' : 'expand_more'}
                 </span>
               </div>
-              <div className={`p-4 space-y-3 border-t border-pmmg-navy/5 dark:border-slate-700 ${expandedSection === 'associations' || window.innerWidth >= 1024 ? 'block' : 'hidden'}`}>
+              {expandedSection === 'associations' && (
+                <div className="p-4 space-y-3 border-t border-pmmg-navy/5 dark:border-slate-700">
                   {suspect.associations && suspect.associations.length > 0 ? suspect.associations.map((association, i) => {
                     const associatedSuspect = findAssociatedSuspect(association.suspectId);
                     if (!associatedSuspect) return null;
@@ -364,13 +424,10 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
                   }) : (
                     <p className="text-xs text-slate-400 italic">Nenhuma ligação registrada.</p>
                   )}
-              </div>
+                </div>
+              )}
             </div>
-          </div>
 
-          {/* COLUNA 3: GALERIA E MAPAS */}
-          <div className="lg:col-span-1 space-y-6 pt-6 lg:pt-0">
-            
             {/* Photo Gallery */}
             <div className="pmmg-card p-4">
               <h3 className="text-[10px] font-bold text-pmmg-navy/60 dark:text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
