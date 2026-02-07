@@ -77,122 +77,129 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
         </div>
       </header>
       
-      <main className="flex-1 px-4 -mt-6 pb-32 space-y-6 overflow-y-auto no-scrollbar">
-        
-        {/* Stats Card */}
-        <div className="pmmg-card p-4 flex items-center justify-between">
-          <div>
-            <h4 className="text-[10px] font-bold text-pmmg-navy/50 dark:text-slate-400 uppercase tracking-widest mb-1">Meus Registros</h4>
-            <p className="text-xl font-black text-pmmg-navy dark:text-slate-200 uppercase">{suspectCount} <span className="text-[10px] font-normal text-slate-500 dark:text-slate-400 ml-1 tracking-normal italic">Suspeitos Identificados</span></p>
+      <main className="flex-1 px-4 -mt-6 lg:pb-4 space-y-6 overflow-y-auto no-scrollbar">
+        <div className="lg:grid lg:grid-cols-2 lg:gap-6 lg:max-w-7xl lg:mx-auto">
+          
+          {/* Coluna 1: Stats e Dados da Conta */}
+          <div className="lg:col-span-1">
+            {/* Stats Card */}
+            <div className="pmmg-card p-4 flex items-center justify-between">
+              <div>
+                <h4 className="text-[10px] font-bold text-pmmg-navy/50 dark:text-slate-400 uppercase tracking-widest mb-1">Meus Registros</h4>
+                <p className="text-xl font-black text-pmmg-navy dark:text-slate-200 uppercase">{suspectCount} <span className="text-[10px] font-normal text-slate-500 dark:text-slate-400 ml-1 tracking-normal italic">Suspeitos Identificados</span></p>
+              </div>
+              <div className={iconContainerClasses}>
+                <span className="material-symbols-outlined text-pmmg-navy dark:text-pmmg-yellow">person_search</span>
+              </div>
+            </div>
+            
+            {/* Dados da Conta */}
+            <section className="mt-6">
+              <h3 className="px-4 mb-2 text-[11px] font-bold text-pmmg-navy/80 dark:text-slate-400 uppercase tracking-widest">Dados da Conta</h3>
+              <div className="pmmg-card">
+                {/* E-mail Funcional */}
+                <div className={iosListItemClasses}>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] text-pmmg-navy/50 dark:text-slate-500 font-bold uppercase tracking-tighter">E-mail Funcional</span>
+                    <span className="text-sm font-semibold text-pmmg-navy dark:text-slate-200">{userEmail}</span>
+                  </div>
+                  <button onClick={() => alert('Simulação: Abrir edição de e-mail')} className="p-2 text-pmmg-navy/40 dark:text-slate-500 hover:text-pmmg-navy dark:hover:text-slate-300">
+                    <span className="material-symbols-outlined text-lg">edit</span>
+                  </button>
+                </div>
+                
+                <div className={iosListItemClasses}>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] text-pmmg-navy/50 dark:text-slate-500 font-bold uppercase tracking-tighter">Nome Completo</span>
+                    <span className="text-sm font-semibold text-pmmg-navy dark:text-slate-200">{userName}</span>
+                  </div>
+                  <button onClick={() => alert('Simulação: Abrir edição de nome')} className="p-2 text-pmmg-navy/40 dark:text-slate-500 hover:text-pmmg-navy dark:hover:text-slate-300">
+                    <span className="material-symbols-outlined text-lg">edit</span>
+                  </button>
+                </div>
+                <div className={iosListItemClasses}>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] text-pmmg-navy/50 dark:text-slate-500 font-bold uppercase tracking-tighter">Graduação</span>
+                    <span className="text-sm font-semibold text-pmmg-navy dark:text-slate-200">{currentRank}</span>
+                  </div>
+                  <button onClick={() => alert('Simulação: Abrir edição de graduação')} className="p-2 text-pmmg-navy/40 dark:text-slate-500 hover:text-pmmg-navy dark:hover:text-slate-300">
+                    <span className="material-symbols-outlined text-lg">edit</span>
+                  </button>
+                </div>
+                <div className={iosListItemClasses}>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] text-pmmg-navy/50 dark:text-slate-500 font-bold uppercase tracking-tighter">Senha de Acesso</span>
+                    <span className="text-sm font-semibold text-pmmg-navy dark:text-slate-200 tracking-widest">••••••••••••</span>
+                  </div>
+                  <button onClick={() => alert('Simulação: Abrir edição de senha')} className="p-2 text-pmmg-navy/40 dark:text-slate-500 hover:text-pmmg-navy dark:hover:text-slate-300">
+                    <span className="material-symbols-outlined text-lg">edit</span>
+                  </button>
+                </div>
+              </div>
+            </section>
           </div>
-          <div className={iconContainerClasses}>
-            <span className="material-symbols-outlined text-pmmg-navy dark:text-pmmg-yellow">person_search</span>
+          
+          {/* Coluna 2: Configurações e Segurança */}
+          <div className="lg:col-span-1 lg:mt-0 mt-6">
+            <section>
+              <h3 className="px-4 mb-2 text-[11px] font-bold text-pmmg-navy/80 dark:text-slate-400 uppercase tracking-widest">Configurações e Segurança</h3>
+              <div className="pmmg-card">
+                
+                {/* Modo Escuro (Usando ThemeToggle Component) - Agora ocupa a largura total do item da lista */}
+                <div className={iosListItemClasses + ' !p-0'}>
+                  <ThemeToggle isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
+                </div>
+                
+                {/* Biometria (Simulada) - Corrigido o toggle */}
+                <div className={iosListItemClasses}>
+                  <div className="flex items-center gap-3">
+                    <div className={iconContainerClasses + ' !w-8 !h-8'}>
+                      <span className="material-symbols-outlined text-pmmg-navy dark:text-pmmg-yellow text-xl">fingerprint</span>
+                    </div>
+                    <span className="text-sm font-semibold text-pmmg-navy dark:text-slate-200">Habilitar Biometria</span>
+                  </div>
+                  <button 
+                    onClick={() => setIsBiometricEnabled(prev => !prev)}
+                    className={`relative w-11 h-6 rounded-full transition-colors focus:outline-none ${isBiometricEnabled ? 'bg-green-600' : 'bg-slate-300 dark:bg-slate-600'}`}
+                  >
+                    <span className={`absolute left-0.5 top-0.5 inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-md ${isBiometricEnabled ? 'translate-x-5' : 'translate-x-0'}`}></span>
+                  </button>
+                </div>
+                
+                {/* Configurações de Alerta */}
+                <button onClick={() => alert('Simulação: Configurações de Alerta')} className={iosListItemClasses + ' w-full active:bg-slate-50 dark:active:bg-slate-700 transition-colors text-left'}>
+                  <div className="flex items-center gap-3">
+                    <div className={iconContainerClasses + ' !w-8 !h-8'}>
+                      <span className="material-symbols-outlined text-pmmg-navy dark:text-pmmg-yellow text-xl">notifications_active</span>
+                    </div>
+                    <span className="text-sm font-semibold text-pmmg-navy dark:text-slate-200">Configurações de Alerta</span>
+                  </div>
+                  <span className="material-symbols-outlined text-slate-400 dark:text-slate-600">chevron_right</span>
+                </button>
+                
+                {/* Sair do Sistema */}
+                <button onClick={() => alert('Simulação: Sair do Sistema')} className={iosListItemClasses + ' w-full active:bg-slate-50 dark:active:bg-slate-700 transition-colors text-left'}>
+                  <div className="flex items-center gap-3">
+                    <div className={iconContainerClasses + ' !w-8 !h-8 bg-slate-100 dark:bg-slate-700'}>
+                      <span className="material-symbols-outlined text-slate-400 text-xl">logout</span>
+                    </div>
+                    <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">Sair do Sistema</span>
+                  </div>
+                </button>
+                
+                {/* Excluir Conta */}
+                <button onClick={() => alert('Simulação: Excluir Conta')} className={iosListItemClasses + ' w-full active:bg-red-50/50 transition-colors text-left bg-red-50/30 dark:bg-pmmg-red/10'}>
+                  <div className="flex items-center gap-3">
+                    <div className={iconContainerClasses + ' !w-8 !h-8 bg-pmmg-red/10 border-pmmg-red/20'}>
+                      <span className="material-symbols-outlined text-pmmg-red text-xl">delete_forever</span>
+                    </div>
+                    <span className="text-sm font-bold text-pmmg-red uppercase tracking-tight">Excluir Conta</span>
+                  </div>
+                </button>
+              </div>
+            </section>
           </div>
         </div>
-        
-        {/* Dados da Conta */}
-        <section>
-          <h3 className="px-4 mb-2 text-[11px] font-bold text-pmmg-navy/80 dark:text-slate-400 uppercase tracking-widest">Dados da Conta</h3>
-          <div className="pmmg-card">
-            {/* E-mail Funcional */}
-            <div className={iosListItemClasses}>
-              <div className="flex flex-col">
-                <span className="text-[9px] text-pmmg-navy/50 dark:text-slate-500 font-bold uppercase tracking-tighter">E-mail Funcional</span>
-                <span className="text-sm font-semibold text-pmmg-navy dark:text-slate-200">{userEmail}</span>
-              </div>
-              <button onClick={() => alert('Simulação: Abrir edição de e-mail')} className="p-2 text-pmmg-navy/40 dark:text-slate-500 hover:text-pmmg-navy dark:hover:text-slate-300">
-                <span className="material-symbols-outlined text-lg">edit</span>
-              </button>
-            </div>
-            
-            <div className={iosListItemClasses}>
-              <div className="flex flex-col">
-                <span className="text-[9px] text-pmmg-navy/50 dark:text-slate-500 font-bold uppercase tracking-tighter">Nome Completo</span>
-                <span className="text-sm font-semibold text-pmmg-navy dark:text-slate-200">{userName}</span>
-              </div>
-              <button onClick={() => alert('Simulação: Abrir edição de nome')} className="p-2 text-pmmg-navy/40 dark:text-slate-500 hover:text-pmmg-navy dark:hover:text-slate-300">
-                <span className="material-symbols-outlined text-lg">edit</span>
-              </button>
-            </div>
-            <div className={iosListItemClasses}>
-              <div className="flex flex-col">
-                <span className="text-[9px] text-pmmg-navy/50 dark:text-slate-500 font-bold uppercase tracking-tighter">Graduação</span>
-                <span className="text-sm font-semibold text-pmmg-navy dark:text-slate-200">{currentRank}</span>
-              </div>
-              <button onClick={() => alert('Simulação: Abrir edição de graduação')} className="p-2 text-pmmg-navy/40 dark:text-slate-500 hover:text-pmmg-navy dark:hover:text-slate-300">
-                <span className="material-symbols-outlined text-lg">edit</span>
-              </button>
-            </div>
-            <div className={iosListItemClasses}>
-              <div className="flex flex-col">
-                <span className="text-[9px] text-pmmg-navy/50 dark:text-slate-500 font-bold uppercase tracking-tighter">Senha de Acesso</span>
-                <span className="text-sm font-semibold text-pmmg-navy dark:text-slate-200 tracking-widest">••••••••••••</span>
-              </div>
-              <button onClick={() => alert('Simulação: Abrir edição de senha')} className="p-2 text-pmmg-navy/40 dark:text-slate-500 hover:text-pmmg-navy dark:hover:text-slate-300">
-                <span className="material-symbols-outlined text-lg">edit</span>
-              </button>
-            </div>
-          </div>
-        </section>
-        
-        {/* Configurações e Segurança */}
-        <section>
-          <h3 className="px-4 mb-2 text-[11px] font-bold text-pmmg-navy/80 dark:text-slate-400 uppercase tracking-widest">Configurações e Segurança</h3>
-          <div className="pmmg-card">
-            
-            {/* Modo Escuro (Usando ThemeToggle Component) - Agora ocupa a largura total do item da lista */}
-            <div className={iosListItemClasses + ' !p-0'}>
-              <ThemeToggle isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
-            </div>
-            
-            {/* Biometria (Simulada) - Corrigido o toggle */}
-            <div className={iosListItemClasses}>
-              <div className="flex items-center gap-3">
-                <div className={iconContainerClasses + ' !w-8 !h-8'}>
-                  <span className="material-symbols-outlined text-pmmg-navy dark:text-pmmg-yellow text-xl">fingerprint</span>
-                </div>
-                <span className="text-sm font-semibold text-pmmg-navy dark:text-slate-200">Habilitar Biometria</span>
-              </div>
-              <button 
-                onClick={() => setIsBiometricEnabled(prev => !prev)}
-                className={`relative w-11 h-6 rounded-full transition-colors focus:outline-none ${isBiometricEnabled ? 'bg-green-600' : 'bg-slate-300 dark:bg-slate-600'}`}
-              >
-                <span className={`absolute left-0.5 top-0.5 inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-md ${isBiometricEnabled ? 'translate-x-5' : 'translate-x-0'}`}></span>
-              </button>
-            </div>
-            
-            {/* Configurações de Alerta */}
-            <button onClick={() => alert('Simulação: Configurações de Alerta')} className={iosListItemClasses + ' w-full active:bg-slate-50 dark:active:bg-slate-700 transition-colors text-left'}>
-              <div className="flex items-center gap-3">
-                <div className={iconContainerClasses + ' !w-8 !h-8'}>
-                  <span className="material-symbols-outlined text-pmmg-navy dark:text-pmmg-yellow text-xl">notifications_active</span>
-                </div>
-                <span className="text-sm font-semibold text-pmmg-navy dark:text-slate-200">Configurações de Alerta</span>
-              </div>
-              <span className="material-symbols-outlined text-slate-400 dark:text-slate-600">chevron_right</span>
-            </button>
-            
-            {/* Sair do Sistema */}
-            <button onClick={() => alert('Simulação: Sair do Sistema')} className={iosListItemClasses + ' w-full active:bg-slate-50 dark:active:bg-slate-700 transition-colors text-left'}>
-              <div className="flex items-center gap-3">
-                <div className={iconContainerClasses + ' !w-8 !h-8 bg-slate-100 dark:bg-slate-700'}>
-                  <span className="material-symbols-outlined text-slate-400 text-xl">logout</span>
-                </div>
-                <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">Sair do Sistema</span>
-              </div>
-            </button>
-            
-            {/* Excluir Conta */}
-            <button onClick={() => alert('Simulação: Excluir Conta')} className={iosListItemClasses + ' w-full active:bg-red-50/50 transition-colors text-left bg-red-50/30 dark:bg-pmmg-red/10'}>
-              <div className="flex items-center gap-3">
-                <div className={iconContainerClasses + ' !w-8 !h-8 bg-pmmg-red/10 border-pmmg-red/20'}>
-                  <span className="material-symbols-outlined text-pmmg-red text-xl">delete_forever</span>
-                </div>
-                <span className="text-sm font-bold text-pmmg-red uppercase tracking-tight">Excluir Conta</span>
-              </div>
-            </button>
-          </div>
-        </section>
         
         {/* Footer Info */}
         <div className="flex flex-col items-center justify-center opacity-40 py-8">
@@ -206,8 +213,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
         </div>
       </main>
       
-      {/* Bottom Navigation */}
-      <BottomNav activeScreen="dashboard" navigateTo={navigateTo} />
+      {/* BottomNav is now handled by App.tsx and hidden on desktop */}
     </div>
   );
 };

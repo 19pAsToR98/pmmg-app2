@@ -25,7 +25,7 @@ const ProductList: React.FC<ProductListProps> = ({ navigateTo, categoryId }) => 
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki dark:bg-slate-900 overflow-hidden">
-      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-xl">
+      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-xl shrink-0">
         <div className="flex items-center gap-3">
           <button onClick={() => navigateTo('store')} className="text-white active:scale-90 transition-transform">
             <span className="material-symbols-outlined">arrow_back_ios</span>
@@ -43,12 +43,12 @@ const ProductList: React.FC<ProductListProps> = ({ navigateTo, categoryId }) => 
         </button>
       </header>
 
-      <main className="flex-1 overflow-y-auto pb-32 no-scrollbar px-4 pt-6">
+      <main className="flex-1 overflow-y-auto lg:pb-4 no-scrollbar px-4 pt-6">
         <p className="text-[10px] font-bold uppercase text-pmmg-navy/70 dark:text-slate-400 mb-6 text-center tracking-wider">
           {category.products.length} itens disponíveis em {category.name}.
         </p>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 lg:max-w-7xl lg:mx-auto">
           {category.products.map((product, index) => (
             <a 
               key={index}
@@ -75,7 +75,7 @@ const ProductList: React.FC<ProductListProps> = ({ navigateTo, categoryId }) => 
         </div>
       </main>
 
-      <BottomNav activeScreen="store" navigateTo={navigateTo} />
+      {/* BottomNav is now handled by App.tsx and hidden on desktop */}
     </div>
   );
 };

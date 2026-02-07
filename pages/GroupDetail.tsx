@@ -445,263 +445,267 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto pb-4 no-scrollbar">
-        {activeTab === 'timeline' ? (
-          <div className="p-4 space-y-4">
-            {/* Barra de Busca e Alternância de Visualização */}
-            <div className="flex items-center gap-2 mb-2 relative">
-              <div className="relative flex-1">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-pmmg-navy/30 dark:text-slate-500 text-lg">search</span>
-                <input 
-                  value={postSearchQuery}
-                  onChange={(e) => setPostSearchQuery(e.target.value)}
-                  placeholder="BUSCAR NOME, CPF OU OBSERVAÇÃO..."
-                  className="w-full pl-10 pr-4 py-3 bg-white/60 dark:bg-slate-700 border-none rounded-2xl text-[10px] font-black uppercase placeholder:text-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-pmmg-navy/10 transition-all shadow-inner dark:text-slate-200"
-                />
-              </div>
-              
-              <div className="flex bg-white/40 dark:bg-slate-700 p-1 rounded-2xl border border-white/20 dark:border-slate-600 shadow-sm shrink-0">
-                <button 
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-xl transition-all ${viewMode === 'list' ? 'bg-pmmg-navy text-pmmg-yellow shadow-md' : 'text-pmmg-navy/40 dark:text-slate-400'}`}
-                >
-                  <span className="material-symbols-outlined text-xl">view_day</span>
-                </button>
-                <button 
-                  onClick={() => setViewMode('gallery')}
-                  className={`p-2 rounded-xl transition-all ${viewMode === 'gallery' ? 'bg-pmmg-navy text-pmmg-yellow shadow-md' : 'text-pmmg-navy/40 dark:text-slate-400'}`}
-                >
-                  <span className="material-symbols-outlined text-xl">grid_view</span>
-                </button>
-              </div>
-
-              <button 
-                onClick={() => setShowTimelineFilters(prev => !prev)}
-                className={`p-3 rounded-2xl flex items-center justify-center transition-all shrink-0 ${isFilterActive ? 'bg-pmmg-yellow text-primary-dark shadow-md' : 'bg-white/40 dark:bg-slate-700 text-pmmg-navy dark:text-slate-200 border border-white/20 dark:border-slate-600'}`}
-              >
-                <span className={`material-symbols-outlined text-xl ${isFilterActive ? 'fill-icon' : ''}`}>tune</span>
-              </button>
-
-              {/* Menu de Filtro da Timeline */}
-              {showTimelineFilters && (
-                <div 
-                  ref={timelineFilterRef}
-                  className="absolute top-full right-0 mt-3 w-72 bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-pmmg-navy/10 dark:border-slate-700 z-[100] p-5 animate-in fade-in slide-in-from-top-2 duration-200"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-[9px] font-black uppercase tracking-widest text-pmmg-navy/60 dark:text-slate-400">Filtros Operacionais</h4>
-                    {isFilterActive && (
-                      <button 
-                        onClick={handleClearFilters}
-                        className="text-[8px] font-black text-pmmg-red uppercase"
-                      >
-                        Limpar Tudo
-                      </button>
-                    )}
-                  </div>
-                  
-                  <div className="space-y-5">
-                    {/* Filtro por Status */}
-                    <div>
-                      <label className="block text-[8px] font-black uppercase text-pmmg-navy/40 dark:text-slate-500 mb-2 tracking-wider">Status do Indivíduo</label>
-                      <div className="flex flex-wrap gap-2 pb-1 no-scrollbar">
-                        {STATUS_OPTIONS.map(opt => (
-                          <button
-                            key={opt}
-                            onClick={() => setStatusFilter(opt)}
-                            className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all border shrink-0 ${
-                              statusFilter === opt 
-                              ? 'bg-pmmg-navy text-white border-pmmg-navy shadow-md' 
-                              : 'bg-slate-50 dark:bg-slate-700 text-pmmg-navy/60 dark:text-slate-300 border-slate-200 dark:border-slate-600'
-                            }`}
-                          >
-                            {opt}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <button 
-                    onClick={() => setShowTimelineFilters(false)}
-                    className="w-full mt-6 bg-pmmg-navy text-white py-3 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-transform"
-                  >
-                    Aplicar Filtros ({filteredPosts.length})
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Chips de filtros ativos */}
-            {isFilterActive && (
-              <div className="flex flex-wrap gap-2 mb-2">
-                {postSearchQuery && (
-                  <div className="bg-pmmg-navy/10 dark:bg-slate-700 text-pmmg-navy dark:text-slate-300 px-3 py-1 rounded-full text-[8px] font-black uppercase flex items-center gap-1 border border-pmmg-navy/10 dark:border-slate-600">
-                    Busca: {postSearchQuery}
-                    <button onClick={() => setPostSearchQuery('')} className="material-symbols-outlined text-xs">close</button>
-                  </div>
-                )}
-                {statusFilter !== 'Todos' && (
-                  <div className="bg-pmmg-navy/10 dark:bg-slate-700 text-pmmg-navy dark:text-slate-300 px-3 py-1 rounded-full text-[8px] font-black uppercase flex items-center gap-1 border border-pmmg-navy/10 dark:border-slate-600">
-                    Status: {statusFilter}
-                    <button onClick={() => setStatusFilter('Todos')} className="material-symbols-outlined text-xs">close</button>
-                  </div>
-                )}
-                {selectedMemberFilterId && activeMemberFilter && (
-                  <div className="bg-pmmg-navy/10 dark:bg-slate-700 text-pmmg-navy dark:text-slate-300 px-3 py-1 rounded-full text-[8px] font-black uppercase flex items-center gap-1 border border-pmmg-navy/10 dark:border-slate-600">
-                    Autor: {activeMemberFilter.name.split(' ')[0]}
-                    <button onClick={() => setSelectedMemberFilterId(null)} className="material-symbols-outlined text-xs">close</button>
-                  </div>
-                )}
-              </div>
-            )}
-            
-            {/* Botão de teste para entrada de membro */}
-            <button 
-              onClick={onJoinGroup}
-              className="w-full bg-green-500 text-white text-[10px] font-bold py-2 rounded-xl uppercase tracking-widest active:scale-[0.98] transition-transform"
-            >
-              [TESTE] Adicionar Cap. Pereira (o2)
-            </button>
-
-            {filteredPosts.length > 0 ? (
-              viewMode === 'list' ? (
-                <div className="space-y-6 mt-4 animate-in fade-in duration-300">
-                  {filteredPosts.map(renderTimelinePost)}
-                </div>
-              ) : (
-                /* MODO GALERIA PARA O GRUPO */
-                <div className="grid grid-cols-3 gap-3 mt-4 animate-in zoom-in-95 duration-300">
-                  {filteredPosts.filter(p => p.type === 'suspect').map((post) => (
-                    <div 
-                      key={post.id}
-                      onClick={() => post.suspectId && onOpenProfile(post.suspectId)}
-                      className="relative aspect-[3/4] pmmg-card overflow-hidden shadow-lg border-2 border-pmmg-navy/10 dark:border-slate-700 active:scale-95 transition-all cursor-pointer"
-                    >
-                      <img src={post.suspectPhoto} alt={post.suspectName} className="w-full h-full object-cover" />
-                      
-                      {/* Autor Badge */}
-                      <div className="absolute top-1 left-1 bg-pmmg-navy/70 backdrop-blur-sm text-[6px] font-black text-white px-1.5 py-0.5 rounded uppercase tracking-tighter z-10">
-                        {post.authorName.charAt(0)}
-                      </div>
-
-                      {/* Info Overlay */}
-                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-1.5 pt-4">
-                        <p className="text-[8px] font-black text-white uppercase truncate text-center drop-shadow-md">
-                          {post.suspectName?.split(' ')[0]}
-                        </p>
-                        <p className="text-[6px] text-pmmg-yellow/80 font-bold uppercase text-center tracking-tighter mt-0.5">
-                          {post.timestamp.split(' ')[0]}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )
-            ) : (
-              <div className="text-center py-32 opacity-20">
-                <span className="material-symbols-outlined text-7xl">post_add</span>
-                <p className="text-sm font-black uppercase mt-4 tracking-[0.2em]">
-                  {group.posts.length > 0 ? 'Nenhum resultado para os filtros' : 'Sem publicações ainda'}
-                </p>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="p-4 space-y-3">
-            <div className="bg-white/40 dark:bg-slate-700 p-4 rounded-3xl border border-white/20 dark:border-slate-600 mb-6 flex items-center justify-between">
-              <div>
-                <p className="text-[9px] font-black text-pmmg-navy/40 dark:text-slate-400 uppercase tracking-widest mb-1">Convite para Oficiais</p>
-                <p className="text-sm font-black text-pmmg-navy dark:text-slate-200 tracking-widest">{group.inviteCode}</p>
-              </div>
-              <button 
-                onClick={() => {
-                  navigator.clipboard.writeText(group.inviteCode);
-                  alert('Código de convite copiado para a área de transferência!');
-                }}
-                className="w-10 h-10 bg-pmmg-navy text-white rounded-xl flex items-center justify-center shadow-lg active:scale-90 transition-transform"
-              >
-                <span className="material-symbols-outlined text-lg">content_copy</span>
-              </button>
-            </div>
-            
-            {/* Campo de Pesquisa de Membros */}
-            <div className="relative mb-4">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-pmmg-navy/30 dark:text-slate-500 text-lg">search</span>
-              <input 
-                value={memberSearchQuery}
-                onChange={(e) => setMemberSearchQuery(e.target.value)}
-                placeholder="BUSCAR MEMBRO (NOME, UNIDADE, POSTO)..."
-                className="w-full pl-10 pr-4 py-3 bg-white/60 dark:bg-slate-700 border-none rounded-2xl text-[10px] font-black uppercase placeholder:text-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-pmmg-navy/10 transition-all shadow-inner dark:text-slate-200"
-              />
-            </div>
-
-            {filteredMembers.length > 0 ? filteredMembers.map(member => (
-              <div 
-                key={member.id} 
-                className="pmmg-card p-3 flex items-center justify-between shadow-sm border-l-4 border-l-pmmg-navy dark:border-l-pmmg-yellow"
-              >
-                <div 
-                  onClick={() => handleFilterByMember(member.id)}
-                  className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer active:scale-[0.99] transition-transform"
-                >
-                  <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-300 shrink-0">
-                    <img src={member.photoUrl} alt={member.name} className="w-full h-full object-cover" />
-                  </div>
-                  <div>
-                    <h4 className="text-[11px] font-black text-pmmg-navy dark:text-slate-200 uppercase leading-none">{member.rank} {member.name}</h4>
-                    <span className={`text-[8px] font-black uppercase tracking-tighter ${member.role === 'admin' ? 'text-pmmg-red' : 'text-slate-400 dark:text-slate-500'}`}>
-                      {member.role === 'admin' ? 'Responsável Técnico' : 'Agente Operacional'}
-                    </span>
-                  </div>
+      <main className="flex-1 overflow-y-auto lg:pb-4 no-scrollbar">
+        <div className="lg:grid lg:grid-cols-3 lg:gap-6 lg:p-6">
+          {activeTab === 'timeline' ? (
+            <div className="p-4 lg:p-0 lg:col-span-2 space-y-4">
+              {/* Barra de Busca e Alternância de Visualização */}
+              <div className="flex items-center gap-2 mb-2 relative">
+                <div className="relative flex-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-pmmg-navy/30 dark:text-slate-500 text-lg">search</span>
+                  <input 
+                    value={postSearchQuery}
+                    onChange={(e) => setPostSearchQuery(e.target.value)}
+                    placeholder="BUSCAR NOME, CPF OU OBSERVAÇÃO..."
+                    className="w-full pl-10 pr-4 py-3 bg-white/60 dark:bg-slate-700 border-none rounded-2xl text-[10px] font-black uppercase placeholder:text-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-pmmg-navy/10 transition-all shadow-inner dark:text-slate-200"
+                  />
                 </div>
                 
-                {/* Ações de Gerenciamento (Apenas para Admins) */}
-                {isCurrentUserAdmin && member.id !== CURRENT_USER_ID && (
-                  <div className="flex items-center gap-2 shrink-0">
-                    {member.isAdmin ? (
-                      <button 
-                        onClick={() => handleDemoteMember(member.id, member.name)}
-                        className="text-pmmg-yellow/80 hover:text-pmmg-yellow active:scale-90 transition-transform p-1"
-                        title="Rebaixar para Membro"
-                      >
-                        <span className="material-symbols-outlined text-xl fill-icon">star_half</span>
-                      </button>
-                    ) : (
-                      <button 
-                        onClick={() => handlePromoteMember(member.id, member.name)}
-                        className="text-green-600/80 hover:text-green-600 active:scale-90 transition-transform p-1"
-                        title="Promover a Admin"
-                      >
-                        <span className="material-symbols-outlined text-xl">star</span>
-                      </button>
-                    )}
+                <div className="flex bg-white/40 dark:bg-slate-700 p-1 rounded-2xl border border-white/20 dark:border-slate-600 shadow-sm shrink-0">
+                  <button 
+                    onClick={() => setViewMode('list')}
+                    className={`p-2 rounded-xl transition-all ${viewMode === 'list' ? 'bg-pmmg-navy text-pmmg-yellow shadow-md' : 'text-pmmg-navy/40 dark:text-slate-400'}`}
+                  >
+                    <span className="material-symbols-outlined text-xl">view_day</span>
+                  </button>
+                  <button 
+                    onClick={() => setViewMode('gallery')}
+                    className={`p-2 rounded-xl transition-all ${viewMode === 'gallery' ? 'bg-pmmg-navy text-pmmg-yellow shadow-md' : 'text-pmmg-navy/40 dark:text-slate-400'}`}
+                  >
+                    <span className="material-symbols-outlined text-xl">grid_view</span>
+                  </button>
+                </div>
+
+                <button 
+                  onClick={() => setShowTimelineFilters(prev => !prev)}
+                  className={`p-3 rounded-2xl flex items-center justify-center transition-all shrink-0 ${isFilterActive ? 'bg-pmmg-yellow text-primary-dark shadow-md' : 'bg-white/40 dark:bg-slate-700 text-pmmg-navy dark:text-slate-200 border border-white/20 dark:border-slate-600'}`}
+                >
+                  <span className={`material-symbols-outlined text-xl ${isFilterActive ? 'fill-icon' : ''}`}>tune</span>
+                </button>
+
+                {/* Menu de Filtro da Timeline */}
+                {showTimelineFilters && (
+                  <div 
+                    ref={timelineFilterRef}
+                    className="absolute top-full right-0 mt-3 w-72 bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-pmmg-navy/10 dark:border-slate-700 z-[100] p-5 animate-in fade-in slide-in-from-top-2 duration-200"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-[9px] font-black uppercase tracking-widest text-pmmg-navy/60 dark:text-slate-400">Filtros Operacionais</h4>
+                      {isFilterActive && (
+                        <button 
+                          onClick={handleClearFilters}
+                          className="text-[8px] font-black text-pmmg-red uppercase"
+                        >
+                          Limpar Tudo
+                        </button>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-5">
+                      {/* Filtro por Status */}
+                      <div>
+                        <label className="block text-[8px] font-black uppercase text-pmmg-navy/40 dark:text-slate-500 mb-2 tracking-wider">Status do Indivíduo</label>
+                        <div className="flex flex-wrap gap-2 pb-1 no-scrollbar">
+                          {STATUS_OPTIONS.map(opt => (
+                            <button
+                              key={opt}
+                              onClick={() => setStatusFilter(opt)}
+                              className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase transition-all border shrink-0 ${
+                                statusFilter === opt 
+                                ? 'bg-pmmg-navy text-white border-pmmg-navy shadow-md' 
+                                : 'bg-slate-50 dark:bg-slate-700 text-pmmg-navy/60 dark:text-slate-300 border-slate-200 dark:border-slate-600'
+                              }`}
+                            >
+                              {opt}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
                     <button 
-                      onClick={() => handleRemoveMember(member.id, member.name)}
-                      className="text-pmmg-red/40 hover:text-pmmg-red active:scale-90 transition-transform p-1"
-                      title="Remover do Grupo"
+                      onClick={() => setShowTimelineFilters(false)}
+                      className="w-full mt-6 bg-pmmg-navy text-white py-3 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-transform"
                     >
-                      <span className="material-symbols-outlined text-xl">person_remove</span>
+                      Aplicar Filtros ({filteredPosts.length})
                     </button>
                   </div>
                 )}
-                
-                {/* Ícone de navegação (se não for admin ou se for o próprio usuário) */}
-                {(!isCurrentUserAdmin || member.id === CURRENT_USER_ID) && (
-                    <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600 text-lg shrink-0">arrow_forward_ios</span>
+              </div>
+
+              {/* Chips de filtros ativos */}
+              {isFilterActive && (
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {postSearchQuery && (
+                    <div className="bg-pmmg-navy/10 dark:bg-slate-700 text-pmmg-navy dark:text-slate-300 px-3 py-1 rounded-full text-[8px] font-black uppercase flex items-center gap-1 border border-pmmg-navy/10 dark:border-slate-600">
+                      Busca: {postSearchQuery}
+                      <button onClick={() => setPostSearchQuery('')} className="material-symbols-outlined text-xs">close</button>
+                    </div>
+                  )}
+                  {statusFilter !== 'Todos' && (
+                    <div className="bg-pmmg-navy/10 dark:bg-slate-700 text-pmmg-navy dark:text-slate-300 px-3 py-1 rounded-full text-[8px] font-black uppercase flex items-center gap-1 border border-pmmg-navy/10 dark:border-slate-600">
+                      Status: {statusFilter}
+                      <button onClick={() => setStatusFilter('Todos')} className="material-symbols-outlined text-xs">close</button>
+                    </div>
+                  )}
+                  {selectedMemberFilterId && activeMemberFilter && (
+                    <div className="bg-pmmg-navy/10 dark:bg-slate-700 text-pmmg-navy dark:text-slate-300 px-3 py-1 rounded-full text-[8px] font-black uppercase flex items-center gap-1 border border-pmmg-navy/10 dark:border-slate-600">
+                      Autor: {activeMemberFilter.name.split(' ')[0]}
+                      <button onClick={() => setSelectedMemberFilterId(null)} className="material-symbols-outlined text-xs">close</button>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Botão de teste para entrada de membro */}
+              <button 
+                onClick={onJoinGroup}
+                className="w-full bg-green-500 text-white text-[10px] font-bold py-2 rounded-xl uppercase tracking-widest active:scale-[0.98] transition-transform"
+              >
+                [TESTE] Adicionar Cap. Pereira (o2)
+              </button>
+
+              {filteredPosts.length > 0 ? (
+                viewMode === 'list' ? (
+                  <div className="space-y-6 mt-4 animate-in fade-in duration-300">
+                    {filteredPosts.map(renderTimelinePost)}
+                  </div>
+                ) : (
+                  /* MODO GALERIA PARA O GRUPO */
+                  <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mt-4 animate-in zoom-in-95 duration-300">
+                    {filteredPosts.filter(p => p.type === 'suspect').map((post) => (
+                      <div 
+                        key={post.id}
+                        onClick={() => post.suspectId && onOpenProfile(post.suspectId)}
+                        className="relative aspect-[3/4] pmmg-card overflow-hidden shadow-lg border-2 border-pmmg-navy/10 dark:border-slate-700 active:scale-95 transition-all cursor-pointer"
+                      >
+                        <img src={post.suspectPhoto} alt={post.suspectName} className="w-full h-full object-cover" />
+                        
+                        {/* Autor Badge */}
+                        <div className="absolute top-1 left-1 bg-pmmg-navy/70 backdrop-blur-sm text-[6px] font-black text-white px-1.5 py-0.5 rounded uppercase tracking-tighter z-10">
+                          {post.authorName.charAt(0)}
+                        </div>
+
+                        {/* Info Overlay */}
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-1.5 pt-4">
+                          <p className="text-[8px] font-black text-white uppercase truncate text-center drop-shadow-md">
+                            {post.suspectName?.split(' ')[0]}
+                          </p>
+                          <p className="text-[6px] text-pmmg-yellow/80 font-bold uppercase text-center tracking-tighter mt-0.5">
+                            {post.timestamp.split(' ')[0]}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : (
+                <div className="text-center py-32 opacity-20">
+                  <span className="material-symbols-outlined text-7xl">post_add</span>
+                  <p className="text-sm font-black uppercase mt-4 tracking-[0.2em]">
+                    {group.posts.length > 0 ? 'Nenhum resultado para os filtros' : 'Sem publicações ainda'}
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="p-4 lg:p-0 lg:col-span-3 space-y-3">
+              <div className="bg-white/40 dark:bg-slate-700/50 p-4 rounded-3xl border border-white/20 dark:border-slate-600 mb-6 flex items-center justify-between lg:max-w-3xl lg:mx-auto">
+                <div>
+                  <p className="text-[9px] font-black text-pmmg-navy/40 dark:text-slate-400 uppercase tracking-widest mb-1">Convite para Oficiais</p>
+                  <p className="text-sm font-black text-pmmg-navy dark:text-slate-200 tracking-widest">{group.inviteCode}</p>
+                </div>
+                <button 
+                  onClick={() => {
+                    navigator.clipboard.writeText(group.inviteCode);
+                    alert('Código de convite copiado para a área de transferência!');
+                  }}
+                  className="w-10 h-10 bg-pmmg-navy text-white rounded-xl flex items-center justify-center shadow-lg active:scale-90 transition-transform"
+                >
+                  <span className="material-symbols-outlined text-lg">content_copy</span>
+                </button>
+              </div>
+              
+              {/* Campo de Pesquisa de Membros */}
+              <div className="relative mb-4 lg:max-w-3xl lg:mx-auto">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-pmmg-navy/30 dark:text-slate-500 text-lg">search</span>
+                <input 
+                  value={memberSearchQuery}
+                  onChange={(e) => setMemberSearchQuery(e.target.value)}
+                  placeholder="BUSCAR MEMBRO (NOME, UNIDADE, POSTO)..."
+                  className="w-full pl-10 pr-4 py-3 bg-white/60 dark:bg-slate-700 border-none rounded-2xl text-[10px] font-black uppercase placeholder:text-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-pmmg-navy/10 transition-all shadow-inner dark:text-slate-200"
+                />
+              </div>
+
+              <div className="lg:grid lg:grid-cols-2 lg:gap-4 lg:max-w-5xl lg:mx-auto">
+                {filteredMembers.length > 0 ? filteredMembers.map(member => (
+                  <div 
+                    key={member.id} 
+                    className="pmmg-card p-3 flex items-center justify-between shadow-sm border-l-4 border-l-pmmg-navy dark:border-l-pmmg-yellow"
+                  >
+                    <div 
+                      onClick={() => handleFilterByMember(member.id)}
+                      className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer active:scale-[0.99] transition-transform"
+                    >
+                      <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-300 shrink-0">
+                        <img src={member.photoUrl} alt={member.name} className="w-full h-full object-cover" />
+                      </div>
+                      <div>
+                        <h4 className="text-[11px] font-black text-pmmg-navy dark:text-slate-200 uppercase leading-none">{member.rank} {member.name}</h4>
+                        <span className={`text-[8px] font-black uppercase tracking-tighter ${member.role === 'admin' ? 'text-pmmg-red' : 'text-slate-400 dark:text-slate-500'}`}>
+                          {member.role === 'admin' ? 'Responsável Técnico' : 'Agente Operacional'}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Ações de Gerenciamento (Apenas para Admins) */}
+                    {isCurrentUserAdmin && member.id !== CURRENT_USER_ID && (
+                      <div className="flex items-center gap-2 shrink-0">
+                        {member.isAdmin ? (
+                          <button 
+                            onClick={() => handleDemoteMember(member.id, member.name)}
+                            className="text-pmmg-yellow/80 hover:text-pmmg-yellow active:scale-90 transition-transform p-1"
+                            title="Rebaixar para Membro"
+                          >
+                            <span className="material-symbols-outlined text-xl fill-icon">star_half</span>
+                          </button>
+                        ) : (
+                          <button 
+                            onClick={() => handlePromoteMember(member.id, member.name)}
+                            className="text-green-600/80 hover:text-green-600 active:scale-90 transition-transform p-1"
+                            title="Promover a Admin"
+                          >
+                            <span className="material-symbols-outlined text-xl">star</span>
+                          </button>
+                        )}
+                        <button 
+                          onClick={() => handleRemoveMember(member.id, member.name)}
+                          className="text-pmmg-red/40 hover:text-pmmg-red active:scale-90 transition-transform p-1"
+                          title="Remover do Grupo"
+                        >
+                          <span className="material-symbols-outlined text-xl">person_remove</span>
+                        </button>
+                      </div>
+                    )}
+                    
+                    {/* Ícone de navegação (se não for admin ou se for o próprio usuário) */}
+                    {(!isCurrentUserAdmin || member.id === CURRENT_USER_ID) && (
+                        <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600 text-lg shrink-0">arrow_forward_ios</span>
+                    )}
+                  </div>
+                )) : (
+                  <div className="text-center py-10 opacity-40 lg:col-span-2">
+                    <span className="material-symbols-outlined text-5xl">person_search</span>
+                    <p className="text-xs font-bold uppercase mt-2">Nenhum membro encontrado</p>
+                  </div>
                 )}
               </div>
-            )) : (
-              <div className="text-center py-10 opacity-40">
-                <span className="material-symbols-outlined text-5xl">person_search</span>
-                <p className="text-xs font-bold uppercase mt-2">Nenhum membro encontrado</p>
-              </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </main>
 
-      {/* MODAL: Editar Grupo */}
+      {/* MODAL: Editar Grupo (Mantido como fixed, mas centralizado) */}
       {showEditModal && (
         <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4 bg-pmmg-navy/80 backdrop-blur-md animate-in fade-in duration-200">
           <div className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl shadow-2xl p-6">
@@ -746,7 +750,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
         </div>
       )}
       
-      {/* MODAL: Confirmação de Exclusão */}
+      {/* MODAL: Confirmação de Exclusão (Mantido como fixed, mas centralizado) */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-[1001] flex items-center justify-center p-4 bg-pmmg-navy/80 backdrop-blur-md animate-in fade-in duration-200">
           <div className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl shadow-2xl p-6 text-center">
@@ -772,9 +776,9 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
         </div>
       )}
 
-      {/* Share Suspect Modal (Mantido) */}
+      {/* Share Suspect Modal (Mantido como fixed, mas centralizado) */}
       {showShareModal && (
-        <div className="fixed inset-0 z-[1000] flex items-end justify-center p-4 bg-pmmg-navy/80 backdrop-blur-md animate-in fade-in slide-in-from-bottom-10 duration-300">
+        <div className="fixed inset-0 z-[1000] flex items-end justify-center p-4 bg-pmmg-navy/80 backdrop-blur-md animate-in fade-in slide-in-from-bottom-10 duration-300 lg:items-center">
           <div className="bg-white dark:bg-slate-800 w-full max-w-sm rounded-[3rem] shadow-2xl p-6 flex flex-col max-h-[90vh]">
             <div className="flex items-center justify-between mb-6 shrink-0">
                <div>

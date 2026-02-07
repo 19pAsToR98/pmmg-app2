@@ -16,7 +16,7 @@ const Store: React.FC<StoreProps> = ({ navigateTo }) => {
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki dark:bg-slate-900 overflow-hidden">
-      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-xl">
+      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-xl shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 shrink-0 bg-white rounded-full flex items-center justify-center p-1 border-2 border-pmmg-yellow shadow-inner">
             <span className="material-symbols-outlined text-pmmg-navy text-2xl">storefront</span>
@@ -34,12 +34,12 @@ const Store: React.FC<StoreProps> = ({ navigateTo }) => {
         </button>
       </header>
 
-      <main className="flex-1 overflow-y-auto pb-32 no-scrollbar px-4 pt-6">
+      <main className="flex-1 overflow-y-auto lg:pb-4 no-scrollbar px-4 pt-6">
         <p className="text-[10px] font-bold uppercase text-pmmg-navy/70 dark:text-slate-400 mb-4 text-center tracking-wider">
           Links para fornecedores parceiros e materiais recomendados.
         </p>
 
-        <div className="space-y-4">
+        <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0 lg:max-w-5xl lg:mx-auto">
           {CATEGORIES.map((category) => (
             <div key={category.id} className="pmmg-card overflow-hidden">
               {/* Category Header (Clickable) */}
@@ -74,7 +74,7 @@ const Store: React.FC<StoreProps> = ({ navigateTo }) => {
         </div>
       </main>
 
-      <BottomNav activeScreen="store" navigateTo={navigateTo} />
+      {/* BottomNav is now handled by App.tsx and hidden on desktop */}
     </div>
   );
 };

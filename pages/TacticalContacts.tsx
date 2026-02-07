@@ -30,7 +30,7 @@ const TacticalContacts: React.FC<TacticalContactsProps> = ({ navigateTo, officer
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki dark:bg-slate-900 overflow-hidden">
-      <header className="sticky top-0 z-50 bg-pmmg-navy text-white shadow-xl px-4 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-pmmg-navy text-white shadow-xl px-4 py-4 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
           <button onClick={() => navigateTo('groupsList')} className="text-white">
             <span className="material-symbols-outlined">arrow_back_ios</span>
@@ -42,155 +42,163 @@ const TacticalContacts: React.FC<TacticalContactsProps> = ({ navigateTo, officer
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto pb-32 no-scrollbar px-4 pt-4">
-        
-        {/* Busca de Oficiais */}
-        <section className="mb-6">
-          <h3 className="text-[11px] font-bold text-pmmg-navy/60 dark:text-slate-400 uppercase tracking-wider mb-3">Buscar Oficial (Matrícula/Nome)</h3>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-              <span className="material-symbols-outlined text-pmmg-navy/50 dark:text-slate-500 text-xl">search</span>
-            </div>
-            <input 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-full pl-10 pr-3 py-3 bg-white/60 dark:bg-slate-700 border border-pmmg-navy/10 dark:border-slate-600 focus:border-pmmg-navy focus:ring-0 rounded-2xl text-sm placeholder-pmmg-navy/40 dark:placeholder-slate-500 dark:text-slate-200" 
-              placeholder="Buscar por nome ou unidade..." 
-              type="text" 
-            />
+      <main className="flex-1 overflow-y-auto lg:pb-4 no-scrollbar px-4 pt-4">
+        <div className="lg:grid lg:grid-cols-2 lg:gap-6 lg:max-w-7xl lg:mx-auto">
+          
+          {/* Coluna 1: Busca e Solicitações Recebidas */}
+          <div className="lg:col-span-1">
+            {/* Busca de Oficiais */}
+            <section className="mb-6">
+              <h3 className="text-[11px] font-bold text-pmmg-navy/60 dark:text-slate-400 uppercase tracking-wider mb-3">Buscar Oficial (Matrícula/Nome)</h3>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                  <span className="material-symbols-outlined text-pmmg-navy/50 dark:text-slate-500 text-xl">search</span>
+                </div>
+                <input 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="block w-full pl-10 pr-3 py-3 bg-white/60 dark:bg-slate-700 border border-pmmg-navy/10 dark:border-slate-600 focus:border-pmmg-navy focus:ring-0 rounded-2xl text-sm placeholder-pmmg-navy/40 dark:placeholder-slate-500 dark:text-slate-200" 
+                  placeholder="Buscar por nome ou unidade..." 
+                  type="text" 
+                />
+              </div>
+              
+              {searchTerm.length > 0 && availableOfficers.length > 0 && (
+                <div className="mt-3 pmmg-card p-3 space-y-2">
+                  {availableOfficers.map(officer => (
+                    <div key={officer.id} className="flex items-center justify-between p-2 bg-pmmg-khaki/30 dark:bg-slate-700/50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-300 shrink-0">
+                          <img src={officer.photoUrl} alt={officer.name} className="w-full h-full object-cover" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-pmmg-navy dark:text-slate-200 leading-tight">{officer.name}</p>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400">{officer.rank} • {officer.unit}</p>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => onSendRequest(officer.id)}
+                        className="bg-pmmg-navy text-white text-[9px] font-bold px-3 py-1.5 rounded-lg uppercase active:scale-95 transition-transform"
+                      >
+                        Solicitar Contato
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {searchTerm.length > 0 && availableOfficers.length === 0 && (
+                <p className="text-center text-[10px] text-pmmg-navy/50 dark:text-slate-400 mt-4">Nenhum oficial encontrado ou já é seu contato.</p>
+              )}
+            </section>
+
+            {/* Solicitações Pendentes */}
+            <section className="mb-6">
+              <h3 className="text-[11px] font-bold text-pmmg-navy/60 dark:text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                Solicitações Recebidas 
+                {pendingRequests.length > 0 && (
+                  <span className="bg-pmmg-red text-white text-[8px] font-bold px-2 py-0.5 rounded-full">{pendingRequests.length}</span>
+                )}
+              </h3>
+              <div className="pmmg-card p-4 space-y-3">
+                {pendingRequests.length > 0 ? pendingRequests.map(contact => {
+                  const officer = getOfficer(contact.officerId);
+                  if (!officer) return null;
+                  return (
+                    <div key={officer.id} className="flex items-center justify-between border-b border-pmmg-navy/5 dark:border-slate-700 pb-3 last:border-b-0 last:pb-0">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-300 shrink-0">
+                          <img src={officer.photoUrl} alt={officer.name} className="w-full h-full object-cover" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-pmmg-navy dark:text-slate-200 leading-tight">{officer.name}</p>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400">{officer.rank} • {officer.unit}</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 shrink-0">
+                        <button 
+                          onClick={() => onAcceptRequest(officer.id)}
+                          className="bg-green-600 text-white p-2 rounded-lg active:scale-95 transition-transform"
+                        >
+                          <span className="material-symbols-outlined text-lg">check</span>
+                        </button>
+                        <button 
+                          onClick={() => onRejectRequest(officer.id)}
+                          className="bg-pmmg-red text-white p-2 rounded-lg active:scale-95 transition-transform"
+                        >
+                          <span className="material-symbols-outlined text-lg">close</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                }) : (
+                  <p className="text-xs text-slate-400 italic text-center py-2">Nenhuma solicitação pendente.</p>
+                )}
+              </div>
+            </section>
           </div>
           
-          {searchTerm.length > 0 && availableOfficers.length > 0 && (
-            <div className="mt-3 pmmg-card p-3 space-y-2">
-              {availableOfficers.map(officer => (
-                <div key={officer.id} className="flex items-center justify-between p-2 bg-pmmg-khaki/30 dark:bg-slate-700/50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-300 shrink-0">
-                      <img src={officer.photoUrl} alt={officer.name} className="w-full h-full object-cover" />
+          {/* Coluna 2: Contatos Aceitos e Solicitações Enviadas */}
+          <div className="lg:col-span-1">
+            {/* Contatos Aceitos */}
+            <section className="mb-6 lg:mt-0 mt-6">
+              <h3 className="text-[11px] font-bold text-pmmg-navy/60 dark:text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                Contatos Aceitos ({acceptedContacts.length})
+              </h3>
+              <div className="pmmg-card p-4 space-y-3">
+                {acceptedContacts.length > 0 ? acceptedContacts.map(contact => {
+                  const officer = getOfficer(contact.officerId);
+                  if (!officer) return null;
+                  return (
+                    <div key={officer.id} className="flex items-center justify-between border-b border-pmmg-navy/5 dark:border-slate-700 pb-3 last:border-b-0 last:pb-0">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-300 shrink-0">
+                          <img src={officer.photoUrl} alt={officer.name} className="w-full h-full object-cover" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-pmmg-navy dark:text-slate-200 leading-tight">{officer.name}</p>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400">{officer.rank} • {officer.unit}</p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-bold text-green-600 uppercase">Aceito</span>
                     </div>
-                    <div>
-                      <p className="text-sm font-bold text-pmmg-navy dark:text-slate-200 leading-tight">{officer.name}</p>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400">{officer.rank} • {officer.unit}</p>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => onSendRequest(officer.id)}
-                    className="bg-pmmg-navy text-white text-[9px] font-bold px-3 py-1.5 rounded-lg uppercase active:scale-95 transition-transform"
-                  >
-                    Solicitar Contato
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-          {searchTerm.length > 0 && availableOfficers.length === 0 && (
-            <p className="text-center text-[10px] text-pmmg-navy/50 dark:text-slate-400 mt-4">Nenhum oficial encontrado ou já é seu contato.</p>
-          )}
-        </section>
+                  );
+                }) : (
+                  <p className="text-xs text-slate-400 italic text-center py-2">Nenhum contato aceito.</p>
+                )}
+              </div>
+            </section>
 
-        {/* Contatos Aceitos */}
-        <section className="mb-6">
-          <h3 className="text-[11px] font-bold text-pmmg-navy/60 dark:text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-            Contatos Aceitos ({acceptedContacts.length})
-          </h3>
-          <div className="pmmg-card p-4 space-y-3">
-            {acceptedContacts.length > 0 ? acceptedContacts.map(contact => {
-              const officer = getOfficer(contact.officerId);
-              if (!officer) return null;
-              return (
-                <div key={officer.id} className="flex items-center justify-between border-b border-pmmg-navy/5 dark:border-slate-700 pb-3 last:border-b-0 last:pb-0">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-300 shrink-0">
-                      <img src={officer.photoUrl} alt={officer.name} className="w-full h-full object-cover" />
+            {/* Solicitações Enviadas */}
+            <section className="mb-6">
+              <h3 className="text-[11px] font-bold text-pmmg-navy/60 dark:text-slate-400 uppercase tracking-wider mb-3">Solicitações Enviadas ({sentRequests.length})</h3>
+              <div className="pmmg-card p-4 space-y-3">
+                {sentRequests.length > 0 ? sentRequests.map(contact => {
+                  const officer = getOfficer(contact.officerId);
+                  if (!officer) return null;
+                  return (
+                    <div key={officer.id} className="flex items-center justify-between border-b border-pmmg-navy/5 dark:border-slate-700 pb-3 last:border-b-0 last:pb-0 opacity-70">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-300 shrink-0">
+                          <img src={officer.photoUrl} alt={officer.name} className="w-full h-full object-cover" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-pmmg-navy dark:text-slate-200 leading-tight">{officer.name}</p>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400">{officer.rank} • {officer.unit}</p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-bold text-pmmg-yellow uppercase">Pendente</span>
                     </div>
-                    <div>
-                      <p className="text-sm font-bold text-pmmg-navy dark:text-slate-200 leading-tight">{officer.name}</p>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400">{officer.rank} • {officer.unit}</p>
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-bold text-green-600 uppercase">Aceito</span>
-                </div>
-              );
-            }) : (
-              <p className="text-xs text-slate-400 italic text-center py-2">Nenhum contato aceito.</p>
-            )}
+                  );
+                }) : (
+                  <p className="text-xs text-slate-400 italic text-center py-2">Nenhuma solicitação enviada.</p>
+                )}
+              </div>
+            </section>
           </div>
-        </section>
-
-        {/* Solicitações Pendentes */}
-        <section className="mb-6">
-          <h3 className="text-[11px] font-bold text-pmmg-navy/60 dark:text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-            Solicitações Recebidas 
-            {pendingRequests.length > 0 && (
-              <span className="bg-pmmg-red text-white text-[8px] font-bold px-2 py-0.5 rounded-full">{pendingRequests.length}</span>
-            )}
-          </h3>
-          <div className="pmmg-card p-4 space-y-3">
-            {pendingRequests.length > 0 ? pendingRequests.map(contact => {
-              const officer = getOfficer(contact.officerId);
-              if (!officer) return null;
-              return (
-                <div key={officer.id} className="flex items-center justify-between border-b border-pmmg-navy/5 dark:border-slate-700 pb-3 last:border-b-0 last:pb-0">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-300 shrink-0">
-                      <img src={officer.photoUrl} alt={officer.name} className="w-full h-full object-cover" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-pmmg-navy dark:text-slate-200 leading-tight">{officer.name}</p>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400">{officer.rank} • {officer.unit}</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2 shrink-0">
-                    <button 
-                      onClick={() => onAcceptRequest(officer.id)}
-                      className="bg-green-600 text-white p-2 rounded-lg active:scale-95 transition-transform"
-                    >
-                      <span className="material-symbols-outlined text-lg">check</span>
-                    </button>
-                    <button 
-                      onClick={() => onRejectRequest(officer.id)}
-                      className="bg-pmmg-red text-white p-2 rounded-lg active:scale-95 transition-transform"
-                    >
-                      <span className="material-symbols-outlined text-lg">close</span>
-                    </button>
-                  </div>
-                </div>
-              );
-            }) : (
-              <p className="text-xs text-slate-400 italic text-center py-2">Nenhuma solicitação pendente.</p>
-            )}
-          </div>
-        </section>
-
-        {/* Solicitações Enviadas */}
-        <section className="mb-6">
-          <h3 className="text-[11px] font-bold text-pmmg-navy/60 dark:text-slate-400 uppercase tracking-wider mb-3">Solicitações Enviadas ({sentRequests.length})</h3>
-          <div className="pmmg-card p-4 space-y-3">
-            {sentRequests.length > 0 ? sentRequests.map(contact => {
-              const officer = getOfficer(contact.officerId);
-              if (!officer) return null;
-              return (
-                <div key={officer.id} className="flex items-center justify-between border-b border-pmmg-navy/5 dark:border-slate-700 pb-3 last:border-b-0 last:pb-0 opacity-70">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-300 shrink-0">
-                      <img src={officer.photoUrl} alt={officer.name} className="w-full h-full object-cover" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-pmmg-navy dark:text-slate-200 leading-tight">{officer.name}</p>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400">{officer.rank} • {officer.unit}</p>
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-bold text-pmmg-yellow uppercase">Pendente</span>
-                </div>
-              );
-            }) : (
-              <p className="text-xs text-slate-400 italic text-center py-2">Nenhuma solicitação enviada.</p>
-            )}
-          </div>
-        </section>
+        </div>
       </main>
 
-      <BottomNav activeScreen="groupsList" navigateTo={navigateTo} />
+      {/* BottomNav is now handled by App.tsx and hidden on desktop */}
     </div>
   );
 };
