@@ -425,65 +425,56 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           <div className="flex items-center gap-4 pl-4 border-l border-white/20">
             
             {/* Filtro de Localização */}
-            <div className="flex flex-col gap-1 shrink-0">
-              <p className="text-[8px] font-bold uppercase text-white/50 tracking-widest">Localização</p>
-              <div className="flex bg-white/10 p-1 rounded-lg">
-                <button 
-                  onClick={() => setLocationFilter('residence')}
-                  className={`text-[9px] font-bold uppercase py-1.5 px-2 rounded-md transition-all flex items-center gap-1 ${locationFilter === 'residence' ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white/70 hover:bg-white/20'}`}
-                >
-                  <span className="material-symbols-outlined text-sm">location_on</span> Residência
-                </button>
-                <button 
-                  onClick={() => setLocationFilter('approach')}
-                  className={`text-[9px] font-bold uppercase py-1.5 px-2 rounded-md transition-all flex items-center gap-1 ${locationFilter === 'approach' ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white/70 hover:bg-white/20'}`}
-                >
-                  <span className="material-symbols-outlined text-sm">pin_drop</span> Abordagem
-                </button>
-              </div>
+            <div className="flex bg-white/10 p-1 rounded-lg shrink-0" title="Filtro de Localização">
+              <button 
+                onClick={() => setLocationFilter('residence')}
+                className={`text-[9px] font-bold uppercase py-1.5 px-2 rounded-md transition-all flex items-center gap-1 ${locationFilter === 'residence' ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white/70 hover:bg-white/20'}`}
+              >
+                <span className="material-symbols-outlined text-sm">location_on</span> Residência
+              </button>
+              <button 
+                onClick={() => setLocationFilter('approach')}
+                className={`text-[9px] font-bold uppercase py-1.5 px-2 rounded-md transition-all flex items-center gap-1 ${locationFilter === 'approach' ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white/70 hover:bg-white/20'}`}
+              >
+                <span className="material-symbols-outlined text-sm">pin_drop</span> Abordagem
+              </button>
             </div>
             
             {/* Filtro de Status */}
-            <div className="flex flex-col gap-1 shrink-0">
-              <p className="text-[8px] font-bold uppercase text-white/50 tracking-widest">Status</p>
-              <div className="flex bg-white/10 p-1 rounded-lg">
+            <div className="flex bg-white/10 p-1 rounded-lg shrink-0" title="Filtro por Status">
+              <button 
+                onClick={() => setActiveFilter('Todos')}
+                className={`text-[9px] font-bold uppercase py-1.5 px-2 rounded-md transition-all ${activeFilter === 'Todos' ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white/70 hover:bg-white/20'}`}
+              >
+                Todos
+              </button>
+              {STATUS_FILTERS.slice(0, 3).map(filter => ( // Limita a 3 status principais
                 <button 
-                  onClick={() => setActiveFilter('Todos')}
-                  className={`text-[9px] font-bold uppercase py-1.5 px-2 rounded-md transition-all ${activeFilter === 'Todos' ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white/70 hover:bg-white/20'}`}
+                  key={filter.id}
+                  onClick={() => setActiveFilter(filter.id)}
+                  className={`text-[9px] font-bold uppercase py-1.5 px-2 rounded-md transition-all ${activeFilter === filter.id ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white/70 hover:bg-white/20'}`}
                 >
-                  Todos
+                  {filter.label}
                 </button>
-                {STATUS_FILTERS.slice(0, 3).map(filter => ( // Limita a 3 status principais
-                  <button 
-                    key={filter.id}
-                    onClick={() => setActiveFilter(filter.id)}
-                    className={`text-[9px] font-bold uppercase py-1.5 px-2 rounded-md transition-all ${activeFilter === filter.id ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white/70 hover:bg-white/20'}`}
-                  >
-                    {filter.label}
-                  </button>
-                ))}
-              </div>
+              ))}
             </div>
             
             {/* Opções de Camadas */}
-            <div className="flex flex-col gap-1 shrink-0">
-              <p className="text-[8px] font-bold uppercase text-white/50 tracking-widest">Camadas</p>
-              <div className="flex bg-white/10 p-1 rounded-lg">
-                {MAP_TYPES.map(type => (
-                  <button 
-                    key={type.id}
-                    onClick={() => setMapType(type.id)}
-                    className={`text-[9px] font-bold uppercase py-1.5 px-2 rounded-md transition-all flex items-center gap-1 ${mapType === type.id ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white/70 hover:bg-white/20'}`}
-                  >
-                    <span className="material-symbols-outlined text-sm">{type.icon}</span> {type.label}
-                  </button>
-                ))}
-              </div>
+            <div className="flex bg-white/10 p-1 rounded-lg shrink-0" title="Opções de Camadas">
+              {MAP_TYPES.map(type => (
+                <button 
+                  key={type.id}
+                  onClick={() => setMapType(type.id)}
+                  className={`text-[9px] font-bold uppercase py-1.5 px-2 rounded-md transition-all flex items-center gap-1 ${mapType === type.id ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white/70 hover:bg-white/20'}`}
+                >
+                  <span className="material-symbols-outlined text-sm">{type.icon}</span> {type.label}
+                </button>
+              ))}
             </div>
           </div>
           
-          {/* Botões de Ação (AGORA DENTRO DO CONTÊINER PRINCIPAL) */}
-          <div className="flex items-center gap-2 pl-4 border-l border-white/20">
+          {/* Botões de Ação */}
+          <div className="flex items-center gap-2 pl-4 border-l border-white/20 shrink-0">
             <button 
               onClick={() => {
                 setIsAddingMarker(prev => !prev);
