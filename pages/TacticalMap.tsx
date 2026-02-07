@@ -405,7 +405,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       {/* DESKTOP FLOATING ACTIONS (Visível apenas em telas grandes) */}
       <div className="hidden lg:flex absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000]">
         {/* Removendo gap-4 e usando gap-2 para maior compactação */}
-        <div className="bg-pmmg-navy/90 backdrop-blur-md p-3 rounded-xl shadow-2xl border border-pmmg-yellow/30 flex items-center gap-2">
+        <div className="bg-pmmg-navy/90 backdrop-blur-md p-3 rounded-xl shadow-2xl border border-pmmg-yellow/30 flex items-center gap-3">
           
           {/* Título */}
           <div className="flex items-center gap-3 shrink-0 pr-2">
@@ -423,8 +423,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           </div>
           
           {/* Controles de Filtro e Visualização (CONSOLIDADOS) */}
-          {/* Usando flex-wrap para garantir que caiba, mas mantendo a linha se possível */}
-          <div className="flex items-center gap-2 pl-2 border-l border-white/20">
+          <div className="flex items-center gap-2 pl-3 border-l border-white/20">
             
             {/* Filtro de Localização */}
             <div className="flex bg-white/10 p-1 rounded-lg shrink-0" title="Filtro de Localização">
@@ -476,7 +475,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           </div>
           
           {/* Botões de Ação */}
-          <div className="flex items-center gap-2 pl-2 border-l border-white/20 shrink-0">
+          <div className="flex items-center gap-2 pl-3 border-l border-white/20 shrink-0">
             <button 
               onClick={() => {
                 setIsAddingMarker(prev => !prev);
