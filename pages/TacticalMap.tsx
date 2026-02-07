@@ -473,8 +473,8 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             </div>
           </div>
           
-          {/* Botões de Ação */}
-          <div className="flex items-center gap-2 pl-3 border-l border-white/20 shrink-0">
+          {/* Botões de Ação (REMOVENDO DIVISOR, MANTENDO ESPAÇO COM PL-3) */}
+          <div className="flex items-center gap-2 pl-3 shrink-0">
             <button 
               onClick={() => {
                 setIsAddingMarker(prev => !prev);
