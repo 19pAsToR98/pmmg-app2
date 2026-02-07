@@ -403,9 +403,8 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       </header>
       
       {/* DESKTOP FLOATING ACTIONS (Visível apenas em telas grandes) */}
-      <div className="hidden lg:flex absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000]">
-        {/* Removendo a classe 'gap-2' do contêiner principal e usando 'flex-nowrap' para evitar quebras de linha */}
-        <div className="bg-pmmg-navy/90 backdrop-blur-md p-3 rounded-xl shadow-2xl border border-pmmg-yellow/30 flex items-center flex-nowrap">
+      <div className="hidden lg:flex absolute top-4 left-0 right-0 z-[1000] justify-center px-4">
+        <div className="bg-pmmg-navy/90 backdrop-blur-md p-3 rounded-xl shadow-2xl border border-pmmg-yellow/30 flex items-center flex-nowrap max-w-[1400px] overflow-x-auto">
           
           {/* Título */}
           <div className="flex items-center gap-3 shrink-0 pr-3">
@@ -547,7 +546,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               locationType = 'Última Localização';
             } else if (locationFilter === 'approach') {
               lat = suspect.approachLat;
-              lng = suspect.lng;
+              lng = suspect.approachLng;
               locationName = suspect.approachAddress;
               locationType = 'Endereço de Abordagem';
             }
