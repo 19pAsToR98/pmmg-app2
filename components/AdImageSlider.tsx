@@ -32,7 +32,7 @@ const AdImageSlider: React.FC = () => {
   const currentAd = AD_IMAGES[currentIndex];
 
   return (
-    <div className="pmmg-card p-3 overflow-hidden shadow-xl h-80 flex flex-col">
+    <div className="pmmg-card p-3 overflow-hidden shadow-xl h-72 flex flex-col">
       <h3 className="text-[10px] font-black text-pmmg-red uppercase tracking-widest text-center mb-3">
         Parceiros Táticos
       </h3>
