@@ -714,10 +714,10 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         )}
 
         {/* SIDEBAR OCULTÁVEL (Legenda Tática) */}
-        {/* Ajustado para ser fixo no mobile e absoluto no desktop, com o botão de toggle sempre presente na lateral */}
-        <div className={`fixed lg:absolute top-0 right-0 z-[1000] bottom-0 lg:bottom-auto lg:top-0 lg:h-full transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className={`fixed z-[1000] right-0 transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'} 
+                        top-[60px] bottom-[80px] lg:absolute lg:top-0 lg:bottom-auto lg:h-full lg:mt-0`}>
           
-          {/* Botão de Toggle da Sidebar (Visível em ambas as telas, mas posicionado de forma diferente) */}
+          {/* Botão de Toggle da Sidebar (Visível em ambas as telas, posicionado na lateral) */}
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="absolute left-0 top-1/2 transform -translate-x-full -translate-y-1/2 bg-pmmg-navy p-1.5 rounded-l-xl shadow-xl text-pmmg-yellow active:scale-90 transition-transform"
@@ -728,7 +728,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           </button>
 
           {/* Conteúdo do Painel */}
-          <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-md p-3 rounded-l-2xl shadow-2xl border border-pmmg-navy/10 dark:border-slate-700 flex flex-col gap-2.5 h-full overflow-y-auto w-64 lg:max-h-full lg:mt-0">
+          <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-md p-3 rounded-l-2xl shadow-2xl border border-pmmg-navy/10 dark:border-slate-700 flex flex-col gap-2.5 h-full overflow-y-auto w-64">
             <p className="text-[8px] font-black text-pmmg-navy/40 dark:text-slate-500 uppercase tracking-widest border-b border-pmmg-navy/5 dark:border-slate-700 pb-1 mb-1">Legenda Tática</p>
             
             {/* --- Filtro de Localização --- */}
