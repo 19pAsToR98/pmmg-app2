@@ -10,9 +10,9 @@ const AIToolsWidget: React.FC<AIToolsWidgetProps> = ({ navigateTo, aiAvatar }) =
   return (
     <div className="pmmg-card p-4 space-y-4 flex flex-col items-center">
       
-      {/* Avatar em Destaque */}
-      <div className="flex flex-col items-center w-full mb-4">
-        <div className="relative w-24 h-24 mb-4">
+      {/* Avatar em Destaque (Tamanho Aumentado) */}
+      <div className="flex flex-col items-center w-full mb-6 pt-4">
+        <div className="relative w-36 h-36 mb-6">
           <div className="w-full h-full rounded-full overflow-hidden relative shadow-xl border-2 border-pmmg-navy/10 dark:border-slate-700">
              <img 
               alt={aiAvatar.name} 
@@ -20,7 +20,7 @@ const AIToolsWidget: React.FC<AIToolsWidgetProps> = ({ navigateTo, aiAvatar }) =
               src={aiAvatar.url} 
             />
           </div>
-          <div className="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-white dark:border-slate-800"></div>
+          <div className="absolute -bottom-1 -right-1 bg-green-500 w-6 h-6 rounded-full border-2 border-white dark:border-slate-800"></div>
         </div>
         
         {/* Bolha de Fala Simplificada */}
