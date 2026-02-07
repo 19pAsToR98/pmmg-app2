@@ -2,7 +2,7 @@ import React from 'react';
 import { GoogleMap, useLoadScript } from '@react-google-maps/api';
 import { LIGHT_MAP_STYLES, DARK_MAP_STYLES } from '../utils/mapStyles';
 
-// Libraries required for the map (geometry for utility functions, places if needed later)
+// Libraries required for the map
 const libraries: ("places" | "geometry" | "drawing" | "visualization")[] = ["geometry"];
 
 interface GoogleMapWrapperProps {
@@ -13,7 +13,7 @@ interface GoogleMapWrapperProps {
   options?: google.maps.MapOptions;
   onLoad?: (map: google.maps.Map) => void;
   onClick?: (e: google.maps.MapMouseEvent) => void;
-  isDarkMode?: boolean; // NEW PROP
+  isDarkMode?: boolean;
 }
 
 const GoogleMapWrapper: React.FC<GoogleMapWrapperProps> = ({ 
@@ -24,7 +24,7 @@ const GoogleMapWrapper: React.FC<GoogleMapWrapperProps> = ({
   options, 
   onLoad,
   onClick,
-  isDarkMode = false, // Default to false
+  isDarkMode = false,
 }) => {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
   
@@ -34,7 +34,6 @@ const GoogleMapWrapper: React.FC<GoogleMapWrapperProps> = ({
     language: 'pt-BR',
   });
   
-  // Determine which style to use based on dark mode state
   const mapStyles = isDarkMode ? DARK_MAP_STYLES : LIGHT_MAP_STYLES;
 
   if (loadError) {
@@ -57,13 +56,16 @@ const GoogleMapWrapper: React.FC<GoogleMapWrapperProps> = ({
       zoom={zoom}
       options={{
         disableDefaultUI: true,
-        zoomControl: false, 
-        rotateControl: false, 
-        // Removendo tilt: 0 para permitir rotação por gestos
+        zoomControl: true,
+        rotateControl: true, // Habilitado para rotação
         streetViewControl: false,
         mapTypeControl: false,
         fullscreenControl: false,
-        styles: mapStyles, 
+        styles: mapStyles,
+        
+        // Configurações para gestos
+        gestureHandling: 'greedy', 
+        
         ...options,
       }}
       onLoad={onLoad}
