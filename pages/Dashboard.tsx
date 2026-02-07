@@ -40,6 +40,12 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
       <h1 className="font-black text-xl text-primary-dark uppercase tracking-tight">Painel de Controle Tático</h1>
       
       <div className="flex items-center gap-4">
+        <div className="text-right">
+          <div className="text-[10px] text-secondary-light uppercase font-bold">Patrulha 402</div>
+          <div className="text-xs text-green-600 font-bold uppercase flex items-center justify-end gap-1">
+            <span className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></span> Online
+          </div>
+        </div>
         {/* Search Bar Desktop */}
         <button 
           onClick={() => navigateToSuspectsManagement('Todos')}
@@ -54,13 +60,6 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
             BUSCAR INDIVÍDUO (NOME, CPF, ALCUNHA)
           </div>
         </button>
-        
-        <div className="text-right">
-          <div className="text-[10px] text-secondary-light uppercase font-bold">Patrulha 402</div>
-          <div className="text-xs text-green-600 font-bold uppercase flex items-center justify-end gap-1">
-            <span className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></span> Online
-          </div>
-        </div>
       </div>
     </header>
   );
@@ -119,206 +118,168 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
 
       <main className="flex-1 overflow-y-auto pb-32 lg:pb-8 no-scrollbar">
         
-        <div className="p-4 lg:p-8 space-y-6">
+        {/* Desktop Layout: Grid 2/3 columns */}
+        <div className="lg:grid lg:grid-cols-3 lg:gap-6 lg:p-8">
           
-          {/* 1. Stats Grid (4 columns on mobile, 5 on desktop) */}
-          <section className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4">
-            <button 
-              onClick={() => navigateTo('registry')}
-              className="pmmg-card p-4 border-l-4 border-l-pmmg-yellow active:scale-[0.98] transition-transform text-left flex flex-col justify-between h-full min-h-[100px] bg-pmmg-navy text-white shadow-lg"
-            >
-              <span className="text-[10px] font-bold uppercase text-pmmg-yellow block mb-1 tracking-widest">Ação Rápida</span>
-              <div className="flex items-end justify-between">
-                <span className="text-lg font-black uppercase leading-tight">Novo Registro</span>
-                <span className="material-symbols-outlined text-pmmg-yellow text-3xl fill-icon">person_add</span>
-              </div>
-            </button>
+          {/* Coluna 1 & 2: Estatísticas e Novo Registro (Ocupa 2/3 no desktop) */}
+          <div className="lg:col-span-2">
             
-            <button onClick={() => handleCardClick('Foragido')} className="pmmg-card p-4 border-l-4 border-l-pmmg-red active:scale-[0.98] transition-transform text-left flex flex-col justify-between">
-              <span className="text-[10px] font-bold uppercase text-secondary-light block mb-1">Foragidos</span>
-              <div className="flex items-end justify-between">
-                <span className="text-3xl font-black text-pmmg-red">{stats.foragidos}</span>
-                <span className="material-symbols-outlined text-pmmg-red/30 text-3xl">release_alert</span>
-              </div>
-            </button>
-            <button onClick={() => handleCardClick('Suspeito')} className="pmmg-card p-4 border-l-4 border-l-pmmg-yellow active:scale-[0.98] transition-transform text-left flex flex-col justify-between">
-              <span className="text-[10px] font-bold uppercase text-secondary-light block mb-1">Suspeitos</span>
-              <div className="flex items-end justify-between">
-                <span className="text-3xl font-black text-primary-dark">{stats.suspeitos}</span>
-                <span className="material-symbols-outlined text-pmmg-yellow text-3xl">visibility</span>
-              </div>
-            </button>
-            <button onClick={() => handleCardClick('Preso')} className="pmmg-card p-4 border-l-4 border-l-pmmg-blue active:scale-[0.98] transition-transform text-left flex flex-col justify-between">
-              <span className="text-[10px] font-bold uppercase text-secondary-light block mb-1">Presos</span>
-              <div className="flex items-end justify-between">
-                <span className="text-3xl font-black text-pmmg-blue">{stats.presos}</span>
-                <span className="material-symbols-outlined text-pmmg-blue/30 text-3xl">lock</span>
-              </div>
-            </button>
-            <button onClick={() => handleCardClick('Todos')} className="hidden sm:flex pmmg-card p-4 border-l-4 border-l-pmmg-navy active:scale-[0.98] transition-transform text-left flex-col justify-between">
-              <span className="text-[10px] font-bold uppercase text-secondary-light block mb-1">Total Registros</span>
-              <div className="flex items-end justify-between">
-                <span className="text-3xl font-black text-pmmg-navy dark:text-slate-200">{stats.total}</span>
-                <span className="material-symbols-outlined text-pmmg-navy/30 text-3xl">manage_search</span>
-              </div>
-            </button>
-          </section>
-          
-          {/* 2. Main Content Grid (Desktop: 3 columns, Mobile: 1 column) */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            {/* Coluna 1 & 2 (Desktop): Alertas Recentes (Ocupa 2/3) */}
-            <section className="lg:col-span-2">
-              <div className="flex items-center justify-between pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="h-4 w-1.5 bg-pmmg-red rounded-full"></div>
-                  <h3 className="font-bold text-xs text-primary-dark uppercase tracking-widest italic">
-                    Alertas e Registros Recentes
-                  </h3>
+            {/* Stats Grid */}
+            <section className="px-4 pt-4 lg:px-0 lg:pt-0 grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <button onClick={() => handleCardClick('Foragido')} className="pmmg-card p-4 border-l-4 border-l-pmmg-red active:scale-[0.98] transition-transform text-left">
+                <span className="text-[10px] font-bold uppercase text-secondary-light block mb-1">Foragidos</span>
+                <div className="flex items-end justify-between">
+                  <span className="text-3xl font-black text-pmmg-red">{stats.foragidos}</span>
+                  <span className="material-symbols-outlined text-pmmg-red/30 text-3xl">release_alert</span>
                 </div>
-                <button 
-                  onClick={() => navigateToSuspectsManagement('Todos')}
-                  className="text-[9px] font-black text-pmmg-navy/60 dark:text-slate-400 uppercase hover:text-pmmg-navy transition-colors"
-                >
-                  Ver Todos
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {recentSuspects.length > 0 ? recentSuspects.map((s) => (
-                  <div 
-                    key={s.id} 
-                    onClick={() => onOpenProfile(s.id)}
-                    className="pmmg-card overflow-hidden transition-all active:scale-[0.98] cursor-pointer"
-                  >
-                    <div className="flex">
-                      <div className="w-24 h-32 relative bg-slate-200 dark:bg-slate-700 shrink-0">
-                        <img alt={s.name} className="w-full h-full object-cover" src={s.photoUrl} />
-                        <div className={`absolute top-0 left-0 text-white text-[8px] font-bold px-2 py-1 uppercase rounded-br-lg shadow-md ${
-                          s.status === 'Foragido' ? 'bg-pmmg-red' : 
-                          s.status === 'Suspeito' ? 'bg-pmmg-yellow text-primary-dark' :
-                          s.status === 'Preso' ? 'bg-pmmg-blue' : 'bg-slate-700'
-                        }`}>
-                          {s.status}
-                        </div>
-                      </div>
-                      <div className="flex-1 p-3 flex flex-col justify-between overflow-hidden">
-                        <div>
-                          <div className="flex justify-between items-start">
-                            <h4 className="font-bold text-xs text-primary-dark uppercase leading-tight truncate pr-1">{s.name}</h4>
-                            <span className={`material-symbols-outlined fill-icon text-lg ${
-                              s.status === 'Foragido' ? 'text-pmmg-red' : 'text-pmmg-yellow'
-                            }`}>
-                              {s.status === 'Foragido' ? 'priority_high' : 'warning'}
-                            </span>
-                          </div>
-                          <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 mt-1">CPF: {s.cpf}</p>
-                          <div className="mt-2 space-y-1">
-                            <div className="flex items-center gap-1.5">
-                              <span className="material-symbols-outlined text-[14px] text-primary-dark">location_on</span>
-                              <span className="text-[10px] text-secondary-light truncate">Visto em: {s.lastSeen}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <span className="material-symbols-outlined text-[14px] text-primary-dark">history</span>
-                              <span className="text-[10px] text-secondary-light">Há {s.timeAgo}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex gap-2 mt-2">
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); onOpenProfile(s.id); }}
-                            className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded-lg uppercase tracking-wide"
-                          >
-                            Ficha
-                          </button>
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); startShareFlow(s.id); }} // USANDO NOVO FLUXO
-                            className="px-3 border-2 border-pmmg-navy/20 dark:border-slate-600 rounded-lg flex items-center justify-center"
-                          >
-                            <span className="material-symbols-outlined text-primary-dark text-lg">share</span>
-                          </button>
-                          {/* Link VER NO MAPA (Apenas ícone no desktop) */}
-                          {s.lat && s.lng && (
-                            <button 
-                              onClick={(e) => { e.stopPropagation(); handleViewOnMap(s); }}
-                              className="px-3 border-2 border-pmmg-navy/20 dark:border-slate-600 rounded-lg flex items-center justify-center"
-                            >
-                              <span className="material-symbols-outlined text-primary-dark text-lg fill-icon">map</span>
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )) : (
-                  <div className="text-center py-10 opacity-40 col-span-full">
-                    <span className="material-symbols-outlined text-7xl">person_search</span>
-                    <p className="text-xs font-bold uppercase mt-2">Nenhum registro encontrado</p>
-                  </div>
-                )}
-              </div>
+              </button>
+              <button onClick={() => handleCardClick('Suspeito')} className="pmmg-card p-4 border-l-4 border-l-pmmg-yellow active:scale-[0.98] transition-transform text-left">
+                <span className="text-[10px] font-bold uppercase text-secondary-light block mb-1">Suspeitos</span>
+                <div className="flex items-end justify-between">
+                  <span className="text-3xl font-black text-primary-dark">{stats.suspeitos}</span>
+                  <span className="material-symbols-outlined text-pmmg-yellow text-3xl">visibility</span>
+                </div>
+              </button>
+              <button onClick={() => handleCardClick('Preso')} className="pmmg-card p-4 border-l-4 border-l-pmmg-blue active:scale-[0.98] transition-transform text-left">
+                <span className="text-[10px] font-bold uppercase text-secondary-light block mb-1">Presos</span>
+                <div className="flex items-end justify-between">
+                  <span className="text-3xl font-black text-pmmg-blue">{stats.presos}</span>
+                  <span className="material-symbols-outlined text-pmmg-blue/30 text-3xl">lock</span>
+                </div>
+              </button>
+              {/* NOVO CARD: TODOS */}
+              <button onClick={() => handleCardClick('Todos')} className="pmmg-card p-4 border-l-4 border-l-pmmg-navy active:scale-[0.98] transition-transform text-left">
+                <span className="text-[10px] font-bold uppercase text-secondary-light block mb-1">Todos Registros</span>
+                <div className="flex items-end justify-between">
+                  <span className="text-3xl font-black text-pmmg-navy dark:text-slate-200">{stats.total}</span>
+                  <span className="material-symbols-outlined text-pmmg-navy/30 text-3xl">manage_search</span>
+                </div>
+              </button>
             </section>
             
-            {/* Coluna 3 (Desktop): Ferramentas Rápidas e IA (Ocupa 1/3) */}
-            <section className="lg:col-span-1 space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="h-4 w-1.5 bg-pmmg-navy rounded-full"></div>
-                <h3 className="font-bold text-xs text-primary-dark uppercase tracking-widest italic">
-                  Ferramentas de Inteligência
-                </h3>
-              </div>
-              
-              <div className="pmmg-card p-4 space-y-3">
-                <button 
-                  onClick={() => navigateTo('plateConsultation')}
-                  className="w-full flex items-center justify-between p-3 bg-pmmg-navy/5 dark:bg-slate-700 rounded-xl active:bg-pmmg-navy/10 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-pmmg-navy dark:text-pmmg-yellow text-2xl fill-icon">photo_camera</span>
-                    <span className="text-sm font-bold text-primary-dark uppercase">Consultar Placa</span>
-                  </div>
-                  <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600">chevron_right</span>
-                </button>
-                
-                <button 
-                  onClick={() => navigateTo('voiceReport')}
-                  className="w-full flex items-center justify-between p-3 bg-pmmg-navy/5 dark:bg-slate-700 rounded-xl active:bg-pmmg-navy/10 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-pmmg-navy dark:text-pmmg-yellow text-2xl fill-icon">mic</span>
-                    <span className="text-sm font-bold text-primary-dark uppercase">Boletim por Voz</span>
-                  </div>
-                  <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600">chevron_right</span>
-                </button>
-                
-                <button 
-                  onClick={() => navigateTo('aiTools')}
-                  className="w-full flex items-center justify-between p-3 bg-pmmg-navy/5 dark:bg-slate-700 rounded-xl active:bg-pmmg-navy/10 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-pmmg-navy dark:text-pmmg-yellow text-2xl fill-icon">psychology</span>
-                    <span className="text-sm font-bold text-primary-dark uppercase">Assistente IA</span>
-                  </div>
-                  <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600">chevron_right</span>
-                </button>
-              </div>
-              
-              {/* Mapa de Calor (Widget Mock) */}
-              <div className="flex items-center gap-2 pt-4">
-                <div className="h-4 w-1.5 bg-pmmg-navy rounded-full"></div>
-                <h3 className="font-bold text-xs text-primary-dark uppercase tracking-widest italic">
-                  Visão Tática
-                </h3>
-              </div>
-              <div className="pmmg-card p-4 h-48 flex flex-col items-center justify-center opacity-70 bg-pmmg-navy/5 dark:bg-slate-700/50 border-2 border-dashed border-pmmg-navy/20 dark:border-slate-600">
-                <span className="material-symbols-outlined text-5xl text-pmmg-navy/30 dark:text-slate-600">map</span>
-                <p className="text-xs font-bold uppercase text-secondary-light mt-2">Mapa de Calor de Ocorrências</p>
-                <p className="text-[9px] text-slate-400 mt-1">Clique em Mapa Tático para visualizar</p>
+            {/* New Registry Button (Desktop: Full width of 2/3 column) */}
+            <section className="px-4 pt-4 lg:px-0">
+              <button 
+                onClick={() => navigateTo('registry')}
+                className="w-full bg-pmmg-navy text-white text-sm font-bold py-4 rounded-xl uppercase tracking-widest flex items-center justify-center gap-2 active:scale-[0.99] transition-transform border border-pmmg-yellow/30 shadow-lg"
+              >
+                <span className="material-symbols-outlined text-xl text-pmmg-yellow">person_add</span>
+                Novo Registro de Indivíduo
+              </button>
+            </section>
+            
+            {/* Espaço para futuros widgets na coluna principal (Desktop) */}
+            <section className="hidden lg:block p-4 mt-6">
+              <h3 className="font-bold text-xs text-primary-dark uppercase tracking-widest italic mb-4">
+                Widgets de Inteligência (Em Desenvolvimento)
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="pmmg-card p-4 h-32 flex items-center justify-center opacity-50">
+                  <p className="text-xs font-bold uppercase text-secondary-light">Mapa de Calor de Ocorrências</p>
+                </div>
+                <div className="pmmg-card p-4 h-32 flex items-center justify-center opacity-50">
+                  <p className="text-xs font-bold uppercase text-secondary-light">Análise de Rota de Fuga IA</p>
+                </div>
               </div>
             </section>
           </div>
+
+          {/* Coluna 3: Alertas Recentes (Ocupa 1/3 no desktop) */}
+          <section className="lg:col-span-1 px-4 pt-8 lg:px-0 lg:pt-0">
+            <div className="flex items-center justify-between pb-3">
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-1.5 bg-pmmg-red rounded-full"></div>
+                <h3 className="font-bold text-xs text-primary-dark uppercase tracking-widest italic">
+                  Alertas e Registros Recentes
+                </h3>
+              </div>
+              <button 
+                onClick={() => navigateToSuspectsManagement('Todos')}
+                className="text-[9px] font-black text-pmmg-navy/60 dark:text-slate-400 uppercase hover:text-pmmg-navy transition-colors"
+              >
+                Ver Todos
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {recentSuspects.length > 0 ? recentSuspects.map((s) => (
+                <div 
+                  key={s.id} 
+                  onClick={() => onOpenProfile(s.id)}
+                  className="pmmg-card overflow-hidden transition-all active:scale-[0.98] cursor-pointer"
+                >
+                  <div className="flex">
+                    <div className="w-24 h-32 relative bg-slate-200 dark:bg-slate-700 shrink-0">
+                      <img alt={s.name} className="w-full h-full object-cover" src={s.photoUrl} />
+                      <div className={`absolute top-0 left-0 text-white text-[8px] font-bold px-2 py-1 uppercase rounded-br-lg shadow-md ${
+                        s.status === 'Foragido' ? 'bg-pmmg-red' : 
+                        s.status === 'Suspeito' ? 'bg-pmmg-yellow text-primary-dark' :
+                        s.status === 'Preso' ? 'bg-pmmg-blue' : 'bg-slate-700'
+                      }`}>
+                        {s.status}
+                      </div>
+                    </div>
+                    <div className="flex-1 p-3 flex flex-col justify-between overflow-hidden">
+                      <div>
+                        <div className="flex justify-between items-start">
+                          <h4 className="font-bold text-xs text-primary-dark uppercase leading-tight truncate pr-1">{s.name}</h4>
+                          <span className={`material-symbols-outlined fill-icon text-lg ${
+                            s.status === 'Foragido' ? 'text-pmmg-red' : 'text-pmmg-yellow'
+                          }`}>
+                            {s.status === 'Foragido' ? 'priority_high' : 'warning'}
+                          </span>
+                        </div>
+                        <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 mt-1">CPF: {s.cpf}</p>
+                        <div className="mt-2 space-y-1">
+                          <div className="flex items-center gap-1.5">
+                            <span className="material-symbols-outlined text-[14px] text-primary-dark">location_on</span>
+                            <span className="text-[10px] text-secondary-light truncate">Visto em: {s.lastSeen}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="material-symbols-outlined text-[14px] text-primary-dark">history</span>
+                            <span className="text-[10px] text-secondary-light">Há {s.timeAgo}</span>
+                          </div>
+                          {/* Link VER NO MAPA */}
+                          {s.lat && s.lng && (
+                            <div 
+                              onClick={(e) => { e.stopPropagation(); handleViewOnMap(s); }}
+                              className="flex items-center gap-1.5 cursor-pointer active:opacity-70 transition-opacity"
+                            >
+                              <span className="material-symbols-outlined text-[14px] text-secondary-light fill-icon">map</span>
+                              <span className="text-[10px] text-secondary-light font-bold uppercase tracking-wider">Ver no Mapa</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex gap-2 mt-2">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); onOpenProfile(s.id); }}
+                          className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded-lg uppercase tracking-wide"
+                        >
+                          Ficha
+                        </button>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); startShareFlow(s.id); }} // USANDO NOVO FLUXO
+                          className="px-3 border-2 border-pmmg-navy/20 dark:border-slate-600 rounded-lg flex items-center justify-center"
+                        >
+                          <span className="material-symbols-outlined text-primary-dark text-lg">share</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )) : (
+                <div className="text-center py-10 opacity-40">
+                  <span className="material-symbols-outlined text-5xl">person_search</span>
+                  <p className="text-xs font-bold uppercase mt-2">Nenhum registro encontrado</p>
+                </div>
+              )}
+            </div>
+          </section>
         </div>
       </main>
+
+      {/* BottomNav removido, agora centralizado no App.tsx */}
     </div>
   );
 };
