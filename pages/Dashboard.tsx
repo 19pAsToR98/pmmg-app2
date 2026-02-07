@@ -36,7 +36,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
   
   // Componente de Cabeçalho Desktop (Top Bar)
   const DesktopHeader = () => (
-    <header className="hidden lg:flex sticky top-0 z-50 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md px-8 py-4 shadow-md border-b border-pmmg-navy/10 dark:border-slate-700 justify-between items-center shrink-0">
+    <header className="hidden lg:flex sticky top-0 z-50 bg-pmmg-khaki/90 dark:bg-slate-800/90 backdrop-blur-md px-8 py-4 shadow-md border-b border-pmmg-navy/10 dark:border-slate-700 justify-between items-center shrink-0">
       <h1 className="font-black text-xl text-primary-dark uppercase tracking-tight">Painel de Controle Tático</h1>
       
       <div className="flex items-center gap-4">
