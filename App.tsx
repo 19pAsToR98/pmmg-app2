@@ -694,7 +694,7 @@ const App: React.FC = () => {
           />
         )}
         
-        {currentScreen === 'dashboard' && <Dashboard navigateTo={navigateTo} navigateToSuspectsManagement={navigateToSuspectsManagement} onOpenProfile={openProfile} suspects={suspects} startShareFlow={startShareFlow} />}
+        {currentScreen === 'dashboard' && <Dashboard navigateTo={navigateTo} navigateToSuspectsManagement={navigateToSuspectsManagement} onOpenProfile={openProfile} suspects={suspects} startShareFlow={startShareFlow} aiAvatar={aiAvatar} />}
         {currentScreen === 'registry' && (
           <SuspectRegistry 
             navigateTo={navigateTo} 

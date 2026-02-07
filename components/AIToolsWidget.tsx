@@ -1,16 +1,26 @@
 import React from 'react';
-import { Screen } from '../types';
+import { Screen, UserAvatar } from '../types';
 
 interface AIToolsWidgetProps {
   navigateTo: (screen: Screen) => void;
+  aiAvatar: UserAvatar; // NOVO: Avatar do Assistente de IA
 }
 
-const AIToolsWidget: React.FC<AIToolsWidgetProps> = ({ navigateTo }) => {
+const AIToolsWidget: React.FC<AIToolsWidgetProps> = ({ navigateTo, aiAvatar }) => {
   return (
     <div className="pmmg-card p-4 space-y-4">
-      <div className="flex items-center gap-2 border-b border-pmmg-navy/10 dark:border-slate-700 pb-3">
-        <span className="material-symbols-outlined text-pmmg-navy dark:text-pmmg-yellow fill-icon text-xl">psychology</span>
-        <h3 className="font-bold text-xs text-primary-dark uppercase tracking-widest">Assistente Tático IA</h3>
+      <div className="flex items-center gap-3 border-b border-pmmg-navy/10 dark:border-slate-700 pb-3">
+        <div className="w-10 h-10 shrink-0 rounded-full overflow-hidden relative shadow-md border-2 border-pmmg-yellow/50">
+            <img 
+                alt={aiAvatar.name} 
+                className="w-full h-full object-cover" 
+                src={aiAvatar.url} 
+            />
+        </div>
+        <div>
+            <h3 className="font-bold text-xs text-primary-dark uppercase tracking-widest leading-none">Assistente Tático IA</h3>
+            <p className="text-[9px] text-secondary-light mt-1">Sgt. {aiAvatar.name.split(' ')[1]}</p>
+        </div>
       </div>
       
       <div className="grid grid-cols-2 gap-3">

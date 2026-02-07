@@ -1,5 +1,5 @@
 import React from 'react';
-import { Screen, Suspect } from '../types';
+import { Screen, Suspect, UserAvatar } from '../types';
 import AIToolsWidget from '../components/AIToolsWidget'; // NOVO IMPORT
 
 interface DashboardProps {
@@ -8,9 +8,10 @@ interface DashboardProps {
   onOpenProfile: (id: string) => void;
   suspects: Suspect[];
   startShareFlow: (suspectId: string) => void; // NOVO
+  aiAvatar: UserAvatar; // NOVO: Avatar do Assistente de IA
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsManagement, onOpenProfile, suspects, startShareFlow }) => {
+const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsManagement, onOpenProfile, suspects, startShareFlow, aiAvatar }) => {
   
   // Quick filter for recent alerts on the dashboard (limited to top 5)
   const recentSuspects = suspects.slice(0, 5); 
@@ -264,7 +265,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
 
           {/* Coluna 3: Assistente Tático IA (Ocupa 1/3 no desktop) */}
           <section className="lg:col-span-1 px-4 pt-8 lg:px-0 lg:pt-0">
-            <AIToolsWidget navigateTo={navigateTo} />
+            <AIToolsWidget navigateTo={navigateTo} aiAvatar={aiAvatar} />
           </section>
         </div>
       </main>
