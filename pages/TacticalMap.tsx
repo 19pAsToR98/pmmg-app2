@@ -245,13 +245,10 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       setCurrentZoom(map.getZoom() ?? 14);
     });
     
-    // Se houver um centro inicial, garante que o mapa se ajuste
-    if (initialCenter) {
-        map.setCenter({ lat: initialCenter[0], lng: initialCenter[1] });
-        map.setZoom(currentZoom);
-    }
+    // REMOVIDO: Lógica de abertura automática do InfoWindow ao carregar o mapa.
+    // O mapa deve apenas centralizar no ponto inicial, se fornecido.
 
-  }, [initialCenter, currentZoom]);
+  }, []);
 
   const handleMapClick = (e: google.maps.MapMouseEvent) => {
     setActiveInfoWindow(null); // Fecha qualquer InfoWindow aberta
@@ -360,48 +357,25 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki dark:bg-slate-900 overflow-hidden">
-      <header className="sticky top-0 z-[1000] bg-pmmg-navy px-4 py-4 shadow-xl lg:px-8 lg:py-3 lg:flex lg:items-center lg:justify-between">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigateTo(groupName ? 'groupDetail' : 'dashboard')} className="text-white active:scale-90 transition-transform">
-            <span className="material-symbols-outlined">arrow_back_ios</span>
-          </button>
-          <div className="w-9 h-9 shrink-0 bg-white rounded-full flex items-center justify-center p-1 border-2 border-pmmg-red">
-            <span className="material-symbols-outlined text-pmmg-navy text-xl">map</span>
+      <header className="sticky top-0 z-[1000] bg-pmmg-navy px-4 py-4 shadow-xl">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button onClick={() => navigateTo(groupName ? 'groupDetail' : 'dashboard')} className="text-white active:scale-90 transition-transform">
+              <span className="material-symbols-outlined">arrow_back_ios</span>
+            </button>
+            <div className="w-9 h-9 shrink-0 bg-white rounded-full flex items-center justify-center p-1 border-2 border-pmmg-red">
+              <span className="material-symbols-outlined text-pmmg-navy text-xl">map</span>
+            </div>
+            <div>
+              <h1 className="font-bold text-xs leading-none text-white uppercase tracking-tight">
+                {groupName ? 'Mapa Tático do Grupo' : 'Mapa Tático'}
+              </h1>
+              <p className="text-[9px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">
+                {groupName || 'Inteligência Territorial'}
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="font-bold text-xs leading-none text-white uppercase tracking-tight">
-              {groupName ? 'Mapa Tático do Grupo' : 'Mapa Tático'}
-            </h1>
-            <p className="text-[9px] font-medium text-pmmg-yellow tracking-wider uppercase mt-1">
-              {groupName || 'Inteligência Territorial'}
-            </p>
-          </div>
-        </div>
-        <div className="hidden lg:flex items-center gap-4">
-            {/* Desktop Controls */}
-            <button 
-              onClick={() => {
-                setIsAddingMarker(prev => !prev);
-                setNewMarkerData(null); 
-                setEditingMarker(null);
-              }}
-              className={`p-2 rounded-xl border transition-all text-sm font-bold uppercase flex items-center gap-2 ${isAddingMarker ? 'bg-pmmg-red text-white border-pmmg-red shadow-lg' : 'bg-white/10 text-white border-white/20 hover:bg-white/20'}`}
-            >
-              <span className="material-symbols-outlined text-lg">add_location_alt</span>
-              {isAddingMarker ? 'Cancelar Ponto' : 'Adicionar Ponto'}
-            </button>
-            <button onClick={recenter} className="bg-white/10 p-2 rounded-xl border border-white/20 text-white active:bg-white/20 hover:bg-white/20">
-              <span className="material-symbols-outlined text-lg">my_location</span>
-            </button>
-            <button 
-                onClick={() => setIsSidebarOpen(prev => !prev)}
-                className={`p-2 rounded-xl border transition-all text-white ${isSidebarOpen ? 'bg-pmmg-yellow text-pmmg-navy border-pmmg-yellow fill-icon' : 'bg-white/10 border-white/20 hover:bg-white/20'}`}
-            >
-                <span className="material-symbols-outlined text-lg">tune</span>
-            </button>
-        </div>
-        {/* Mobile Controls (Hidden on Desktop) */}
-        <div className="flex items-center gap-2 mt-3 lg:hidden">
+          <div className="flex items-center gap-2">
             <button 
               onClick={() => {
                 setIsAddingMarker(prev => !prev);
@@ -415,12 +389,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             <button onClick={recenter} className="bg-white/10 p-2 rounded-full border border-white/20 text-white active:bg-white/20">
               <span className="material-symbols-outlined text-lg">my_location</span>
             </button>
-            <button 
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className={`p-2 rounded-full border transition-all ${isSidebarOpen ? 'bg-pmmg-yellow text-pmmg-navy border-pmmg-yellow fill-icon' : 'bg-white/10 text-white border-white/20'}`}
-            >
-                <span className="material-symbols-outlined text-lg">tune</span>
-            </button>
+          </div>
         </div>
       </header>
 
@@ -720,23 +689,12 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         )}
 
         {/* SIDEBAR OCULTÁVEL (Legenda Tática) */}
-        {/* Ajustado para ser fixo e ocupar a altura total da tela no desktop */}
-        <div className={`absolute top-0 right-0 z-[1000] transition-transform duration-300 lg:top-auto lg:bottom-0 lg:h-full lg:pt-[70px] ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className={`absolute top-4 right-0 z-[1000] bottom-[100px] transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
           
-          {/* Botão de Toggle (Centralizado Verticalmente - Apenas Mobile) */}
+          {/* Botão de Toggle (Centralizado Verticalmente) */}
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="absolute left-0 top-1/2 transform -translate-x-full -translate-y-1/2 bg-pmmg-navy p-1.5 rounded-l-xl shadow-xl text-pmmg-yellow lg:hidden"
-          >
-            <span className="material-symbols-outlined text-lg">
-              {isSidebarOpen ? 'arrow_forward_ios' : 'arrow_back_ios'}
-            </span>
-          </button>
-          
-          {/* Botão de Toggle (Fixo no Topo - Apenas Desktop) */}
-          <button 
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="hidden lg:block absolute left-0 top-[70px] transform -translate-x-full bg-pmmg-navy p-1.5 rounded-l-xl shadow-xl text-pmmg-yellow"
+            className="absolute left-0 top-1/2 transform -translate-x-full -translate-y-1/2 bg-pmmg-navy p-1.5 rounded-l-xl shadow-xl text-pmmg-yellow"
           >
             <span className="material-symbols-outlined text-lg">
               {isSidebarOpen ? 'arrow_forward_ios' : 'arrow_back_ios'}
@@ -744,7 +702,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           </button>
 
           {/* Conteúdo do Painel */}
-          <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-md p-3 rounded-l-2xl shadow-2xl border border-pmmg-navy/10 dark:border-slate-700 flex flex-col gap-2.5 h-full overflow-y-auto w-64 lg:h-auto lg:max-h-[calc(100vh-70px)] lg:rounded-none lg:rounded-bl-2xl">
+          <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-md p-3 rounded-l-2xl shadow-2xl border border-pmmg-navy/10 dark:border-slate-700 flex flex-col gap-2.5 h-full overflow-y-auto w-64">
             <p className="text-[8px] font-black text-pmmg-navy/40 dark:text-slate-500 uppercase tracking-widest border-b border-pmmg-navy/5 dark:border-slate-700 pb-1 mb-1">Legenda Tática</p>
             
             {/* --- Filtro de Localização --- */}
