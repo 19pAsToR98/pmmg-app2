@@ -404,7 +404,6 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       
       {/* DESKTOP FLOATING ACTIONS (Visível apenas em telas grandes) */}
       <div className="hidden lg:flex absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000]">
-        {/* Removendo gap-4 e usando gap-2 para maior compactação */}
         <div className="bg-pmmg-navy/90 backdrop-blur-md p-3 rounded-xl shadow-2xl border border-pmmg-yellow/30 flex items-center gap-3">
           
           {/* Título */}
@@ -460,41 +459,41 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               ))}
             </div>
             
-            {/* Opções de Camadas */}
-            <div className="flex bg-white/10 p-1 rounded-lg shrink-0" title="Opções de Camadas">
+            {/* Opções de Camadas E AÇÕES */}
+            <div className="flex items-center gap-2 pl-2 border-l border-white/20 shrink-0">
               {MAP_TYPES.map(type => (
                 <button 
                   key={type.id}
                   onClick={() => setMapType(type.id)}
                   className={`text-[9px] font-bold uppercase py-1.5 px-2 rounded-md transition-all flex items-center gap-1 ${mapType === type.id ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white/70 hover:bg-white/20'}`}
+                  title={type.label}
                 >
-                  <span className="material-symbols-outlined text-sm">{type.icon}</span> {type.label}
+                  <span className="material-symbols-outlined text-sm">{type.icon}</span>
                 </button>
               ))}
+              
+              {/* Botões de Ação (Movidos para cá) */}
+              <button 
+                onClick={() => {
+                  setIsAddingMarker(prev => !prev);
+                  setNewMarkerData(null); 
+                  setEditingMarker(null);
+                }}
+                className={`p-2 rounded-full border transition-all ${isAddingMarker ? 'bg-pmmg-red text-white border-pmmg-red shadow-lg' : 'bg-white/10 text-white border-white/20 hover:bg-white/20'}`}
+                title="Adicionar Ponto Tático"
+              >
+                <span className="material-symbols-outlined text-lg">add_location_alt</span>
+              </button>
+              <button 
+                onClick={recenter} 
+                className="bg-white/10 p-2 rounded-full border border-white/20 text-white active:bg-white/20 hover:bg-white/20"
+                title="Centralizar Minha Localização"
+              >
+                <span className="material-symbols-outlined text-lg">my_location</span>
+              </button>
             </div>
           </div>
           
-          {/* Botões de Ação */}
-          <div className="flex items-center gap-2 pl-3 border-l border-white/20 shrink-0">
-            <button 
-              onClick={() => {
-                setIsAddingMarker(prev => !prev);
-                setNewMarkerData(null); 
-                setEditingMarker(null);
-              }}
-              className={`p-2 rounded-full border transition-all ${isAddingMarker ? 'bg-pmmg-red text-white border-pmmg-red shadow-lg' : 'bg-white/10 text-white border-white/20 hover:bg-white/20'}`}
-              title="Adicionar Ponto Tático"
-            >
-              <span className="material-symbols-outlined text-lg">add_location_alt</span>
-            </button>
-            <button 
-              onClick={recenter} 
-              className="bg-white/10 p-2 rounded-full border border-white/20 text-white active:bg-white/20 hover:bg-white/20"
-              title="Centralizar Minha Localização"
-            >
-              <span className="material-symbols-outlined text-lg">my_location</span>
-            </button>
-          </div>
         </div>
       </div>
 
