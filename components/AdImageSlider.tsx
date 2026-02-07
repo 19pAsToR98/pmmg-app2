@@ -45,7 +45,7 @@ const AdImageSlider: React.FC = () => {
         <img 
           src={currentAd.url} 
           alt={currentAd.alt} 
-          className="w-full h-full object-cover transition-opacity duration-1000"
+          className="w-full h-full object-contain transition-opacity duration-1000"
           // Adiciona key para forçar a re-renderização e o efeito de transição (simulado)
           key={currentIndex} 
         />
