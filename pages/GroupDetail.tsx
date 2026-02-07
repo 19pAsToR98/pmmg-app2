@@ -609,7 +609,7 @@ const GroupDetail: React.FC<GroupDetailProps> = ({ navigateTo, group, allSuspect
           </div>
         ) : (
           <div className="p-4 space-y-3">
-            <div className="bg-white/40 dark:bg-slate-700 p-4 rounded-3xl border border-white/20 dark:border-slate-600 mb-6 flex items-center justify-between">
+            <div className="bg-white/40 dark:bg-slate-700/50 p-4 rounded-3xl border border-white/20 dark:border-slate-600 mb-6 flex items-center justify-between">
               <div>
                 <p className="text-[9px] font-black text-pmmg-navy/40 dark:text-slate-400 uppercase tracking-widest mb-1">Convite para Oficiais</p>
                 <p className="text-sm font-black text-pmmg-navy dark:text-slate-200 tracking-widest">{group.inviteCode}</p>

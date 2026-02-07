@@ -91,8 +91,8 @@ const SuspectRegistry: React.FC<SuspectRegistryProps> = ({ navigateTo, onSave, o
       const position = await getCurrentLocation(true); // Use the new utility
       
       if (position) {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
+        const lat = position.lat;
+        const lng = position.lng;
         
         try {
           const location = await reverseGeocode(lat, lng);

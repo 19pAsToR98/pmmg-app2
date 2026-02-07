@@ -263,8 +263,6 @@ const App: React.FC = () => {
   const [userEmail, setUserEmail] = useState('oficial.pmmg@mg.gov.br'); // NOVO: Email mockado
   const [userCity, setUserCity] = useState('Belo Horizonte');
   const [userDefaultLocation, setUserDefaultLocation] = useState<GeocodedLocation | null>(null); 
-  // REMOVIDO: isRegistered
-  // REMOVIDO: userInstitution
   
   // Avatar States (Fixos)
   const userAvatar = DEFAULT_USER_AVATAR;
@@ -653,7 +651,7 @@ const App: React.FC = () => {
   // Se o nome do usuário estiver vazio, força a tela de onboarding, a menos que já esteja no fluxo de login/registro
   if (userName === '' && currentScreen !== 'welcomeScreen' && currentScreen !== 'requestAccess' && currentScreen !== 'onboardingSetup') {
     return (
-      <div className={`flex flex-col h-screen max-w-md mx-auto relative overflow-hidden ${themeClass}`}>
+      <div className={`flex flex-col h-screen relative overflow-hidden ${themeClass}`}>
         <OnboardingSetup 
           onComplete={handleOnboardingComplete} 
           defaultAvatar={userAvatar}
@@ -661,181 +659,227 @@ const App: React.FC = () => {
       </div>
     );
   }
+  
+  // Componente Wrapper para telas que devem manter o layout mobile (max-w-md)
+  const MobileWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+    <div className="max-w-md mx-auto w-full h-full">
+      {children}
+    </div>
+  );
+
+  const renderScreen = () => {
+    switch (currentScreen) {
+      case 'welcomeScreen':
+        return <WelcomeScreen onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />;
+      case 'requestAccess':
+        return <MobileWrapper><RequestAccess onBack={() => navigateTo('welcomeScreen')} onSuccess={() => { setUserName('Oficial PMMG'); navigateTo('onboardingSetup'); }} /></MobileWrapper>;
+      case 'onboardingSetup':
+        return (
+          <MobileWrapper>
+            <OnboardingSetup 
+              onComplete={handleOnboardingComplete} 
+              defaultAvatar={userAvatar}
+            />
+          </MobileWrapper>
+        );
+      case 'dashboard':
+        return <MobileWrapper><Dashboard navigateTo={navigateTo} navigateToSuspectsManagement={navigateToSuspectsManagement} onOpenProfile={openProfile} suspects={suspects} startShareFlow={startShareFlow} /></MobileWrapper>;
+      case 'registry':
+        return (
+          <MobileWrapper>
+            <SuspectRegistry 
+              navigateTo={navigateTo} 
+              onSave={addSuspect} 
+              onUpdate={updateSuspect}
+              currentSuspect={suspectToEdit}
+              allSuspects={suspects} 
+              isDarkMode={isDarkMode}
+            />
+          </MobileWrapper>
+        );
+      case 'profile':
+        return selectedSuspect ? (
+          <MobileWrapper>
+            <SuspectProfile 
+              suspect={selectedSuspect} 
+              onBack={() => navigateTo('dashboard')} 
+              navigateTo={navigateTo} 
+              allSuspects={suspects} 
+              onOpenProfile={openProfile}
+              onEdit={handleEditProfile}
+              startShareFlow={startShareFlow}
+              isDarkMode={isDarkMode}
+            />
+          </MobileWrapper>
+        ) : null;
+      case 'suspectsManagement':
+        return (
+          <MobileWrapper>
+            <SuspectsManagement
+              navigateTo={navigateTo}
+              onOpenProfile={openProfile}
+              suspects={suspects}
+              initialStatusFilter={initialSuspectFilter}
+              deleteSuspects={deleteSuspects}
+            />
+          </MobileWrapper>
+        );
+      case 'groupsList':
+        return (
+          <MobileWrapper>
+            <GroupsList 
+              navigateTo={navigateTo} 
+              userGroups={userGroups}
+              officers={officers} 
+              allSuspects={suspects}
+              openGroup={openGroup}
+              pendingRequestsCount={pendingRequestsCount}
+            />
+          </MobileWrapper>
+        );
+      case 'groupCreation':
+        return (
+          <MobileWrapper>
+            <GroupCreation
+              navigateTo={navigateTo}
+              allOfficers={officers}
+              onCreateGroup={handleCreateGroup}
+            />
+          </MobileWrapper>
+        );
+      case 'groupDetail':
+        return enrichedActiveGroup ? (
+          <MobileWrapper>
+            <GroupDetail
+              navigateTo={navigateTo}
+              group={enrichedActiveGroup}
+              allOfficers={officers}
+              allSuspects={suspects}
+              onOpenProfile={openProfile}
+              onShareSuspect={handleShareSuspect}
+              onUpdateGroup={handleUpdateGroup}
+              onDeleteGroup={handleDeleteGroup}
+              onJoinGroup={() => handleJoinGroup(enrichedActiveGroup.id, 'o2')}
+              shareTarget={shareTarget}
+            />
+          </MobileWrapper>
+        ) : null;
+      case 'groupMap':
+        return activeGroup ? (
+          <GroupTacticalMap
+              navigateTo={navigateTo}
+              group={activeGroup}
+              allSuspects={suspects}
+              allOfficers={officers}
+              userName={userName}
+              userRank={userRank}
+              userDefaultLocation={userDefaultLocation}
+              onOpenProfile={openProfile}
+              addCustomMarker={(marker) => addGroupCustomMarker(activeGroup.id, marker)}
+              updateCustomMarker={(marker) => updateGroupCustomMarker(activeGroup.id, marker)}
+              deleteCustomMarker={(markerId) => deleteGroupCustomMarker(activeGroup.id, markerId)}
+              isDarkMode={isDarkMode}
+          />
+        ) : null;
+      case 'aiTools':
+        return <MobileWrapper><AITools navigateTo={navigateTo} userRank={userRank} aiAvatar={aiAvatar} /></MobileWrapper>;
+      case 'plateConsultation':
+        return (
+          <MobileWrapper>
+            <PlateConsultation 
+              navigateTo={navigateTo} 
+              userRank={userRank} 
+            />
+          </MobileWrapper>
+        );
+      case 'voiceReport':
+        return (
+          <MobileWrapper>
+            <VoiceReport 
+              navigateTo={navigateTo} 
+              userRank={userRank} 
+            />
+          </MobileWrapper>
+        );
+      case 'store':
+        return (
+          <MobileWrapper>
+            <Store 
+              navigateTo={navigateTo} 
+            />
+          </MobileWrapper>
+        );
+      case 'productList':
+        return selectedCategoryId ? (
+          <MobileWrapper>
+            <ProductList
+              navigateTo={navigateTo}
+              categoryId={selectedCategoryId}
+            />
+          </MobileWrapper>
+        ) : null;
+      case 'profileSettings':
+        return (
+          <MobileWrapper>
+            <ProfileSettings 
+              navigateTo={navigateTo} 
+              onBack={() => navigateTo('dashboard')} 
+              currentRank={userRank} 
+              onRankChange={setUserRank}
+              userAvatar={userAvatar}
+              isDarkMode={isDarkMode}
+              toggleDarkMode={toggleDarkMode}
+              userName={userName}
+              userEmail={userEmail}
+              suspectCount={suspectCount}
+            />
+          </MobileWrapper>
+        );
+      case 'map':
+        return (
+          <TacticalMap 
+            navigateTo={navigateTo} 
+            suspects={suspects} 
+            onOpenProfile={openProfile} 
+            initialCenter={mapCenter} 
+            userDefaultLocation={userDefaultLocation}
+            customMarkers={customMarkers} 
+            addCustomMarker={addCustomMarker} 
+            updateCustomMarker={updateCustomMarker}
+            deleteCustomMarker={deleteCustomMarker}
+            isDarkMode={isDarkMode}
+          />
+        );
+      case 'contacts':
+        return (
+          <MobileWrapper>
+            <TacticalContacts
+              navigateTo={navigateTo}
+              officers={officers}
+              contacts={contacts}
+              onSendRequest={onSendRequest}
+              onAcceptRequest={onAcceptRequest}
+              onRejectRequest={onRejectRequest}
+            />
+          </MobileWrapper>
+        );
+      case 'shareGroupSelector':
+        return selectedSuspectId ? (
+          <ShareGroupSelector
+            suspect={suspects.find(s => s.id === selectedSuspectId)!}
+            userGroups={userGroups}
+            onSelectGroup={selectGroupForShare}
+            onClose={() => navigateTo('dashboard')} // Volta para a tela anterior (Dashboard ou Profile)
+          />
+        ) : null;
+      default:
+        return <WelcomeScreen onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />;
+    }
+  };
 
   return (
-    <div className={`flex flex-col h-screen max-w-md mx-auto relative overflow-hidden ${themeClass}`}>
-      {currentScreen === 'welcomeScreen' && <WelcomeScreen onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />}
-      
-      {currentScreen === 'requestAccess' && <RequestAccess onBack={() => navigateTo('welcomeScreen')} onSuccess={() => { setUserName('Oficial PMMG'); navigateTo('onboardingSetup'); }} />}
-      
-      {currentScreen === 'onboardingSetup' && (
-        <OnboardingSetup 
-          onComplete={handleOnboardingComplete} 
-          defaultAvatar={userAvatar}
-        />
-      )}
-      
-      {currentScreen === 'dashboard' && <Dashboard navigateTo={navigateTo} navigateToSuspectsManagement={navigateToSuspectsManagement} onOpenProfile={openProfile} suspects={suspects} startShareFlow={startShareFlow} />}
-      {currentScreen === 'registry' && (
-        <SuspectRegistry 
-          navigateTo={navigateTo} 
-          onSave={addSuspect} 
-          onUpdate={updateSuspect}
-          currentSuspect={suspectToEdit}
-          allSuspects={suspects} 
-          isDarkMode={isDarkMode}
-        />
-      )}
-      {currentScreen === 'profile' && selectedSuspect && (
-        <SuspectProfile 
-          suspect={selectedSuspect} 
-          onBack={() => navigateTo('dashboard')} 
-          navigateTo={navigateTo} 
-          allSuspects={suspects} 
-          onOpenProfile={openProfile}
-          onEdit={handleEditProfile}
-          startShareFlow={startShareFlow}
-          isDarkMode={isDarkMode}
-        />
-      )}
-      {currentScreen === 'suspectsManagement' && (
-        <SuspectsManagement
-          navigateTo={navigateTo}
-          onOpenProfile={openProfile}
-          suspects={suspects}
-          initialStatusFilter={initialSuspectFilter}
-          deleteSuspects={deleteSuspects}
-        />
-      )}
-      
-      {currentScreen === 'groupsList' && (
-        <GroupsList 
-          navigateTo={navigateTo} 
-          userGroups={userGroups}
-          officers={officers} 
-          allSuspects={suspects}
-          openGroup={openGroup}
-          pendingRequestsCount={pendingRequestsCount}
-        />
-      )}
-      
-      {currentScreen === 'groupCreation' && (
-        <GroupCreation
-          navigateTo={navigateTo}
-          allOfficers={officers}
-          onCreateGroup={handleCreateGroup}
-        />
-      )}
-      
-      {currentScreen === 'groupDetail' && enrichedActiveGroup && (
-        <GroupDetail
-          navigateTo={navigateTo}
-          group={enrichedActiveGroup}
-          allOfficers={officers}
-          allSuspects={suspects}
-          onOpenProfile={openProfile}
-          onShareSuspect={handleShareSuspect}
-          onUpdateGroup={handleUpdateGroup}
-          onDeleteGroup={handleDeleteGroup}
-          onJoinGroup={() => handleJoinGroup(enrichedActiveGroup.id, 'o2')}
-          shareTarget={shareTarget}
-        />
-      )}
-      
-      {currentScreen === 'groupMap' && activeGroup && (
-        <GroupTacticalMap
-            navigateTo={navigateTo}
-            group={activeGroup}
-            allSuspects={suspects}
-            allOfficers={officers}
-            userName={userName}
-            userRank={userRank}
-            userDefaultLocation={userDefaultLocation}
-            onOpenProfile={openProfile}
-            addCustomMarker={(marker) => addGroupCustomMarker(activeGroup.id, marker)}
-            updateCustomMarker={(marker) => updateGroupCustomMarker(activeGroup.id, marker)}
-            deleteCustomMarker={(markerId) => deleteGroupCustomMarker(activeGroup.id, markerId)}
-            isDarkMode={isDarkMode}
-        />
-      )}
-      
-      {currentScreen === 'aiTools' && <AITools navigateTo={navigateTo} userRank={userRank} aiAvatar={aiAvatar} />}
-      
-      {currentScreen === 'plateConsultation' && (
-        <PlateConsultation 
-          navigateTo={navigateTo} 
-          userRank={userRank} 
-        />
-      )}
-      {currentScreen === 'voiceReport' && (
-        <VoiceReport 
-          navigateTo={navigateTo} 
-          userRank={userRank} 
-        />
-      )}
-      
-      {currentScreen === 'store' && (
-        <Store 
-          navigateTo={navigateTo} 
-        />
-      )}
-      
-      {currentScreen === 'productList' && selectedCategoryId && (
-        <ProductList
-          navigateTo={navigateTo}
-          categoryId={selectedCategoryId}
-        />
-      )}
-      
-      {currentScreen === 'profileSettings' && (
-        <ProfileSettings 
-          navigateTo={navigateTo} 
-          onBack={() => navigateTo('dashboard')} 
-          currentRank={userRank} 
-          onRankChange={setUserRank}
-          userAvatar={userAvatar}
-          isDarkMode={isDarkMode}
-          toggleDarkMode={toggleDarkMode}
-          userName={userName}
-          userEmail={userEmail}
-          suspectCount={suspectCount}
-        />
-      )}
-      
-      {currentScreen === 'map' && (
-        <TacticalMap 
-          navigateTo={navigateTo} 
-          suspects={suspects} 
-          onOpenProfile={openProfile} 
-          initialCenter={mapCenter} 
-          userDefaultLocation={userDefaultLocation}
-          customMarkers={customMarkers} 
-          addCustomMarker={addCustomMarker} 
-          updateCustomMarker={updateCustomMarker}
-          deleteCustomMarker={deleteCustomMarker}
-          isDarkMode={isDarkMode}
-        />
-      )}
-      {currentScreen === 'contacts' && (
-        <TacticalContacts
-          navigateTo={navigateTo}
-          officers={officers}
-          contacts={contacts}
-          onSendRequest={onSendRequest}
-          onAcceptRequest={onAcceptRequest}
-          onRejectRequest={onRejectRequest}
-        />
-      )}
-      
-      {/* Seletor de Grupo de Compartilhamento (Modal) */}
-      {currentScreen === 'shareGroupSelector' && selectedSuspectId && (
-        <ShareGroupSelector
-          suspect={suspects.find(s => s.id === selectedSuspectId)!}
-          userGroups={userGroups}
-          onSelectGroup={selectGroupForShare}
-          onClose={() => navigateTo('dashboard')} // Volta para a tela anterior (Dashboard ou Profile)
-        />
-      )}
+    <div className={`flex flex-col h-screen relative overflow-hidden ${themeClass}`}>
+      {renderScreen()}
     </div>
   );
 };
