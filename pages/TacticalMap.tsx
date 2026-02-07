@@ -327,7 +327,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       const position = await getCurrentLocation(true); // Request high accuracy
       
       if (position) {
-        const newPos = { lat: position.coords.latitude, lng: position.coords.longitude };
+        const newPos = { lat: position.lat, lng: position.lng };
         setUserPos(newPos); // Update user position state
         
         if (mapRef.current) {
@@ -357,7 +357,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki dark:bg-slate-900 overflow-hidden">
-      <header className="sticky top-0 z-[1000] bg-pmmg-navy px-4 py-4 shadow-xl shrink-0">
+      <header className="sticky top-0 z-[1000] bg-pmmg-navy px-4 py-4 shadow-xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={() => navigateTo(groupName ? 'groupDetail' : 'dashboard')} className="text-white active:scale-90 transition-transform">
@@ -689,7 +689,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         )}
 
         {/* SIDEBAR OCULTÁVEL (Legenda Tática) */}
-        <div className={`absolute top-4 right-0 z-[1000] bottom-4 transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className={`absolute top-4 right-0 z-[1000] bottom-[100px] transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
           
           {/* Botão de Toggle (Centralizado Verticalmente) */}
           <button 
@@ -800,7 +800,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         </div>
       </div>
 
-      {/* BottomNav is now handled by App.tsx and hidden on desktop */}
+      <BottomNav activeScreen={groupName ? 'groupsList' : 'map'} navigateTo={navigateTo} />
     </div>
   );
 };

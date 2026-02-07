@@ -68,7 +68,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
             v.color.toLowerCase().includes(searchLower)
           );
         
-        if (!matchesGlobal) return false; 
+        if (!matchesGlobal) return false;
       }
       
       return true;
@@ -77,7 +77,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
 
   const handleClearFilters = () => {
     setGlobalSearch('');
-    setDateFilter(''); 
+    setDateFilter('');
     setStatusFilter('Todos');
   };
 
@@ -251,7 +251,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
         )}
       </header>
 
-      <main className="flex-1 overflow-y-auto lg:pb-4 px-4 pt-4 no-scrollbar bg-pmmg-khaki dark:bg-slate-900">
+      <main className="flex-1 overflow-y-auto pb-40 px-4 pt-4 no-scrollbar bg-pmmg-khaki dark:bg-slate-900">
         <div className="flex items-center justify-between mb-4 px-1">
           <span className="text-[10px] font-black text-pmmg-navy/50 dark:text-slate-400 uppercase tracking-widest italic">
             Exibindo {filteredSuspects.length} resultados táticos
@@ -265,7 +265,7 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
         <section className="space-y-4">
           {filteredSuspects.length > 0 ? (
             viewMode === 'grid' ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 {filteredSuspects.map(suspect => (
                   <SuspectGridItem
                     key={suspect.id}
@@ -301,22 +301,24 @@ const SuspectsManagement: React.FC<SuspectsManagementProps> = ({ navigateTo, onO
         </section>
       </main>
       
-      {/* Floating Action Bar for Deletion (Fixed to bottom of the screen, not the main content) */}
+      {/* Floating Action Bar for Deletion */}
       {isSelectionMode && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-pmmg-red shadow-xl p-4 text-white flex items-center justify-between lg:left-20">
-          <span className="text-sm font-bold uppercase">{selectedSuspectIds.length} Selecionado(s)</span>
-          <button 
-            onClick={handleDeleteSelected}
-            disabled={selectedSuspectIds.length === 0}
-            className="bg-white/20 px-3 py-2 rounded-lg text-xs font-bold uppercase flex items-center gap-2 active:scale-95 transition-transform disabled:opacity-50"
-          >
-            <span className="material-symbols-outlined text-lg">delete</span>
-            Excluir
-          </button>
+        <div className="fixed bottom-[80px] left-0 right-0 z-50 max-w-md mx-auto px-4 animate-in slide-in-from-bottom-4 duration-300">
+          <div className="bg-pmmg-red text-white p-3 rounded-xl shadow-2xl flex items-center justify-between border-2 border-white">
+            <span className="text-sm font-bold uppercase">{selectedSuspectIds.length} Selecionado(s)</span>
+            <button 
+              onClick={handleDeleteSelected}
+              disabled={selectedSuspectIds.length === 0}
+              className="bg-white text-pmmg-red font-bold px-4 py-2 rounded-lg text-xs uppercase flex items-center gap-2 active:scale-95 transition-transform disabled:opacity-50"
+            >
+              <span className="material-symbols-outlined text-lg">delete</span>
+              Excluir
+            </button>
+          </div>
         </div>
       )}
 
-      {/* BottomNav is now handled by App.tsx and hidden on desktop */}
+      <BottomNav activeScreen="dashboard" navigateTo={navigateTo} />
     </div>
   );
 };

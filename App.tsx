@@ -20,7 +20,6 @@ import GroupCreation from './pages/GroupCreation'; // NOVO: Criação de Grupo
 import GroupDetail from './pages/GroupDetail'; // NOVO: Detalhe do Grupo
 import GroupTacticalMap from './pages/GroupTacticalMap'; // NOVO: Mapa do Grupo
 import ShareGroupSelector from './components/ShareGroupSelector'; // NOVO: Componente para seleção de grupo
-import BottomNav from './components/BottomNav';
 
 const INITIAL_SUSPECTS: Suspect[] = [
   {
@@ -264,6 +263,8 @@ const App: React.FC = () => {
   const [userEmail, setUserEmail] = useState('oficial.pmmg@mg.gov.br'); // NOVO: Email mockado
   const [userCity, setUserCity] = useState('Belo Horizonte');
   const [userDefaultLocation, setUserDefaultLocation] = useState<GeocodedLocation | null>(null); 
+  // REMOVIDO: isRegistered
+  // REMOVIDO: userInstitution
   
   // Avatar States (Fixos)
   const userAvatar = DEFAULT_USER_AVATAR;
@@ -652,7 +653,7 @@ const App: React.FC = () => {
   // Se o nome do usuário estiver vazio, força a tela de onboarding, a menos que já esteja no fluxo de login/registro
   if (userName === '' && currentScreen !== 'welcomeScreen' && currentScreen !== 'requestAccess' && currentScreen !== 'onboardingSetup') {
     return (
-      <div className={`flex flex-col h-screen w-full lg:w-auto lg:h-full relative overflow-hidden ${themeClass}`}>
+      <div className={`flex flex-col h-screen max-w-md mx-auto relative overflow-hidden ${themeClass}`}>
         <OnboardingSetup 
           onComplete={handleOnboardingComplete} 
           defaultAvatar={userAvatar}
@@ -662,187 +663,179 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className={`flex flex-col h-screen w-full lg:h-full relative overflow-hidden ${themeClass}`}>
-      {/* Sidebar/BottomNav */}
-      <BottomNav activeScreen={currentScreen} navigateTo={navigateTo} />
+    <div className={`flex flex-col h-screen max-w-md mx-auto relative overflow-hidden ${themeClass}`}>
+      {currentScreen === 'welcomeScreen' && <WelcomeScreen onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />}
       
-      {/* Main Content Area */}
-      <div className="flex-1 w-full h-full lg:pl-20">
-        <div className="h-full w-full max-w-md mx-auto lg:max-w-full lg:mx-0">
-          {currentScreen === 'welcomeScreen' && <WelcomeScreen onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />}
-          
-          {currentScreen === 'requestAccess' && <RequestAccess onBack={() => navigateTo('welcomeScreen')} onSuccess={() => { setUserName('Oficial PMMG'); navigateTo('onboardingSetup'); }} />}
-          
-          {currentScreen === 'onboardingSetup' && (
-            <OnboardingSetup 
-              onComplete={handleOnboardingComplete} 
-              defaultAvatar={userAvatar}
-            />
-          )}
-          
-          {currentScreen === 'dashboard' && <Dashboard navigateTo={navigateTo} navigateToSuspectsManagement={navigateToSuspectsManagement} onOpenProfile={openProfile} suspects={suspects} startShareFlow={startShareFlow} />}
-          {currentScreen === 'registry' && (
-            <SuspectRegistry 
-              navigateTo={navigateTo} 
-              onSave={addSuspect} 
-              onUpdate={updateSuspect}
-              currentSuspect={suspectToEdit}
-              allSuspects={suspects} 
-              isDarkMode={isDarkMode}
-            />
-          )}
-          {currentScreen === 'profile' && selectedSuspect && (
-            <SuspectProfile 
-              suspect={selectedSuspect} 
-              onBack={() => navigateTo('dashboard')} 
-              navigateTo={navigateTo} 
-              allSuspects={suspects} 
-              onOpenProfile={openProfile}
-              onEdit={handleEditProfile}
-              startShareFlow={startShareFlow}
-              isDarkMode={isDarkMode}
-            />
-          )}
-          {currentScreen === 'suspectsManagement' && (
-            <SuspectsManagement
-              navigateTo={navigateTo}
-              onOpenProfile={openProfile}
-              suspects={suspects}
-              initialStatusFilter={initialSuspectFilter}
-              deleteSuspects={deleteSuspects}
-            />
-          )}
-          
-          {currentScreen === 'groupsList' && (
-            <GroupsList 
-              navigateTo={navigateTo} 
-              userGroups={userGroups}
-              officers={officers} 
-              allSuspects={suspects}
-              openGroup={openGroup}
-              pendingRequestsCount={pendingRequestsCount}
-            />
-          )}
-          
-          {currentScreen === 'groupCreation' && (
-            <GroupCreation
-              navigateTo={navigateTo}
-              allOfficers={officers}
-              onCreateGroup={handleCreateGroup}
-            />
-          )}
-          
-          {currentScreen === 'groupDetail' && enrichedActiveGroup && (
-            <GroupDetail
-              navigateTo={navigateTo}
-              group={enrichedActiveGroup}
-              allOfficers={officers}
-              allSuspects={suspects}
-              onOpenProfile={openProfile}
-              onShareSuspect={handleShareSuspect}
-              onUpdateGroup={handleUpdateGroup}
-              onDeleteGroup={handleDeleteGroup}
-              onJoinGroup={() => handleJoinGroup(enrichedActiveGroup.id, 'o2')}
-              shareTarget={shareTarget}
-            />
-          )}
-          
-          {currentScreen === 'groupMap' && activeGroup && (
-            <GroupTacticalMap
-                navigateTo={navigateTo}
-                group={activeGroup}
-                allSuspects={suspects}
-                allOfficers={officers}
-                userName={userName}
-                userRank={userRank}
-                userDefaultLocation={userDefaultLocation}
-                onOpenProfile={openProfile}
-                addCustomMarker={(marker) => addGroupCustomMarker(activeGroup.id, marker)}
-                updateCustomMarker={(marker) => updateGroupCustomMarker(activeGroup.id, marker)}
-                deleteCustomMarker={(markerId) => deleteGroupCustomMarker(activeGroup.id, markerId)}
-                isDarkMode={isDarkMode}
-            />
-          )}
-          
-          {currentScreen === 'aiTools' && <AITools navigateTo={navigateTo} userRank={userRank} aiAvatar={aiAvatar} />}
-          
-          {currentScreen === 'plateConsultation' && (
-            <PlateConsultation 
-              navigateTo={navigateTo} 
-              userRank={userRank} 
-            />
-          )}
-          {currentScreen === 'voiceReport' && (
-            <VoiceReport 
-              navigateTo={navigateTo} 
-              userRank={userRank} 
-            />
-          )}
-          
-          {currentScreen === 'store' && (
-            <Store 
-              navigateTo={navigateTo} 
-            />
-          )}
-          
-          {currentScreen === 'productList' && selectedCategoryId && (
-            <ProductList
-              navigateTo={navigateTo}
-              categoryId={selectedCategoryId}
-            />
-          )}
-          
-          {currentScreen === 'profileSettings' && (
-            <ProfileSettings 
-              navigateTo={navigateTo} 
-              onBack={() => navigateTo('dashboard')} 
-              currentRank={userRank} 
-              onRankChange={setUserRank}
-              userAvatar={userAvatar}
-              isDarkMode={isDarkMode}
-              toggleDarkMode={toggleDarkMode}
-              userName={userName}
-              userEmail={userEmail}
-              suspectCount={suspectCount}
-            />
-          )}
-          
-          {currentScreen === 'map' && (
-            <TacticalMap 
-              navigateTo={navigateTo} 
-              suspects={suspects} 
-              onOpenProfile={openProfile} 
-              initialCenter={mapCenter} 
-              userDefaultLocation={userDefaultLocation}
-              customMarkers={customMarkers} 
-              addCustomMarker={addCustomMarker} 
-              updateCustomMarker={updateCustomMarker}
-              deleteCustomMarker={deleteCustomMarker}
-              isDarkMode={isDarkMode}
-            />
-          )}
-          {currentScreen === 'contacts' && (
-            <TacticalContacts
-              navigateTo={navigateTo}
-              officers={officers}
-              contacts={contacts}
-              onSendRequest={onSendRequest}
-              onAcceptRequest={onAcceptRequest}
-              onRejectRequest={onRejectRequest}
-            />
-          )}
-          
-          {/* Seletor de Grupo de Compartilhamento (Modal) */}
-          {currentScreen === 'shareGroupSelector' && selectedSuspectId && (
-            <ShareGroupSelector
-              suspect={suspects.find(s => s.id === selectedSuspectId)!}
-              userGroups={userGroups}
-              onSelectGroup={selectGroupForShare}
-              onClose={() => navigateTo('dashboard')} // Volta para a tela anterior (Dashboard ou Profile)
-            />
-          )}
-        </div>
-      </div>
+      {currentScreen === 'requestAccess' && <RequestAccess onBack={() => navigateTo('welcomeScreen')} onSuccess={() => { setUserName('Oficial PMMG'); navigateTo('onboardingSetup'); }} />}
+      
+      {currentScreen === 'onboardingSetup' && (
+        <OnboardingSetup 
+          onComplete={handleOnboardingComplete} 
+          defaultAvatar={userAvatar}
+        />
+      )}
+      
+      {currentScreen === 'dashboard' && <Dashboard navigateTo={navigateTo} navigateToSuspectsManagement={navigateToSuspectsManagement} onOpenProfile={openProfile} suspects={suspects} startShareFlow={startShareFlow} />}
+      {currentScreen === 'registry' && (
+        <SuspectRegistry 
+          navigateTo={navigateTo} 
+          onSave={addSuspect} 
+          onUpdate={updateSuspect}
+          currentSuspect={suspectToEdit}
+          allSuspects={suspects} 
+          isDarkMode={isDarkMode}
+        />
+      )}
+      {currentScreen === 'profile' && selectedSuspect && (
+        <SuspectProfile 
+          suspect={selectedSuspect} 
+          onBack={() => navigateTo('dashboard')} 
+          navigateTo={navigateTo} 
+          allSuspects={suspects} 
+          onOpenProfile={openProfile}
+          onEdit={handleEditProfile}
+          startShareFlow={startShareFlow}
+          isDarkMode={isDarkMode}
+        />
+      )}
+      {currentScreen === 'suspectsManagement' && (
+        <SuspectsManagement
+          navigateTo={navigateTo}
+          onOpenProfile={openProfile}
+          suspects={suspects}
+          initialStatusFilter={initialSuspectFilter}
+          deleteSuspects={deleteSuspects}
+        />
+      )}
+      
+      {currentScreen === 'groupsList' && (
+        <GroupsList 
+          navigateTo={navigateTo} 
+          userGroups={userGroups}
+          officers={officers} 
+          allSuspects={suspects}
+          openGroup={openGroup}
+          pendingRequestsCount={pendingRequestsCount}
+        />
+      )}
+      
+      {currentScreen === 'groupCreation' && (
+        <GroupCreation
+          navigateTo={navigateTo}
+          allOfficers={officers}
+          onCreateGroup={handleCreateGroup}
+        />
+      )}
+      
+      {currentScreen === 'groupDetail' && enrichedActiveGroup && (
+        <GroupDetail
+          navigateTo={navigateTo}
+          group={enrichedActiveGroup}
+          allOfficers={officers}
+          allSuspects={suspects}
+          onOpenProfile={openProfile}
+          onShareSuspect={handleShareSuspect}
+          onUpdateGroup={handleUpdateGroup}
+          onDeleteGroup={handleDeleteGroup}
+          onJoinGroup={() => handleJoinGroup(enrichedActiveGroup.id, 'o2')}
+          shareTarget={shareTarget}
+        />
+      )}
+      
+      {currentScreen === 'groupMap' && activeGroup && (
+        <GroupTacticalMap
+            navigateTo={navigateTo}
+            group={activeGroup}
+            allSuspects={suspects}
+            allOfficers={officers}
+            userName={userName}
+            userRank={userRank}
+            userDefaultLocation={userDefaultLocation}
+            onOpenProfile={openProfile}
+            addCustomMarker={(marker) => addGroupCustomMarker(activeGroup.id, marker)}
+            updateCustomMarker={(marker) => updateGroupCustomMarker(activeGroup.id, marker)}
+            deleteCustomMarker={(markerId) => deleteGroupCustomMarker(activeGroup.id, markerId)}
+            isDarkMode={isDarkMode}
+        />
+      )}
+      
+      {currentScreen === 'aiTools' && <AITools navigateTo={navigateTo} userRank={userRank} aiAvatar={aiAvatar} />}
+      
+      {currentScreen === 'plateConsultation' && (
+        <PlateConsultation 
+          navigateTo={navigateTo} 
+          userRank={userRank} 
+        />
+      )}
+      {currentScreen === 'voiceReport' && (
+        <VoiceReport 
+          navigateTo={navigateTo} 
+          userRank={userRank} 
+        />
+      )}
+      
+      {currentScreen === 'store' && (
+        <Store 
+          navigateTo={navigateTo} 
+        />
+      )}
+      
+      {currentScreen === 'productList' && selectedCategoryId && (
+        <ProductList
+          navigateTo={navigateTo}
+          categoryId={selectedCategoryId}
+        />
+      )}
+      
+      {currentScreen === 'profileSettings' && (
+        <ProfileSettings 
+          navigateTo={navigateTo} 
+          onBack={() => navigateTo('dashboard')} 
+          currentRank={userRank} 
+          onRankChange={setUserRank}
+          userAvatar={userAvatar}
+          isDarkMode={isDarkMode}
+          toggleDarkMode={toggleDarkMode}
+          userName={userName}
+          userEmail={userEmail}
+          suspectCount={suspectCount}
+        />
+      )}
+      
+      {currentScreen === 'map' && (
+        <TacticalMap 
+          navigateTo={navigateTo} 
+          suspects={suspects} 
+          onOpenProfile={openProfile} 
+          initialCenter={mapCenter} 
+          userDefaultLocation={userDefaultLocation}
+          customMarkers={customMarkers} 
+          addCustomMarker={addCustomMarker} 
+          updateCustomMarker={updateCustomMarker}
+          deleteCustomMarker={deleteCustomMarker}
+          isDarkMode={isDarkMode}
+        />
+      )}
+      {currentScreen === 'contacts' && (
+        <TacticalContacts
+          navigateTo={navigateTo}
+          officers={officers}
+          contacts={contacts}
+          onSendRequest={onSendRequest}
+          onAcceptRequest={onAcceptRequest}
+          onRejectRequest={onRejectRequest}
+        />
+      )}
+      
+      {/* Seletor de Grupo de Compartilhamento (Modal) */}
+      {currentScreen === 'shareGroupSelector' && selectedSuspectId && (
+        <ShareGroupSelector
+          suspect={suspects.find(s => s.id === selectedSuspectId)!}
+          userGroups={userGroups}
+          onSelectGroup={selectGroupForShare}
+          onClose={() => navigateTo('dashboard')} // Volta para a tela anterior (Dashboard ou Profile)
+        />
+      )}
     </div>
   );
 };

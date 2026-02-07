@@ -22,9 +22,9 @@ interface GroupTacticalMapProps {
   userRank: Officer['rank']; // Adicionado para o usuário 'EU'
   userDefaultLocation: GeocodedLocation | null; // NOVO: Localização padrão do usuário
   onOpenProfile: (id: string) => void;
-  addCustomMarker: (groupId: string, marker: CustomMarker) => void;
-  updateCustomMarker: (groupId: string, marker: CustomMarker) => void;
-  deleteCustomMarker: (groupId: string, markerId: string) => void;
+  addCustomMarker: (marker: CustomMarker) => void;
+  updateCustomMarker: (marker: CustomMarker) => void;
+  deleteCustomMarker: (id: string) => void;
   isDarkMode: boolean; // NEW PROP
 }
 

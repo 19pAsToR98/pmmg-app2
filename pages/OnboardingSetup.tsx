@@ -278,7 +278,7 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, defaultAv
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki dark:bg-slate-900 overflow-hidden">
-      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-lg shrink-0">
+      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 shrink-0 bg-pmmg-yellow rounded-full flex items-center justify-center">
             <span className="material-symbols-outlined text-primary-dark text-xl fill-icon">person_check</span>
@@ -290,40 +290,38 @@ const OnboardingSetup: React.FC<OnboardingSetupProps> = ({ onComplete, defaultAv
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto lg:pb-4 no-scrollbar px-4 pt-6 flex items-start justify-center">
+      <main className="flex-1 overflow-y-auto pb-24 no-scrollbar px-4 pt-6">
         {/* Aplicando fundo branco sólido ao container principal do passo 4 */}
-        <div className={`rounded-xl shadow-md p-6 pmmg-card w-full max-w-lg`}>
+        <div className={`rounded-xl shadow-md p-6 pmmg-card`}>
           {renderStepContent()}
         </div>
       </main>
 
-      <footer className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 dark:bg-slate-900/95 border-t border-pmmg-navy/10 dark:border-slate-700 backdrop-blur-lg z-50 lg:left-20">
-        <div className="max-w-md mx-auto lg:max-w-full">
-          <div className="flex justify-between gap-3">
-            <button 
-              onClick={handleBack}
-              disabled={step === 1}
-              className="flex-1 bg-slate-200 dark:bg-slate-700 text-primary-dark dark:text-slate-200 font-bold py-3 rounded-xl text-xs uppercase disabled:opacity-50"
-            >
-              <span className="material-symbols-outlined text-lg">arrow_back</span>
-            </button>
-            <button 
-              onClick={handleNext}
-              className="flex-[3] bg-pmmg-navy text-white font-bold py-3 rounded-xl text-xs uppercase flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
-            >
-              {step === 3 ? (
-                <>
-                  <span className="material-symbols-outlined text-pmmg-yellow">check_circle</span>
-                  Concluir Configuração
-                </>
-              ) : (
-                <>
-                  Próximo Passo
-                  <span className="material-symbols-outlined text-lg">arrow_forward</span>
-                </>
-              )}
-            </button>
-          </div>
+      <footer className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 dark:bg-slate-900/95 border-t border-pmmg-navy/10 dark:border-slate-700 backdrop-blur-lg max-w-md mx-auto">
+        <div className="flex justify-between gap-3">
+          <button 
+            onClick={handleBack}
+            disabled={step === 1}
+            className="flex-1 bg-slate-200 dark:bg-slate-700 text-primary-dark dark:text-slate-200 font-bold py-3 rounded-xl text-xs uppercase disabled:opacity-50"
+          >
+            <span className="material-symbols-outlined text-lg">arrow_back</span>
+          </button>
+          <button 
+            onClick={handleNext}
+            className="flex-[3] bg-pmmg-navy text-white font-bold py-3 rounded-xl text-xs uppercase flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+          >
+            {step === 3 ? (
+              <>
+                <span className="material-symbols-outlined text-pmmg-yellow">check_circle</span>
+                Concluir Configuração
+              </>
+            ) : (
+              <>
+                Próximo Passo
+                <span className="material-symbols-outlined text-lg">arrow_forward</span>
+              </>
+            )}
+          </button>
         </div>
       </footer>
     </div>

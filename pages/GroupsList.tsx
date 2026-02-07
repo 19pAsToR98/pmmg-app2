@@ -94,13 +94,13 @@ const GroupsList: React.FC<GroupsListProps> = ({ navigateTo, userGroups, officer
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto lg:pb-4 no-scrollbar px-4 pt-4">
+      <main className="flex-1 overflow-y-auto pb-40 no-scrollbar px-4 pt-4">
         <div className="flex items-center gap-2 mb-4 px-1">
           <div className="h-4 w-1 bg-pmmg-navy rounded-full"></div>
           <h3 className="text-[10px] font-black text-pmmg-navy/60 dark:text-slate-400 uppercase tracking-widest">Meus Grupos de Operação</h3>
         </div>
 
-        <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
+        <div className="space-y-4">
           {userGroups.map(group => {
             const members = getGroupMembers(group);
             return (
@@ -148,7 +148,7 @@ const GroupsList: React.FC<GroupsListProps> = ({ navigateTo, userGroups, officer
           })}
 
           {userGroups.length === 0 && (
-            <div className="text-center py-20 opacity-30 lg:col-span-2">
+            <div className="text-center py-20 opacity-30">
               <span className="material-symbols-outlined text-7xl">folder_off</span>
               <p className="text-sm font-black uppercase mt-4 tracking-[0.2em]">Nenhum grupo ativo</p>
               <p className="text-[10px] font-bold uppercase mt-1">Crie um grupo ou entre com um código</p>
@@ -157,7 +157,7 @@ const GroupsList: React.FC<GroupsListProps> = ({ navigateTo, userGroups, officer
         </div>
       </main>
 
-      {/* BottomNav is now handled by App.tsx and hidden on desktop */}
+      <BottomNav activeScreen="groupsList" navigateTo={navigateTo} />
     </div>
   );
 };

@@ -29,7 +29,7 @@ const RequestAccess: React.FC<RequestAccessProps> = ({ onBack, onSuccess }) => {
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki dark:bg-slate-900 overflow-hidden">
-      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-5 flex items-center justify-between shadow-xl shrink-0">
+      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-5 flex items-center justify-between shadow-xl">
         <div className="flex items-center gap-3">
           <button onClick={onBack} className="text-white">
             <span className="material-symbols-outlined">arrow_back_ios</span>
@@ -44,8 +44,8 @@ const RequestAccess: React.FC<RequestAccessProps> = ({ onBack, onSuccess }) => {
         </div>
       </header>
 
-      <main className="flex-1 px-5 pt-6 lg:pb-4 no-scrollbar overflow-y-auto flex items-start justify-center">
-        <div className="max-w-md mx-auto space-y-6 w-full">
+      <main className="flex-1 px-5 pt-6 pb-32 no-scrollbar overflow-y-auto">
+        <div className="max-w-md mx-auto space-y-6">
           <div className="bg-white/40 dark:bg-slate-700/50 p-4 rounded-xl border border-white/20 dark:border-slate-600 backdrop-blur-sm">
             <p className="text-xs text-pmmg-navy/80 dark:text-slate-300 leading-relaxed font-medium">
               <span className="font-bold text-pmmg-navy dark:text-pmmg-yellow">Passo 1/2:</span> Crie suas credenciais de acesso seguro.
@@ -101,17 +101,15 @@ const RequestAccess: React.FC<RequestAccessProps> = ({ onBack, onSuccess }) => {
         </div>
       </main>
 
-      <footer className="fixed bottom-0 left-0 right-0 p-5 bg-gradient-to-t from-pmmg-khaki dark:from-slate-900 via-pmmg-khaki dark:via-slate-900 to-transparent z-50 lg:left-20">
-        <div className="max-w-md mx-auto lg:max-w-full">
-          <button 
-            onClick={handleSubmit}
-            className="w-full bg-pmmg-navy text-white font-bold py-4 rounded-xl shadow-2xl flex items-center justify-center gap-3 active:scale-[0.98] transition-transform"
-          >
-            <span className="uppercase tracking-widest text-sm">Registrar Credenciais</span>
-            <span className="material-symbols-outlined text-pmmg-yellow">lock_open</span>
-          </button>
-          <p className="text-center text-[9px] text-pmmg-navy/50 dark:text-slate-500 uppercase font-bold mt-3 tracking-widest">Plataforma Segura PMMG © 2024</p>
-        </div>
+      <footer className="fixed bottom-0 left-0 right-0 p-5 bg-gradient-to-t from-pmmg-khaki dark:from-slate-900 via-pmmg-khaki dark:via-slate-900 to-transparent max-w-md mx-auto">
+        <button 
+          onClick={handleSubmit}
+          className="w-full bg-pmmg-navy text-white font-bold py-4 rounded-xl shadow-2xl flex items-center justify-center gap-3 active:scale-[0.98] transition-transform"
+        >
+          <span className="uppercase tracking-widest text-sm">Registrar Credenciais</span>
+          <span className="material-symbols-outlined text-pmmg-yellow">lock_open</span>
+        </button>
+        <p className="text-center text-[9px] text-pmmg-navy/50 dark:text-slate-500 uppercase font-bold mt-3 tracking-widest">Plataforma Segura PMMG © 2024</p>
       </footer>
     </div>
   );
