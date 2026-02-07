@@ -20,6 +20,7 @@ import GroupCreation from './pages/GroupCreation'; // NOVO: Criação de Grupo
 import GroupDetail from './pages/GroupDetail'; // NOVO: Detalhe do Grupo
 import GroupTacticalMap from './pages/GroupTacticalMap'; // NOVO: Mapa do Grupo
 import ShareGroupSelector from './components/ShareGroupSelector'; // NOVO: Componente para seleção de grupo
+import BottomNav from './components/BottomNav';
 
 const INITIAL_SUSPECTS: Suspect[] = [
   {
