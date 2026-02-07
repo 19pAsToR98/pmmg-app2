@@ -132,7 +132,7 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
         </div>
       )}
 
-      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 py-4 flex items-center justify-between shadow-lg">
+      <header className="sticky top-0 z-50 bg-pmmg-navy px-4 lg:px-8 py-4 flex items-center justify-between shadow-lg shrink-0">
         <div className="flex items-center gap-3">
           <button onClick={onBack} className="text-white active:scale-90 transition-transform">
             <span className="material-symbols-outlined">arrow_back_ios</span>
@@ -160,9 +160,10 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto pb-32 no-scrollbar">
-        {/* Header Section with Photo and Text side-by-side */}
-        <section className="p-4 profile-header-gradient pb-12 rounded-b-[2rem] shadow-xl">
+      <main className="flex-1 overflow-y-auto pb-32 lg:pb-8 no-scrollbar">
+        
+        {/* MOBILE HEADER SECTION (Mantido para mobile) */}
+        <section className="p-4 profile-header-gradient pb-12 rounded-b-[2rem] shadow-xl lg:hidden">
           
           <div className="flex gap-4 relative items-start">
             {/* Bloco da Foto (Esquerda) */}
@@ -213,234 +214,320 @@ const SuspectProfile: React.FC<SuspectProfileProps> = ({ suspect, onBack, naviga
           </div>
         </section>
 
-        <div className="px-4 -mt-6 space-y-3">
-          <div className="pmmg-card">
-            <div onClick={() => toggleSection('data')} className="flex items-center justify-between p-4 cursor-pointer">
-              <div className="flex items-center gap-3 text-primary-dark">
-                <span className="material-symbols-outlined">person</span>
-                <span className="text-sm font-bold uppercase">Dados do Indivíduo</span>
-              </div>
-              <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600">
-                {expandedSection === 'data' ? 'expand_less' : 'expand_more'}
-              </span>
-            </div>
-            {expandedSection === 'data' && (
-              <div className="p-4 space-y-4 border-t border-pmmg-navy/5 dark:border-slate-700">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">CPF</p>
-                    <p className="text-sm font-bold text-primary-dark">{suspect.cpf}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">RG</p>
-                    <p className="text-sm font-bold text-primary-dark">{suspect.rg || 'N/D'}</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">Nascimento</p>
-                    <p className="text-sm font-bold text-primary-dark">{suspect.birthDate || 'N/D'}</p>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">Filiação (Genitora)</p>
-                  <p className="text-sm font-bold text-primary-dark">{suspect.motherName || 'Não Informado'}</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="pmmg-card">
-             <div onClick={() => toggleSection('articles')} className="flex items-center justify-between p-4 cursor-pointer">
-              <div className="flex items-center gap-3 text-primary-dark">
-                <span className="material-symbols-outlined">gavel</span>
-                <span className="text-sm font-bold uppercase">Artigos Criminais</span>
-              </div>
-              <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600">
-                {expandedSection === 'articles' ? 'expand_less' : 'expand_more'}
-              </span>
-            </div>
-            {expandedSection === 'articles' && (
-              <div className="p-4 space-y-3 border-t border-pmmg-navy/5 dark:border-slate-700">
-                {suspect.articles && suspect.articles.length > 0 ? suspect.articles.map((art, i) => (
-                  <div key={i} className="flex items-start gap-3 p-2 bg-pmmg-navy/5 dark:bg-slate-700 rounded border border-pmmg-navy/10 dark:border-slate-600">
-                    <span className="text-primary-dark font-bold text-sm">{art}</span>
-                    <p className="text-[10px] text-secondary-light italic mt-0.5">Enquadramento ativo no sistema.</p>
-                  </div>
-                )) : (
-                  <p className="text-xs text-slate-400 italic">Nenhum artigo registrado.</p>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Vehicles Section */}
-          <div className="pmmg-card">
-            <div onClick={() => toggleSection('vehicles')} className="flex items-center justify-between p-4 cursor-pointer">
-              <div className="flex items-center gap-3 text-primary-dark">
-                <span className="material-symbols-outlined">directions_car</span>
-                <span className="text-sm font-bold uppercase">Veículos Cadastrados</span>
-              </div>
-              <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600">
-                {expandedSection === 'vehicles' ? 'expand_less' : 'expand_more'}
-              </span>
-            </div>
-            {expandedSection === 'vehicles' && (
-              <div className="p-4 space-y-3 border-t border-pmmg-navy/5 dark:border-slate-700">
-                {suspect.vehicles && suspect.vehicles.length > 0 ? suspect.vehicles.map((vehicle, i) => (
-                  <div key={i} className="p-3 bg-pmmg-navy/5 dark:bg-slate-700 rounded border border-pmmg-navy/10 dark:border-slate-600">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-bold text-primary-dark">{vehicle.plate}</p>
-                      <span className="text-[10px] font-semibold text-secondary-light">{vehicle.color}</span>
-                    </div>
-                    <p className="text-[11px] text-secondary-light">{vehicle.model}</p>
-                  </div>
-                )) : (
-                  <p className="text-xs text-slate-400 italic">Nenhum veículo registrado.</p>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Associations Section */}
-          <div className="pmmg-card">
-            <div onClick={() => toggleSection('associations')} className="flex items-center justify-between p-4 cursor-pointer">
-              <div className="flex items-center gap-3 text-primary-dark">
-                <span className="material-symbols-outlined">link</span>
-                <span className="text-sm font-bold uppercase">Ligações e Contatos</span>
-              </div>
-              <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600">
-                {expandedSection === 'associations' ? 'expand_less' : 'expand_more'}
-              </span>
-            </div>
-            {expandedSection === 'associations' && (
-              <div className="p-4 space-y-3 border-t border-pmmg-navy/5 dark:border-slate-700">
-                {suspect.associations && suspect.associations.length > 0 ? suspect.associations.map((association, i) => {
-                  const associatedSuspect = findAssociatedSuspect(association.suspectId);
-                  if (!associatedSuspect) return null;
-
-                  return (
-                    <div 
-                      key={i} 
-                      className="flex items-center gap-3 p-3 bg-pmmg-navy/5 dark:bg-slate-700 rounded border border-pmmg-navy/10 dark:border-slate-600 cursor-pointer active:bg-pmmg-navy/10 dark:active:bg-slate-600 transition-colors"
-                      onClick={() => onOpenProfile(associatedSuspect.id)}
-                    >
-                      <div className="w-10 h-10 shrink-0 rounded-full overflow-hidden bg-slate-300 border border-pmmg-navy/20 dark:border-slate-600">
-                        <img src={associatedSuspect.photoUrl} alt={associatedSuspect.name} className="w-full h-full object-cover" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider truncate">{association.relationship}</p>
-                        <h4 className="text-sm font-bold text-primary-dark truncate">{associatedSuspect.name}</h4>
-                      </div>
-                      <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600 text-lg shrink-0">arrow_forward_ios</span>
-                    </div>
-                  );
-                }) : (
-                  <p className="text-xs text-slate-400 italic">Nenhuma ligação registrada.</p>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Photo Gallery */}
-          <div className="pmmg-card p-4">
-            <h3 className="text-[10px] font-bold text-pmmg-navy/60 dark:text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-              <span className="material-symbols-outlined">photo_library</span>
-              Galeria de Identificação ({photos.length})
-            </h3>
-            <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
-              {photos.map((src, i) => (
-                <div 
-                  key={i} 
-                  onClick={() => setFullscreenImage(src)}
-                  className={`shrink-0 w-24 h-32 rounded-lg overflow-hidden border-2 transition-all active:scale-95 shadow-sm border-pmmg-navy/10 dark:border-slate-700`}
-                >
-                  <img src={src} className="w-full h-full object-cover" alt="Thumbnail" />
-                </div>
-              ))}
-            </div>
-            <p className="text-[8px] text-slate-400 mt-2 uppercase text-center font-bold italic tracking-wider">Clique para expandir (Cores Reais)</p>
-          </div>
-
-          {/* Endereço Principal */}
-          {suspect.lat && suspect.lng && (
-            <div className="pmmg-card overflow-hidden">
-              <div className="p-4 text-primary-dark bg-white/40 dark:bg-slate-700/50">
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined">location_on</span>
-                  <span className="text-sm font-bold uppercase">Endereço Principal</span>
-                </div>
-                {/* Endereço movido para baixo do título */}
-                <p className="text-[10px] font-bold uppercase opacity-70 mt-1 ml-8">{suspect.lastSeen}</p>
-              </div>
-              <div className="relative group cursor-pointer" onClick={() => handleOpenMap(suspect.lat, suspect.lng)}>
-                <GoogleMapWrapper
-                  center={{ lat: suspect.lat, lng: suspect.lng }}
-                  zoom={15}
-                  mapContainerClassName="h-48 w-full z-0 pointer-events-none"
-                  options={{
-                    disableDefaultUI: true,
-                    draggable: false,
-                    scrollwheel: false,
-                    zoomControl: false,
-                    mapTypeId: 'roadmap'
-                  }}
-                  isDarkMode={isDarkMode} // PASSING NEW PROP
-                >
-                  <MarkerF
-                    position={{ lat: suspect.lat, lng: suspect.lng }}
-                    icon={getMiniMapIcon(false)}
-                  />
-                </GoogleMapWrapper>
-                <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors flex items-center justify-center">
-                  <div className="bg-pmmg-navy/80 text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-xl backdrop-blur-sm transform scale-90 group-hover:scale-100 transition-transform">
-                    <span className="material-symbols-outlined text-sm">open_in_full</span>
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Abrir Mapa Geral</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+        {/* DESKTOP LAYOUT GRID */}
+        <div className="lg:grid lg:grid-cols-3 lg:gap-8 lg:p-8">
           
-          {/* Endereço da Abordagem (NOVO MAPA) */}
-          {suspect.approachAddress && suspect.approachLat && suspect.approachLng && (
-            <div className="pmmg-card overflow-hidden">
-              <div className="p-4 text-primary-dark bg-white/40 dark:bg-slate-700/50">
-                <div className="flex items-center gap-3">
-                  <span className="material-symbols-outlined">pin_drop</span>
-                  <span className="text-sm font-bold uppercase">Endereço da Abordagem</span>
+          {/* COLUNA 1 (Desktop): Foto e Dados Principais */}
+          <div className="hidden lg:block lg:col-span-1 space-y-6 sticky top-8 self-start">
+            
+            {/* Foto Principal e Status */}
+            <div className="pmmg-card p-4 flex flex-col items-center text-center">
+              <div 
+                className="w-40 h-52 bg-slate-300 rounded-2xl border-4 border-pmmg-yellow/50 overflow-hidden shadow-2xl relative cursor-pointer active:scale-[0.98] transition-transform mb-4"
+                onClick={() => setFullscreenImage(suspect.photoUrl)}
+              >
+                <img 
+                  alt={suspect.name} 
+                  className="w-full h-full object-cover" 
+                  src={suspect.photoUrl} 
+                />
+                <div className="absolute bottom-0 right-0 p-1.5 bg-pmmg-navy/60 rounded-tl-xl backdrop-blur-sm">
+                  <span className="material-symbols-outlined text-white text-sm">zoom_in</span>
                 </div>
-                {/* Endereço movido para baixo do título */}
-                <p className="text-[10px] font-bold uppercase opacity-70 mt-1 ml-8">{suspect.approachAddress}</p>
               </div>
-              <div className="relative group cursor-pointer" onClick={() => handleOpenMap(suspect.approachLat!, suspect.approachLng!)}>
-                <GoogleMapWrapper
-                  center={{ lat: suspect.approachLat, lng: suspect.approachLng }}
-                  zoom={15}
-                  mapContainerClassName="h-48 w-full z-0 pointer-events-none"
-                  options={{
-                    disableDefaultUI: true,
-                    draggable: false,
-                    scrollwheel: false,
-                    zoomControl: false,
-                    mapTypeId: 'roadmap'
-                  }}
-                  isDarkMode={isDarkMode} // PASSING NEW PROP
-                >
-                  <MarkerF
-                    position={{ lat: suspect.approachLat, lng: suspect.approachLng }}
-                    icon={getMiniMapIcon(true)}
-                  />
-                </GoogleMapWrapper>
-                <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors flex items-center justify-center">
-                  <div className="bg-pmmg-navy/80 text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-xl backdrop-blur-sm transform scale-90 group-hover:scale-100 transition-transform">
-                    <span className="material-symbols-outlined text-sm">open_in_full</span>
-                    <span className="text-[10px] font-bold uppercase tracking-widest">Abrir Mapa Geral</span>
+              
+              <h2 className="text-xl font-black text-primary-dark uppercase leading-tight">{suspect.name}</h2>
+              {suspect.nickname && <p className="text-pmmg-red text-sm font-semibold mt-1">Vulgo: "{suspect.nickname}"</p>}
+              
+              <span className={`text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg border border-white/20 uppercase tracking-widest mt-3 ${
+                suspect.status === 'Foragido' ? 'bg-pmmg-red animate-pulse' : 
+                suspect.status === 'Suspeito' ? 'bg-pmmg-yellow text-primary-dark' : 'bg-pmmg-blue'
+              }`}>
+                {suspect.status}
+              </span>
+            </div>
+            
+            {/* Dados Rápidos */}
+            <div className="pmmg-card p-4 space-y-3">
+              <h3 className="text-[10px] font-bold uppercase text-pmmg-navy/70 dark:text-slate-400 mb-2 tracking-wider border-b border-pmmg-navy/10 dark:border-slate-700 pb-2">Dados Rápidos</h3>
+              <div className="flex justify-between">
+                <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider">CPF</p>
+                <p className="text-sm font-bold text-primary-dark">{suspect.cpf}</p>
+              </div>
+              <div className="flex justify-between">
+                <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider">RG</p>
+                <p className="text-sm font-bold text-primary-dark">{suspect.rg || 'N/D'}</p>
+              </div>
+              <div className="flex justify-between">
+                <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider">Nascimento</p>
+                <p className="text-sm font-bold text-primary-dark">{suspect.birthDate || 'N/D'}</p>
+              </div>
+            </div>
+            
+            {/* Botões de Ação Rápida */}
+            <div className="space-y-3">
+              <button 
+                onClick={() => onEdit(suspect.id)} 
+                className="w-full bg-pmmg-navy text-white text-sm font-bold py-3 rounded-xl uppercase tracking-widest flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+              >
+                <span className="material-symbols-outlined text-pmmg-yellow">edit</span>
+                Editar Ficha
+              </button>
+              <button 
+                onClick={() => startShareFlow(suspect.id)}
+                className="w-full bg-pmmg-blue text-white text-sm font-bold py-3 rounded-xl uppercase tracking-widest flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+              >
+                <span className="material-symbols-outlined">share</span>
+                Compartilhar
+              </button>
+            </div>
+          </div>
+
+          {/* COLUNA 2 (Mobile & Desktop): Detalhes e Seções Expansíveis */}
+          <div className="lg:col-span-2 px-4 -mt-6 lg:mt-0 lg:px-0 space-y-6">
+            
+            {/* Descrição Tática (Apenas Desktop) */}
+            <div className="hidden lg:block pmmg-card p-4">
+              <h3 className="text-[10px] font-bold uppercase text-pmmg-navy/70 dark:text-slate-400 mb-2 tracking-wider">Observação Tática</h3>
+              {suspect.description ? (
+                <p className="text-sm text-secondary-light italic leading-relaxed">
+                  {suspect.description}
+                </p>
+              ) : (
+                <p className="text-sm text-slate-400 italic">Nenhuma observação física registrada no prontuário.</p>
+              )}
+            </div>
+            
+            {/* Dados do Indivíduo (Oculto no Desktop, pois está na Coluna 1) */}
+            <div className="pmmg-card lg:hidden">
+              <div onClick={() => toggleSection('data')} className="flex items-center justify-between p-4 cursor-pointer">
+                <div className="flex items-center gap-3 text-primary-dark">
+                  <span className="material-symbols-outlined">person</span>
+                  <span className="text-sm font-bold uppercase">Dados do Indivíduo</span>
+                </div>
+                <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600">
+                  {expandedSection === 'data' ? 'expand_less' : 'expand_more'}
+                </span>
+              </div>
+              {expandedSection === 'data' && (
+                <div className="p-4 space-y-4 border-t border-pmmg-navy/5 dark:border-slate-700">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">CPF</p>
+                      <p className="text-sm font-bold text-primary-dark">{suspect.cpf}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">RG</p>
+                      <p className="text-sm font-bold text-primary-dark">{suspect.rg || 'N/D'}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">Nascimento</p>
+                      <p className="text-sm font-bold text-primary-dark">{suspect.birthDate || 'N/D'}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider mb-0.5">Filiação (Genitora)</p>
+                    <p className="text-sm font-bold text-primary-dark">{suspect.motherName || 'Não Informado'}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Artigos Criminais */}
+            <div className="pmmg-card">
+               <div onClick={() => toggleSection('articles')} className="flex items-center justify-between p-4 cursor-pointer">
+                <div className="flex items-center gap-3 text-primary-dark">
+                  <span className="material-symbols-outlined">gavel</span>
+                  <span className="text-sm font-bold uppercase">Artigos Criminais</span>
+                </div>
+                <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600">
+                  {expandedSection === 'articles' ? 'expand_less' : 'expand_more'}
+                </span>
+              </div>
+              {expandedSection === 'articles' && (
+                <div className="p-4 space-y-3 border-t border-pmmg-navy/5 dark:border-slate-700">
+                  {suspect.articles && suspect.articles.length > 0 ? suspect.articles.map((art, i) => (
+                    <div key={i} className="flex items-start gap-3 p-2 bg-pmmg-navy/5 dark:bg-slate-700 rounded border border-pmmg-navy/10 dark:border-slate-600">
+                      <span className="text-primary-dark font-bold text-sm">{art}</span>
+                      <p className="text-[10px] text-secondary-light italic mt-0.5">Enquadramento ativo no sistema.</p>
+                    </div>
+                  )) : (
+                    <p className="text-xs text-slate-400 italic">Nenhum artigo registrado.</p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Vehicles Section */}
+            <div className="pmmg-card">
+              <div onClick={() => toggleSection('vehicles')} className="flex items-center justify-between p-4 cursor-pointer">
+                <div className="flex items-center gap-3 text-primary-dark">
+                  <span className="material-symbols-outlined">directions_car</span>
+                  <span className="text-sm font-bold uppercase">Veículos Cadastrados</span>
+                </div>
+                <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600">
+                  {expandedSection === 'vehicles' ? 'expand_less' : 'expand_more'}
+                </span>
+              </div>
+              {expandedSection === 'vehicles' && (
+                <div className="p-4 space-y-3 border-t border-pmmg-navy/5 dark:border-slate-700">
+                  {suspect.vehicles && suspect.vehicles.length > 0 ? suspect.vehicles.map((vehicle, i) => (
+                    <div key={i} className="p-3 bg-pmmg-navy/5 dark:bg-slate-700 rounded border border-pmmg-navy/10 dark:border-slate-600">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-bold text-primary-dark">{vehicle.plate}</p>
+                        <span className="text-[10px] font-semibold text-secondary-light">{vehicle.color}</span>
+                      </div>
+                      <p className="text-[11px] text-secondary-light">{vehicle.model}</p>
+                    </div>
+                  )) : (
+                    <p className="text-xs text-slate-400 italic">Nenhum veículo registrado.</p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Associations Section */}
+            <div className="pmmg-card">
+              <div onClick={() => toggleSection('associations')} className="flex items-center justify-between p-4 cursor-pointer">
+                <div className="flex items-center gap-3 text-primary-dark">
+                  <span className="material-symbols-outlined">link</span>
+                  <span className="text-sm font-bold uppercase">Ligações e Contatos</span>
+                </div>
+                <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600">
+                  {expandedSection === 'associations' ? 'expand_less' : 'expand_more'}
+                </span>
+              </div>
+              {expandedSection === 'associations' && (
+                <div className="p-4 space-y-3 border-t border-pmmg-navy/5 dark:border-slate-700">
+                  {suspect.associations && suspect.associations.length > 0 ? suspect.associations.map((association, i) => {
+                    const associatedSuspect = findAssociatedSuspect(association.suspectId);
+                    if (!associatedSuspect) return null;
+
+                    return (
+                      <div 
+                        key={i} 
+                        className="flex items-center gap-3 p-3 bg-pmmg-navy/5 dark:bg-slate-700 rounded border border-pmmg-navy/10 dark:border-slate-600 cursor-pointer active:bg-pmmg-navy/10 dark:active:bg-slate-600 transition-colors"
+                        onClick={() => onOpenProfile(associatedSuspect.id)}
+                      >
+                        <div className="w-10 h-10 shrink-0 rounded-full overflow-hidden bg-slate-300 border border-pmmg-navy/20 dark:border-slate-600">
+                          <img src={associatedSuspect.photoUrl} alt={associatedSuspect.name} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] text-pmmg-navy/50 dark:text-slate-400 font-bold uppercase tracking-wider truncate">{association.relationship}</p>
+                          <h4 className="text-sm font-bold text-primary-dark truncate">{associatedSuspect.name}</h4>
+                        </div>
+                        <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-600 text-lg shrink-0">arrow_forward_ios</span>
+                      </div>
+                    );
+                  }) : (
+                    <p className="text-xs text-slate-400 italic">Nenhuma ligação registrada.</p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Photo Gallery */}
+            <div className="pmmg-card p-4">
+              <h3 className="text-[10px] font-bold text-pmmg-navy/60 dark:text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                <span className="material-symbols-outlined">photo_library</span>
+                Galeria de Identificação ({photos.length})
+              </h3>
+              <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+                {photos.map((src, i) => (
+                  <div 
+                    key={i} 
+                    onClick={() => setFullscreenImage(src)}
+                    className={`shrink-0 w-24 h-32 rounded-lg overflow-hidden border-2 transition-all active:scale-95 shadow-sm border-pmmg-navy/10 dark:border-slate-700`}
+                  >
+                    <img src={src} className="w-full h-full object-cover" alt="Thumbnail" />
+                  </div>
+                ))}
+              </div>
+              <p className="text-[8px] text-slate-400 mt-2 uppercase text-center font-bold italic tracking-wider">Clique para expandir (Cores Reais)</p>
+            </div>
+
+            {/* Endereço Principal */}
+            {suspect.lat && suspect.lng && (
+              <div className="pmmg-card overflow-hidden">
+                <div className="p-4 text-primary-dark bg-white/40 dark:bg-slate-700/50">
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined">location_on</span>
+                    <span className="text-sm font-bold uppercase">Endereço Principal</span>
+                  </div>
+                  {/* Endereço movido para baixo do título */}
+                  <p className="text-[10px] font-bold uppercase opacity-70 mt-1 ml-8">{suspect.lastSeen}</p>
+                </div>
+                <div className="relative group cursor-pointer" onClick={() => handleOpenMap(suspect.lat, suspect.lng)}>
+                  <GoogleMapWrapper
+                    center={{ lat: suspect.lat, lng: suspect.lng }}
+                    zoom={15}
+                    mapContainerClassName="h-48 w-full z-0 pointer-events-none"
+                    options={{
+                      disableDefaultUI: true,
+                      draggable: false,
+                      scrollwheel: false,
+                      zoomControl: false,
+                      mapTypeId: 'roadmap'
+                    }}
+                    isDarkMode={isDarkMode} // PASSING NEW PROP
+                  >
+                    <MarkerF
+                      position={{ lat: suspect.lat, lng: suspect.lng }}
+                      icon={getMiniMapIcon(false)}
+                    />
+                  </GoogleMapWrapper>
+                  <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors flex items-center justify-center">
+                    <div className="bg-pmmg-navy/80 text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-xl backdrop-blur-sm transform scale-90 group-hover:scale-100 transition-transform">
+                      <span className="material-symbols-outlined text-sm">open_in_full</span>
+                      <span className="text-[10px] font-bold uppercase tracking-widest">Abrir Mapa Geral</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+            
+            {/* Endereço da Abordagem (NOVO MAPA) */}
+            {suspect.approachAddress && suspect.approachLat && suspect.approachLng && (
+              <div className="pmmg-card overflow-hidden">
+                <div className="p-4 text-primary-dark bg-white/40 dark:bg-slate-700/50">
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined">pin_drop</span>
+                    <span className="text-sm font-bold uppercase">Endereço da Abordagem</span>
+                  </div>
+                  {/* Endereço movido para baixo do título */}
+                  <p className="text-[10px] font-bold uppercase opacity-70 mt-1 ml-8">{suspect.approachAddress}</p>
+                </div>
+                <div className="relative group cursor-pointer" onClick={() => handleOpenMap(suspect.approachLat!, suspect.approachLng!)}>
+                  <GoogleMapWrapper
+                    center={{ lat: suspect.approachLat, lng: suspect.approachLng }}
+                    zoom={15}
+                    mapContainerClassName="h-48 w-full z-0 pointer-events-none"
+                    options={{
+                      disableDefaultUI: true,
+                      draggable: false,
+                      scrollwheel: false,
+                      zoomControl: false,
+                      mapTypeId: 'roadmap'
+                    }}
+                    isDarkMode={isDarkMode} // PASSING NEW PROP
+                  >
+                    <MarkerF
+                      position={{ lat: suspect.approachLat, lng: suspect.approachLng }}
+                      icon={getMiniMapIcon(true)}
+                    />
+                  </GoogleMapWrapper>
+                  <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors flex items-center justify-center">
+                    <div className="bg-pmmg-navy/80 text-white px-4 py-2 rounded-full flex items-center gap-2 shadow-xl backdrop-blur-sm transform scale-90 group-hover:scale-100 transition-transform">
+                      <span className="material-symbols-outlined text-sm">open_in_full</span>
+                      <span className="text-[10px] font-bold uppercase tracking-widest">Abrir Mapa Geral</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </main>
 
