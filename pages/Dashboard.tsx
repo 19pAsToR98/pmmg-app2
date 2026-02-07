@@ -168,7 +168,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
               </button>
             </section>
             
-            {/* NOVO: Alertas e Registros Recentes (Lado a Lado no Desktop) */}
+            {/* Alertas e Registros Recentes (Agora na Coluna Principal) */}
             <section className="px-4 lg:px-0">
               <div className="flex items-center justify-between pb-3">
                 <div className="flex items-center gap-2">
@@ -252,14 +252,13 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                       </div>
                     </div>
                   </div>
-                </div>
-              )) : (
-                <div className="text-center py-10 opacity-40 col-span-full">
-                  <span className="material-symbols-outlined text-5xl">person_search</span>
-                  <p className="text-xs font-bold uppercase mt-2">Nenhum registro encontrado</p>
-                </div>
-              )}
-            </div>
+                )) : (
+                  <div className="text-center py-10 opacity-40 col-span-full">
+                    <span className="material-symbols-outlined text-5xl">person_search</span>
+                    <p className="text-xs font-bold uppercase mt-2">Nenhum registro encontrado</p>
+                  </div>
+                )}
+              </div>
             </section>
           </div>
 
