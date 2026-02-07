@@ -1,6 +1,7 @@
 import React from 'react';
 import { Screen, Suspect, UserAvatar } from '../types';
-import AdImageSlider from '../components/AdImageSlider'; // NOVO IMPORT
+import AdImageSlider from '../components/AdImageSlider';
+import InstagramPostSlider from '../components/InstagramPostSlider'; // NOVO IMPORT
 
 interface DashboardProps {
   navigateTo: (screen: Screen) => void;
@@ -256,16 +257,17 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                 )) : (
                   <div className="text-center py-10 opacity-40 col-span-full">
                     <span className="material-symbols-outlined text-5xl">person_search</span>
-                    <p className="text-xs font-bold uppercase mt-2">Nenhum registro encontrado</p>
+                    <p className="text-xs font-bold uppercase mt-4 tracking-[0.2em]">Nenhum registro encontrado</p>
                   </div>
                 )}
               </div>
             </section>
           </div>
 
-          {/* Coluna 3: Slider de Imagens Publicitárias (Ocupa 1/3 no desktop) */}
-          <section className="lg:col-span-1 px-4 pt-8 lg:px-0 lg:pt-0">
+          {/* Coluna 3: Sliders (Ocupa 1/3 no desktop) */}
+          <section className="lg:col-span-1 px-4 pt-8 lg:px-0 lg:pt-0 space-y-6">
             <AdImageSlider />
+            <InstagramPostSlider />
           </section>
         </div>
       </main>
