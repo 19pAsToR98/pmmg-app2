@@ -70,6 +70,25 @@ const AdImageSlider: React.FC = () => {
           />
         ))}
       </div>
+      
+      {/* Instagram Widget (Simulado) */}
+      <a 
+        href="https://www.instagram.com/pmmg.oficial/" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="w-full mt-4 p-3 bg-pmmg-navy/5 dark:bg-slate-700 rounded-xl flex items-center justify-between border border-pmmg-navy/10 dark:border-slate-600 active:scale-[0.98] transition-transform shrink-0"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-pmmg-red rounded-lg flex items-center justify-center text-white">
+            <span className="material-symbols-outlined text-xl">link</span>
+          </div>
+          <div>
+            <p className="text-[10px] font-black text-pmmg-navy dark:text-slate-200 uppercase leading-none">Siga a PMMG</p>
+            <p className="text-[9px] text-slate-500 dark:text-slate-400">@pmmg.oficial</p>
+          </div>
+        </div>
+        <span className="material-symbols-outlined text-pmmg-navy/40 dark:text-slate-500 text-lg">arrow_forward_ios</span>
+      </a>
     </div>
   );
 };
