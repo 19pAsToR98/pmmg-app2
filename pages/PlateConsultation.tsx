@@ -62,7 +62,7 @@ const PlateConsultation: React.FC<PlateConsultationProps> = ({ navigateTo, userR
               />
             </div>
           </div>
-          <div className="relative bg-white dark:bg-slate-800 rounded-[1.5rem] p-4 px-6 shadow-lg mb-12 text-center border-2 border-pmmg-navy/5 dark:border-slate-700 after:content-[''] after:absolute after:top-0 after:left-1/2 after:w-0 after:h-0 after:border-[20px] after:border-transparent after:border-b-white dark:after:border-b-slate-800 after:mt-[-20px] after:ml-[-20px] after:border-t-0">
+          <div className="relative bg-white dark:bg-slate-800 rounded-[1.5rem] p-4 px-6 shadow-lg mb-8 text-center border-2 border-pmmg-navy/5 dark:border-slate-700 after:content-[''] after:absolute after:top-0 after:left-1/2 after:w-0 after:h-0 after:border-[20px] after:border-transparent after:border-b-white dark:after:border-b-slate-800 after:mt-[-20px] after:ml-[-20px] after:border-t-0">
             <p className="text-pmmg-navy dark:text-slate-200 font-semibold text-sm">
               <span className="font-bold text-pmmg-red">{rankLabel}</span>, insira a placa manualmente ou utilize a câmera para leitura automática.
             </p>
