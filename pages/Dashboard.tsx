@@ -1,6 +1,6 @@
 import React from 'react';
 import { Screen, Suspect, UserAvatar } from '../types';
-import AIToolsWidget from '../components/AIToolsWidget'; // NOVO IMPORT
+import AdImageSlider from '../components/AdImageSlider'; // NOVO IMPORT
 
 interface DashboardProps {
   navigateTo: (screen: Screen) => void;
@@ -8,7 +8,7 @@ interface DashboardProps {
   onOpenProfile: (id: string) => void;
   suspects: Suspect[];
   startShareFlow: (suspectId: string) => void; // NOVO
-  aiAvatar: UserAvatar; // NOVO: Avatar do Assistente de IA
+  aiAvatar: UserAvatar; // Mantido, mas não usado diretamente aqui
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsManagement, onOpenProfile, suspects, startShareFlow, aiAvatar }) => {
@@ -263,9 +263,9 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
             </section>
           </div>
 
-          {/* Coluna 3: Assistente Tático IA (Ocupa 1/3 no desktop) */}
+          {/* Coluna 3: Slider de Imagens Publicitárias (Ocupa 1/3 no desktop) */}
           <section className="lg:col-span-1 px-4 pt-8 lg:px-0 lg:pt-0">
-            <AIToolsWidget navigateTo={navigateTo} aiAvatar={aiAvatar} />
+            <AdImageSlider />
           </section>
         </div>
       </main>
