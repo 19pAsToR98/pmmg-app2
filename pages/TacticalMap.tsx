@@ -357,6 +357,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki dark:bg-slate-900 overflow-hidden">
+      {/* Mobile Header (Hidden on Desktop) */}
       <header className="sticky top-0 z-[1000] bg-pmmg-navy px-4 py-4 shadow-xl lg:hidden">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -394,41 +395,43 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       </header>
 
       <div className="flex-1 relative">
-        {/* Desktop Header (Apenas botões de ação) */}
-        <div className="hidden lg:flex absolute top-0 left-0 right-0 z-[1000] justify-end p-4">
-          <div className="flex items-center gap-3 bg-pmmg-navy/90 backdrop-blur-md p-3 rounded-xl shadow-xl border border-white/20">
-            <button 
-              onClick={() => {
-                setIsAddingMarker(prev => !prev);
-                setNewMarkerData(null); 
-                setEditingMarker(null);
-              }}
-              className={`p-2 rounded-full border transition-all ${isAddingMarker ? 'bg-pmmg-red text-white border-pmmg-red shadow-lg' : 'bg-white/10 text-white border-white/20'}`}
-              title="Adicionar Ponto Tático"
-            >
-              <span className="material-symbols-outlined text-lg">add_location_alt</span>
-            </button>
-            <button 
-              onClick={recenter} 
-              className="bg-white/10 p-2 rounded-full border border-white/20 text-white active:bg-white/20"
-              title="Minha Localização"
-            >
-              <span className="material-symbols-outlined text-lg">my_location</span>
-            </button>
-            <button 
-              onClick={() => setIsSidebarOpen(prev => !prev)}
-              className={`p-2 rounded-full border transition-all ${isSidebarOpen ? 'bg-pmmg-yellow text-pmmg-navy border-pmmg-yellow shadow-lg' : 'bg-white/10 text-white border-white/20'}`}
-              title="Legenda e Filtros"
-            >
-              <span className="material-symbols-outlined text-lg">tune</span>
-            </button>
-          </div>
+        
+        {/* Desktop Action Sidebar (Visible only on large screens) */}
+        <div className="hidden lg:flex fixed top-0 right-0 bottom-0 z-[1000] w-16 bg-pmmg-navy-dark/90 backdrop-blur-md shadow-2xl flex-col items-center pt-20 pb-4 space-y-4">
+          <button 
+            onClick={() => {
+              setIsAddingMarker(prev => !prev);
+              setNewMarkerData(null); 
+              setEditingMarker(null);
+            }}
+            className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${isAddingMarker ? 'bg-pmmg-red text-white shadow-lg ring-2 ring-pmmg-red/50' : 'bg-white/10 text-white hover:bg-white/20'}`}
+            title="Adicionar Ponto Tático"
+          >
+            <span className="material-symbols-outlined text-2xl">add_location_alt</span>
+          </button>
+          <button 
+            onClick={recenter} 
+            className="w-12 h-12 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors flex items-center justify-center"
+            title="Minha Localização"
+          >
+            <span className="material-symbols-outlined text-2xl">my_location</span>
+          </button>
+          <div className="h-px w-8 bg-white/10"></div>
+          <button 
+            onClick={() => setIsSidebarOpen(prev => !prev)}
+            className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${isSidebarOpen ? 'bg-pmmg-yellow text-pmmg-navy shadow-lg ring-2 ring-pmmg-yellow/50' : 'bg-white/10 text-white hover:bg-white/20'}`}
+            title="Legenda e Filtros"
+          >
+            <span className="material-symbols-outlined text-2xl">tune</span>
+          </button>
         </div>
         
+        {/* Google Map Wrapper (Adjusted for Desktop Sidebar) */}
         <GoogleMapWrapper
           center={center}
           zoom={currentZoom}
-          mapContainerClassName="w-full h-full"
+          // No desktop, o mapa deve ter margem à direita para a barra de ações
+          mapContainerClassName="w-full h-full lg:mr-16" 
           onLoad={handleMapLoad}
           onClick={handleMapClick}
           options={{
@@ -436,6 +439,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           }}
           isDarkMode={isDarkMode} // PASSING NEW PROP
         >
+          {/* ... (Markers and InfoWindows remain the same) ... */}
           {/* ✅ MARCADOR DO USUÁRIO COM HTML COMPLETO */}
           {userPos && (
             <>
@@ -721,9 +725,9 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
 
         {/* SIDEBAR OCULTÁVEL (Legenda Tática) */}
         {/* Ajustado para ser fixo e responsivo */}
-        <div className={`fixed lg:absolute top-0 right-0 z-[1000] bottom-0 lg:bottom-auto lg:top-4 lg:h-[calc(100vh-100px)] transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className={`fixed lg:absolute top-0 right-0 z-[1000] bottom-0 lg:bottom-auto lg:top-4 lg:h-[calc(100vh-100px)] transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-[calc(100%+64px)]'}`}>
           
-          {/* Botão de Toggle (Oculto no Desktop, pois o botão está no header) */}
+          {/* Botão de Toggle (Oculto no Desktop, pois o botão está na barra de ações) */}
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="absolute left-0 top-1/2 transform -translate-x-full -translate-y-1/2 bg-pmmg-navy p-1.5 rounded-l-xl shadow-xl text-pmmg-yellow lg:hidden"
