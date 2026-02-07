@@ -394,7 +394,9 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         </div>
       </header>
 
+      {/* O contêiner flex-1 agora é o pai de posicionamento absoluto para a sidebar */}
       <div className="flex-1 relative">
+        
         {/* DESKTOP ACTION BUTTONS (Centralizados no Topo) */}
         <div className="hidden lg:flex absolute top-4 left-0 right-0 z-[1000] justify-center">
           <div className="flex items-center gap-3 bg-pmmg-navy/90 backdrop-blur-md p-3 rounded-xl shadow-xl border border-white/20">
@@ -467,7 +469,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               locationType = 'Última Localização';
             } else if (locationFilter === 'approach') {
               lat = suspect.approachLat;
-              lng = suspect.approachLng;
+              lng = suspect.lng;
               locationName = suspect.approachAddress;
               locationType = 'Endereço de Abordagem';
             }
@@ -714,8 +716,9 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         )}
 
         {/* SIDEBAR OCULTÁVEL (Legenda Tática) */}
-        <div className={`fixed z-[1000] right-0 transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'} 
-                        top-[72px] bottom-[80px] lg:absolute lg:top-0 lg:bottom-auto lg:h-full lg:mt-0`}>
+        {/* Alterado de fixed para absolute e de top/bottom fixos para inset-y-0 */}
+        <div className={`absolute inset-y-0 z-[1000] right-0 transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'} 
+                        lg:top-0 lg:bottom-auto lg:h-full lg:mt-0`}>
           
           {/* Botão de Toggle da Sidebar (Visível em ambas as telas, posicionado na lateral) */}
           <button 
