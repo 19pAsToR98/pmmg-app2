@@ -482,7 +482,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             </div>
           </div>
           
-          {/* Botões de Ação */}
+          {/* Botões de Ação (AGORA DENTRO DO CONTÊINER PRINCIPAL) */}
           <div className="flex items-center gap-2 pl-4 border-l border-white/20">
             <button 
               onClick={() => {
