@@ -422,7 +422,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           </div>
           
           {/* Controles de Filtro e Visualização (CONSOLIDADOS) */}
-          <div className="flex items-center gap-2 pl-3 border-l border-white/20 shrink-0">
+          <div className="flex items-center gap-3 pl-3 border-l border-white/20 shrink-0">
             
             {/* Filtro de Localização */}
             <div className="flex bg-white/10 p-1 rounded-lg shrink-0" title="Filtro de Localização">
@@ -460,7 +460,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             </div>
             
             {/* Opções de Camadas */}
-            <div className="flex bg-white/10 p-1 rounded-lg shrink-0" title="Opções de Camadas">
+            <div className="flex bg-white/10 p-1 rounded-lg shrink-0 pl-3 border-l border-white/20" title="Opções de Camadas">
               {MAP_TYPES.map(type => (
                 <button 
                   key={type.id}
