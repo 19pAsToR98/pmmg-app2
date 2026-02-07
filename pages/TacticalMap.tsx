@@ -459,7 +459,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               ))}
             </div>
             
-            {/* Opções de Camadas (REMOVENDO PL-3 E BORDER-L) */}
+            {/* Opções de Camadas */}
             <div className="flex bg-white/10 p-1 rounded-lg shrink-0" title="Opções de Camadas">
               {MAP_TYPES.map(type => (
                 <button 
