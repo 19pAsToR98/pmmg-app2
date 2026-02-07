@@ -653,7 +653,7 @@ const App: React.FC = () => {
   // Se o nome do usuário estiver vazio, força a tela de onboarding, a menos que já esteja no fluxo de login/registro
   if (userName === '' && currentScreen !== 'welcomeScreen' && currentScreen !== 'requestAccess' && currentScreen !== 'onboardingSetup') {
     return (
-      <div className={`flex flex-col h-screen max-w-md mx-auto relative overflow-hidden ${themeClass}`}>
+      <div className={`flex flex-col h-screen w-full relative overflow-hidden ${themeClass}`}>
         <OnboardingSetup 
           onComplete={handleOnboardingComplete} 
           defaultAvatar={userAvatar}
@@ -663,7 +663,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className={`flex flex-col h-screen max-w-md mx-auto relative overflow-hidden ${themeClass}`}>
+    <div className={`flex flex-col h-screen w-full relative overflow-hidden ${themeClass}`}>
       {currentScreen === 'welcomeScreen' && <WelcomeScreen onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />}
       
       {currentScreen === 'requestAccess' && <RequestAccess onBack={() => navigateTo('welcomeScreen')} onSuccess={() => { setUserName('Oficial PMMG'); navigateTo('onboardingSetup'); }} />}
