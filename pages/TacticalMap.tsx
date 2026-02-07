@@ -393,73 +393,139 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         </div>
       </header>
 
-      <div className="flex-1 relative">
-        <GoogleMapWrapper
-          center={center}
-          zoom={currentZoom}
-          mapContainerClassName="w-full h-full"
-          onLoad={handleMapLoad}
-          onClick={handleMapClick}
-          options={{
-            mapTypeId: mapType, // USANDO O NOVO ESTADO mapType
-          }}
-          isDarkMode={isDarkMode} // PASSING NEW PROP
-        >
-          {/* ✅ MARCADOR DO USUÁRIO COM HTML COMPLETO */}
-          {userPos && (
-            <>
-              <UserMarkerComponent
-                position={userPos}
-                onClick={() => setActiveInfoWindow('user-pos')}
-              />
+      {/* Main Map and Sidebar Container (Desktop Layout) */}
+      <div className="flex-1 relative lg:flex lg:flex-row lg:overflow-hidden">
+        
+        {/* Map Container (Takes remaining space on desktop) */}
+        <div className="flex-1 h-full relative">
+          <GoogleMapWrapper
+            center={center}
+            zoom={currentZoom}
+            mapContainerClassName="w-full h-full"
+            onLoad={handleMapLoad}
+            onClick={handleMapClick}
+            options={{
+              mapTypeId: mapType, // USANDO O NOVO ESTADO mapType
+            }}
+            isDarkMode={isDarkMode} // PASSING NEW PROP
+          >
+            {/* ✅ MARCADOR DO USUÁRIO COM HTML COMPLETO */}
+            {userPos && (
+              <>
+                <UserMarkerComponent
+                  position={userPos}
+                  onClick={() => setActiveInfoWindow('user-pos')}
+                />
+                
+                {activeInfoWindow === 'user-pos' && (
+                  <InfoWindowF 
+                    position={userPos} 
+                    onCloseClick={() => setActiveInfoWindow(null)}
+                    pixelOffset={{ width: 0, height: 0 }} // AJUSTE PARA CENTRALIZAR
+                  >
+                    <div className="p-2">
+                      <p className="font-bold text-pmmg-navy text-sm">Você (Oficial)</p>
+                      <p className="text-[10px] text-slate-500">Localização Atual</p>
+                    </div>
+                  </InfoWindowF>
+                )}
+              </>
+            )}
+
+            {/* ✅ MARCADORES DE SUSPEITOS COM FOTOS/ÍCONES */}
+            {filteredSuspects.map(suspect => {
+              let lat: number | undefined;
+              let lng: number | undefined;
+              let locationName: string | undefined;
+              let locationType: 'Última Localização' | 'Endereço de Abordagem';
               
-              {activeInfoWindow === 'user-pos' && (
-                <InfoWindowF 
-                  position={userPos} 
-                  onCloseClick={() => setActiveInfoWindow(null)}
-                  pixelOffset={{ width: 0, height: 0 }} // AJUSTE PARA CENTRALIZAR
-                >
-                  <div className="p-2">
-                    <p className="font-bold text-pmmg-navy text-sm">Você (Oficial)</p>
-                    <p className="text-[10px] text-slate-500">Localização Atual</p>
-                  </div>
-                </InfoWindowF>
-              )}
-            </>
-          )}
+              if (locationFilter === 'residence') {
+                lat = suspect.lat;
+                lng = suspect.lng;
+                locationName = suspect.lastSeen;
+                locationType = 'Última Localização';
+              } else if (locationFilter === 'approach') {
+                lat = suspect.approachLat;
+                lng = suspect.approachLng;
+                locationName = suspect.approachAddress;
+                locationType = 'Endereço de Abordagem';
+              }
 
-          {/* ✅ MARCADORES DE SUSPEITOS COM FOTOS/ÍCONES */}
-          {filteredSuspects.map(suspect => {
-            let lat: number | undefined;
-            let lng: number | undefined;
-            let locationName: string | undefined;
-            let locationType: 'Última Localização' | 'Endereço de Abordagem';
-            
-            if (locationFilter === 'residence') {
-              lat = suspect.lat;
-              lng = suspect.lng;
-              locationName = suspect.lastSeen;
-              locationType = 'Última Localização';
-            } else if (locationFilter === 'approach') {
-              lat = suspect.approachLat;
-              lng = suspect.approachLng;
-              locationName = suspect.approachAddress;
-              locationType = 'Endereço de Abordagem';
-            }
+              if (lat && lng) {
+                const position = { lat, lng };
+                const markerId = `suspect-${suspect.id}`;
+                
+                return (
+                  <React.Fragment key={markerId}>
+                    {/* ✅ USANDO OverlayViewF COM HTML COMPLETO */}
+                    <SuspectPhotoMarker
+                      suspect={suspect}
+                      position={position}
+                      onClick={() => setActiveInfoWindow(markerId)}
+                      usePhotoMarker={usePhotoMarker}
+                      locationFilter={locationFilter}
+                    />
+                    
+                    {activeInfoWindow === markerId && (
+                      <InfoWindowF 
+                        position={position} 
+                        onCloseClick={() => setActiveInfoWindow(null)}
+                        pixelOffset={{ width: 0, height: 0 }} // AJUSTE PARA CENTRALIZAR
+                      >
+                        <div className="p-2 min-w-[150px]">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-10 h-10 rounded bg-slate-200 overflow-hidden">
+                              <img src={suspect.photoUrl} className="w-full h-full object-cover" alt={suspect.name} />
+                            </div>
+                            <div>
+                              <p className="font-bold text-[10px] text-pmmg-navy uppercase leading-tight">{suspect.name}</p>
+                              <p className="text-[9px] text-pmmg-blue font-bold uppercase">{locationType}</p>
+                              <p className="text-[9px] text-slate-500 mt-1">{locationName || 'Local não especificado'}</p>
+                            </div>
+                          </div>
+                          
+                          {/* NOVO: Autor do Post (Apenas em contexto de grupo) */}
+                          {groupName && suspect.authorName && (
+                            <div className="mt-2 pt-2 border-t border-slate-100">
+                              <p className="text-[8px] font-bold text-pmmg-navy/50 uppercase">Compartilhado por:</p>
+                              <p className="text-[10px] font-black text-pmmg-red uppercase">{suspect.authorRank}. {suspect.authorName}</p>
+                            </div>
+                          )}
+                          
+                          <div className="flex gap-2 mt-3">
+                            <button 
+                              onClick={() => onOpenProfile(suspect.id)} 
+                              className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider"
+                            >
+                              Ver Ficha
+                            </button>
+                            <button 
+                              onClick={() => handleShareLocation(lat, lng, `${locationType} de ${suspect.name}`)} 
+                              className="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center"
+                            >
+                              <span className="material-symbols-outlined text-pmmg-navy text-lg">share</span>
+                            </button>
+                          </div>
+                        </div>
+                      </InfoWindowF>
+                    )}
+                  </React.Fragment>
+                );
+              }
+              return null;
+            })}
 
-            if (lat && lng) {
-              const position = { lat, lng };
-              const markerId = `suspect-${suspect.id}`;
+            {/* ✅ MARCADORES PERSONALIZADOS COM HTML COMPLETO */}
+            {customMarkers.map(markerData => {
+              const position = { lat: markerData.lat, lng: markerData.lng };
+              const markerId = `custom-${markerData.id}`;
               
               return (
                 <React.Fragment key={markerId}>
-                  {/* ✅ USANDO OverlayViewF COM HTML COMPLETO */}
-                  <SuspectPhotoMarker
-                    suspect={suspect}
+                  <CustomMarkerComponent
+                    markerData={markerData}
                     position={position}
                     onClick={() => setActiveInfoWindow(markerId)}
-                    usePhotoMarker={usePhotoMarker}
-                    locationFilter={locationFilter}
                   />
                   
                   {activeInfoWindow === markerId && (
@@ -469,37 +535,35 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                       pixelOffset={{ width: 0, height: 0 }} // AJUSTE PARA CENTRALIZAR
                     >
                       <div className="p-2 min-w-[150px]">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="w-10 h-10 rounded bg-slate-200 overflow-hidden">
-                            <img src={suspect.photoUrl} className="w-full h-full object-cover" alt={suspect.name} />
-                          </div>
-                          <div>
-                            <p className="font-bold text-[10px] text-pmmg-navy uppercase leading-tight">{suspect.name}</p>
-                            <p className="text-[9px] text-pmmg-blue font-bold uppercase">{locationType}</p>
-                            <p className="text-[9px] text-slate-500 mt-1">{locationName || 'Local não especificado'}</p>
-                          </div>
-                        </div>
+                        <p className="font-bold text-[11px] text-pmmg-navy uppercase leading-tight">{markerData.title}</p>
+                        <p className="text-[10px] text-slate-600 mt-1">{markerData.description}</p>
                         
-                        {/* NOVO: Autor do Post (Apenas em contexto de grupo) */}
-                        {groupName && suspect.authorName && (
+                        {/* NOVO: Autor do Ponto (Apenas em contexto de grupo) */}
+                        {groupName && markerData.authorName && (
                           <div className="mt-2 pt-2 border-t border-slate-100">
-                            <p className="text-[8px] font-bold text-pmmg-navy/50 uppercase">Compartilhado por:</p>
-                            <p className="text-[10px] font-black text-pmmg-red uppercase">{suspect.authorRank}. {suspect.authorName}</p>
+                            <p className="text-[8px] font-bold text-pmmg-navy/50 uppercase">Criado por:</p>
+                            <p className="text-[10px] font-black text-pmmg-red uppercase">{markerData.authorRank}. {markerData.authorName}</p>
                           </div>
                         )}
                         
                         <div className="flex gap-2 mt-3">
                           <button 
-                            onClick={() => onOpenProfile(suspect.id)} 
-                            className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider"
+                            onClick={() => { setEditingMarker(markerData); setActiveInfoWindow(null); }}
+                            className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center"
                           >
-                            Ver Ficha
+                            <span className="material-symbols-outlined text-sm">edit</span>
                           </button>
                           <button 
-                            onClick={() => handleShareLocation(lat, lng, `${locationType} de ${suspect.name}`)} 
-                            className="px-3 border-2 border-pmmg-navy/20 rounded-lg flex items-center justify-center"
+                            onClick={() => handleShareLocation(markerData.lat, markerData.lng, markerData.title)}
+                            className="flex-1 bg-pmmg-blue text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center"
                           >
-                            <span className="material-symbols-outlined text-pmmg-navy text-lg">share</span>
+                            <span className="material-symbols-outlined text-sm">share</span>
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteMarker(markerData.id)}
+                            className="px-3 bg-pmmg-red text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center"
+                          >
+                            <span className="material-symbols-outlined text-sm">delete</span>
                           </button>
                         </div>
                       </div>
@@ -507,87 +571,28 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                   )}
                 </React.Fragment>
               );
-            }
-            return null;
-          })}
-
-          {/* ✅ MARCADORES PERSONALIZADOS COM HTML COMPLETO */}
-          {customMarkers.map(markerData => {
-            const position = { lat: markerData.lat, lng: markerData.lng };
-            const markerId = `custom-${markerData.id}`;
+            })}
             
-            return (
-              <React.Fragment key={markerId}>
-                <CustomMarkerComponent
-                  markerData={markerData}
-                  position={position}
-                  onClick={() => setActiveInfoWindow(markerId)}
-                />
-                
-                {activeInfoWindow === markerId && (
-                  <InfoWindowF 
-                    position={position} 
-                    onCloseClick={() => setActiveInfoWindow(null)}
-                    pixelOffset={{ width: 0, height: 0 }} // AJUSTE PARA CENTRALIZAR
-                  >
-                    <div className="p-2 min-w-[150px]">
-                      <p className="font-bold text-[11px] text-pmmg-navy uppercase leading-tight">{markerData.title}</p>
-                      <p className="text-[10px] text-slate-600 mt-1">{markerData.description}</p>
-                      
-                      {/* NOVO: Autor do Ponto (Apenas em contexto de grupo) */}
-                      {groupName && markerData.authorName && (
-                        <div className="mt-2 pt-2 border-t border-slate-100">
-                          <p className="text-[8px] font-bold text-pmmg-navy/50 uppercase">Criado por:</p>
-                          <p className="text-[10px] font-black text-pmmg-red uppercase">{markerData.authorRank}. {markerData.authorName}</p>
-                        </div>
-                      )}
-                      
-                      <div className="flex gap-2 mt-3">
-                        <button 
-                          onClick={() => { setEditingMarker(markerData); setActiveInfoWindow(null); }}
-                          className="flex-1 bg-pmmg-navy text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center"
-                        >
-                          <span className="material-symbols-outlined text-sm">edit</span>
-                        </button>
-                        <button 
-                          onClick={() => handleShareLocation(markerData.lat, markerData.lng, markerData.title)}
-                          className="flex-1 bg-pmmg-blue text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center"
-                        >
-                          <span className="material-symbols-outlined text-sm">share</span>
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteMarker(markerData.id)}
-                          className="px-3 bg-pmmg-red text-white text-[9px] font-bold py-1.5 rounded uppercase tracking-wider flex items-center justify-center"
-                        >
-                          <span className="material-symbols-outlined text-sm">delete</span>
-                        </button>
-                      </div>
-                    </div>
-                  </InfoWindowF>
-                )}
-              </React.Fragment>
-            );
-          })}
-          
-          {/* Marcador de Adição (40x40) - Mantido como SVG */}
-          {isAddingMarker && (
-            <MarkerF
-              position={center}
-              icon={{
-                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                  <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="20" cy="20" r="18" fill="#e31c1c" stroke="#ffffff" stroke-width="4"/>
-                    <path d="${ICON_PATHS['pin_drop']}" fill="#ffffff" transform="translate(11 11) scale(0.75)"/>
-                  </svg>
-                `),
-                scaledSize: new window.google.maps.Size(40, 40),
-                // CORREÇÃO: Âncora na base central para o InfoWindow
-                anchor: new window.google.maps.Point(20, 40),
-              }}
-              title="Clique no mapa para posicionar"
-            />
-          )}
-        </GoogleMapWrapper>
+            {/* Marcador de Adição (40x40) - Mantido como SVG */}
+            {isAddingMarker && (
+              <MarkerF
+                position={center}
+                icon={{
+                  url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                    <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="20" cy="20" r="18" fill="#e31c1c" stroke="#ffffff" stroke-width="4"/>
+                      <path d="${ICON_PATHS['pin_drop']}" fill="#ffffff" transform="translate(11 11) scale(0.75)"/>
+                    </svg>
+                  `),
+                  scaledSize: new window.google.maps.Size(40, 40),
+                  // CORREÇÃO: Âncora na base central para o InfoWindow
+                  anchor: new window.google.maps.Point(20, 40),
+                }}
+                title="Clique no mapa para posicionar"
+              />
+            )}
+          </GoogleMapWrapper>
+        </div>
         
         {/* Marker Configuration Modal (New or Edit) */}
         {activeMarkerData && (
@@ -689,12 +694,16 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         )}
 
         {/* SIDEBAR OCULTÁVEL (Legenda Tática) */}
-        <div className={`absolute top-4 right-0 z-[1000] bottom-[100px] transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className={`
+          absolute top-4 right-0 z-[1000] bottom-[100px] transition-transform duration-300 
+          ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}
+          lg:relative lg:translate-x-0 lg:w-80 lg:h-full lg:bottom-0 lg:p-0 lg:shrink-0
+        `}>
           
           {/* Botão de Toggle (Centralizado Verticalmente) */}
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="absolute left-0 top-1/2 transform -translate-x-full -translate-y-1/2 bg-pmmg-navy p-1.5 rounded-l-xl shadow-xl text-pmmg-yellow"
+            className="absolute left-0 top-1/2 transform -translate-x-full -translate-y-1/2 bg-pmmg-navy p-1.5 rounded-l-xl shadow-xl text-pmmg-yellow lg:hidden"
           >
             <span className="material-symbols-outlined text-lg">
               {isSidebarOpen ? 'arrow_forward_ios' : 'arrow_back_ios'}
@@ -702,7 +711,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           </button>
 
           {/* Conteúdo do Painel */}
-          <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-md p-3 rounded-l-2xl shadow-2xl border border-pmmg-navy/10 dark:border-slate-700 flex flex-col gap-2.5 h-full overflow-y-auto w-64">
+          <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-md p-3 rounded-l-2xl shadow-2xl border border-pmmg-navy/10 dark:border-slate-700 flex flex-col gap-2.5 h-full overflow-y-auto w-64 lg:w-full lg:rounded-none lg:shadow-none lg:border-l lg:border-t-0 lg:border-pmmg-navy/10 lg:dark:border-slate-700">
             <p className="text-[8px] font-black text-pmmg-navy/40 dark:text-slate-500 uppercase tracking-widest border-b border-pmmg-navy/5 dark:border-slate-700 pb-1 mb-1">Legenda Tática</p>
             
             {/* --- Filtro de Localização --- */}
