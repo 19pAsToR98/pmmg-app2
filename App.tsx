@@ -682,7 +682,7 @@ const App: React.FC = () => {
       )}
       
       {/* Main Content Area (Pushed right on desktop) */}
-      <div className={`flex-1 h-full overflow-y-auto ${!isFullPageScreen ? 'lg:ml-64' : ''}`}>
+      <div className={`flex-1 h-full overflow-y-auto ${!isFullPageScreen ? 'lg:ml-20' : ''}`}>
         {currentScreen === 'welcomeScreen' && <WelcomeScreen onEnter={() => navigateTo('dashboard')} onRequest={() => navigateTo('requestAccess')} />}
         
         {currentScreen === 'requestAccess' && <RequestAccess onBack={() => navigateTo('welcomeScreen')} onSuccess={() => { setUserName('Oficial PMMG'); navigateTo('onboardingSetup'); }} />}
@@ -796,13 +796,6 @@ const App: React.FC = () => {
         {currentScreen === 'store' && (
           <Store 
             navigateTo={navigateTo} 
-          />
-        )}
-        
-        {currentScreen === 'productList' && selectedCategoryId && (
-          <ProductList
-            navigateTo={navigateTo}
-            categoryId={selectedCategoryId}
           />
         )}
         

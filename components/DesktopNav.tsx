@@ -21,50 +21,44 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ activeScreen, navigateTo, userN
   const isActive = (id: string) => activeScreen === id;
 
   return (
-    <nav className="hidden lg:flex flex-col w-64 bg-pmmg-navy-dark h-full fixed left-0 top-0 z-40 shadow-2xl p-4 shrink-0">
+    <nav className="hidden lg:flex flex-col w-20 bg-pmmg-navy-dark h-full fixed left-0 top-0 z-40 shadow-2xl p-2 shrink-0 items-center">
       
-      {/* Logo/Branding */}
-      <div className="flex items-center gap-3 p-2 mb-6 border-b border-white/10 pb-4">
-        <div className="w-10 h-10 shrink-0 bg-white rounded-full flex items-center justify-center p-1 border-2 border-pmmg-yellow shadow-inner">
-          <span className="material-symbols-outlined text-pmmg-navy text-2xl fill-icon">shield</span>
-        </div>
-        <div>
-          <h1 className="font-black text-sm leading-none text-white uppercase tracking-tight">PMMG OP</h1>
-          <p className="text-[10px] font-medium text-pmmg-yellow tracking-wider uppercase mt-0.5">Inteligência</p>
-        </div>
+      {/* Logo/Branding (Apenas Ícone) */}
+      <div className="w-12 h-12 shrink-0 bg-white rounded-xl flex items-center justify-center p-1 border-2 border-pmmg-yellow shadow-inner mb-6 mt-2">
+        <span className="material-symbols-outlined text-pmmg-navy text-3xl fill-icon">shield</span>
       </div>
 
       {/* Navigation Links */}
-      <div className="flex-1 space-y-2">
+      <div className="flex-1 space-y-3 w-full">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => navigateTo(tab.id as Screen)}
-            className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors text-left ${
+            className={`w-full flex flex-col items-center justify-center p-2 rounded-xl transition-colors text-center group relative ${
               isActive(tab.id)
                 ? 'bg-pmmg-navy text-pmmg-yellow shadow-lg'
                 : 'text-white/70 hover:bg-white/10 hover:text-white'
             }`}
           >
-            <span className={`material-symbols-outlined text-xl ${isActive(tab.id) ? 'fill-icon' : ''}`}>
+            <span className={`material-symbols-outlined text-2xl ${isActive(tab.id) ? 'fill-icon' : ''}`}>
               {tab.icon}
             </span>
-            <span className="text-sm font-bold uppercase tracking-wide">{tab.label}</span>
+            {/* Tooltip/Label on hover */}
+            <span className="absolute left-full ml-3 px-3 py-1 bg-pmmg-navy text-white text-[10px] font-bold uppercase rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
+              {tab.label}
+            </span>
           </button>
         ))}
       </div>
       
-      {/* User Profile Link at Bottom */}
+      {/* User Profile Link at Bottom (Apenas Avatar) */}
       <button 
         onClick={() => navigateTo('profileSettings')}
-        className="w-full flex items-center gap-3 p-3 mt-4 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
+        className="w-12 h-12 flex items-center justify-center mt-4 rounded-xl bg-white/10 hover:bg-white/20 transition-colors p-1"
+        title={`${userRank}. ${userName}`}
       >
-        <div className="w-8 h-8 rounded-full overflow-hidden border border-pmmg-yellow/50 shrink-0">
+        <div className="w-full h-full rounded-lg overflow-hidden border border-pmmg-yellow/50 shrink-0">
           <img src={userAvatarUrl} alt={userName} className="w-full h-full object-cover" />
-        </div>
-        <div className="text-left min-w-0">
-          <p className="text-xs font-bold text-white truncate">{userName}</p>
-          <p className="text-[10px] text-pmmg-yellow/80 uppercase">{userRank}</p>
         </div>
       </button>
     </nav>
