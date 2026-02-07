@@ -354,6 +354,13 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
     { id: 'Preso', label: 'Preso', color: 'bg-pmmg-blue', icon: 'lock' },
     { id: 'CPF Cancelado', label: 'CPF Cancelado', color: 'bg-slate-700', icon: 'cancel' },
   ];
+  
+  // Lista de tipos de mapa
+  const MAP_TYPES: { id: MapType, label: string, icon: string }[] = [
+    { id: 'roadmap', label: 'Padrão', icon: 'map' },
+    { id: 'satellite', label: 'Satélite', icon: 'satellite' },
+    { id: 'hybrid', label: 'Híbrida', icon: 'layers' },
+  ];
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki dark:bg-slate-900 overflow-hidden">
@@ -414,46 +421,68 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             </div>
           </div>
           
-          {/* Controles de Filtro (NOVO) */}
+          {/* Controles de Filtro e Visualização (CONSOLIDADOS) */}
           <div className="flex items-center gap-4 pl-4 border-l border-white/20">
             
             {/* Filtro de Localização */}
-            <div className="flex bg-white/10 p-1 rounded-lg shrink-0">
-              <button 
-                onClick={() => setLocationFilter('residence')}
-                className={`text-[9px] font-bold uppercase py-1.5 px-2 rounded-md transition-all flex items-center gap-1 ${locationFilter === 'residence' ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white/70 hover:bg-white/20'}`}
-              >
-                <span className="material-symbols-outlined text-sm">location_on</span> Residência
-              </button>
-              <button 
-                onClick={() => setLocationFilter('approach')}
-                className={`text-[9px] font-bold uppercase py-1.5 px-2 rounded-md transition-all flex items-center gap-1 ${locationFilter === 'approach' ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white/70 hover:bg-white/20'}`}
-              >
-                <span className="material-symbols-outlined text-sm">pin_drop</span> Abordagem
-              </button>
+            <div className="flex flex-col gap-1 shrink-0">
+              <p className="text-[8px] font-bold uppercase text-white/50 tracking-widest">Localização</p>
+              <div className="flex bg-white/10 p-1 rounded-lg">
+                <button 
+                  onClick={() => setLocationFilter('residence')}
+                  className={`text-[9px] font-bold uppercase py-1.5 px-2 rounded-md transition-all flex items-center gap-1 ${locationFilter === 'residence' ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white/70 hover:bg-white/20'}`}
+                >
+                  <span className="material-symbols-outlined text-sm">location_on</span> Residência
+                </button>
+                <button 
+                  onClick={() => setLocationFilter('approach')}
+                  className={`text-[9px] font-bold uppercase py-1.5 px-2 rounded-md transition-all flex items-center gap-1 ${locationFilter === 'approach' ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white/70 hover:bg-white/20'}`}
+                >
+                  <span className="material-symbols-outlined text-sm">pin_drop</span> Abordagem
+                </button>
+              </div>
             </div>
             
             {/* Filtro de Status */}
-            <div className="flex bg-white/10 p-1 rounded-lg shrink-0">
-              <button 
-                onClick={() => setActiveFilter('Todos')}
-                className={`text-[9px] font-bold uppercase py-1.5 px-2 rounded-md transition-all ${activeFilter === 'Todos' ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white/70 hover:bg-white/20'}`}
-              >
-                Todos
-              </button>
-              {STATUS_FILTERS.slice(0, 3).map(filter => ( // Limita a 3 status principais
+            <div className="flex flex-col gap-1 shrink-0">
+              <p className="text-[8px] font-bold uppercase text-white/50 tracking-widest">Status</p>
+              <div className="flex bg-white/10 p-1 rounded-lg">
                 <button 
-                  key={filter.id}
-                  onClick={() => setActiveFilter(filter.id)}
-                  className={`text-[9px] font-bold uppercase py-1.5 px-2 rounded-md transition-all ${activeFilter === filter.id ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white/70 hover:bg-white/20'}`}
+                  onClick={() => setActiveFilter('Todos')}
+                  className={`text-[9px] font-bold uppercase py-1.5 px-2 rounded-md transition-all ${activeFilter === 'Todos' ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white/70 hover:bg-white/20'}`}
                 >
-                  {filter.label}
+                  Todos
                 </button>
-              ))}
+                {STATUS_FILTERS.slice(0, 3).map(filter => ( // Limita a 3 status principais
+                  <button 
+                    key={filter.id}
+                    onClick={() => setActiveFilter(filter.id)}
+                    className={`text-[9px] font-bold uppercase py-1.5 px-2 rounded-md transition-all ${activeFilter === filter.id ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white/70 hover:bg-white/20'}`}
+                  >
+                    {filter.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Opções de Camadas */}
+            <div className="flex flex-col gap-1 shrink-0">
+              <p className="text-[8px] font-bold uppercase text-white/50 tracking-widest">Camadas</p>
+              <div className="flex bg-white/10 p-1 rounded-lg">
+                {MAP_TYPES.map(type => (
+                  <button 
+                    key={type.id}
+                    onClick={() => setMapType(type.id)}
+                    className={`text-[9px] font-bold uppercase py-1.5 px-2 rounded-md transition-all flex items-center gap-1 ${mapType === type.id ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white/70 hover:bg-white/20'}`}
+                  >
+                    <span className="material-symbols-outlined text-sm">{type.icon}</span> {type.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
           
-          {/* Botões de Ação (NOVO) */}
+          {/* Botões de Ação */}
           <div className="flex items-center gap-2 pl-4 border-l border-white/20">
             <button 
               onClick={() => {
@@ -772,8 +801,8 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           </div>
         )}
 
-        {/* SIDEBAR OCULTÁVEL (Legenda Tática) */}
-        <div className={`absolute top-4 right-0 z-[1000] bottom-[100px] lg:bottom-4 transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        {/* SIDEBAR OCULTÁVEL (Legenda Tática) - AGORA APENAS PARA MOBILE */}
+        <div className={`lg:hidden absolute top-4 right-0 z-[1000] bottom-[100px] transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
           
           {/* Botão de Toggle (Centralizado Verticalmente) */}
           <button 
@@ -789,8 +818,8 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-md p-3 rounded-l-2xl shadow-2xl border border-pmmg-navy/10 dark:border-slate-700 flex flex-col gap-2.5 h-full overflow-y-auto w-64">
             <p className="text-[8px] font-black text-pmmg-navy/40 dark:text-slate-500 uppercase tracking-widest border-b border-pmmg-navy/5 dark:border-slate-700 pb-1 mb-1">Legenda Tática</p>
             
-            {/* --- Filtro de Localização (REMOVIDO DA SIDEBAR NO DESKTOP) --- */}
-            <div className="lg:hidden pt-2 pb-3 border-b border-pmmg-navy/5 dark:border-slate-700">
+            {/* --- Filtro de Localização (MOBILE) --- */}
+            <div className="pt-2 pb-3 border-b border-pmmg-navy/5 dark:border-slate-700">
               <p className="text-[9px] font-black text-pmmg-navy/60 dark:text-slate-400 uppercase tracking-wider mb-2">Tipo de Localização</p>
               <div className="flex gap-2">
                 <button 
@@ -808,12 +837,12 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               </div>
             </div>
             
-            {/* --- Filtro de Status (REMOVIDO DA SIDEBAR NO DESKTOP) --- */}
-            <p className="lg:hidden text-[8px] font-black text-pmmg-navy/40 dark:text-slate-500 uppercase tracking-widest border-b border-pmmg-navy/5 dark:border-slate-700 pb-1 mb-1 pt-2">Filtro por Status</p>
+            {/* --- Filtro de Status (MOBILE) --- */}
+            <p className="text-[8px] font-black text-pmmg-navy/40 dark:text-slate-500 uppercase tracking-widest border-b border-pmmg-navy/5 dark:border-slate-700 pb-1 mb-1 pt-2">Filtro por Status</p>
 
             <button 
               onClick={() => setActiveFilter('Todos')}
-              className={`lg:hidden flex items-center gap-2 w-full text-left p-1 rounded transition-colors ${activeFilter === 'Todos' ? 'bg-pmmg-navy/10 dark:bg-slate-700' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+              className={`flex items-center gap-2 w-full text-left p-1 rounded transition-colors ${activeFilter === 'Todos' ? 'bg-pmmg-navy/10 dark:bg-slate-700' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
             >
                <div className={`w-4 h-4 rounded-full bg-pmmg-navy flex items-center justify-center shadow-sm`}>
                  <span className="material-symbols-outlined text-white text-[10px] fill-icon">done_all</span>
@@ -825,7 +854,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               <button 
                 key={filter.id}
                 onClick={() => setActiveFilter(filter.id)}
-                className={`lg:hidden flex items-center gap-2 w-full text-left p-1 rounded transition-colors ${activeFilter === filter.id ? 'bg-pmmg-navy/10 dark:bg-slate-700' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+                className={`flex items-center gap-2 w-full text-left p-1 rounded transition-colors ${activeFilter === filter.id ? 'bg-pmmg-navy/10 dark:bg-slate-700' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
               >
                 <div className={`w-4 h-4 ${usePhotoMarker ? 'rounded-md border-2 bg-slate-300' : 'rounded-full flex items-center justify-center'} ${filter.color} border-white shadow-sm`}>
                   {!usePhotoMarker && <span className={`material-symbols-outlined text-[10px] fill-icon ${filter.id === 'Suspeito' ? 'text-pmmg-navy' : 'text-white'}`}>{filter.icon}</span>}
@@ -849,13 +878,13 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             {activeFilter !== 'Todos' && (
               <button 
                 onClick={() => setActiveFilter('Todos')}
-                className="lg:hidden mt-2 text-[8px] font-black text-pmmg-red uppercase border-t border-pmmg-navy/5 dark:border-slate-700 pt-2 text-left"
+                className="mt-2 text-[8px] font-black text-pmmg-red uppercase border-t border-pmmg-navy/5 dark:border-slate-700 pt-2 text-left"
               >
                 Limpar Filtros ({activeFilter})
               </button>
             )}
 
-            {/* --- Opções de Camadas (Implementado) --- */}
+            {/* --- Opções de Camadas (MOBILE) --- */}
             <div className="mt-4 pt-4 border-t border-pmmg-navy/5 dark:border-slate-700">
               <p className="text-[8px] font-black text-pmmg-navy/40 dark:text-slate-500 uppercase tracking-widest mb-2">Visualização de Camadas</p>
               
