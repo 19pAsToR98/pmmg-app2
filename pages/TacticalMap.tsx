@@ -404,11 +404,11 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       
       {/* DESKTOP FLOATING ACTIONS (Visível apenas em telas grandes) */}
       <div className="hidden lg:flex absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000]">
-        {/* Removendo gap-4 e usando gap-2 para maior compactação */}
-        <div className="bg-pmmg-navy/90 backdrop-blur-md p-3 rounded-xl shadow-2xl border border-pmmg-yellow/30 flex items-center gap-3">
+        {/* Removendo a classe 'gap-2' do contêiner principal e usando 'flex-nowrap' para evitar quebras de linha */}
+        <div className="bg-pmmg-navy/90 backdrop-blur-md p-3 rounded-xl shadow-2xl border border-pmmg-yellow/30 flex items-center flex-nowrap">
           
           {/* Título */}
-          <div className="flex items-center gap-3 shrink-0 pr-2">
+          <div className="flex items-center gap-3 shrink-0 pr-3">
             <div className="w-8 h-8 shrink-0 bg-white rounded-full flex items-center justify-center p-1 border-2 border-pmmg-red">
               <span className="material-symbols-outlined text-pmmg-navy text-xl">map</span>
             </div>
@@ -423,7 +423,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           </div>
           
           {/* Controles de Filtro e Visualização (CONSOLIDADOS) */}
-          <div className="flex items-center gap-2 pl-3 border-l border-white/20">
+          <div className="flex items-center gap-2 pl-3 border-l border-white/20 shrink-0">
             
             {/* Filtro de Localização */}
             <div className="flex bg-white/10 p-1 rounded-lg shrink-0" title="Filtro de Localização">
@@ -547,7 +547,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               locationType = 'Última Localização';
             } else if (locationFilter === 'approach') {
               lat = suspect.approachLat;
-              lng = suspect.approachLng;
+              lng = suspect.lng;
               locationName = suspect.approachAddress;
               locationType = 'Endereço de Abordagem';
             }
