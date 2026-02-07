@@ -715,7 +715,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
 
         {/* SIDEBAR OCULTÁVEL (Legenda Tática) */}
         <div className={`fixed z-[1000] right-0 transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'} 
-                        top-[72px] bottom-[80px] lg:absolute lg:top-0 lg:bottom-auto lg:h-full lg:mt-0`}>
+                        top-[60px] bottom-[80px] lg:absolute lg:top-0 lg:bottom-auto lg:h-full lg:mt-0`}>
           
           {/* Botão de Toggle da Sidebar (Visível em ambas as telas, posicionado na lateral) */}
           <button 
