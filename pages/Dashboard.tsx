@@ -98,7 +98,7 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
           </div>
         </div>
 
-        {/* Search Bar (Mobile) - Mantida para mobile */}
+        {/* Search Bar (Mobile) */}
         <button 
           onClick={() => navigateToSuspectsManagement('Todos')}
           className="w-full relative group text-left active:scale-[0.99] transition-transform"
@@ -250,14 +250,13 @@ const Dashboard: React.FC<DashboardProps> = ({ navigateTo, navigateToSuspectsMan
                       </div>
                     </div>
                   </div>
-                </div>
-              )) : (
-                <div className="text-center py-10 opacity-40 col-span-full">
-                  <span className="material-symbols-outlined text-7xl">person_search</span>
-                  <p className="text-xs font-bold uppercase mt-2">Nenhum registro encontrado</p>
-                </div>
-              )}
-            </div>
+                )) : (
+                  <div className="text-center py-10 opacity-40 col-span-full">
+                    <span className="material-symbols-outlined text-7xl">person_search</span>
+                    <p className="text-xs font-bold uppercase mt-2">Nenhum registro encontrado</p>
+                  </div>
+                )}
+              </div>
             </section>
             
             {/* Coluna 3 (Desktop): Ferramentas Rápidas e IA (Ocupa 1/3) */}
