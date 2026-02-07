@@ -40,7 +40,7 @@ const AdImageSlider: React.FC = () => {
         href={currentAd.link} 
         target="_blank" 
         rel="noopener noreferrer"
-        className="flex-1 relative w-full rounded-xl overflow-hidden bg-slate-200 dark:bg-slate-700 shadow-lg transition-all duration-500 ease-in-out active:scale-[0.99]"
+        className="flex-1 relative w-full rounded-xl overflow-hidden bg-white dark:bg-slate-700 shadow-lg transition-all duration-500 ease-in-out active:scale-[0.99]"
       >
         <img 
           src={currentAd.url} 
