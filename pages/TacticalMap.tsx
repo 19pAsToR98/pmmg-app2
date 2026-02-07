@@ -357,7 +357,8 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
 
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki dark:bg-slate-900 overflow-hidden">
-      <header className="sticky top-0 z-[1000] bg-pmmg-navy px-4 py-4 shadow-xl">
+      {/* MOBILE HEADER */}
+      <header className="sticky top-0 z-[1000] bg-pmmg-navy px-4 py-4 shadow-xl lg:hidden">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={() => navigateTo(groupName ? 'groupDetail' : 'dashboard')} className="text-white active:scale-90 transition-transform">
@@ -394,6 +395,30 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
       </header>
 
       <div className="flex-1 relative">
+        {/* DESKTOP ACTION BUTTONS (Centralizados no Topo) */}
+        <div className="hidden lg:flex absolute top-4 left-0 right-0 z-[1000] justify-center">
+          <div className="flex items-center gap-3 bg-pmmg-navy/90 backdrop-blur-md p-3 rounded-xl shadow-xl border border-white/20">
+            <button 
+              onClick={() => {
+                setIsAddingMarker(prev => !prev);
+                setNewMarkerData(null); 
+                setEditingMarker(null);
+              }}
+              className={`p-2 rounded-full border transition-all ${isAddingMarker ? 'bg-pmmg-red text-white border-pmmg-red shadow-lg' : 'bg-white/10 text-white border-white/20'}`}
+              title="Adicionar Ponto Tático"
+            >
+              <span className="material-symbols-outlined text-lg">add_location_alt</span>
+            </button>
+            <button 
+              onClick={recenter} 
+              className="bg-white/10 p-2 rounded-full border border-white/20 text-white active:bg-white/20"
+              title="Minha Localização"
+            >
+              <span className="material-symbols-outlined text-lg">my_location</span>
+            </button>
+          </div>
+        </div>
+        
         <GoogleMapWrapper
           center={center}
           zoom={currentZoom}
@@ -689,12 +714,13 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         )}
 
         {/* SIDEBAR OCULTÁVEL (Legenda Tática) */}
-        <div className={`absolute top-4 right-0 z-[1000] bottom-[100px] transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className={`fixed z-[1000] right-0 transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'} 
+                        top-[72px] bottom-[80px] lg:absolute lg:top-0 lg:bottom-auto lg:h-full lg:mt-0`}>
           
-          {/* Botão de Toggle (Centralizado Verticalmente) */}
+          {/* Botão de Toggle da Sidebar (Visível em ambas as telas, posicionado na lateral) */}
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="absolute left-0 top-1/2 transform -translate-x-full -translate-y-1/2 bg-pmmg-navy p-1.5 rounded-l-xl shadow-xl text-pmmg-yellow"
+            className="absolute left-0 top-1/2 transform -translate-x-full -translate-y-1/2 bg-pmmg-navy p-1.5 rounded-l-xl shadow-xl text-pmmg-yellow active:scale-90 transition-transform"
           >
             <span className="material-symbols-outlined text-lg">
               {isSidebarOpen ? 'arrow_forward_ios' : 'arrow_back_ios'}
