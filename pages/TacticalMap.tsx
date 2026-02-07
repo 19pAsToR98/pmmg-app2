@@ -400,7 +400,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         <div className="bg-pmmg-navy/90 backdrop-blur-md p-3 rounded-xl shadow-2xl border border-pmmg-yellow/30 flex items-center gap-4">
           
           {/* Título */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             <div className="w-8 h-8 shrink-0 bg-white rounded-full flex items-center justify-center p-1 border-2 border-pmmg-red">
               <span className="material-symbols-outlined text-pmmg-navy text-xl">map</span>
             </div>
@@ -414,7 +414,46 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             </div>
           </div>
           
-          {/* Botões de Ação */}
+          {/* Controles de Filtro (NOVO) */}
+          <div className="flex items-center gap-4 pl-4 border-l border-white/20">
+            
+            {/* Filtro de Localização */}
+            <div className="flex bg-white/10 p-1 rounded-lg shrink-0">
+              <button 
+                onClick={() => setLocationFilter('residence')}
+                className={`text-[9px] font-bold uppercase py-1.5 px-2 rounded-md transition-all flex items-center gap-1 ${locationFilter === 'residence' ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white/70 hover:bg-white/20'}`}
+              >
+                <span className="material-symbols-outlined text-sm">location_on</span> Residência
+              </button>
+              <button 
+                onClick={() => setLocationFilter('approach')}
+                className={`text-[9px] font-bold uppercase py-1.5 px-2 rounded-md transition-all flex items-center gap-1 ${locationFilter === 'approach' ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white/70 hover:bg-white/20'}`}
+              >
+                <span className="material-symbols-outlined text-sm">pin_drop</span> Abordagem
+              </button>
+            </div>
+            
+            {/* Filtro de Status */}
+            <div className="flex bg-white/10 p-1 rounded-lg shrink-0">
+              <button 
+                onClick={() => setActiveFilter('Todos')}
+                className={`text-[9px] font-bold uppercase py-1.5 px-2 rounded-md transition-all ${activeFilter === 'Todos' ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white/70 hover:bg-white/20'}`}
+              >
+                Todos
+              </button>
+              {STATUS_FILTERS.slice(0, 3).map(filter => ( // Limita a 3 status principais
+                <button 
+                  key={filter.id}
+                  onClick={() => setActiveFilter(filter.id)}
+                  className={`text-[9px] font-bold uppercase py-1.5 px-2 rounded-md transition-all ${activeFilter === filter.id ? 'bg-pmmg-yellow text-pmmg-navy shadow-md' : 'text-white/70 hover:bg-white/20'}`}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {/* Botões de Ação (NOVO) */}
           <div className="flex items-center gap-2 pl-4 border-l border-white/20">
             <button 
               onClick={() => {
@@ -750,8 +789,8 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
           <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-md p-3 rounded-l-2xl shadow-2xl border border-pmmg-navy/10 dark:border-slate-700 flex flex-col gap-2.5 h-full overflow-y-auto w-64">
             <p className="text-[8px] font-black text-pmmg-navy/40 dark:text-slate-500 uppercase tracking-widest border-b border-pmmg-navy/5 dark:border-slate-700 pb-1 mb-1">Legenda Tática</p>
             
-            {/* --- Filtro de Localização --- */}
-            <div className="pt-2 pb-3 border-b border-pmmg-navy/5 dark:border-slate-700">
+            {/* --- Filtro de Localização (REMOVIDO DA SIDEBAR NO DESKTOP) --- */}
+            <div className="lg:hidden pt-2 pb-3 border-b border-pmmg-navy/5 dark:border-slate-700">
               <p className="text-[9px] font-black text-pmmg-navy/60 dark:text-slate-400 uppercase tracking-wider mb-2">Tipo de Localização</p>
               <div className="flex gap-2">
                 <button 
@@ -769,12 +808,12 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               </div>
             </div>
             
-            {/* --- Filtro de Status --- */}
-            <p className="text-[8px] font-black text-pmmg-navy/40 dark:text-slate-500 uppercase tracking-widest border-b border-pmmg-navy/5 dark:border-slate-700 pb-1 mb-1 pt-2">Filtro por Status</p>
+            {/* --- Filtro de Status (REMOVIDO DA SIDEBAR NO DESKTOP) --- */}
+            <p className="lg:hidden text-[8px] font-black text-pmmg-navy/40 dark:text-slate-500 uppercase tracking-widest border-b border-pmmg-navy/5 dark:border-slate-700 pb-1 mb-1 pt-2">Filtro por Status</p>
 
             <button 
               onClick={() => setActiveFilter('Todos')}
-              className={`flex items-center gap-2 w-full text-left p-1 rounded transition-colors ${activeFilter === 'Todos' ? 'bg-pmmg-navy/10 dark:bg-slate-700' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+              className={`lg:hidden flex items-center gap-2 w-full text-left p-1 rounded transition-colors ${activeFilter === 'Todos' ? 'bg-pmmg-navy/10 dark:bg-slate-700' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
             >
                <div className={`w-4 h-4 rounded-full bg-pmmg-navy flex items-center justify-center shadow-sm`}>
                  <span className="material-symbols-outlined text-white text-[10px] fill-icon">done_all</span>
@@ -786,7 +825,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               <button 
                 key={filter.id}
                 onClick={() => setActiveFilter(filter.id)}
-                className={`flex items-center gap-2 w-full text-left p-1 rounded transition-colors ${activeFilter === filter.id ? 'bg-pmmg-navy/10 dark:bg-slate-700' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+                className={`lg:hidden flex items-center gap-2 w-full text-left p-1 rounded transition-colors ${activeFilter === filter.id ? 'bg-pmmg-navy/10 dark:bg-slate-700' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
               >
                 <div className={`w-4 h-4 ${usePhotoMarker ? 'rounded-md border-2 bg-slate-300' : 'rounded-full flex items-center justify-center'} ${filter.color} border-white shadow-sm`}>
                   {!usePhotoMarker && <span className={`material-symbols-outlined text-[10px] fill-icon ${filter.id === 'Suspeito' ? 'text-pmmg-navy' : 'text-white'}`}>{filter.icon}</span>}
@@ -810,7 +849,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             {activeFilter !== 'Todos' && (
               <button 
                 onClick={() => setActiveFilter('Todos')}
-                className="mt-2 text-[8px] font-black text-pmmg-red uppercase border-t border-pmmg-navy/5 dark:border-slate-700 pt-2 text-left"
+                className="lg:hidden mt-2 text-[8px] font-black text-pmmg-red uppercase border-t border-pmmg-navy/5 dark:border-slate-700 pt-2 text-left"
               >
                 Limpar Filtros ({activeFilter})
               </button>
