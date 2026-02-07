@@ -212,6 +212,9 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
   const [currentZoom, setCurrentZoom] = useState(initialCenter ? 17 : 14);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); 
   const [activeInfoWindow, setActiveInfoWindow] = useState<string | null>(null); 
+  
+  // NOVO: Estado para controlar a abertura do painel flutuante no desktop
+  const [showDesktopControls, setShowDesktopControls] = useState(true); 
 
   // Center state managed by initialCenter prop or user position
   const center = initialCenter 
@@ -357,6 +360,124 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
     { id: 'CPF Cancelado', label: 'CPF Cancelado', color: 'bg-slate-700', icon: 'cancel' },
   ];
 
+  // Componente de Controles Flutuantes (Desktop)
+  const DesktopFloatingControls = () => (
+    <div className="hidden lg:block absolute top-4 right-4 z-[1001]">
+      <div className="flex flex-col items-end gap-3">
+        
+        {/* Botão de Toggle do Painel */}
+        <button 
+          onClick={() => setShowDesktopControls(prev => !prev)}
+          className="bg-pmmg-navy text-pmmg-yellow p-3 rounded-xl shadow-xl active:scale-95 transition-transform"
+          title={showDesktopControls ? "Ocultar Controles" : "Mostrar Controles"}
+        >
+          <span className="material-symbols-outlined text-xl">
+            {showDesktopControls ? 'close' : 'menu'}
+          </span>
+        </button>
+        
+        {/* Painel de Controles (Ocultável) */}
+        {showDesktopControls && (
+          <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-md p-4 rounded-xl shadow-2xl border border-pmmg-navy/10 dark:border-slate-700 w-64 animate-in fade-in slide-in-from-right-2 duration-200">
+            <p className="text-[8px] font-black text-pmmg-navy/40 dark:text-slate-500 uppercase tracking-widest border-b border-pmmg-navy/5 dark:border-slate-700 pb-1 mb-3">Controles Táticos</p>
+            
+            {/* --- Filtro de Localização --- */}
+            <div className="pt-2 pb-3 border-b border-pmmg-navy/5 dark:border-slate-700">
+              <p className="text-[9px] font-black text-pmmg-navy/60 dark:text-slate-400 uppercase tracking-wider mb-2">Tipo de Localização</p>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => setLocationFilter('residence')}
+                  className={`flex-1 text-[9px] font-bold uppercase py-1.5 rounded-lg transition-all ${locationFilter === 'residence' ? 'bg-pmmg-navy text-white shadow-md' : 'bg-slate-100 dark:bg-slate-700 text-pmmg-navy/70 dark:text-slate-300'}`}
+                >
+                  <span className="material-symbols-outlined text-sm mr-1">location_on</span> Residência
+                </button>
+                <button 
+                  onClick={() => setLocationFilter('approach')}
+                  className={`flex-1 text-[9px] font-bold uppercase py-1.5 rounded-lg transition-all ${locationFilter === 'approach' ? 'bg-pmmg-navy text-white shadow-md' : 'bg-slate-100 dark:bg-slate-700 text-pmmg-navy/70 dark:text-slate-300'}`}
+                >
+                  <span className="material-symbols-outlined text-sm mr-1">pin_drop</span> Abordagem
+                </button>
+              </div>
+            </div>
+            
+            {/* --- Filtro de Status --- */}
+            <p className="text-[8px] font-black text-pmmg-navy/40 dark:text-slate-500 uppercase tracking-widest border-b border-pmmg-navy/5 dark:border-slate-700 pb-1 mb-1 pt-4">Filtro por Status</p>
+
+            <button 
+              onClick={() => setActiveFilter('Todos')}
+              className={`flex items-center gap-2 w-full text-left p-1 rounded transition-colors ${activeFilter === 'Todos' ? 'bg-pmmg-navy/10 dark:bg-slate-700' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+            >
+               <div className={`w-4 h-4 rounded-full bg-pmmg-navy flex items-center justify-center shadow-sm`}>
+                 <span className="material-symbols-outlined text-white text-[10px] fill-icon">done_all</span>
+               </div>
+               <span className="text-[9px] font-bold text-pmmg-navy dark:text-slate-200 uppercase">Todos os Suspeitos ({suspects.length})</span>
+            </button>
+
+            {STATUS_FILTERS.map(filter => (
+              <button 
+                key={filter.id}
+                onClick={() => setActiveFilter(filter.id)}
+                className={`flex items-center gap-2 w-full text-left p-1 rounded transition-colors ${activeFilter === filter.id ? 'bg-pmmg-navy/10 dark:bg-slate-700' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
+              >
+                <div className={`w-4 h-4 ${usePhotoMarker ? 'rounded-md border-2 bg-slate-300' : 'rounded-full flex items-center justify-center'} ${filter.color} border-white shadow-sm`}>
+                  {!usePhotoMarker && <span className={`material-symbols-outlined text-[10px] fill-icon ${filter.id === 'Suspeito' ? 'text-pmmg-navy' : 'text-white'}`}>{filter.icon}</span>}
+                </div>
+                <span className="text-[9px] font-bold text-pmmg-navy dark:text-slate-200 uppercase">{filter.label}</span>
+              </button>
+            ))}
+            
+            {/* Oficial */}
+            <div className="flex items-center gap-2 pt-2 border-t border-pmmg-navy/5 dark:border-slate-700">
+               <div className="w-3.5 h-3.5 bg-pmmg-blue rounded-full border-2 border-white shadow-sm ring-1 ring-pmmg-blue/50"></div>
+               <span className="text-[9px] font-bold text-pmmg-navy dark:text-slate-200 uppercase">Oficial (Você)</span>
+            </div>
+            
+            {/* Ponto Tático */}
+            <div className="flex items-center gap-2">
+               <div className="w-3.5 h-3.5 bg-pmmg-gold rounded-full border-2 border-white shadow-sm ring-1 ring-pmmg-gold/30"></div>
+               <span className="text-[9px] font-bold text-pmmg-navy dark:text-slate-200 uppercase">Ponto Tático</span>
+            </div>
+            
+            {activeFilter !== 'Todos' && (
+              <button 
+                onClick={() => setActiveFilter('Todos')}
+                className="mt-2 text-[8px] font-black text-pmmg-red uppercase border-t border-pmmg-navy/5 dark:border-slate-700 pt-2 text-left"
+              >
+                Limpar Filtros ({activeFilter})
+              </button>
+            )}
+
+            {/* --- Opções de Camadas --- */}
+            <div className="mt-4 pt-4 border-t border-pmmg-navy/5 dark:border-slate-700">
+              <p className="text-[8px] font-black text-pmmg-navy/40 dark:text-slate-500 uppercase tracking-widest mb-2">Visualização de Camadas</p>
+              
+              <button 
+                onClick={() => setMapType('roadmap')}
+                className={`w-full text-left text-[10px] font-bold uppercase py-1.5 px-2 rounded transition-colors flex items-center gap-1 ${mapType === 'roadmap' ? 'bg-pmmg-navy text-white' : 'text-pmmg-navy/70 dark:text-slate-300 hover:bg-pmmg-navy/5 dark:hover:bg-slate-700'}`}
+              >
+                <span className="material-symbols-outlined text-sm">map</span> Visualização Padrão
+              </button>
+              
+              <button 
+                onClick={() => setMapType('satellite')}
+                className={`w-full text-left text-[10px] font-bold uppercase py-1.5 px-2 rounded transition-colors flex items-center gap-1 ${mapType === 'satellite' ? 'bg-pmmg-navy text-white' : 'text-pmmg-navy/70 dark:text-slate-300 hover:bg-pmmg-navy/5 dark:hover:bg-slate-700'}`}
+              >
+                <span className="material-symbols-outlined text-sm">satellite</span> Visualização Satélite
+              </button>
+              
+              <button 
+                onClick={() => setMapType('hybrid')}
+                className={`w-full text-left text-[10px] font-bold uppercase py-1.5 px-2 rounded transition-colors flex items-center gap-1 ${mapType === 'hybrid' ? 'bg-pmmg-navy text-white' : 'text-pmmg-navy/70 dark:text-slate-300 hover:bg-pmmg-navy/5 dark:hover:bg-slate-700'}`}
+              >
+                <span className="material-symbols-outlined text-sm">layers</span> Visualização Híbrida
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div className="flex flex-col h-full bg-pmmg-khaki dark:bg-slate-900 overflow-hidden">
       
@@ -404,7 +525,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
         </div>
       </header>
       
-      {/* DESKTOP HEADER (Fixed Top Bar) */}
+      {/* DESKTOP HEADER (Fixed Top Bar) - Mantido para consistência visual com o Dashboard */}
       <header className="hidden lg:flex sticky top-0 z-[1000] bg-white/90 dark:bg-slate-800/90 backdrop-blur-md px-8 py-4 shadow-md border-b border-pmmg-navy/10 dark:border-slate-700 justify-between items-center shrink-0">
         <div className="flex items-center gap-3">
             <div className="w-8 h-8 shrink-0 bg-white rounded-full flex items-center justify-center p-1 border-2 border-pmmg-red">
@@ -419,18 +540,8 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
               </p>
             </div>
         </div>
+        {/* Ações principais movidas para o painel flutuante, mas mantemos o botão de recenter aqui para acesso rápido */}
         <div className="flex items-center gap-4">
-            <button 
-              onClick={() => {
-                setIsAddingMarker(prev => !prev);
-                setNewMarkerData(null); 
-                setEditingMarker(null);
-              }}
-              className={`p-3 rounded-xl border transition-all flex items-center gap-2 ${isAddingMarker ? 'bg-pmmg-red text-white border-pmmg-red shadow-lg' : 'bg-pmmg-navy text-white border-pmmg-navy hover:bg-pmmg-navy-dark'}`}
-            >
-              <span className="material-symbols-outlined text-lg">add_location_alt</span>
-              <span className="text-xs font-bold uppercase">Adicionar Ponto Tático</span>
-            </button>
             <button 
               onClick={recenter} 
               className="bg-pmmg-yellow text-pmmg-navy p-3 rounded-xl active:scale-95 transition-transform shadow-md flex items-center gap-2"
@@ -443,7 +554,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
 
       <div className="flex-1 relative flex">
         
-        {/* MAP AREA (Ocupa o espaço restante) */}
+        {/* MAP AREA (Ocupa 100% da área disponível) */}
         <div className="flex-1 relative">
             <GoogleMapWrapper
               center={center}
@@ -639,6 +750,9 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
                 />
               )}
             </GoogleMapWrapper>
+            
+            {/* Desktop Floating Controls */}
+            <DesktopFloatingControls />
         </div>
         
         {/* Marker Configuration Modal (New or Edit) */}
@@ -850,107 +964,7 @@ const TacticalMap: React.FC<TacticalMapProps> = ({ navigateTo, suspects, onOpenP
             </div>
           </div>
         </div>
-        
-        {/* DESKTOP SIDEBAR (Fixo na Direita) */}
-        <div className="hidden lg:block w-72 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md p-4 shadow-2xl border-l border-pmmg-navy/10 dark:border-slate-700 shrink-0 overflow-y-auto">
-            <p className="text-[8px] font-black text-pmmg-navy/40 dark:text-slate-500 uppercase tracking-widest border-b border-pmmg-navy/5 dark:border-slate-700 pb-1 mb-3">Controles Táticos</p>
-            
-            {/* --- Filtro de Localização --- */}
-            <div className="pt-2 pb-3 border-b border-pmmg-navy/5 dark:border-slate-700">
-              <p className="text-[9px] font-black text-pmmg-navy/60 dark:text-slate-400 uppercase tracking-wider mb-2">Tipo de Localização</p>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => setLocationFilter('residence')}
-                  className={`flex-1 text-[9px] font-bold uppercase py-1.5 rounded-lg transition-all ${locationFilter === 'residence' ? 'bg-pmmg-navy text-white shadow-md' : 'bg-slate-100 dark:bg-slate-700 text-pmmg-navy/70 dark:text-slate-300'}`}
-                >
-                  <span className="material-symbols-outlined text-sm mr-1">location_on</span> Residência
-                </button>
-                <button 
-                  onClick={() => setLocationFilter('approach')}
-                  className={`flex-1 text-[9px] font-bold uppercase py-1.5 rounded-lg transition-all ${locationFilter === 'approach' ? 'bg-pmmg-navy text-white shadow-md' : 'bg-slate-100 dark:bg-slate-700 text-pmmg-navy/70 dark:text-slate-300'}`}
-                >
-                  <span className="material-symbols-outlined text-sm mr-1">pin_drop</span> Abordagem
-                </button>
-              </div>
-            </div>
-            
-            {/* --- Filtro de Status --- */}
-            <p className="text-[8px] font-black text-pmmg-navy/40 dark:text-slate-500 uppercase tracking-widest border-b border-pmmg-navy/5 dark:border-slate-700 pb-1 mb-1 pt-4">Filtro por Status</p>
-
-            <button 
-              onClick={() => setActiveFilter('Todos')}
-              className={`flex items-center gap-2 w-full text-left p-1 rounded transition-colors ${activeFilter === 'Todos' ? 'bg-pmmg-navy/10 dark:bg-slate-700' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
-            >
-               <div className={`w-4 h-4 rounded-full bg-pmmg-navy flex items-center justify-center shadow-sm`}>
-                 <span className="material-symbols-outlined text-white text-[10px] fill-icon">done_all</span>
-               </div>
-               <span className="text-[9px] font-bold text-pmmg-navy dark:text-slate-200 uppercase">Todos os Suspeitos ({suspects.length})</span>
-            </button>
-
-            {STATUS_FILTERS.map(filter => (
-              <button 
-                key={filter.id}
-                onClick={() => setActiveFilter(filter.id)}
-                className={`flex items-center gap-2 w-full text-left p-1 rounded transition-colors ${activeFilter === filter.id ? 'bg-pmmg-navy/10 dark:bg-slate-700' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
-              >
-                <div className={`w-4 h-4 ${usePhotoMarker ? 'rounded-md border-2 bg-slate-300' : 'rounded-full flex items-center justify-center'} ${filter.color} border-white shadow-sm`}>
-                  {!usePhotoMarker && <span className={`material-symbols-outlined text-[10px] fill-icon ${filter.id === 'Suspeito' ? 'text-pmmg-navy' : 'text-white'}`}>{filter.icon}</span>}
-                </div>
-                <span className="text-[9px] font-bold text-pmmg-navy dark:text-slate-200 uppercase">{filter.label}</span>
-              </button>
-            ))}
-            
-            {/* Oficial */}
-            <div className="flex items-center gap-2 pt-2 border-t border-pmmg-navy/5 dark:border-slate-700">
-               <div className="w-3.5 h-3.5 bg-pmmg-blue rounded-full border-2 border-white shadow-sm ring-1 ring-pmmg-blue/50"></div>
-               <span className="text-[9px] font-bold text-pmmg-navy dark:text-slate-200 uppercase">Oficial (Você)</span>
-            </div>
-            
-            {/* Ponto Tático */}
-            <div className="flex items-center gap-2">
-               <div className="w-3.5 h-3.5 bg-pmmg-gold rounded-full border-2 border-white shadow-sm ring-1 ring-pmmg-gold/30"></div>
-               <span className="text-[9px] font-bold text-pmmg-navy dark:text-slate-200 uppercase">Ponto Tático</span>
-            </div>
-            
-            {activeFilter !== 'Todos' && (
-              <button 
-                onClick={() => setActiveFilter('Todos')}
-                className="mt-2 text-[8px] font-black text-pmmg-red uppercase border-t border-pmmg-navy/5 dark:border-slate-700 pt-2 text-left"
-              >
-                Limpar Filtros ({activeFilter})
-              </button>
-            )}
-
-            {/* --- Opções de Camadas (Implementado) --- */}
-            <div className="mt-4 pt-4 border-t border-pmmg-navy/5 dark:border-slate-700">
-              <p className="text-[8px] font-black text-pmmg-navy/40 dark:text-slate-500 uppercase tracking-widest mb-2">Visualização de Camadas</p>
-              
-              <button 
-                onClick={() => setMapType('roadmap')}
-                className={`w-full text-left text-[10px] font-bold uppercase py-1.5 px-2 rounded transition-colors flex items-center gap-1 ${mapType === 'roadmap' ? 'bg-pmmg-navy text-white' : 'text-pmmg-navy/70 dark:text-slate-300 hover:bg-pmmg-navy/5 dark:hover:bg-slate-700'}`}
-              >
-                <span className="material-symbols-outlined text-sm">map</span> Visualização Padrão
-              </button>
-              
-              <button 
-                onClick={() => setMapType('satellite')}
-                className={`w-full text-left text-[10px] font-bold uppercase py-1.5 px-2 rounded transition-colors flex items-center gap-1 ${mapType === 'satellite' ? 'bg-pmmg-navy text-white' : 'text-pmmg-navy/70 dark:text-slate-300 hover:bg-pmmg-navy/5 dark:hover:bg-slate-700'}`}
-              >
-                <span className="material-symbols-outlined text-sm">satellite</span> Visualização Satélite
-              </button>
-              
-              <button 
-                onClick={() => setMapType('hybrid')}
-                className={`w-full text-left text-[10px] font-bold uppercase py-1.5 px-2 rounded transition-colors flex items-center gap-1 ${mapType === 'hybrid' ? 'bg-pmmg-navy text-white' : 'text-pmmg-navy/70 dark:text-slate-300 hover:bg-pmmg-navy/5 dark:hover:bg-slate-700'}`}
-              >
-                <span className="material-symbols-outlined text-sm">layers</span> Visualização Híbrida
-              </button>
-            </div>
-          </div>
-        
-        </div>
-      
-      {/* BottomNav removido daqui, agora gerenciado pelo App.tsx */}
+      </div>
     </div>
   );
 };
