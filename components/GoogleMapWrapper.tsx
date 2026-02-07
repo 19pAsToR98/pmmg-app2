@@ -1,21 +1,3 @@
-import React from 'react';
-import { GoogleMap, useLoadScript } from '@react-google-maps/api';
-import { LIGHT_MAP_STYLES, DARK_MAP_STYLES } from '../utils/mapStyles';
-
-// Libraries required for the map (geometry for utility functions, places if needed later)
-const libraries: ("places" | "geometry" | "drawing" | "visualization")[] = ["geometry"];
-
-interface GoogleMapWrapperProps {
-  children: React.ReactNode;
-  center: { lat: number; lng: number };
-  zoom: number;
-  mapContainerClassName: string;
-  options?: google.maps.MapOptions;
-  onLoad?: (map: google.maps.Map) => void;
-  onClick?: (e: google.maps.MapMouseEvent) => void;
-  isDarkMode?: boolean; // NEW PROP
-}
-
 const GoogleMapWrapper: React.FC<GoogleMapWrapperProps> = ({ 
   children, 
   center, 
@@ -24,7 +6,7 @@ const GoogleMapWrapper: React.FC<GoogleMapWrapperProps> = ({
   options, 
   onLoad,
   onClick,
-  isDarkMode = false, // Default to false
+  isDarkMode = false,
 }) => {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
   
@@ -34,7 +16,6 @@ const GoogleMapWrapper: React.FC<GoogleMapWrapperProps> = ({
     language: 'pt-BR',
   });
   
-  // Determine which style to use based on dark mode state
   const mapStyles = isDarkMode ? DARK_MAP_STYLES : LIGHT_MAP_STYLES;
 
   if (loadError) {
@@ -58,13 +39,19 @@ const GoogleMapWrapper: React.FC<GoogleMapWrapperProps> = ({
       options={{
         disableDefaultUI: true,
         zoomControl: false, 
-        rotateControl: false, 
-        // Removendo tilt: 0 para permitir rotação por gestos
+        rotateControl: false, // ✅ Mantém oculto (rotação por gesto, não botão)
         streetViewControl: false,
         mapTypeControl: false,
         fullscreenControl: false,
-        styles: mapStyles, 
-        ...options,
+        styles: mapStyles,
+        
+        // ✅ CONFIGURAÇÕES PARA HABILITAR ROTAÇÃO POR GESTO:
+        gestureHandling: 'greedy', // ✅ Prioriza gestos do mapa (melhor para mobile)
+        // tilt: undefined,        // ✅ Deixa a API decidir (permite inclinação/rotação)
+        // heading: undefined,     // ✅ Deixa a API decidir (permite rotação)
+        // draggable: true,        // ✅ Mantém arrastar (necessário para gestos)
+        
+        ...options, // Permite override via prop
       }}
       onLoad={onLoad}
       onClick={onClick}
@@ -73,5 +60,3 @@ const GoogleMapWrapper: React.FC<GoogleMapWrapperProps> = ({
     </GoogleMap>
   );
 };
-
-export default GoogleMapWrapper;
